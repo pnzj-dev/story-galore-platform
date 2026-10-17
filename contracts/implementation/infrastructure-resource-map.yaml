@@ -1,0 +1,50 @@
+version: 1.0.0
+release: V1
+policy: deterministic
+rule: Infrastructure resources MUST originate from a registry entry and official provider
+  tooling; agents MUST NOT invent resource identifiers.
+resources:
+- id: appwrite-project
+  provider: appwrite
+  authority: contracts/compatibility/appwrite-resource-registry.yaml
+  provisioner: official-appwrite-tooling
+- id: appwrite-tables
+  provider: appwrite
+  authority: contracts/compatibility/appwrite-resource-registry.yaml
+  provisioner: official-appwrite-tooling
+- id: appwrite-storage
+  provider: appwrite
+  authority: contracts/compatibility/appwrite-resource-registry.yaml
+  provisioner: official-appwrite-tooling
+- id: appwrite-functions
+  provider: appwrite
+  authority: contracts/compatibility/appwrite-resource-registry.yaml
+  provisioner: official-appwrite-tooling
+- id: appwrite-messaging
+  provider: appwrite
+  authority: contracts/compatibility/appwrite-resource-registry.yaml
+  provisioner: official-appwrite-tooling
+- id: appwrite-realtime
+  provider: appwrite
+  authority: contracts/compatibility/appwrite-resource-registry.yaml
+  provisioner: official-appwrite-tooling
+- id: appwrite-mcp-connection
+  provider: appwrite
+  authority: contracts/integrations/appwrite-mcp-connection.yaml
+  provisioner: official-appwrite-mcp-connection
+- id: cloudflare-agents
+  provider: cloudflare
+  authority: contracts/agents/registry.yaml
+  provisioner: official-cloudflare-agents-sdk
+- id: cloudflare_workflows
+  provider: cloudflare
+  authority: contracts/runtime/profiles.yaml
+  provisioner: official-cloudflare-workflows-tooling
+- id: bunny-distribution
+  provider: bunny
+  authority: contracts/media/distribution-config.schema.yaml
+  provisioner: provider-console-or-api-adapter
+- id: posthog
+  provider: posthog
+  authority: contracts/analytics
+  provisioner: provider-console-or-api-adapter

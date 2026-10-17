@@ -1,0 +1,6 @@
+schema: storygalore.agent-tool-output/v1
+tool: story-guardian.continuity.review
+required:
+- status
+- correlationId
+additionalProperties: false

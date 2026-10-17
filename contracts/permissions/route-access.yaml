@@ -1,0 +1,47 @@
+schema: storygalore.route-access-policy/v1
+version: 1
+status: canonical
+source_of_truth: contracts/permissions/route-access.yaml
+policy: fail_closed
+principles:
+  - Route group membership does not grant access by itself.
+  - Capabilities are stable identifiers; display labels are not identifiers.
+  - Resource ownership and tenant scope are evaluated by the authoritative domain policy.
+  - This registry defines required capabilities, not user grants. Grants are resolved by the Policy Engine from authoritative identity and domain records.
+capabilities:
+  account.read:
+    meaning: Read the authenticated user's own account projection.
+    subject: authenticated_user
+    resource_scope: self
+  account.settings.manage:
+    meaning: Read or update the authenticated user's own settings.
+    subject: authenticated_user
+    resource_scope: self
+  library.read:
+    meaning: Read the authenticated user's own library and reading progress.
+    subject: authenticated_user
+    resource_scope: self
+  creator.workspace.access:
+    meaning: Enter Creator Studio for a creator identity the actor is authorized to use.
+    subject: authenticated_user
+    resource_scope: creator_membership
+  creator.story.manage:
+    meaning: Manage drafts and stories only within the actor's authorized creator/project scope.
+    subject: authenticated_user
+    resource_scope: creator_membership_and_resource_ownership
+route_defaults:
+  /account/**: account.read
+  /settings/**: account.settings.manage
+  /library/**: library.read
+  /creator/**: creator.workspace.access
+  /studio/**: creator.workspace.access
+route_specific_requirements:
+  - Mutation routes must require the domain command's registered capability in addition to the route default.
+  - Routes that address a resource must evaluate resource ownership and tenant scope using the canonical resource contract.
+  - A route may declare a stricter capability in a registered route-specific entry; it may not weaken the route default.
+  - Unknown capability, missing actor context, or unresolved resource scope is BLOCK.
+implementation_readiness:
+  route_patterns_are_not_complete_route_inventory: true
+  concrete_routes_must_be_enumerated_from_astro_files: true
+  admin_routes_must_be_registered_in: contracts/permissions/admin-rbac.json
+  missing_mapping: BLOCK

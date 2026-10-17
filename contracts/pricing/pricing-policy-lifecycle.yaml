@@ -1,0 +1,28 @@
+schema: storygalore.pricing-policy-lifecycle/v1
+version: 1
+canonical: true
+status: V19.5.3
+policy: fail_closed
+states:
+- DRAFT
+- SIMULATED
+- REVIEWED
+- APPROVED
+- SCHEDULED
+- ACTIVE
+- RETIRED
+transition_rules:
+- DRAFT_TO_SIMULATED
+- SIMULATED_TO_REVIEWED
+- REVIEWED_TO_APPROVED
+- APPROVED_TO_SCHEDULED
+- SCHEDULED_TO_ACTIVE
+- ACTIVE_TO_RETIRED
+rules:
+- No pricing policy may become ACTIVE without human approval.
+- Every active pricing policy MUST have an immutable version identifier.
+- Existing subscribers MUST reference an explicit grandfathering policy.
+- Price changes MUST include an effective timestamp.
+- Promotion funding source MUST be explicit.
+- A policy failing economic safety thresholds MUST NOT activate.
+- Pricing code MUST NOT contain commercial amounts outside registered policy data.

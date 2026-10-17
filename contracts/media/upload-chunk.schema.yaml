@@ -1,0 +1,15 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: storygalore://contracts/media/upload-chunk/v1
+title: Media Upload Chunk Contract
+version: 1
+type: object
+additionalProperties: false
+required: [uploadId, chunkIndex, offsetBytes, lengthBytes, idempotencyKey]
+properties:
+  uploadId: {type: string, minLength: 1}
+  chunkIndex: {type: integer, minimum: 0}
+  offsetBytes: {type: integer, minimum: 0}
+  lengthBytes: {type: integer, minimum: 1}
+  checksum: {type: string}
+  idempotencyKey: {type: string, minLength: 1}
+  attempt: {type: integer, minimum: 1}

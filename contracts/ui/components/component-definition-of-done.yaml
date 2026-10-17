@@ -1,0 +1,24 @@
+schema: storygalore.ui-component-dod/v1
+version: 1
+required:
+  - component_registry_entry
+  - semantic_tokens_only
+  - keyboard_behavior
+  - focus_behavior
+  - accessible_name_or_role
+  - light_theme
+  - dark_theme
+  - rtl_behavior
+  - responsive_behavior
+  - loading_state
+  - error_state
+  - empty_state_when_applicable
+  - reduced_motion_behavior
+  - visual_regression
+  - unit_or_component_test
+  - no_console_errors
+forbidden:
+  - untracked_design_decision
+  - hardcoded_authorization_logic
+  - hover_only_functionality
+  - client_hydration_without_reason

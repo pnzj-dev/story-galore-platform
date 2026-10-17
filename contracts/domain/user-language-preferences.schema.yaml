@@ -1,0 +1,20 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+title: User Language Preferences
+version: 1
+type: object
+required: [userId, uiLocale, contentLanguages, contentLanguageMode]
+properties:
+  userId: {type: string}
+  uiLocale: {type: string}
+  contentLanguages:
+    type: array
+    maxItems: 20
+    uniqueItems: true
+    items: {type: string}
+  contentLanguageMode:
+    enum: [ALL, ONLY_SELECTED]
+  direction:
+    enum: [LTR, RTL]
+  updatedAt:
+    type: string
+    format: date-time

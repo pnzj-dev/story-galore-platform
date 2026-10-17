@@ -1,0 +1,43 @@
+version: 1.0.0
+release: V1
+policy: deterministic
+steps:
+  - id: 00
+    name: reconnaissance
+    gate: repository-and-contracts-readable
+  - id: 01
+    name: toolchain
+    gate: exact-toolchain-known
+  - id: 02
+    name: contract-resolution
+    gate: no-ambiguous-requirements
+  - id: 03
+    name: domain-and-state
+    gate: state-machines-and-invariants-pass
+  - id: 04
+    name: persistence
+    gate: resource-registry-and-migration-known
+  - id: 05
+    name: authorization
+    gate: policy-engine-rules-pass
+  - id: 06
+    name: api
+    gate: request-response-error-contracts-pass
+  - id: 07
+    name: integrations
+    gate: provider-adapters-pass
+  - id: 08
+    name: ui
+    gate: route-state-and-accessibility-pass
+  - id: 09
+    name: agents
+    gate: capability-and-task-contracts-pass
+  - id: 10
+    name: verification
+    gate: definition-of-done-pass
+  - id: 11
+    name: deployment-candidate
+    gate: explicit-candidate-approval
+  - id: 12
+    name: production
+    gate: explicit-production-authorization

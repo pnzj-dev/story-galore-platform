@@ -1,0 +1,57 @@
+schema: storygalore.astro-features/v1
+version: 1
+features:
+  file_based_routing:
+    required: true
+    source: src/pages
+  layouts:
+    required: true
+    source: src/layouts
+  content_collections:
+    required: true
+    source: src/content.config.ts
+    uses:
+      - editorial_posts
+      - guides
+      - announcements
+      - help
+      - changelog
+  markdown:
+    required: true
+    formats: [md, mdx]
+    primary_use: creator_editorial_posts_when_repository_backed
+  optimized_images:
+    required: true
+    mechanism: astro_assets
+    rule: use_for_site_owned_editorial_ui_images
+  view_transitions:
+    required: true
+    mechanism: astro_client_router_or_current_astro_view_transition_api
+    reduced_motion: required
+  actions:
+    required: true
+    use_for: [small_web_mutations, form_actions]
+    must_delegate_to_domain_command: true
+  middleware:
+    required: true
+    use_for: [locale, direction, request_id, auth_context, policy_context, feature_flags]
+    must_not_replace_policy_engine: true
+  endpoints:
+    allowed: true
+    use_when: [webhook, explicit_api_contract, non_action_http_protocol]
+  server_islands:
+    allowed: true
+    use_when: interactive_server_rendered_fragment_is_contractually_required
+  prefetch:
+    required: true
+    rule: use_only_for_navigation_that_is_safe_to_prefetch
+  streaming:
+    allowed: true
+    rule: use_for_on_demand_pages_when_backend_latency_benefits_from_streaming
+seo:
+  required: true
+  per_page_metadata: true
+  canonical_urls: true
+  structured_data_where_applicable: true
+  sitemap: true
+  rss_where_applicable: true

@@ -1,0 +1,36 @@
+---
+import AdminLayout from "../../layouts/AdminLayout.astro";
+import { DataTable } from "@storygalore/ui";
+import { fetchAdminList } from "../../lib/gateway";
+
+const user = Astro.locals.user;
+const creators = user ? await fetchAdminList("admin_creator_list", user.$id) : [];
+
+const columns = [
+  { key: "handle", label: "Handle" },
+  { key: "displayName", label: "Display name" },
+  { key: "creatorStatus", label: "Status" },
+  { key: "verificationStatus", label: "Verification" },
+];
+
+const rows = creators.map((c) => ({
+  $id: String(c.$id ?? ""),
+  handle: String(c.handle ?? ""),
+  displayName: String(c.displayName ?? ""),
+  creatorStatus: String(c.creatorStatus ?? ""),
+  verificationStatus: String(c.verificationStatus ?? ""),
+}));
+---
+
+<AdminLayout title="Admin — Creators">
+  <main class="mx-auto max-w-[1600px] px-6 py-10">
+    <header>
+      <h1 class="text-3xl font-bold">Creators</h1>
+      <p class="mt-1 text-sm text-foreground-muted">{creators.length} creator(s).</p>
+    </header>
+
+    <div class="mt-8">
+      <DataTable columns={columns} rows={rows} rowKey="$id" searchable />
+    </div>
+  </main>
+</AdminLayout>

@@ -1,0 +1,17 @@
+schema: storygalore.astro-performance/v1
+version: 1
+budgets_ref: contracts/ui/performance/budget.yaml
+required:
+  - static_prerender_where_valid
+  - server_render_only_when_needed
+  - minimal_hydration
+  - optimized_images
+  - navigation_prefetch_when_safe
+  - compressed_assets
+  - cache_headers_according_to_route_contract
+  - no_client_waterfall_for_initial_page_data
+verification:
+  - build_output_inspection
+  - playwright_performance_smoke
+  - core_web_vitals_check
+  - bundle_size_report

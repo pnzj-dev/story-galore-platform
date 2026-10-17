@@ -1,0 +1,15 @@
+schema: storygalore.function-resource-map/v1
+version: 1
+function: payment-webhooks
+policy: explicit_only
+resources:
+  - payment_events
+  - payments
+  - payment_attempts
+  - refunds
+  - payment_idempotency
+  - subscriptions
+  - subscription_events
+  - entitlements
+  - entitlement_events
+undeclared_resource_access: BLOCK

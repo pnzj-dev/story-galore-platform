@@ -1,0 +1,3 @@
+version: 2
+name: media
+canonicalStateMachineRef: contracts/state-machines/media.yaml

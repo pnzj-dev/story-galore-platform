@@ -1,0 +1,54 @@
+schema: storygalore.ui-page-registry/v1
+version: 1
+rules:
+  route_source: astro_file_based_routing
+  route_file_is_canonical: true
+  dynamic_routes_must_declare_data_requirements: true
+  protected_routes_must_declare_policy_requirements: true
+  page_must_declare_rendering_strategy: true
+  page_must_declare_hydration_strategy: true
+pages:
+  public:
+  - /
+  - /discover
+  - /series
+  - /series/[seriesId]
+  - /comic/[publicationId]
+  - /creators
+  - /creator/[creatorId]
+  - /search
+  - /posts/[slug]
+  studio:
+  - /studio
+  - /studio/projects
+  - /studio/projects/[projectId]
+  - /studio/projects/[projectId]/story-bible
+  - /studio/projects/[projectId]/characters
+  - /studio/projects/[projectId]/world
+  - /studio/projects/[projectId]/assets
+  - /studio/projects/[projectId]/prompts
+  - /studio/projects/[projectId]/ai
+  - /studio/projects/[projectId]/drafts
+  - /studio/projects/[projectId]/editor
+  - /studio/projects/[projectId]/publications
+  - /studio/analytics
+  admin:
+  - /admin
+  - /admin/operations
+  - /admin/analytics
+  - /admin/users
+  - /admin/content
+  - /admin/ads
+  - /admin/support
+  - /admin/settings
+  - /admin/economics
+  - /admin/economics/consumption
+  - /admin/economics/media
+  - /admin/economics/plans
+  - /admin/economics/unit-economics
+  - /admin/economics/anomalies
+  - /admin/economics/governance
+  - /admin/economics/simulator
+  - /admin/economics/reserves
+  - /admin/economics/tax
+  - /admin/economics/pricing

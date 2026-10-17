@@ -1,0 +1,14 @@
+{
+  "purpose": "Desired aggregate analytics tables. Provision these using the current official Appwrite CLI/Console/Terraform workflow rather than treating this manifest as generated Appwrite config.",
+  "tables": [
+    {"id": "platform_metrics_daily", "purpose": "daily platform KPI aggregates", "security": "server + staff"},
+    {"id": "subscription_metrics_daily", "purpose": "subscription/revenue KPI aggregates", "security": "server + staff"},
+    {"id": "content_metrics_daily", "purpose": "comic/series/content KPI aggregates", "security": "server + staff"},
+    {"id": "creator_metrics_daily", "purpose": "creator KPI aggregates", "security": "server + creator-scoped + staff"},
+    {"id": "payment_provider_metrics_daily", "purpose": "provider routing and health aggregates", "security": "server + staff"},
+    {"id": "ai_metrics_daily", "purpose": "AI generation usage/cost aggregates", "security": "server + staff + creator-scoped"}
+  ],
+  "platform_metric_keys": [
+    "active_paid_subscribers", "new_subscribers", "churned_subscribers", "mrr", "revenue_net", "active_readers_30d", "new_registrations", "published_content", "ai_generation_units", "ai_estimated_cost"
+  ]
+}

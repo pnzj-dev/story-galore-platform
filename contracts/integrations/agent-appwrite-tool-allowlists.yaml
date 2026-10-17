@@ -1,0 +1,160 @@
+# Stable StoryGalore tool IDs are allowlisted here. Native Appwrite MCP tool names are mapped only after the official catalog is inspected and verified.
+contract_id: agent-appwrite-tool-allowlists
+version: 1.0.0
+status: normative
+default_decision: DENY
+native_tool_mapping_status: BLOCKED_UNTIL_VERIFIED_REGISTRY
+agents:
+  - agent_id: sg.agent.story-producer
+    default_decision: DENY
+    allowed_storygalore_tool_ids:
+      - stories.read
+      - stories.create_draft
+      - story_plans.read
+      - story_plans.create
+    resource_scope: authenticated_task_and_canonical_domain_contracts
+    may_select_native_tool_by_name: false
+    may_expand_own_allowlist: false
+  - agent_id: sg.agent.story-guardian
+    default_decision: DENY
+    allowed_storygalore_tool_ids:
+      - stories.read
+      - continuity.read
+      - moderation.propose
+    resource_scope: authenticated_task_and_canonical_domain_contracts
+    may_select_native_tool_by_name: false
+    may_expand_own_allowlist: false
+  - agent_id: sg.agent.art-director
+    default_decision: DENY
+    allowed_storygalore_tool_ids:
+      - stories.read
+      - art_briefs.read
+      - art_briefs.create_draft
+      - media_metadata.read
+    resource_scope: authenticated_task_and_canonical_domain_contracts
+    may_select_native_tool_by_name: false
+    may_expand_own_allowlist: false
+  - agent_id: sg.agent.production
+    default_decision: DENY
+    allowed_storygalore_tool_ids:
+      - stories.read
+      - production_jobs.read
+      - production_jobs.create_approved
+    resource_scope: authenticated_task_and_canonical_domain_contracts
+    may_select_native_tool_by_name: false
+    may_expand_own_allowlist: false
+  - agent_id: sg.agent.community-guardian
+    default_decision: DENY
+    allowed_storygalore_tool_ids:
+      - community_reports.read_scoped
+      - moderation.propose
+    resource_scope: authenticated_task_and_canonical_domain_contracts
+    may_select_native_tool_by_name: false
+    may_expand_own_allowlist: false
+  - agent_id: sg.agent.discovery-curator
+    default_decision: DENY
+    allowed_storygalore_tool_ids:
+      - published_catalog.read
+      - recommendations.propose
+      - collections.create_draft
+    resource_scope: authenticated_task_and_canonical_domain_contracts
+    may_select_native_tool_by_name: false
+    may_expand_own_allowlist: false
+  - agent_id: sg.agent.reader-companion
+    default_decision: DENY
+    allowed_storygalore_tool_ids:
+      - published_catalog.read
+      - reader_context.read_scoped
+    resource_scope: authenticated_task_and_canonical_domain_contracts
+    may_select_native_tool_by_name: false
+    may_expand_own_allowlist: false
+  - agent_id: sg.agent.creator-business
+    default_decision: DENY
+    allowed_storygalore_tool_ids:
+      - creator_metrics.read_scoped
+      - campaigns.read_scoped
+      - business_reports.create
+    resource_scope: authenticated_task_and_canonical_domain_contracts
+    may_select_native_tool_by_name: false
+    may_expand_own_allowlist: false
+  - agent_id: sg.agent.media-operations
+    default_decision: DENY
+    allowed_storygalore_tool_ids:
+      - media_metadata.read
+      - media_jobs.read
+      - media_jobs.retry_approved
+    resource_scope: authenticated_task_and_canonical_domain_contracts
+    may_select_native_tool_by_name: false
+    may_expand_own_allowlist: false
+  - agent_id: sg.agent.support
+    default_decision: DENY
+    allowed_storygalore_tool_ids:
+      - support_cases.read_scoped
+      - support_cases.update_scoped
+      - support_escalations.create
+    resource_scope: authenticated_task_and_canonical_domain_contracts
+    may_select_native_tool_by_name: false
+    may_expand_own_allowlist: false
+  - agent_id: sg.agent.qa-release
+    default_decision: DENY
+    allowed_storygalore_tool_ids:
+      - release_evidence.read
+      - contract_validation.run
+      - release_readiness.report
+    resource_scope: authenticated_task_and_canonical_domain_contracts
+    may_select_native_tool_by_name: false
+    may_expand_own_allowlist: false
+  - agent_id: sg.agent.infrastructure
+    default_decision: DENY
+    allowed_storygalore_tool_ids:
+      - infrastructure_status.read
+      - approved_operations.read
+      - staging_operation.execute_approved
+    resource_scope: authenticated_task_and_canonical_domain_contracts
+    may_select_native_tool_by_name: false
+    may_expand_own_allowlist: false
+  - agent_id: sg.agent.ceo
+    default_decision: DENY
+    allowed_storygalore_tool_ids:
+      - executive_reports.read_aggregated
+      - business_reports.read_aggregated
+    resource_scope: authenticated_task_and_canonical_domain_contracts
+    may_select_native_tool_by_name: false
+    may_expand_own_allowlist: false
+  - agent_id: sg.agent.data-analysis-reporting
+    default_decision: DENY
+    allowed_storygalore_tool_ids:
+      - analytics.read_approved
+      - economics.read_approved
+      - reports.create
+    resource_scope: authenticated_task_and_canonical_domain_contracts
+    may_select_native_tool_by_name: false
+    may_expand_own_allowlist: false
+  - agent_id: sg.agent.coding-dev
+    default_decision: DENY
+    allowed_storygalore_tool_ids:
+      - appwrite_docs.search
+      - development_resources.read
+      - staging_resources.mutate_approved
+    resource_scope: authenticated_task_and_canonical_domain_contracts
+    may_select_native_tool_by_name: false
+    may_expand_own_allowlist: false
+  - agent_id: sg.agent.orchestrator
+    default_decision: DENY
+    allowed_storygalore_tool_ids:
+      - agent_tasks.read
+      - agent_tasks.create
+      - agent_tasks.delegate_approved
+    resource_scope: authenticated_task_and_canonical_domain_contracts
+    may_select_native_tool_by_name: false
+    may_expand_own_allowlist: false
+  - agent_id: sg.agent.keep2share-import
+    default_decision: DENY
+    allowed_storygalore_tool_ids:
+      - imports.read_own
+      - imports.create
+      - imports.status.read_own
+      - media_upload.initiate_approved
+    resource_scope: authenticated_task_and_canonical_domain_contracts
+    may_select_native_tool_by_name: false
+    may_expand_own_allowlist: false

@@ -1,0 +1,27 @@
+schema: storygalore.global-coverage/v1
+version: 1
+policy: deterministic
+canonical_sources:
+  executables:
+    - contracts/implementation/implementation-registry.yaml
+    - contracts/functions/registry.yaml
+    - contracts/agents/implementation-registry.yaml
+  domains:
+    - contracts/compatibility/contract-graph.yaml
+  persistence:
+    - contracts/compatibility/appwrite-resource-registry.yaml
+  commands_events:
+    - contracts/compatibility/command-event-map.yaml
+  pages:
+    - contracts/ui/pages/page-registry.yaml
+coverage_requirements:
+  - every_executable_has_owner
+  - every_executable_has_contract
+  - every_executable_has_tests
+  - every_command_has_policy
+  - every_event_has_schema
+  - every_resource_has_owner
+  - every_route_has_rendering_strategy
+  - every_route_has_auth_policy_if_protected
+  - every_external_provider_has_adapter_or_explicit_blocker
+  - every_secret_has_registry_entry

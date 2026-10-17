@@ -1,0 +1,40 @@
+---
+import AdminLayout from "../../layouts/AdminLayout.astro";
+import { DataTable } from "@storygalore/ui";
+import { fetchAdminList } from "../../lib/gateway";
+
+const user = Astro.locals.user;
+const payments = user ? await fetchAdminList("admin_payment_list", user.$id) : [];
+
+const columns = [
+  { key: "userId", label: "User" },
+  { key: "amount", label: "Amount" },
+  { key: "currency", label: "Currency" },
+  { key: "provider", label: "Provider" },
+  { key: "status", label: "Status" },
+  { key: "createdAt", label: "Created" },
+];
+
+const rows = payments.map((p) => ({
+  $id: String(p.$id ?? ""),
+  userId: String(p.userId ?? ""),
+  amount: String(p.amount ?? 0),
+  currency: String(p.currency ?? ""),
+  provider: String(p.provider ?? ""),
+  status: String(p.status ?? ""),
+  createdAt: String(p.createdAt ?? "").slice(0, 10),
+}));
+---
+
+<AdminLayout title="Admin — Payments">
+  <main class="mx-auto max-w-[1600px] px-6 py-10">
+    <header>
+      <h1 class="text-3xl font-bold">Payments</h1>
+      <p class="mt-1 text-sm text-foreground-muted">{payments.length} payment(s).</p>
+    </header>
+
+    <div class="mt-8">
+      <DataTable columns={columns} rows={rows} rowKey="$id" searchable />
+    </div>
+  </main>
+</AdminLayout>

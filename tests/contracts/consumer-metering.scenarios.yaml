@@ -1,0 +1,14 @@
+schema: storygalore.contract-scenario-suite/v1
+version: 1
+policy: fail_closed
+cases:
+  - id: server-authoritative-meter
+    expected: PASS
+  - id: duplicate-event-idempotency
+    expected: PASS
+  - id: unknown-unit-block
+    expected: PASS
+  - id: unknown-policy-block
+    expected: PASS
+  - id: client-only-meter-rejected
+    expected: PASS

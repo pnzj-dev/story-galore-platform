@@ -1,0 +1,33 @@
+schema: storygalore.admin-economic-governance/v1
+version: 1
+canonical: true
+status: V19.5.3
+policy: fail_closed
+routes:
+- /admin/economics/governance
+- /admin/economics/simulator
+- /admin/economics/reserves
+- /admin/economics/tax
+- /admin/economics/pricing
+metrics:
+- plan_contribution_margin
+- plan_contribution_margin_rate
+- cost_to_serve
+- creator_reserve_balance
+- chargeback_exposure
+- refund_liability
+- deferred_revenue
+- tax_payable
+- promotion_liability
+- ltv
+- cac
+- ltv_cac
+- economic_safety_status
+- pricing_policy_state
+rules:
+- Admin economic governance is read-only unless an explicit approval action contract exists.
+- Financial truth MUST come from canonical ledgers and reconciled datasets.
+- Unknown data MUST render as UNKNOWN, never zero.
+- Pricing activation requires human approval.
+- Tax views MUST be access-controlled and audited.
+- Reserve and chargeback views MUST be access-controlled and audited.

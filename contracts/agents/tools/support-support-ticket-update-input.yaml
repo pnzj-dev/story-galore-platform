@@ -1,0 +1,3 @@
+schema: storygalore.agent-tool-input/v1
+tool: support.support.ticket.update
+additionalProperties: false

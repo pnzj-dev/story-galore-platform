@@ -1,0 +1,23 @@
+version: 1
+domain: moderation
+socialReportCategories:
+  - SPAM
+  - HARASSMENT
+  - HATE
+  - SEXUAL_CONTENT
+  - MINOR_SAFETY
+  - COPYRIGHT
+  - IMPERSONATION
+  - SELF_HARM
+  - OTHER
+states:
+  - OPEN
+  - TRIAGED
+  - ACTIONED
+  - DISMISSED
+  - APPEALED
+rules:
+  - Report creation MUST NOT reveal reporter identity to the reported actor.
+  - Moderation actions MUST be audited.
+  - Social moderation MUST reuse the global Policy Engine and content moderation contracts.
+  - A moderation action MUST identify targetType, targetId, reasonCode, actorId, policyVersion, and createdAt.

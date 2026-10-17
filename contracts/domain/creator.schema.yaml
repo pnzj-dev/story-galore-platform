@@ -1,0 +1,22 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+title: StoryGalore Creator
+description: >
+  Creator profile (one per Appwrite user). Follows and creator status are social
+  concerns, not entitlements; verification never grants moderation/admin access.
+type: object
+required: [actorId, handle, displayName, creatorStatus, verificationStatus, createdAt, updatedAt]
+properties:
+  actorId: {type: string, minLength: 1, description: Appwrite Auth user ID.}
+  handle: {type: string, minLength: 1, description: Unique creator handle/slug.}
+  displayName: {type: string, minLength: 1}
+  avatarMediaAssetId: {type: string, description: MediaAsset ID for the avatar.}
+  coverMediaAssetId: {type: string, description: MediaAsset ID for the profile cover.}
+  bio: {type: string}
+  links: {type: array, items: {type: string}}
+  creatorStatus: {type: string, enum: [ACTIVE, PENDING, SUSPENDED]}
+  verificationStatus: {type: string, enum: [UNVERIFIED, PENDING, VERIFIED]}
+  followerCountProjection: {type: integer, minimum: 0, description: Rebuildable projection, never an authorization source.}
+  featuredPublicationIds: {type: array, items: {type: string}}
+  createdAt: {type: string, format: date-time}
+  updatedAt: {type: string, format: date-time}
+additionalProperties: false

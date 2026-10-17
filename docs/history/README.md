@@ -1,0 +1,3 @@
+# Historical documentation and release records
+
+This directory contains superseded release notes, prior repository audits, and release/change manifests retained for audit history. Active domain documentation remains under `docs/`; release snapshots are grouped under `releases/`, repository audits under `repository-audits/`, and change manifests under `change-manifests/`. Current architecture and implementation rules are defined by `../README.md`, the current machine-readable contracts, `AGENTS.md`, and the latest canonical decision documents. Historical records are not executable instructions.

@@ -1,0 +1,28 @@
+{
+  "teams": [
+    {
+      "id": "staff",
+      "purpose": "internal operations",
+      "roles": [
+        "owner",
+        "admin",
+        "moderator",
+        "support",
+        "finance",
+        "analyst"
+      ]
+    },
+    {
+      "id": "creator-project",
+      "purpose": "per-project collaboration",
+      "roles": [
+        "owner",
+        "editor",
+        "writer",
+        "artist",
+        "reviewer"
+      ]
+    }
+  ],
+  "note": "Subscription plans are not Teams. Use plan/entitlement tables for commercial access."
+}

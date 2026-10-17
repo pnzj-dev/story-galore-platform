@@ -1,0 +1,16 @@
+{
+  "name": "storygalore-outbox-delivery",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-01-01",
+  "observability": { "enabled": true },
+  "workflows": [
+    {
+      "name": "outbox-delivery",
+      "binding": "OUTBOX_DELIVERY",
+      "class_name": "OutboxDeliveryWorkflow"
+    }
+  ],
+  "triggers": {
+    "crons": ["*/5 * * * *"]
+  }
+}

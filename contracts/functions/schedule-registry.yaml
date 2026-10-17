@@ -1,0 +1,16 @@
+schema: storygalore.appwrite-function-schedules/v1
+version: 1
+policy: deterministic
+rules:
+  - Every scheduled Function MUST have exactly one registered schedule.
+  - Schedules MUST be versioned and timezone-explicit.
+  - Overlapping execution MUST have an explicit policy.
+  - Scheduler retries MUST preserve idempotency keys or deterministic run identities.
+schedules:
+  payment-reconciliation: CONTRACT_REQUIRED
+  subscription-lifecycle: CONTRACT_REQUIRED
+  analytics: CONTRACT_REQUIRED
+  cleanup: CONTRACT_REQUIRED
+  ad-campaign-scheduler: CONTRACT_REQUIRED
+  ad-metrics-aggregate: CONTRACT_REQUIRED
+  ad-provider-health: CONTRACT_REQUIRED

@@ -1,0 +1,13 @@
+agent: sg.agent.coding-dev
+cases:
+- valid-task
+- unauthorized-capability
+- missing-contract-blocks
+- idempotent-retry
+- audit-emission
+- approval-boundary
+- secret-redaction
+- provider-failure
+agent_specific:
+- mission-output-valid
+- delegation-policy-valid

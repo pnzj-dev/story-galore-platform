@@ -1,0 +1,22 @@
+{
+  "version": "1.0",
+  "routes": [
+    {"route":"/admin/analytics","capability":"analytics.overview.read","roles":["PLATFORM_ADMIN","ANALYTICS","FINANCE","MARKETING"],"scope":"global","projection":"analytics_overview"},
+    {"route":"/admin/analytics/revenue","capability":"analytics.revenue.read","roles":["PLATFORM_ADMIN","ANALYTICS","FINANCE"],"scope":"global","projection":"financial_analytics"},
+    {"route":"/admin/analytics/subscriptions","capability":"analytics.subscriptions.read","roles":["PLATFORM_ADMIN","ANALYTICS","FINANCE"],"scope":"global","projection":"subscription_analytics"},
+    {"route":"/admin/analytics/acquisition","capability":"analytics.acquisition.read","roles":["PLATFORM_ADMIN","ANALYTICS","MARKETING"],"scope":"global","projection":"acquisition_analytics"},
+    {"route":"/admin/analytics/marketing","capability":"analytics.campaign.read","roles":["PLATFORM_ADMIN","ANALYTICS","MARKETING"],"scope":"global","projection":"marketing_analytics"},
+    {"route":"/admin/analytics/content","capability":"analytics.content.read","roles":["PLATFORM_ADMIN","ANALYTICS","DISCOVERY","CREATOR_SUPPORT"],"scope":"global_or_creator_support","projection":"content_analytics"},
+    {"route":"/admin/analytics/creators","capability":"analytics.creator.read","roles":["PLATFORM_ADMIN","ANALYTICS","CREATOR_SUPPORT"],"scope":"global_or_creator_support","projection":"creator_analytics"},
+    {"route":"/admin/analytics/retention","capability":"analytics.retention.read","roles":["PLATFORM_ADMIN","ANALYTICS","MARKETING"],"scope":"global","projection":"retention_analytics"},
+    {"route":"/admin/analytics/advertising","capability":"analytics.advertising.read","roles":["PLATFORM_ADMIN","ANALYTICS"],"scope":"global","projection":"advertising_analytics"},
+    {"route":"/admin/analytics/ai","capability":"analytics.ai.read","roles":["PLATFORM_ADMIN","ANALYTICS","AI_OPERATIONS","FINANCE"],"scope":"global","projection":"ai_analytics"},
+    {"route":"/admin/analytics/community","capability":"analytics.community.read","roles":["PLATFORM_ADMIN","ANALYTICS","COMMUNITY","MODERATOR"],"scope":"global","projection":"community_analytics"},
+    {"route":"/admin/analytics/support","capability":"analytics.support.read","roles":["PLATFORM_ADMIN","ANALYTICS","SUPPORT","CREATOR_SUPPORT"],"scope":"global_or_support","projection":"support_analytics"},
+    {"route":"/admin/analytics/payments","capability":"analytics.payments.read","roles":["PLATFORM_ADMIN","ANALYTICS","FINANCE"],"scope":"global","projection":"payment_analytics"},
+    {"route":"/admin/analytics/operations","capability":"analytics.operations.read","roles":["PLATFORM_ADMIN","ANALYTICS","SRE_OPS","AI_OPERATIONS"],"scope":"global","projection":"operations_analytics"},
+    {"route":"/admin/analytics/funnels","capability":"analytics.funnel.read","roles":["PLATFORM_ADMIN","ANALYTICS","MARKETING"],"scope":"global","projection":"funnel_analytics"},
+    {"route":"/admin/analytics/cohorts","capability":"analytics.cohort.read","roles":["PLATFORM_ADMIN","ANALYTICS","MARKETING","FINANCE"],"scope":"global","projection":"cohort_analytics"},
+    {"route":"/admin/analytics/reports","capability":"analytics.report.manage","roles":["PLATFORM_ADMIN","ANALYTICS"],"scope":"global","projection":"report_safe"}
+  ]
+}

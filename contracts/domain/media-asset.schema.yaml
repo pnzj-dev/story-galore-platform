@@ -1,0 +1,37 @@
+version: 1
+name: media-asset
+purpose: Canonical media metadata; Appwrite Storage is the authoritative origin.
+fields:
+  id: string
+  tenantId: string|null
+  creatorId: string
+  publicationId: string|null
+  type: IMAGE|VIDEO|AUDIO|DOCUMENT
+  status: UPLOADING|UPLOADED|PROCESSING|READY|RESTRICTED|QUARANTINED|FAILED|DELETED
+  originProvider: APPWRITE_STORAGE
+  originBucketKey: string
+  originFileId: string
+  mimeType: string
+  sizeBytes: integer
+  checksumSha256: string
+  width: integer|null
+  height: integer|null
+  durationMs: integer|null
+  orientation: PORTRAIT|LANDSCAPE|SQUARE|UNKNOWN
+  variantOf: string|null
+  variant: ORIGINAL|THUMBNAIL|SMALL|MEDIUM|LARGE|READER|PREVIEW|POSTER|PLAYBACK|OG|null
+  processingVersion: string|null
+  moderationStatus: PENDING|APPROVED|REJECTED|RESTRICTED
+  contentRating: ALL_AGES|TEEN|ADULT_18_PLUS
+  createdAt: datetime
+  updatedAt: datetime
+  deletedAt: datetime|null
+invariants:
+  - Asset type describes the stored/processed media modality, not the publication role in which it is used.
+  - A comic page is an IMAGE asset; ordering and page semantics belong to the COMIC publication content structure.
+  - Unsupported or unknown media modalities are rejected rather than assigned a generic OTHER type.
+  - Executable/browser game builds are not MediaAsset records; they use GameBuild and the game-build contract so media processors never treat executable code as ordinary media.
+  - Appwrite Storage is the canonical origin.
+  - Cloudflare is never the system of record.
+  - Origin bucket/file identifiers are never exposed as public delivery URLs for protected media.
+  - Deleted assets cannot receive new delivery authorizations.

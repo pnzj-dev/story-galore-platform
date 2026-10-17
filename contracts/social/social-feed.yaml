@@ -1,0 +1,17 @@
+version: 1
+domain: social
+feeds:
+  following:
+    ordering: chronological_with_deterministic_tiebreaker
+    candidates: followed_creators_activity
+    ranking: minimal
+  creator:
+    ordering: chronological_with_deterministic_tiebreaker
+    candidates: creator_public_social_content
+    ranking: none
+rules:
+  - Feed retrieval MUST filter unauthorized candidates before ranking.
+  - Feed pagination MUST use stable cursors; offset pagination is forbidden for mutable feeds.
+  - Feed results MUST carry a visibility decision version.
+  - Feed projections MAY be eventually consistent; direct content authorization MUST remain authoritative.
+  - Engagement counts MAY be eventually consistent and MUST be labeled as projections.

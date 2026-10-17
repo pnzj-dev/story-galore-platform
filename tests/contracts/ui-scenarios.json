@@ -1,0 +1,223 @@
+{
+  "version": "15.6-community",
+  "source": "docs/UI_SCENARIO_MATRIX.md",
+  "releaseGate": true,
+  "requiredStates": [
+    "loading",
+    "empty",
+    "partial",
+    "success",
+    "saving",
+    "saved",
+    "offline",
+    "syncing",
+    "conflict",
+    "save_failed",
+    "processing",
+    "pending_review",
+    "restricted",
+    "age_required",
+    "subscription_required",
+    "permission_denied",
+    "unavailable",
+    "provider_unavailable",
+    "rate_limited",
+    "backpressure",
+    "retryable_error",
+    "permanent_error",
+    "removed",
+    "not_found"
+  ],
+  "journeys": [
+    {
+      "id": "UI-001",
+      "persona": "anonymous",
+      "name": "discovery-to-signup"
+    },
+    {
+      "id": "UI-002",
+      "persona": "free-reader",
+      "name": "read-ad-comment-follow"
+    },
+    {
+      "id": "UI-003",
+      "persona": "paid-reader",
+      "name": "subscribe-to-premium-read"
+    },
+    {
+      "id": "UI-004",
+      "persona": "reader",
+      "name": "cross-device-reading-resume"
+    },
+    {
+      "id": "UI-005",
+      "persona": "creator",
+      "name": "creator-onboarding"
+    },
+    {
+      "id": "UI-006",
+      "persona": "creator",
+      "name": "draft-autosave-recovery"
+    },
+    {
+      "id": "UI-007",
+      "persona": "creator",
+      "name": "editor-assets-crash-recovery"
+    },
+    {
+      "id": "UI-008",
+      "persona": "creator",
+      "name": "ai-generation-to-editor"
+    },
+    {
+      "id": "UI-009",
+      "persona": "creator",
+      "name": "internal-credit-generation"
+    },
+    {
+      "id": "UI-010",
+      "persona": "creator",
+      "name": "byok-provider-setup"
+    },
+    {
+      "id": "UI-011",
+      "persona": "creator",
+      "name": "user-hosted-ai-security"
+    },
+    {
+      "id": "UI-012",
+      "persona": "creator",
+      "name": "adult-generation-policy"
+    },
+    {
+      "id": "UI-013",
+      "persona": "creator",
+      "name": "upload-moderation-publication"
+    },
+    {
+      "id": "UI-014",
+      "persona": "creator",
+      "name": "scheduled-publication"
+    },
+    {
+      "id": "UI-015",
+      "persona": "reader",
+      "name": "adult-access"
+    },
+    {
+      "id": "UI-016",
+      "persona": "admin",
+      "name": "admin-dashboard"
+    },
+    {
+      "id": "UI-017",
+      "persona": "admin",
+      "name": "moderation-queue"
+    },
+    {
+      "id": "UI-018",
+      "persona": "support-admin",
+      "name": "scoped-impersonation"
+    },
+    {
+      "id": "UI-019",
+      "persona": "admin",
+      "name": "dynamic-configuration"
+    },
+    {
+      "id": "UI-020",
+      "persona": "admin",
+      "name": "adult-global-controls"
+    },
+    {
+      "id": "UI-021",
+      "persona": "admin",
+      "name": "provider-model-policy"
+    },
+    {
+      "id": "UI-022",
+      "persona": "finance-admin",
+      "name": "payment-reconciliation"
+    },
+    {
+      "id": "UI-023",
+      "persona": "ad-admin",
+      "name": "advertising"
+    },
+    {
+      "id": "UI-024",
+      "persona": "ops-admin",
+      "name": "mcp-analytics"
+    },
+    {
+      "id": "UI-025",
+      "persona": "ops-admin",
+      "name": "workflow-monitoring"
+    },
+    {
+      "id": "UI-026",
+      "persona": "ops-admin",
+      "name": "provider-outage"
+    },
+    {
+      "id": "UI-027",
+      "persona": "all",
+      "name": "offline-reconnect"
+    },
+    {
+      "id": "UI-028",
+      "persona": "all",
+      "name": "deletion-propagation"
+    },
+    {
+      "id": "UI-029",
+      "persona": "all",
+      "name": "permission-denial"
+    },
+    {
+      "id": "UI-030",
+      "persona": "all",
+      "name": "not-found-removed"
+    },
+    {
+      "id": "UI-031",
+      "persona": "reader",
+      "name": "comment-and-reply"
+    },
+    {
+      "id": "UI-032",
+      "persona": "reader",
+      "name": "mention-and-notification"
+    },
+    {
+      "id": "UI-033",
+      "persona": "reader",
+      "name": "message-request"
+    },
+    {
+      "id": "UI-034",
+      "persona": "reader",
+      "name": "dm-realtime-and-offline"
+    },
+    {
+      "id": "UI-035",
+      "persona": "creator",
+      "name": "creator-messaging-settings"
+    },
+    {
+      "id": "UI-036",
+      "persona": "all",
+      "name": "block-and-report-community"
+    },
+    {
+      "id": "UI-037",
+      "persona": "support-admin",
+      "name": "restricted-private-message-access"
+    },
+    {
+      "id": "UI-038",
+      "persona": "moderator",
+      "name": "community-moderation-reconciliation"
+    }
+  ]
+}

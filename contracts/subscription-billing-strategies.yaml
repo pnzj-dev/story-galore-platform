@@ -1,0 +1,21 @@
+version: 1
+strategies:
+  NATIVE_RECURRING:
+    providerMustSupport: [nativeSubscriptions, recurringPayments]
+    owner: payment_provider
+    renewalAuthorization: provider_managed
+  MERCHANT_MANAGED:
+    providerMustSupport: [oneTimePayments]
+    owner: storygalore
+    renewalAuthorization: user_required
+    description: StoryGalore creates a new renewal payment request for each billing period; it never pulls funds without provider/user authorization.
+  MANUAL:
+    providerMustSupport: [oneTimePayments]
+    owner: storygalore
+    renewalAuthorization: user_initiated
+rules:
+  - never_emulate_automatic_wallet_debits
+  - never_claim_provider_subscription_support_when_unsupported
+  - subscription_lifecycle_is_provider_independent
+  - renewal_is_a_new_payment_attempt
+  - payment_success_does_not_directly_grant_entitlement

@@ -1,0 +1,299 @@
+schema: storygalore.studio-command-handlers/v1
+version: 1
+canonical: true
+purpose: "Deterministic command/query handler contracts for the creator studio and publication core, so the api gateway and Go command handlers can be implemented without guessing."
+source_of_truth:
+  commands: contracts/studio/commands.yaml
+  queries: contracts/studio/queries.yaml
+  events: contracts/studio/events.yaml
+  persistence: contracts/studio/persistence-mapping.yaml
+  state_machines:
+    - contracts/state-machines/studio.yaml
+    - contracts/state-machines/studio-editor.yaml
+  schemas: contracts/studio/*.schema.yaml
+  permissions: contracts/studio/permissions.yaml
+  errors: contracts/functions/error-catalog.yaml
+  command_event_map: contracts/compatibility/command-event-map.yaml
+capabilities:
+  - {id: creator.workspace.create, grant: workspace_membership}
+  - {id: creator.project.read, roles: [OWNER, EDITOR, CONTRIBUTOR, VIEWER]}
+  - {id: creator.project.edit, roles: [OWNER, EDITOR, CONTRIBUTOR]}
+  - {id: creator.project.delete, roles: [OWNER]}
+  - {id: creator.document.edit, roles: [OWNER, EDITOR, CONTRIBUTOR]}
+  - {id: creator.ai.generate, roles: [OWNER, EDITOR]}
+  - {id: creator.asset.manage, roles: [OWNER, EDITOR, CONTRIBUTOR]}
+  - {id: creator.publication.submit, roles: [OWNER, EDITOR]}
+  - {id: creator.publication.publish, roles: [OWNER]}
+shared_rules:
+  actor_required: true
+  tenant_required: true
+  policy_check_required: true
+  idempotency_required_for_mutations: true
+  optimistic_concurrency_required_for_editor_mutations: true
+  events_are_outbox_and_immutable: true
+  ui_must_not_call_storage_directly: true
+  server_authorization_is_authoritative: true
+  unknown_fields: REJECT
+commands:
+  - name: CreateProject
+    operation: studio_project_create
+    capability: creator.workspace.create
+    input:
+      workspaceId: {type: string, required: true}
+      name: {type: string, required: true, minLength: 1, maxLength: 200}
+      description: {type: string, required: false, maxLength: 5000}
+      defaultContentRating: {type: enum, elements: [ALL_AGES, TEEN, ADULT_18_PLUS], required: false}
+    preconditions: [workspace_access]
+    state: {machine: studio-project, action: CREATE, to: DRAFT}
+    effects:
+      events: [studio.project.created.v1]
+      writes: [{table: studio_projects, kind: INSERT}]
+    result: {projectId: string}
+    errors: [FORBIDDEN, POLICY_DENIED, INVALID_INPUT]
+    idempotency: {key: idempotencyKey, behavior: RETURN_EXISTING_RESULT}
+  - name: UpdateProject
+    operation: studio_project_update
+    capability: creator.project.edit
+    input:
+      projectId: {type: string, required: true}
+      name: {type: string, required: false}
+      description: {type: string, required: false}
+      defaultContentRating: {type: enum, elements: [ALL_AGES, TEEN, ADULT_18_PLUS], required: false}
+      status: {type: enum, elements: [ACTIVE, ARCHIVED], required: false}
+    preconditions: [project_exists, project_write_permission]
+    state: {machine: studio-project, action: TRANSITION, events: [ACTIVATE, ARCHIVE, RESTORE]}
+    effects:
+      events: [studio.project.updated.v1]
+      writes: [{table: studio_projects, kind: UPDATE}]
+    result: {projectId: string}
+    errors: [FORBIDDEN, POLICY_DENIED, NOT_FOUND, INVALID_STATE, INVALID_INPUT]
+    idempotency: {key: idempotencyKey, behavior: RETURN_EXISTING_RESULT}
+  - name: CreatePage
+    operation: page_create
+    capability: creator.document.edit
+    input:
+      documentId: {type: string, required: true}
+      position: {type: integer, required: true, minimum: 0}
+      templateId: {type: string, required: false}
+      width: {type: integer, required: false, minimum: 1}
+      height: {type: integer, required: false, minimum: 1}
+      backgroundAssetId: {type: string, required: false}
+      baseRevisionId: {type: string, required: true}
+    preconditions: [document_write_permission, expected_revision]
+    effects:
+      events: [studio.page.created.v1]
+      writes: [{table: studio_pages, kind: INSERT}, {table: studio_documents, kind: UPDATE}]
+    result: {pageId: string, revisionId: string}
+    errors: [FORBIDDEN, POLICY_DENIED, NOT_FOUND, REVISION_CONFLICT, INVALID_INPUT]
+    idempotency: {key: mutationId, behavior: RETURN_EXISTING_RESULT}
+  - name: MovePage
+    operation: page_reorder
+    capability: creator.document.edit
+    input:
+      documentId: {type: string, required: true}
+      pageId: {type: string, required: true}
+      newPosition: {type: integer, required: true, minimum: 0}
+      baseRevisionId: {type: string, required: true}
+    preconditions: [document_write_permission, expected_revision]
+    effects:
+      events: [studio.page.reordered.v1]
+      writes: [{table: studio_pages, kind: UPDATE}, {table: studio_documents, kind: UPDATE}]
+    result: {pageId: string, revisionId: string}
+    errors: [FORBIDDEN, POLICY_DENIED, NOT_FOUND, REVISION_CONFLICT, INVALID_INPUT]
+    idempotency: {key: mutationId, behavior: RETURN_EXISTING_RESULT}
+  - name: CreatePanel
+    operation: panel_create
+    capability: creator.document.edit
+    input:
+      pageId: {type: string, required: true}
+      position: {type: integer, required: false}
+      baseRevisionId: {type: string, required: true}
+      panel: {type: object, required: true, schema: contracts/studio/panel.schema.yaml}
+    preconditions: [page_write_permission, expected_revision]
+    effects:
+      events: [studio.panel.created.v1]
+      writes: [{table: studio_panels, kind: INSERT}]
+    result: {panelId: string, revisionId: string}
+    errors: [FORBIDDEN, POLICY_DENIED, NOT_FOUND, REVISION_CONFLICT, INVALID_INPUT]
+    idempotency: {key: mutationId, behavior: RETURN_EXISTING_RESULT}
+  - name: ApplyEditorOperation
+    operation: editor_apply_operation
+    capability: creator.document.edit
+    input:
+      documentId: {type: string, required: true}
+      operation: {type: enum, elements: [CREATE, UPDATE, DELETE, REORDER, DUPLICATE, APPLY_GENERATION, RESTORE_REVISION], required: true}
+      targetType: {type: enum, elements: [DOCUMENT, PAGE, PANEL, LAYER, TEXT, DIALOGUE, ASSET, READING_ORDER], required: true}
+      targetId: {type: string, required: false}
+      payload: {type: object, required: true}
+      baseRevisionId: {type: string, required: true}
+      mutationId: {type: string, required: true}
+      clientId: {type: string, required: true}
+      clientTimestamp: {type: datetime, required: true}
+    preconditions: [document_write_permission, expected_revision, operation_schema_valid]
+    effects:
+      events: [studio.document.revised.v1]
+      writes: [{table: studio_editor_operations, kind: INSERT}, {table: studio_editor_revisions, kind: INSERT}, {table: studio_documents, kind: UPDATE}]
+    result: {revisionId: string, applied: boolean}
+    errors: [FORBIDDEN, POLICY_DENIED, NOT_FOUND, REVISION_CONFLICT, VALIDATION_FAILED, INVALID_INPUT]
+    idempotency: {key: mutationId, behavior: RETURN_EXISTING_RESULT}
+  - name: RestoreRevision
+    operation: draft_revision_restore
+    capability: creator.document.edit
+    input:
+      documentId: {type: string, required: true}
+      targetRevisionId: {type: string, required: true}
+    preconditions: [document_write_permission, revision_exists]
+    effects:
+      events: [studio.revision.restored.v1]
+      writes: [{table: studio_editor_revisions, kind: INSERT}]
+    result: {newRevisionId: string}
+    errors: [FORBIDDEN, POLICY_DENIED, NOT_FOUND, INVALID_STATE, INVALID_INPUT]
+    idempotency: {key: idempotencyKey, behavior: RETURN_EXISTING_RESULT}
+  - name: RequestGeneration
+    operation: generation_create
+    capability: creator.ai.generate
+    input:
+      requestId: {type: string, required: true}
+      projectId: {type: string, required: true}
+      draftId: {type: string, required: false}
+      targetType: {type: enum, elements: [PAGE, PANEL, IMAGE, CHARACTER, BACKGROUND, DIALOGUE, STORY_TEXT], required: true}
+      promptTemplateId: {type: string, required: false}
+      prompt: {type: string, required: false}
+      inputAssetIds: {type: array, items: string, required: false}
+      billingMode: {type: enum, elements: [PLATFORM_CREDITS, BYOK, USER_HOSTED], required: true}
+      creditEligible: {type: boolean, required: false}
+      creditEligibilityReason: {type: string, required: false}
+      executionLocation: {type: enum, elements: [CLOUD, USER_HOSTED], required: true}
+      policyContext: {type: object, required: true}
+    preconditions: [generation_policy_allowed, credits_or_byok_available]
+    effects:
+      events: [studio.generation.requested.v1]
+      writes: [{table: studio_generation_requests, kind: INSERT}]
+    result: {requestId: string}
+    errors: [FORBIDDEN, POLICY_DENIED, ENTITLEMENT_REQUIRED, VALIDATION_FAILED, INVALID_INPUT]
+    idempotency: {key: requestId, behavior: RETURN_EXISTING_RESULT}
+  - name: ApplyGeneration
+    operation: generation_apply_to_draft
+    capability: creator.ai.generate
+    input:
+      generationId: {type: string, required: true}
+      documentId: {type: string, required: true}
+      baseRevisionId: {type: string, required: true}
+      mutationId: {type: string, required: true}
+    preconditions: [generation_completed, document_write_permission, expected_revision]
+    effects:
+      events: [studio.generation.applied.v1, studio.document.revised.v1]
+      writes: [{table: studio_editor_revisions, kind: INSERT}, {table: studio_documents, kind: UPDATE}]
+    result: {revisionId: string}
+    errors: [FORBIDDEN, POLICY_DENIED, NOT_FOUND, GENERATION_NOT_READY, REVISION_CONFLICT, INVALID_INPUT]
+    idempotency: {key: mutationId, behavior: RETURN_EXISTING_RESULT}
+  - name: ValidatePublication
+    operation: publication_validate
+    capability: creator.publication.submit
+    input:
+      documentId: {type: string, required: true}
+      revisionId: {type: string, required: true}
+    preconditions: [document_read_permission, revision_exists]
+    effects:
+      events: [studio.publication.validation_failed.v1]
+      writes: [{table: studio_publication_validation_runs, kind: INSERT}]
+    result: {validationRunId: string, valid: boolean, violations: array}
+    errors: [FORBIDDEN, POLICY_DENIED, NOT_FOUND, VALIDATION_FAILED, INVALID_INPUT]
+    idempotency: {key: idempotencyKey, behavior: RETURN_EXISTING_RESULT}
+  - name: Publish
+    operation: publication_publish
+    capability: creator.publication.publish
+    input:
+      documentId: {type: string, required: true}
+      revisionId: {type: string, required: true}
+      publicationMetadata: {type: object, required: true}
+    preconditions: [validation_passed, publish_permission, approved_revision]
+    effects:
+      events: [studio.publication.published.v1]
+      writes: [{table: studio_publication_snapshots, kind: INSERT, immutable: true}, {table: publications, kind: INSERT}]
+    result: {publicationId: string, snapshotId: string}
+    errors: [FORBIDDEN, POLICY_DENIED, NOT_FOUND, INVALID_STATE, VALIDATION_FAILED, INVALID_INPUT]
+    idempotency: {key: idempotencyKey, behavior: RETURN_EXISTING_RESULT}
+queries:
+  - name: project_get
+    capability: creator.project.read
+    input: {projectId: {type: string, required: true}}
+    returns: project_projection
+    table: studio_projects
+    errors: [FORBIDDEN, NOT_FOUND]
+  - name: project_list
+    capability: creator.project.read
+    input: {workspaceId: {type: string, required: true}, cursor: {type: string, required: false}, limit: {type: integer, required: false}}
+    returns: project_summary_list
+    table: studio_projects
+    pagination: cursor
+    errors: [FORBIDDEN]
+  - name: story_bible_get
+    capability: creator.project.read
+    input: {projectId: {type: string, required: true}}
+    returns: story_bible
+    table: studio_story_bibles
+    errors: [FORBIDDEN, NOT_FOUND]
+  - name: character_list
+    capability: creator.project.read
+    input: {projectId: {type: string, required: true}, cursor: {type: string, required: false}, limit: {type: integer, required: false}}
+    returns: character_list
+    table: studio_characters
+    pagination: cursor
+    errors: [FORBIDDEN]
+  - name: world_get
+    capability: creator.project.read
+    input: {projectId: {type: string, required: true}}
+    returns: world
+    table: studio_worlds
+    errors: [FORBIDDEN, NOT_FOUND]
+  - name: asset_list
+    capability: creator.asset.manage
+    input: {projectId: {type: string, required: true}, cursor: {type: string, required: false}, limit: {type: integer, required: false}}
+    returns: studio_asset_list
+    table: studio_assets
+    pagination: cursor
+    errors: [FORBIDDEN]
+  - name: document_get
+    capability: creator.project.read
+    input: {documentId: {type: string, required: true}}
+    returns: document_with_page_summaries
+    table: studio_documents
+    errors: [FORBIDDEN, NOT_FOUND]
+  - name: page_get
+    capability: creator.project.read
+    input: {pageId: {type: string, required: true}}
+    returns: page_with_panels
+    table: studio_pages
+    errors: [FORBIDDEN, NOT_FOUND]
+  - name: revision_list
+    capability: creator.project.read
+    input: {documentId: {type: string, required: true}, cursor: {type: string, required: false}, limit: {type: integer, required: false}}
+    returns: immutable_revision_summaries
+    table: studio_editor_revisions
+    pagination: cursor
+    errors: [FORBIDDEN, NOT_FOUND]
+  - name: operation_list
+    capability: creator.project.read
+    input: {documentId: {type: string, required: true}, cursor: {type: string, required: false}, limit: {type: integer, required: false}}
+    returns: append_only_operations
+    table: studio_editor_operations
+    pagination: cursor
+    errors: [FORBIDDEN, NOT_FOUND]
+  - name: generation_get
+    capability: creator.ai.generate
+    input: {requestId: {type: string, required: true}}
+    returns: generation_status
+    table: studio_generation_requests
+    errors: [FORBIDDEN, NOT_FOUND]
+  - name: publication_validation_get
+    capability: creator.publication.submit
+    input: {validationRunId: {type: string, required: true}}
+    returns: validation_result
+    table: studio_publication_validation_runs
+    errors: [FORBIDDEN, NOT_FOUND]
+implementation_notes:
+  - The api gateway validates the command/query name against contracts/studio/commands.yaml and contracts/studio/queries.yaml, then forwards to the registered Go handler; the handler enforces capability, preconditions, state-machine legality, idempotency, and emits the declared events via the outbox.
+  - Editor mutations use optimistic concurrency on baseRevisionId; a mismatch returns REVISION_CONFLICT with the current revision.
+  - Unknown commands, unknown fields, missing capability, or unavailable policy evaluation deny the operation.
+  - No command or query writes to Appwrite Storage directly; media references use mediaAssetId.

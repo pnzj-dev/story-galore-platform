@@ -1,0 +1,10 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://storygalore.dev/contracts/studio/comic-reading-order.schema.yaml
+title: Comic Reading Order
+version: 1
+required: [documentId, pageOrder, panelOrder]
+properties:
+  documentId: {type: string}
+  pageOrder: {type: array, items: {type: string}}
+  panelOrder: {type: object, additionalProperties: {type: array, items: {type: string}}}
+additionalProperties: false

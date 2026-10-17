@@ -1,0 +1,6 @@
+schema: storygalore.agent-tool-output/v1
+tool: data-analysis-reporting.analytics.read
+required:
+- status
+- correlationId
+additionalProperties: false

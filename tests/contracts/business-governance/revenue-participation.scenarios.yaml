@@ -1,0 +1,12 @@
+schema: storygalore.revenue-participation-tests/v1
+version: 1
+cases:
+- id: shares-must-balance
+  given: active_rpa_shares_do_not_sum_to_allocation_basis
+  expect: BLOCK
+- id: expired-rpa-excluded
+  given: rpa_is_expired
+  expect: no_new_allocation
+- id: overlapping-precedence-required
+  given: multiple_active_rpas_overlap
+  expect: explicit_precedence_required

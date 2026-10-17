@@ -1,0 +1,33 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+title: Publication Language Metadata
+version: 1
+type: object
+required: [publicationId, contentLanguageMode, contentLanguages]
+properties:
+  publicationId: {type: string}
+  contentLanguageMode:
+    enum: [LANGUAGE_BEARING, NOT_APPLICABLE]
+  primaryLanguage:
+    type: [string, 'null']
+    pattern: '^[A-Za-z]{2,8}(-[A-Za-z0-9]{1,8})*$'
+  contentLanguages:
+    type: array
+    minItems: 0
+    uniqueItems: true
+    items:
+      type: string
+  localizations:
+    type: array
+    items:
+      type: object
+      required: [language, status, source]
+      properties:
+        language: {type: string}
+        status: {enum: [DRAFT, REVIEW, APPROVED, RETIRED]}
+        source: {enum: [ORIGINAL, CREATOR_TRANSLATION, HUMAN_TRANSLATION, AI_TRANSLATION]}
+        provenanceId: {type: [string, 'null']}
+allOf:
+  - if:
+      properties: {contentLanguageMode: {const: LANGUAGE_BEARING}}
+    then:
+      required: [primaryLanguage]

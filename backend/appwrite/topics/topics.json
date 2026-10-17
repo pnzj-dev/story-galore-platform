@@ -1,0 +1,36 @@
+{
+  "topics": [
+    {
+      "id": "all-readers",
+      "purpose": "platform announcements"
+    },
+    {
+      "id": "new-releases",
+      "purpose": "new episode/release notifications"
+    },
+    {
+      "id": "creator-updates",
+      "purpose": "creator workflow notifications"
+    },
+    {
+      "id": "security-alerts",
+      "purpose": "security/sign-in alerts"
+    },
+    {
+      "id": "billing-alerts",
+      "purpose": "billing and payment notifications"
+    },
+    {
+      "id": "moderation-alerts",
+      "purpose": "staff moderation notifications"
+    },
+    {
+      "id": "creator-engagement",
+      "purpose": "opt-in creator and reader engagement events; never used as the authorization boundary"
+    },
+    {
+      "id": "product-announcements",
+      "purpose": "opt-in product announcements and release notes"
+    }
+  ]
+}

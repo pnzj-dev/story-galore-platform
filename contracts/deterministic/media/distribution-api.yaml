@@ -1,0 +1,37 @@
+version: 1
+domain: media
+area: distribution
+providerSelection:
+  primary:
+    provider: cloudflare
+    role: PRIMARY
+    canonical: false
+  secondary:
+    provider: bunny
+    role: SECONDARY
+    canonical: false
+commands:
+  - name: media_distribution_config_update
+    requiresAuthorization: true
+    requiredCapability: operations.media_distribution.configure
+    requiresIdempotency: true
+    expectedRevision: required
+    sourceOfTruthWrite: true
+    emitsVersionedEvent: true
+    event: media.distribution_config_updated.v1
+queries:
+  - name: media_distribution_config_get
+    authorizationFiltered: true
+    secretsExcluded: true
+  - name: media_distribution_status_get
+    authorizationFiltered: true
+    secretsExcluded: true
+selectionRules:
+  - Authorization MUST be evaluated before distributor selection for protected media.
+  - Business entitlement and age policy MUST NOT be implemented by a distributor adapter.
+  - Appwrite Storage remains the canonical origin.
+  - PRIMARY and SECONDARY are delivery paths only.
+  - If SECONDARY is disabled, the system MUST NOT fall back to an Appwrite public URL.
+  - Automatic failover MUST be regional/request-scoped when health data supports it.
+  - Recovery MUST require successful probes before returning traffic to PRIMARY.
+  - Distributor selection MUST be recorded in delivery telemetry without secrets.

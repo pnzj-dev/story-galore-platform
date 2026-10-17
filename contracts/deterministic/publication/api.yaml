@@ -1,0 +1,52 @@
+version: "1.0"
+area: publication
+commands:
+  - name: publication_validate
+    requiresAuthorization: true
+    requiresIdempotency: true
+    expectedRevision: optional
+    emitsVersionedEvent: true
+    sourceOfTruthWrite: true
+  - name: publication_submit
+    requiresAuthorization: true
+    requiresIdempotency: true
+    expectedRevision: optional
+    emitsVersionedEvent: true
+    sourceOfTruthWrite: true
+  - name: publication_approve
+    requiresAuthorization: true
+    requiresIdempotency: true
+    expectedRevision: optional
+    emitsVersionedEvent: true
+    sourceOfTruthWrite: true
+  - name: publication_schedule
+    requiresAuthorization: true
+    requiresIdempotency: true
+    expectedRevision: optional
+    emitsVersionedEvent: true
+    sourceOfTruthWrite: true
+  - name: publication_publish
+    requiresAuthorization: true
+    requiresIdempotency: true
+    expectedRevision: optional
+    emitsVersionedEvent: true
+    sourceOfTruthWrite: true
+  - name: publication_unpublish
+    requiresAuthorization: true
+    requiresIdempotency: true
+    expectedRevision: optional
+    emitsVersionedEvent: true
+    sourceOfTruthWrite: true
+queries:
+  - name: publication_get
+    authorizationFiltered: true
+    secretsExcluded: true
+    pagination: cursor_when_collection
+  - name: publication_snapshot_get
+    authorizationFiltered: true
+    secretsExcluded: true
+    pagination: cursor_when_collection
+  - name: publication_validation_get
+    authorizationFiltered: true
+    secretsExcluded: true
+    pagination: cursor_when_collection

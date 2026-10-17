@@ -1,0 +1,24 @@
+version: 1
+name: media-upload
+fields:
+  uploadId: string
+  creatorId: string
+  tenantId: string|null
+  mediaType: IMAGE|VIDEO|AUDIO|DOCUMENT
+  declaredMimeType: string
+  declaredSizeBytes: integer
+  checksumSha256: string|null
+  appwriteBucketKey: string
+  appwriteFileId: string|null
+  status: INITIATED|UPLOADING|UPLOADED|EXPIRED|ABORTED
+  expiresAt: datetime
+  createdAt: datetime
+rules:
+  - mediaType is one of IMAGE, VIDEO, AUDIO, DOCUMENT; unknown values are rejected.
+  - A comic page uploads as IMAGE; comic-page ordering/semantics are defined by the BOOK format content contract.
+  - Browser game builds must not use the ordinary media-upload endpoint; they use the separately authorized GameBuild intake/review pipeline.
+  - Validate declared size and MIME before issuing upload authorization.
+  - Server-side inspect actual MIME/container after upload; never trust extension alone.
+  - Use resumable/chunked upload for configured large-file thresholds.
+  - Upload authorization is scoped to creator, tenant, bucket, file key and expiry.
+  - Abandoned uploads are cleaned up durably.

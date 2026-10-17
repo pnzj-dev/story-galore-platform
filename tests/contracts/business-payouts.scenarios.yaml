@@ -1,0 +1,20 @@
+schema: storygalore.contract-scenarios/v1
+version: 1
+policy: fail_closed
+scenarios:
+- id: default-usdc
+  given: eligible_creator
+  when: select_stablecoin_rail
+  then: USDC_BASE
+- id: unsupported-chain
+  given: USDC_ETHEREUM
+  when: create_payout
+  then: BLOCK
+- id: insufficient-balance
+  given: payout_exceeds_available_balance
+  when: create_payout
+  then: BLOCK
+- id: stablecoin-platform-fee
+  given: USDC_BASE_payout
+  when: calculate_storygalore_fee
+  then: 0_bps

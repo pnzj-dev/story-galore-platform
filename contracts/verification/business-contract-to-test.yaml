@@ -1,0 +1,41 @@
+schema: storygalore.business-contract-to-test/v1
+version: 1
+policy: fail_closed
+contractRoots:
+- contracts/business
+- contracts/providers/payment-providers.yaml
+- contracts/deterministic/payments
+- contracts/security/payment-capability-matrix.yaml
+- contracts/security/secret-registry.yaml
+requiredTestClasses:
+- pricing
+- commission
+- ledger
+- authorization
+- state-transition
+- idempotency
+- provider-capability
+- webhook
+- reconciliation
+- wallet-network-safety
+- payout-eligibility
+- failure-path
+- audit
+requiredMappings:
+- contract: contracts/business/revenue-model.yaml
+  tests: tests/contracts/business-revenue-model.scenarios.yaml
+- contract: contracts/business/commission-policy.yaml
+  tests: tests/contracts/business-commission.scenarios.yaml
+- contract: contracts/business/payouts.yaml
+  tests: tests/contracts/business-payouts.scenarios.yaml
+- contract: contracts/business/wallets.yaml
+  tests: tests/contracts/business-wallets.scenarios.yaml
+- contract: contracts/business/payment-provider-policy.yaml
+  tests: tests/contracts/business-providers.scenarios.yaml
+- contract: contracts/deterministic/payments/state-machine.yaml
+  tests: tests/contracts/business-payment-state.scenarios.yaml
+- contract: contracts/security/payment-capability-matrix.yaml
+  tests: tests/contracts/business-provider-capability.scenarios.yaml
+- contract: contracts/security/secret-registry.yaml
+  tests: tests/contracts/business-provider-secrets.scenarios.yaml
+missingMapping: BLOCK

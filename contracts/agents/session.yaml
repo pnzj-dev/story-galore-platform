@@ -1,0 +1,18 @@
+version: 1.0.0
+required_fields:
+- sessionId
+- agentId
+- trustLevel
+- tenantScope
+- capabilities
+- policyDecisionId
+- createdAt
+- expiresAt
+- correlationId
+invariants:
+- sessionId is unique and immutable.
+- capabilities are a subset of the capability registry.
+- tenantScope is explicit and non-empty for tenant data.
+- expiresAt must be enforced server-side.
+- policyDecisionId references the authoritative policy decision.
+- credentials are never stored in task/session payloads.

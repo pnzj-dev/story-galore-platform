@@ -1,0 +1,34 @@
+schema: storygalore.ui-visual-scenario-matrix/v1
+version: 1
+matrix_axes:
+  viewport: [mobile, tablet, desktop]
+  theme: [light, dark]
+  direction: [ltr, rtl]
+  state: [loading, empty, populated, error]
+required_routes:
+  - /
+  - /discover
+  - /series/example
+  - /comic/example
+  - /posts/example
+  - /studio
+  - /studio/projects/example/editor
+  - /admin
+  - /admin/analytics
+critical_interactions:
+  - primary_navigation
+  - search
+  - filters
+  - modal
+  - dropdown
+  - form_validation
+  - async_mutation
+  - reader_controls
+  - editor_controls
+acceptance:
+  no_unexpected_overflow: true
+  no_unexpected_layout_shift: true
+  focus_visible: true
+  reduced_motion: true
+  rtl_layout_valid: true
+  light_dark_token_parity: true

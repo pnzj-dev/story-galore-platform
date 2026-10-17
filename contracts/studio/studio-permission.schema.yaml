@@ -1,0 +1,10 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://storygalore.dev/contracts/studio/studio-permission.schema.yaml
+title: Studio Permission
+version: 1
+required: [resource, action, scope]
+properties:
+  resource: {enum: [PROJECT, STORY_BIBLE, CHARACTER, WORLD, ASSET, DRAFT, PAGE, PANEL, GENERATION, PUBLICATION, ANALYTICS]}
+  action: {enum: [READ, CREATE, UPDATE, DELETE, GENERATE, RESTORE, SUBMIT, PUBLISH, EXPORT]}
+  scope: {enum: [OWN, WORKSPACE, GLOBAL]}
+additionalProperties: false

@@ -1,0 +1,902 @@
+{
+  "schema": "storygalore.admin-rbac/v2",
+  "version": "2.0",
+  "status": "canonical_v1_planned_route_registry",
+  "principle": "admin_is_capability_based_not_global",
+  "roles": {
+    "PLATFORM_ADMIN": [
+      "admin.dashboard.read",
+      "admin.functions.read",
+      "admin.settings.read",
+      "admin.state_machine.read",
+      "admin.users.read",
+      "ads.policy.read",
+      "analytics.acquisition.read",
+      "analytics.advertising.read",
+      "analytics.ai.read",
+      "analytics.cohorts.read",
+      "analytics.community.read",
+      "analytics.content.read",
+      "analytics.creators.read",
+      "analytics.dashboard.read",
+      "analytics.funnels.read",
+      "analytics.marketing.read",
+      "analytics.operations.read",
+      "analytics.payments.read",
+      "analytics.reports.read",
+      "analytics.retention.read",
+      "analytics.revenue.read",
+      "analytics.subscriptions.read",
+      "analytics.support.read",
+      "content.operations.read",
+      "creator.operations.read",
+      "economics.anomaly.read",
+      "economics.consumer.read",
+      "economics.consumption.read",
+      "economics.governance.read",
+      "economics.media_cost.read",
+      "economics.plan_profitability.read",
+      "economics.pricing.read",
+      "economics.reserve.read",
+      "economics.simulator.run",
+      "economics.tax.read",
+      "economics.unit_economics.read",
+      "finance.refund.request",
+      "moderation.report.read",
+      "operations.media_distribution.configure",
+      "operations.read",
+      "security.private_message.investigate",
+      "support.audit.read",
+      "support.escalation.manage",
+      "support.knowledge.manage",
+      "support.macro.manage",
+      "support.policy.manage",
+      "support.sla.read",
+      "support.ticket.manage",
+      "support.ticket.read",
+      "support.user_context.read"
+    ],
+    "SUPPORT": [
+      "admin.users.read",
+      "analytics.support.read",
+      "support.audit.read",
+      "support.escalation.manage",
+      "support.knowledge.manage",
+      "support.macro.manage",
+      "support.policy.manage",
+      "support.sla.read",
+      "support.ticket.manage",
+      "support.ticket.read",
+      "support.user_context.read"
+    ],
+    "MODERATOR": [
+      "content.operations.read",
+      "moderation.report.read"
+    ],
+    "FINANCE": [
+      "analytics.payments.read",
+      "analytics.revenue.read",
+      "analytics.subscriptions.read",
+      "economics.consumer.read",
+      "economics.governance.read",
+      "economics.media_cost.read",
+      "economics.plan_profitability.read",
+      "economics.pricing.read",
+      "economics.reserve.read",
+      "economics.simulator.run",
+      "economics.tax.read",
+      "economics.unit_economics.read",
+      "finance.refund.request"
+    ],
+    "ANALYTICS": [
+      "ads.policy.read",
+      "analytics.acquisition.read",
+      "analytics.advertising.read",
+      "analytics.ai.read",
+      "analytics.cohorts.read",
+      "analytics.community.read",
+      "analytics.content.read",
+      "analytics.creators.read",
+      "analytics.dashboard.read",
+      "analytics.funnels.read",
+      "analytics.marketing.read",
+      "analytics.operations.read",
+      "analytics.payments.read",
+      "analytics.reports.read",
+      "analytics.retention.read",
+      "analytics.revenue.read",
+      "analytics.subscriptions.read",
+      "analytics.support.read",
+      "economics.anomaly.read",
+      "economics.consumer.read",
+      "economics.consumption.read",
+      "economics.plan_profitability.read",
+      "economics.simulator.run",
+      "economics.unit_economics.read"
+    ],
+    "SRE_OPS": [
+      "admin.functions.read",
+      "admin.state_machine.read",
+      "analytics.operations.read",
+      "economics.anomaly.read",
+      "economics.consumer.read",
+      "economics.consumption.read",
+      "economics.media_cost.read",
+      "operations.media_distribution.configure",
+      "operations.read"
+    ],
+    "DISCOVERY": [
+      "analytics.content.read",
+      "content.operations.read"
+    ],
+    "AI_OPERATIONS": [
+      "analytics.ai.read"
+    ],
+    "SECURITY_ABUSE": [
+      "admin.users.read",
+      "economics.anomaly.read",
+      "moderation.report.read",
+      "security.private_message.investigate"
+    ],
+    "COMMUNITY": [
+      "analytics.community.read"
+    ],
+    "CREATOR_SUPPORT": [
+      "analytics.creators.read",
+      "creator.operations.read",
+      "support.user_context.read"
+    ]
+  },
+  "role_definitions": {
+    "PLATFORM_ADMIN": "Privileged platform administration; still subject to explicit capability, scope, risk, approval, audit and data projection controls.",
+    "SUPPORT": "Customer support operations; no automatic finance, moderation, security or global configuration access.",
+    "MODERATOR": "Content and community moderation; no finance or infrastructure access.",
+    "FINANCE": "Financial reporting and registered finance operations; high-risk changes require approval.",
+    "ANALYTICS": "Aggregate analytics and reporting; no mutation or raw private content by default.",
+    "SRE_OPS": "Reliability and infrastructure operations; no business-content decision authority by default.",
+    "DISCOVERY": "Discovery and indexing operations.",
+    "AI_OPERATIONS": "AI provider and job operations; no plaintext secrets or BYOK credentials.",
+    "SECURITY_ABUSE": "Security and abuse investigation within explicitly approved scope.",
+    "COMMUNITY": "Community operations and aggregate community analytics.",
+    "CREATOR_SUPPORT": "Scoped creator assistance and support context."
+  },
+  "route_registry_complete": true,
+  "route_registry_semantics": "Complete for all admin route paths currently declared in the V1 documentation. Any newly introduced /admin route must add an exact entry before implementation; dynamic parameters are canonicalized as :parameter. This registry does not imply that route files or runtime enforcement have been implemented.",
+  "required_fields": [
+    "route",
+    "capability",
+    "roles",
+    "scope",
+    "risk",
+    "approval",
+    "projection"
+  ],
+  "app_split": {
+    "non_destructive_app": "apps/web",
+    "non_destructive_surface": "/admin",
+    "destructive_app": "apps/admin",
+    "destructive_hosting": "fly_io_initial_then_private_intranet",
+    "classification_contract": "contracts/admin/destructive-operations.yaml",
+    "destructive_registry": "contracts/permissions/admin-rbac-admin-app.json",
+    "selection_rule": "risk IN [HIGH, CRITICAL] AND approval == REQUIRED",
+    "default": "NON_DESTRUCTIVE",
+    "non_destructive_count": 45,
+    "destructive_count": 8,
+    "adr": "docs/adr/0018-admin-app-split.md"
+  },
+  "routes": [
+    {
+      "route": "/admin",
+      "capability": "admin.dashboard.read",
+      "roles": [
+        "PLATFORM_ADMIN"
+      ],
+      "scope": "global",
+      "risk": "LOW",
+      "approval": "NONE",
+      "projection": "admin_dashboard_safe"
+    },
+    {
+      "route": "/admin/ads",
+      "capability": "ads.policy.read",
+      "roles": [
+        "PLATFORM_ADMIN",
+        "ANALYTICS"
+      ],
+      "scope": "ads_policy",
+      "risk": "LOW",
+      "approval": "NONE",
+      "projection": "ads_policy_safe"
+    },
+    {
+      "route": "/admin/analytics",
+      "capability": "analytics.dashboard.read",
+      "roles": [
+        "ANALYTICS",
+        "PLATFORM_ADMIN"
+      ],
+      "scope": "analytics",
+      "risk": "LOW",
+      "approval": "NONE",
+      "projection": "analytics_dashboard_safe"
+    },
+    {
+      "route": "/admin/analytics/acquisition",
+      "capability": "analytics.acquisition.read",
+      "roles": [
+        "ANALYTICS",
+        "PLATFORM_ADMIN"
+      ],
+      "scope": "analytics",
+      "risk": "LOW",
+      "approval": "NONE",
+      "projection": "acquisition_aggregate_safe"
+    },
+    {
+      "route": "/admin/analytics/advertising",
+      "capability": "analytics.advertising.read",
+      "roles": [
+        "ANALYTICS",
+        "PLATFORM_ADMIN"
+      ],
+      "scope": "analytics",
+      "risk": "LOW",
+      "approval": "NONE",
+      "projection": "advertising_aggregate_safe"
+    },
+    {
+      "route": "/admin/analytics/ai",
+      "capability": "analytics.ai.read",
+      "roles": [
+        "ANALYTICS",
+        "AI_OPERATIONS",
+        "PLATFORM_ADMIN"
+      ],
+      "scope": "analytics",
+      "risk": "LOW",
+      "approval": "NONE",
+      "projection": "ai_aggregate_safe"
+    },
+    {
+      "route": "/admin/analytics/cohorts",
+      "capability": "analytics.cohorts.read",
+      "roles": [
+        "ANALYTICS",
+        "PLATFORM_ADMIN"
+      ],
+      "scope": "analytics",
+      "risk": "LOW",
+      "approval": "NONE",
+      "projection": "cohort_aggregate_safe"
+    },
+    {
+      "route": "/admin/analytics/community",
+      "capability": "analytics.community.read",
+      "roles": [
+        "ANALYTICS",
+        "COMMUNITY",
+        "PLATFORM_ADMIN"
+      ],
+      "scope": "analytics",
+      "risk": "LOW",
+      "approval": "NONE",
+      "projection": "community_aggregate_safe"
+    },
+    {
+      "route": "/admin/analytics/content",
+      "capability": "analytics.content.read",
+      "roles": [
+        "ANALYTICS",
+        "DISCOVERY",
+        "PLATFORM_ADMIN"
+      ],
+      "scope": "analytics",
+      "risk": "LOW",
+      "approval": "NONE",
+      "projection": "content_aggregate_safe"
+    },
+    {
+      "route": "/admin/analytics/creators",
+      "capability": "analytics.creators.read",
+      "roles": [
+        "ANALYTICS",
+        "CREATOR_SUPPORT",
+        "PLATFORM_ADMIN"
+      ],
+      "scope": "analytics",
+      "risk": "LOW",
+      "approval": "NONE",
+      "projection": "creator_aggregate_safe"
+    },
+    {
+      "route": "/admin/analytics/funnels",
+      "capability": "analytics.funnels.read",
+      "roles": [
+        "ANALYTICS",
+        "PLATFORM_ADMIN"
+      ],
+      "scope": "analytics",
+      "risk": "LOW",
+      "approval": "NONE",
+      "projection": "funnel_aggregate_safe"
+    },
+    {
+      "route": "/admin/analytics/marketing",
+      "capability": "analytics.marketing.read",
+      "roles": [
+        "ANALYTICS",
+        "PLATFORM_ADMIN"
+      ],
+      "scope": "analytics",
+      "risk": "LOW",
+      "approval": "NONE",
+      "projection": "marketing_aggregate_safe"
+    },
+    {
+      "route": "/admin/analytics/operations",
+      "capability": "analytics.operations.read",
+      "roles": [
+        "ANALYTICS",
+        "SRE_OPS",
+        "PLATFORM_ADMIN"
+      ],
+      "scope": "analytics",
+      "risk": "LOW",
+      "approval": "NONE",
+      "projection": "operations_aggregate_safe"
+    },
+    {
+      "route": "/admin/analytics/payments",
+      "capability": "analytics.payments.read",
+      "roles": [
+        "ANALYTICS",
+        "FINANCE",
+        "PLATFORM_ADMIN"
+      ],
+      "scope": "analytics",
+      "risk": "LOW",
+      "approval": "NONE",
+      "projection": "payments_aggregate_safe"
+    },
+    {
+      "route": "/admin/analytics/reports",
+      "capability": "analytics.reports.read",
+      "roles": [
+        "ANALYTICS",
+        "PLATFORM_ADMIN"
+      ],
+      "scope": "analytics",
+      "risk": "LOW",
+      "approval": "NONE",
+      "projection": "report_catalog_safe"
+    },
+    {
+      "route": "/admin/analytics/retention",
+      "capability": "analytics.retention.read",
+      "roles": [
+        "ANALYTICS",
+        "PLATFORM_ADMIN"
+      ],
+      "scope": "analytics",
+      "risk": "LOW",
+      "approval": "NONE",
+      "projection": "retention_aggregate_safe"
+    },
+    {
+      "route": "/admin/analytics/revenue",
+      "capability": "analytics.revenue.read",
+      "roles": [
+        "ANALYTICS",
+        "FINANCE",
+        "PLATFORM_ADMIN"
+      ],
+      "scope": "analytics",
+      "risk": "LOW",
+      "approval": "NONE",
+      "projection": "revenue_aggregate_safe"
+    },
+    {
+      "route": "/admin/analytics/subscriptions",
+      "capability": "analytics.subscriptions.read",
+      "roles": [
+        "ANALYTICS",
+        "FINANCE",
+        "PLATFORM_ADMIN"
+      ],
+      "scope": "analytics",
+      "risk": "LOW",
+      "approval": "NONE",
+      "projection": "subscriptions_aggregate_safe"
+    },
+    {
+      "route": "/admin/analytics/support",
+      "capability": "analytics.support.read",
+      "roles": [
+        "ANALYTICS",
+        "SUPPORT",
+        "PLATFORM_ADMIN"
+      ],
+      "scope": "analytics",
+      "risk": "LOW",
+      "approval": "NONE",
+      "projection": "support_aggregate_safe"
+    },
+    {
+      "route": "/admin/consumer-economics",
+      "capability": "economics.consumer.read",
+      "roles": [
+        "FINANCE",
+        "ANALYTICS",
+        "SRE_OPS",
+        "PLATFORM_ADMIN"
+      ],
+      "scope": "consumer_economics",
+      "risk": "LOW",
+      "approval": "NONE",
+      "projection": "consumer_economics_safe"
+    },
+    {
+      "route": "/admin/content",
+      "capability": "content.operations.read",
+      "roles": [
+        "DISCOVERY",
+        "MODERATOR",
+        "PLATFORM_ADMIN"
+      ],
+      "scope": "content_operations",
+      "risk": "LOW",
+      "approval": "NONE",
+      "projection": "content_operations_safe"
+    },
+    {
+      "route": "/admin/creator",
+      "capability": "creator.operations.read",
+      "roles": [
+        "CREATOR_SUPPORT",
+        "PLATFORM_ADMIN"
+      ],
+      "scope": "creator_operations",
+      "risk": "LOW",
+      "approval": "NONE",
+      "projection": "creator_operations_safe"
+    },
+    {
+      "route": "/admin/function",
+      "capability": "admin.functions.read",
+      "roles": [
+        "SRE_OPS",
+        "PLATFORM_ADMIN"
+      ],
+      "scope": "operations",
+      "risk": "LOW",
+      "approval": "NONE",
+      "projection": "function_inventory_safe"
+    },
+    {
+      "route": "/admin/operations",
+      "capability": "operations.read",
+      "roles": [
+        "SRE_OPS",
+        "PLATFORM_ADMIN"
+      ],
+      "scope": "operations",
+      "risk": "LOW",
+      "approval": "NONE",
+      "projection": "operations_dashboard_safe"
+    },
+    {
+      "route": "/admin/settings",
+      "capability": "admin.settings.read",
+      "roles": [
+        "PLATFORM_ADMIN"
+      ],
+      "scope": "global",
+      "risk": "LOW",
+      "approval": "NONE",
+      "projection": "admin_settings_safe"
+    },
+    {
+      "route": "/admin/state-machine",
+      "capability": "admin.state_machine.read",
+      "roles": [
+        "SRE_OPS",
+        "PLATFORM_ADMIN"
+      ],
+      "scope": "operations",
+      "risk": "LOW",
+      "approval": "NONE",
+      "projection": "state_machine_safe"
+    },
+    {
+      "route": "/admin/users",
+      "capability": "admin.users.read",
+      "roles": [
+        "SUPPORT",
+        "SECURITY_ABUSE",
+        "PLATFORM_ADMIN"
+      ],
+      "scope": "user_admin",
+      "risk": "LOW",
+      "approval": "NONE",
+      "projection": "user_directory_safe"
+    },
+    {
+      "route": "/admin/support",
+      "capability": "support.ticket.read",
+      "roles": [
+        "SUPPORT",
+        "PLATFORM_ADMIN"
+      ],
+      "scope": "support_workspace",
+      "risk": "LOW",
+      "approval": "NONE",
+      "projection": "support_dashboard_safe"
+    },
+    {
+      "route": "/admin/support/inbox",
+      "capability": "support.ticket.read",
+      "roles": [
+        "SUPPORT",
+        "PLATFORM_ADMIN"
+      ],
+      "scope": "support_workspace",
+      "risk": "LOW",
+      "approval": "NONE",
+      "projection": "support_queue_safe"
+    },
+    {
+      "route": "/admin/support/tickets",
+      "capability": "support.ticket.read",
+      "roles": [
+        "SUPPORT",
+        "PLATFORM_ADMIN"
+      ],
+      "scope": "support_workspace",
+      "risk": "LOW",
+      "approval": "NONE",
+      "projection": "support_ticket_safe"
+    },
+    {
+      "route": "/admin/support/tickets/:ticketId",
+      "capability": "support.ticket.manage",
+      "roles": [
+        "SUPPORT",
+        "PLATFORM_ADMIN"
+      ],
+      "scope": "support_workspace",
+      "risk": "MEDIUM",
+      "approval": "NONE",
+      "projection": "support_ticket_safe"
+    },
+    {
+      "route": "/admin/support/users/:userId",
+      "capability": "support.user_context.read",
+      "roles": [
+        "SUPPORT",
+        "CREATOR_SUPPORT",
+        "PLATFORM_ADMIN"
+      ],
+      "scope": "support_workspace",
+      "risk": "MEDIUM",
+      "approval": "NONE",
+      "projection": "user_context_safe"
+    },
+    {
+      "route": "/admin/support/escalations",
+      "capability": "support.escalation.manage",
+      "roles": [
+        "SUPPORT",
+        "PLATFORM_ADMIN"
+      ],
+      "scope": "support_workspace",
+      "risk": "MEDIUM",
+      "approval": "NONE",
+      "projection": "support_escalation_safe"
+    },
+    {
+      "route": "/admin/support/sla",
+      "capability": "support.sla.read",
+      "roles": [
+        "SUPPORT",
+        "PLATFORM_ADMIN"
+      ],
+      "scope": "support_workspace",
+      "risk": "LOW",
+      "approval": "NONE",
+      "projection": "support_sla_safe"
+    },
+    {
+      "route": "/admin/support/knowledge",
+      "capability": "support.knowledge.manage",
+      "roles": [
+        "SUPPORT",
+        "PLATFORM_ADMIN"
+      ],
+      "scope": "support_workspace",
+      "risk": "MEDIUM",
+      "approval": "NONE",
+      "projection": "support_knowledge_safe"
+    },
+    {
+      "route": "/admin/support/macros",
+      "capability": "support.macro.manage",
+      "roles": [
+        "SUPPORT",
+        "PLATFORM_ADMIN"
+      ],
+      "scope": "support_workspace",
+      "risk": "MEDIUM",
+      "approval": "NONE",
+      "projection": "support_macros_safe"
+    },
+    {
+      "route": "/admin/support/settings",
+      "capability": "support.policy.manage",
+      "roles": [
+        "SUPPORT",
+        "PLATFORM_ADMIN"
+      ],
+      "scope": "support_workspace",
+      "risk": "HIGH",
+      "approval": "REQUIRED",
+      "projection": "support_policy_safe",
+      "destructive": true
+    },
+    {
+      "route": "/admin/support/audit",
+      "capability": "support.audit.read",
+      "roles": [
+        "SUPPORT",
+        "PLATFORM_ADMIN"
+      ],
+      "scope": "support_workspace",
+      "risk": "MEDIUM",
+      "approval": "NONE",
+      "projection": "support_audit_safe"
+    },
+    {
+      "route": "/admin/moderation/reports",
+      "capability": "moderation.report.read",
+      "roles": [
+        "MODERATOR",
+        "SECURITY_ABUSE",
+        "PLATFORM_ADMIN"
+      ],
+      "scope": "moderation",
+      "risk": "LOW",
+      "approval": "NONE",
+      "projection": "moderation_case_safe"
+    },
+    {
+      "route": "/admin/payments/refunds",
+      "capability": "finance.refund.request",
+      "roles": [
+        "FINANCE",
+        "PLATFORM_ADMIN"
+      ],
+      "scope": "finance",
+      "risk": "HIGH",
+      "approval": "REQUIRED",
+      "projection": "payment_safe",
+      "destructive": true
+    },
+    {
+      "route": "/admin/security/private-message-access",
+      "capability": "security.private_message.investigate",
+      "roles": [
+        "SECURITY_ABUSE",
+        "PLATFORM_ADMIN"
+      ],
+      "scope": "approved_investigation",
+      "risk": "CRITICAL",
+      "approval": "REQUIRED",
+      "projection": "restricted_message_case",
+      "destructive": true
+    },
+    {
+      "route": "/admin/operations/media-distribution",
+      "capability": "operations.media_distribution.configure",
+      "roles": [
+        "SRE_OPS",
+        "PLATFORM_ADMIN"
+      ],
+      "scope": "global",
+      "risk": "HIGH",
+      "approval": "REQUIRED",
+      "projection": "media_distribution_safe",
+      "destructive": true
+    },
+    {
+      "route": "/admin/economics",
+      "capability": "economics.consumer.read",
+      "roles": [
+        "FINANCE",
+        "ANALYTICS",
+        "SRE_OPS",
+        "PLATFORM_ADMIN"
+      ],
+      "scope": "consumer_economics",
+      "risk": "LOW",
+      "approval": "NONE",
+      "projection": "consumer_economics_safe"
+    },
+    {
+      "route": "/admin/economics/consumption",
+      "capability": "economics.consumption.read",
+      "roles": [
+        "ANALYTICS",
+        "SRE_OPS",
+        "PLATFORM_ADMIN"
+      ],
+      "scope": "consumer_consumption",
+      "risk": "LOW",
+      "approval": "NONE",
+      "projection": "consumer_consumption_safe"
+    },
+    {
+      "route": "/admin/economics/media",
+      "capability": "economics.media_cost.read",
+      "roles": [
+        "FINANCE",
+        "SRE_OPS",
+        "PLATFORM_ADMIN"
+      ],
+      "scope": "media_economics",
+      "risk": "LOW",
+      "approval": "NONE",
+      "projection": "media_economics_safe"
+    },
+    {
+      "route": "/admin/economics/plans",
+      "capability": "economics.plan_profitability.read",
+      "roles": [
+        "FINANCE",
+        "ANALYTICS",
+        "PLATFORM_ADMIN"
+      ],
+      "scope": "consumer_plans",
+      "risk": "LOW",
+      "approval": "NONE",
+      "projection": "plan_profitability_safe"
+    },
+    {
+      "route": "/admin/economics/unit-economics",
+      "capability": "economics.unit_economics.read",
+      "roles": [
+        "FINANCE",
+        "ANALYTICS",
+        "PLATFORM_ADMIN"
+      ],
+      "scope": "unit_economics",
+      "risk": "LOW",
+      "approval": "NONE",
+      "projection": "unit_economics_safe"
+    },
+    {
+      "route": "/admin/economics/anomalies",
+      "capability": "economics.anomaly.read",
+      "roles": [
+        "SRE_OPS",
+        "SECURITY_ABUSE",
+        "ANALYTICS",
+        "PLATFORM_ADMIN"
+      ],
+      "scope": "economics_anomalies",
+      "risk": "MEDIUM",
+      "approval": "NONE",
+      "projection": "economics_anomaly_safe"
+    },
+    {
+      "route": "/admin/economics/governance",
+      "capability": "economics.governance.read",
+      "roles": [
+        "FINANCE",
+        "PLATFORM_ADMIN"
+      ],
+      "scope": "economic_governance",
+      "risk": "HIGH",
+      "approval": "REQUIRED",
+      "projection": "economic_governance_safe",
+      "destructive": true
+    },
+    {
+      "route": "/admin/economics/pricing",
+      "capability": "economics.pricing.read",
+      "roles": [
+        "FINANCE",
+        "PLATFORM_ADMIN"
+      ],
+      "scope": "pricing",
+      "risk": "HIGH",
+      "approval": "REQUIRED",
+      "projection": "pricing_policy_safe",
+      "destructive": true
+    },
+    {
+      "route": "/admin/economics/reserves",
+      "capability": "economics.reserve.read",
+      "roles": [
+        "FINANCE",
+        "PLATFORM_ADMIN"
+      ],
+      "scope": "reserves",
+      "risk": "HIGH",
+      "approval": "REQUIRED",
+      "projection": "reserves_safe",
+      "destructive": true
+    },
+    {
+      "route": "/admin/economics/simulator",
+      "capability": "economics.simulator.run",
+      "roles": [
+        "FINANCE",
+        "ANALYTICS",
+        "PLATFORM_ADMIN"
+      ],
+      "scope": "economic_simulation",
+      "risk": "MEDIUM",
+      "approval": "NONE",
+      "projection": "simulation_result_safe"
+    },
+    {
+      "route": "/admin/economics/tax",
+      "capability": "economics.tax.read",
+      "roles": [
+        "FINANCE",
+        "PLATFORM_ADMIN"
+      ],
+      "scope": "tax",
+      "risk": "HIGH",
+      "approval": "REQUIRED",
+      "projection": "tax_obligation_safe",
+      "destructive": true
+    },
+    {
+      "route": "/admin/users/:userId",
+      "capability": "admin.users.read",
+      "roles": [
+        "PLATFORM_ADMIN"
+      ],
+      "scope": "global",
+      "risk": "LOW",
+      "approval": "NONE",
+      "projection": "user_safe"
+    },
+    {
+      "route": "/admin/content/:publicationId",
+      "capability": "content.operations.read",
+      "roles": [
+        "PLATFORM_ADMIN"
+      ],
+      "scope": "global",
+      "risk": "LOW",
+      "approval": "NONE",
+      "projection": "publication_safe"
+    },
+    {
+      "route": "/admin/creators/:actorId",
+      "capability": "creator.operations.read",
+      "roles": [
+        "PLATFORM_ADMIN"
+      ],
+      "scope": "global",
+      "risk": "LOW",
+      "approval": "NONE",
+      "projection": "creator_safe"
+    }
+  ],
+  "global_rules": {
+    "unknown_role": "DENY",
+    "unknown_capability": "DENY",
+    "missing_actor": "DENY",
+    "scope_unresolved": "DENY",
+    "policy_engine_unavailable": "DENY",
+    "client_supplied_role_untrusted": true,
+    "platform_admin_bypasses_route_capability": false,
+    "approval_required_actions_cannot_execute_without_approval": true,
+    "high_risk_mutations_require_audit": true,
+    "sensitive_data_requires_safe_projection": true,
+    "raw_secrets_forbidden": true,
+    "private_message_access_requires_case_bound_approval": true
+  }
+}

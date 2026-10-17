@@ -1,0 +1,33 @@
+schema: storygalore.visual-regression/v1
+version: 1
+engine: PLAYWRIGHT
+rules:
+  baseline_required_for_critical_routes: true
+  compare_after_ui_change: true
+  no_approval_by_agent_without_human_for_major_brand_change: true
+viewports:
+  - name: mobile
+    width: 390
+    height: 844
+  - name: tablet
+    width: 1024
+    height: 768
+  - name: desktop
+    width: 1440
+    height: 900
+themes: [light, dark]
+directions: [ltr, rtl]
+critical_routes:
+  - /
+  - /discover
+  - /series/example
+  - /comic/example
+  - /studio
+  - /studio/projects/example/editor
+  - /admin
+  - /admin/analytics
+acceptance:
+  no_unexpected_layout_shift: true
+  no_horizontal_overflow_unless_declared: true
+  no_console_errors: true
+  all_interactive_controls_keyboard_reachable: true

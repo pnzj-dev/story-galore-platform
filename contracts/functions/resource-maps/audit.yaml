@@ -1,0 +1,9 @@
+schema: storygalore.function-resource-map/v1
+version: 1
+function: audit
+policy: explicit_only
+resources:
+  - admin_actions
+  - admin_approvals
+  - admin_leases
+undeclared_resource_access: BLOCK

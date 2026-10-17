@@ -1,0 +1,20 @@
+schema: storygalore.ui-density/v1
+version: 1
+profiles:
+  PUBLIC:
+    information_density: COMFORTABLE
+    max_content_width: 1280
+    artwork_priority: MAXIMUM
+  STUDIO:
+    information_density: HIGH
+    max_content_width: 1600
+    artwork_priority: HIGH
+    workspace_behavior: PERSISTENT_TOOLING
+  ADMIN:
+    information_density: VERY_HIGH
+    max_content_width: 1600
+    artwork_priority: MEDIUM
+rules:
+  - density_profile_must_be_declared_per_route
+  - admin_density_must_not_leak_into_public_routes
+  - public_spacing_must_not_become_dense_table_spacing

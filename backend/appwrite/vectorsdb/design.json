@@ -1,0 +1,37 @@
+{
+  "database": {
+    "id": "semantic",
+    "name": "StoryGalore Semantic Search"
+  },
+  "collections": [
+    {
+      "id": "content",
+      "embeddingPurpose": "series/comic descriptions, tags, metadata",
+      "metadataKeys": [
+        "entityType",
+        "entityId",
+        "visibility",
+        "contentRating"
+      ]
+    },
+    {
+      "id": "creators",
+      "embeddingPurpose": "creator bios and catalog themes",
+      "metadataKeys": [
+        "creatorId",
+        "visibility"
+      ]
+    },
+    {
+      "id": "creative-knowledge",
+      "embeddingPurpose": "characters/worlds/prompts for creator assistance",
+      "metadataKeys": [
+        "projectId",
+        "entityType",
+        "entityId",
+        "visibility"
+      ]
+    }
+  ],
+  "embeddingPolicy": "Use Appwrite Embeddings and keep one embedding model per collection."
+}

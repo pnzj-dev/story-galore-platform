@@ -1,0 +1,12 @@
+schema: storygalore.function-resource-map/v1
+version: 1
+function: central-agent-gateway
+policy: explicit_only
+status: BLOCKED_PENDING_CANONICAL_RESOURCE_ID_REGISTRATION
+resources:
+  - NONE_UNTIL_CANONICAL_RESOURCE_IDS_ARE_REGISTERED
+undeployed_resources: BLOCKED_UNTIL_REGISTERED
+undeclared_resource_access: BLOCK
+notes:
+  - Do not invent resource IDs or add broad administrative access to make the gateway work.
+  - Register exact policy, approval, idempotency, audit, and domain authorization resource IDs before implementation.

@@ -1,0 +1,42 @@
+schema: storygalore.admin-app-runtime/v1
+version: 1
+canonical: true
+status: canonical
+adr: docs/adr/0018-admin-app-split.md
+framework: SVELTEKIT
+route_surface: complete_admin_console_all_routes
+svelte_version: latest_stable_5
+adapter: "@sveltejs/adapter-node"
+toolchain:
+  runner: nub
+  url: https://nubjs.com
+  note: nub_is_a_typescript_first_node_toolchain_and_drop_in_for_pnpm_node_not_a_new_runtime
+  runtime: node
+  details: transpiles_typeScript_in_memory_with_oxc_then_runs_stock_node
+  package_manager: pnpm
+  note_pm: nub_reads_pnpm_lock_yaml_and_pnpm_workspace_yaml_in_place
+  commands:
+    dev: nub run dev
+    build: nub run build
+    start: nub node build
+    install: nub install
+hosting:
+  initial: fly_io
+  long_term: private_intranet
+  network_restriction: IP_allowlist_or_private_network_or_wireguard_peer
+  never_public: true
+backend:
+  sdk: node-appwrite
+  sdk_mode: server_side_narrowly_scoped_api_key_from_environment
+  functions: go_functions_for_privileged_or_durable_work
+  policy_engine: authoritative_for_every_mutation
+  browser_key: FORBIDDEN
+rules:
+  - no_browser_api_key
+  - server_side_authorization_on_every_mutation
+  - network_restricted_even_on_fly_io
+  - secret_from_environment_not_committed
+  - destructive_mutation_requires_approval_audit_idempotency
+  - share_code_via_packages_ui_domain_config_appwrite_client
+  - professional_console_ui_not_the_public_cinematic_theme
+  - dark_mode_mandatory_and_system_aware

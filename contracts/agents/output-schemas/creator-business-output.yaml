@@ -1,0 +1,14 @@
+schema: storygalore.agent-output/v1
+agent: sg.agent.creator-business
+required:
+- status
+- taskId
+- operationId
+- provenance
+- policyDecisionId
+statuses:
+- SUCCEEDED
+- BLOCKED
+- FAILED
+- CANCELLED
+additionalProperties: false

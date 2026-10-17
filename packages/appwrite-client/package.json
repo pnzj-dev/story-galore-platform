@@ -1,0 +1,12 @@
+{
+  "name": "@storygalore/appwrite-client",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "dependencies": {
+    "appwrite": "28.3.0"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  }
+}

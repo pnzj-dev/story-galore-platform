@@ -1,0 +1,13 @@
+contract_id: appwrite-mcp-tool-registry
+version: 1.0.0
+status: BLOCKED_PENDING_OFFICIAL_CATALOG_CAPTURE
+purpose: Map stable StoryGalore tool IDs to verified native Appwrite MCP tools or explicitly approved domain-operation adapters.
+source_endpoint: https://mcp.appwrite.io/
+official_documentation: https://appwrite.io/docs/tooling/ai/mcp-servers
+catalog_snapshot:
+  captured_at_utc: null
+  server_version_or_revision: null
+  catalog_sha256: null
+  status: NOT_CAPTURED
+mappings: []
+block_rule: No native Appwrite MCP tool may be exposed until its name, schema, scopes, side effects, permissions, and tests are registered here. Never infer tool names from labels or examples.

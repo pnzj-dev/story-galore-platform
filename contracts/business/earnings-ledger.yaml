@@ -1,0 +1,22 @@
+schema: storygalore.creator-earnings-ledger/v1
+version: 1
+canonical: true
+appendOnly: true
+dimensions:
+- gross
+- tax
+- processorCost
+- platformCommission
+- creatorNet
+- reserve
+- adjustment
+rules:
+- Every finalized commerce transaction produces deterministic ledger entries.
+- Ledger entries reference immutable transaction and fee-policy versions.
+- Creator balance is a projection; the ledger is authoritative.
+- Manual adjustments require finance capability and audit evidence.
+- No provider balance is authoritative for creator earnings.
+- Negative balance cannot be silently created; explicit reserve/chargeback rules are required.
+resources:
+- creator_earnings_ledger
+- creator_balance_projections

@@ -1,0 +1,34 @@
+schema: storygalore.determinism-gate/v1
+version: 1
+release: V19.5.4
+policy: fail_closed
+principle: A coding agent MUST stop whenever the implementation graph contains an unknown, ambiguous, unregistered, unmapped, unauthorized or untested executable behavior.
+checks:
+  - appwrite-functions
+  - executable-runtime-ownership
+  - api-contract-coverage
+  - event-schema-coverage
+  - persistence-resource-coverage
+  - authorization-coverage
+  - state-machine-coverage
+  - provider-adapter-coverage
+  - configuration-coverage
+  - secret-coverage
+  - cache-policy-coverage
+  - observability-coverage
+  - contract-test-coverage
+  - deployment-contract
+  - migration-contract
+  - disaster-recovery-contract
+  - accessibility-contract
+  - agent-contracts
+  - ui-contracts
+failure_actions:
+  missing: BLOCK
+  ambiguous: BLOCK
+  unknown: BLOCK
+  unregistered: BLOCK
+  unauthorized: BLOCK
+  untested: BLOCK
+success_condition: ALL_REQUIRED_CHECKS_PASS
+production_gate: HUMAN_APPROVAL

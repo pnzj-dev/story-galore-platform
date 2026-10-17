@@ -1,0 +1,9 @@
+schema: storygalore.function-resource-map/v1
+version: 1
+function: analytics
+policy: explicit_only
+resources:
+  - analytics_events
+  - daily_metric_projections
+  - data_dictionary
+undeclared_resource_access: BLOCK

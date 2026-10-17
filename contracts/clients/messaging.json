@@ -1,0 +1,1 @@
+{"name":"MessagingClientContract","version":"1.0","requirements":["conversation","message","request","read state","attachments","Realtime reconciliation","idempotent send"]}

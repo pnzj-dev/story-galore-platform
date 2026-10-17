@@ -1,0 +1,48 @@
+version: 1.0.0
+taskTypes:
+- BUG_FIX
+- FEATURE
+- REFACTOR
+- SECURITY_FIX
+- PERFORMANCE_FIX
+- MIGRATION
+pipeline:
+- INGEST
+- RECON
+- CONTRACT_CHECK
+- REPRODUCE
+- PLAN
+- IMPLEMENT
+- UNIT_TEST
+- INTEGRATION_TEST
+- E2E_TEST
+- STATIC_ANALYSIS
+- SECURITY_CHECK
+- BUILD
+- DIFF_REVIEW
+- PR_CREATE
+- QA_REVIEW
+- STAGING_PREPARE
+- STAGING_VERIFY
+- DEPLOYMENT_CANDIDATE
+required_artifacts:
+- task.json
+- investigation.md
+- acceptance.md
+- changed-files.txt
+- test-results.json
+- validation-results.json
+- risk-assessment.md
+- deployment-notes.md
+- provenance.json
+stop_conditions:
+- missing_authorization
+- contract_conflict
+- unreproducible_high_risk_bug
+- security_failure
+- failing_required_test
+- undeclared_schema_change
+- missing_acceptance_evidence
+- budget_exceeded
+production_rule: DEPLOYMENT_CANDIDATE is the default terminal state. Production deployment
+  requires an explicit separate authorization.

@@ -1,0 +1,30 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: storygalore://contracts/media/upload-session/v1
+title: Media Upload Session
+version: 1
+type: object
+additionalProperties: false
+required: [uploadId, mediaAssetId, actorId, projectId, filename, mimeType, sizeBytes, chunkSizeBytes, status, createdAt, expiresAt, idempotencyKey]
+properties:
+  uploadId: {type: string, minLength: 1}
+  mediaAssetId: {type: string, minLength: 1}
+  actorId: {type: string, minLength: 1}
+  projectId: {type: string, minLength: 1}
+  filename: {type: string, minLength: 1, maxLength: 255}
+  mimeType: {type: string, minLength: 1, maxLength: 255}
+  sizeBytes: {type: integer, minimum: 1}
+  chunkSizeBytes: {type: integer, minimum: 1}
+  totalChunks: {type: integer, minimum: 1}
+  status:
+    enum: [CREATED, UPLOADING, PAUSED, RESUMING, COMPLETING, COMPLETED, FAILED, CANCELLED, EXPIRED]
+  uploadedBytes: {type: integer, minimum: 0}
+  serverConfirmedChunkCount: {type: integer, minimum: 0}
+  fileFingerprint: {type: string}
+  checksumAlgorithm: {enum: [SHA-256, NONE]}
+  checksum: {type: string}
+  appwriteFileId: {type: string}
+  failureCode: {type: string}
+  createdAt: {type: string, format: date-time}
+  updatedAt: {type: string, format: date-time}
+  expiresAt: {type: string, format: date-time}
+  idempotencyKey: {type: string, minLength: 1}

@@ -1,0 +1,30 @@
+version: 1
+kind: messaging-contract
+conversation_types: [DIRECT, GROUP_CAPABLE_MODEL]
+message_states: [PENDING, SENT, FAILED, HIDDEN, REMOVED]
+recipient_policies: [EVERYONE, FOLLOWERS, SUBSCRIBERS, FOLLOWING, REQUESTS_ONLY, NOBODY]
+operations:
+  - conversation_create
+  - message_send
+  - message_list
+  - message_read
+  - request_accept
+  - request_decline
+  - mute
+  - archive
+  - block
+  - report
+authorization:
+  authenticated_required: true
+  recipient_policy_server_enforced: true
+  block_enforced_server_side: true
+  staff_content_access_capability_required: true
+security:
+  idempotency_required: true
+  realtime_not_source_of_truth: true
+  indexeddb_offline_queue_allowed: true
+  no_raw_message_bodies_in_analytics: true
+  no_signed_urls_in_analytics: true
+workflow:
+  ordinary_messages_use_cloudflare_workflows: false
+  long_running_bulk_operations_may_use_cloudflare_workflows: true

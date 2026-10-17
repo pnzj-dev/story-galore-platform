@@ -1,0 +1,14 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://storygalore.dev/contracts/studio/world.schema.yaml
+title: Studio World
+version: 1
+required: [id, projectId, name, revision]
+properties:
+  id: {type: string}
+  projectId: {type: string}
+  name: {type: string, minLength: 1, maxLength: 200}
+  description: {type: string}
+  locations: {type: array, items: {type: object}}
+  rules: {type: array, items: {type: string}}
+  revision: {type: integer, minimum: 1}
+additionalProperties: false

@@ -1,0 +1,29 @@
+version: 1
+id: ui.theme_implementation_map
+status: authoritative
+ownership:
+  token_source: packages/ui/src/tokens
+  theme_provider: packages/ui/src/theme
+  preference_adapter: packages/domain/preferences
+  web_theme_bootstrap: apps/web/src/theme/bootstrap.ts
+  shared_ui: packages/ui
+  e2e: tests/e2e/theme
+required_files:
+  - packages/ui/src/tokens/shared.css
+  - packages/ui/src/tokens/light.css
+  - packages/ui/src/tokens/dark.css
+  - packages/ui/src/theme/ThemeProvider.ts
+  - packages/ui/src/theme/ThemePreference.ts
+  - packages/domain/preferences/theme.ts
+  - apps/web/src/theme/bootstrap.ts
+  - tests/e2e/theme/theme-mode.spec.ts
+  - tests/e2e/theme/theme-ssr.spec.ts
+  - tests/e2e/theme/theme-accessibility.spec.ts
+rules:
+  missing_required_file: BLOCK
+  component_without_theme_mapping: BLOCK
+  token_without_both_theme_values: BLOCK
+  raw_theme_color: BLOCK
+  hydration_mismatch: BLOCK
+  flash_of_wrong_theme: BLOCK
+  inaccessible_theme: BLOCK

@@ -1,0 +1,29 @@
+version: 1
+domain: social
+routes:
+  - /creators/:handle
+  - /following
+  - /posts/:postId
+  - /collections/:collectionId
+  - /notifications
+  - /messages
+commands:
+  - creator_follow
+  - creator_unfollow
+  - social_post_create
+  - social_post_update
+  - social_post_delete
+  - social_reaction_set
+  - social_comment_create
+  - social_comment_update
+  - social_comment_delete
+  - social_collection_create
+  - social_collection_item_add
+  - social_collection_item_remove
+  - social_share_create
+  - social_poll_vote
+  - social_block
+  - social_unblock
+  - social_mute
+  - social_unmute
+  - social_report_create

@@ -1,0 +1,18 @@
+{"message":"Enabling sessions with filesystem storage","label":"@astrojs/node","level":"info"}
+21:49:48 [vite-plugin-svelte] no Svelte config found at /Users/ponzejo/AgenticProjects/story-galore-platform/apps/web - using default configuration.
+{"message":"connected.","label":"vite","level":"info"}
+{"message":"Generated 1ms","label":"types","level":"info"}
+{"message":"connected.","label":"vite","level":"info"}
+{"message":"Syncing content","label":"content","level":"info"}
+{"message":"No files found matching \"**/*.{md,mdx}\" in directory \"src/content/guides\"","label":"glob-loader","level":"warn"}
+{"message":"No files found matching \"**/*.{md,mdx}\" in directory \"src/content/help\"","label":"glob-loader","level":"warn"}
+{"message":"No files found matching \"**/*.{md,mdx}\" in directory \"src/content/changelog\"","label":"glob-loader","level":"warn"}
+{"message":"No files found matching \"**/*.{md,mdx}\" in directory \"src/content/announcements\"","label":"glob-loader","level":"warn"}
+{"message":"Synced content","label":"content","level":"info"}
+{"message":"Re-optimizing dependencies because vite config has changed","label":"vite","level":"info"}
+{"message":" astro  v7.3.8 ready in 1379 ms\n┃ Local    http://localhost:4321/\n┃ Network  use --host to expose","label":"SKIP_FORMAT","level":"info"}
+{"message":"watching for file changes...","label":null,"level":"info"}
+{"message":"[302] /studio 50ms","label":null,"level":"info"}
+21:50:04 [vite-plugin-svelte] /Users/ponzejo/AgenticProjects/story-galore-platform/packages/ui/src/composites/MediaRail.svelte:31:18 This reference only captures the initial value of `getHref`. Did you mean to reference it inside a closure instead?
+https://svelte.dev/e/state_referenced_locally
+{"message":"[200] / 1092ms","label":null,"level":"info"}

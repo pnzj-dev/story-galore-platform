@@ -1,0 +1,21 @@
+version: "1.0"
+canonical: true
+publicationLanguage:
+  contentLanguageMode: LANGUAGE_BEARING | NOT_APPLICABLE
+  primaryLanguage: BCP_47 | null
+  contentLanguages: unique normalized BCP 47 tags
+  localizations:
+    - language: BCP_47
+      title: optional localized title
+      description: optional localized description
+      metadata: optional localized creator-provided metadata
+      source: ORIGINAL | CREATOR_TRANSLATION | HUMAN_TRANSLATION | AI_TRANSLATION
+      status: DRAFT | REVIEW | APPROVED | RETIRED
+      provenanceId: required for generated/translated content
+rules:
+  - primaryLanguage must be included in contentLanguages for LANGUAGE_BEARING publications.
+  - A localization belongs to the canonical work; it does not create a new work identity.
+  - Only APPROVED localizations may be exposed as selectable reader editions.
+  - Translation never overwrites the source-language edition.
+  - AI-generated translation requires provenance and review status.
+  - Search indexes must preserve language identity for localized fields.

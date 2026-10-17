@@ -1,0 +1,11 @@
+schema: storygalore.function-resource-map/v1
+version: 1
+function: video-playback
+policy: explicit_only
+resources:
+  - media_assets
+  - publications
+  - publication_snapshots
+  - entitlements
+  - entitlement_events
+undeclared_resource_access: BLOCK

@@ -1,0 +1,1 @@
+{"name":"DeepLinkContract","version":"1.0","requirements":["canonical web URL","mobile app link/universal link mapping","desktop protocol/deep-link mapping","safe returnTo validation","authorization re-check after navigation"]}

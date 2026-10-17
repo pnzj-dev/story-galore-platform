@@ -1,0 +1,1 @@
+{"name":"ClientAnalyticsContract","version":"1.0","dimensions":["clientPlatform","clientVersion","os","osVersion","deviceType","sessionId"],"values":["WEB","ANDROID","IOS","DESKTOP"],"requirements":["privacy minimization","role-scoped projections","reconstructible analytics"]}

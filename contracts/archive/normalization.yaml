@@ -1,0 +1,67 @@
+version: 1.0.0
+release: V1
+policy: deterministic
+supported_initial_formats:
+  - zip
+  - tar
+  - tar.gz
+  - tgz
+  - tar.bz2
+  - tar.xz
+  - 7z
+  - rar
+security:
+  input_untrusted: true
+  extract_to_empty_private_directory: true
+  reject_absolute_paths: true
+  reject_parent_traversal: true
+  reject_null_bytes: true
+  reject_windows_device_paths: true
+  reject_symlinks: true
+  reject_hardlinks_to_outside_root: true
+  reject_devices: true
+  reject_fifos: true
+  reject_special_files: true
+  max_entry_count: 100000
+  max_total_uncompressed_bytes: 100000000000
+  max_single_uncompressed_bytes: 20000000000
+  max_compression_ratio: 1000
+  max_nesting_depth: 32
+  scan_before_publication: true
+encoding:
+  preferred: UTF-8
+  unicode_normalization: NFC
+  preserve_original_name: true
+entry_normalization:
+  filename:
+    trim_outer_whitespace: true
+    normalize_unicode: NFC
+    replace_control_characters: true
+    replace_path_separators: true
+    reject_dot_segments: true
+    collision_rule: append-deterministic-short-hash
+  permissions:
+    strip_setuid_setgid: true
+    strip_executable_from_non_executable_media: true
+    do_not_preserve_owner: true
+  timestamps:
+    canonical: ISO-8601
+archive_normalization:
+  produce_normalized_archive: true
+  preserve_member_order: deterministic-path-sort
+  preserve_original_archive: true
+  preserve_original_sha256: true
+  normalized_archive_manifest: required
+  normalized_archive_sha256: required
+  recompress_only_after_full_validation: true
+metadata:
+  archive_comments: sanitize_before_display
+  extra_fields: treat_as_untrusted
+  pax_extended_attributes: validate_and_bound
+  link_names: validate_like_entry_names
+  embedded_metadata: apply_media_metadata_normalization_when_supported
+rules:
+  - Never execute files merely because they were found inside an archive.
+  - Never trust archive names, comments, extra fields, link targets, timestamps or permissions.
+  - Never extract multiple untrusted archives into the same working directory.
+  - A normalized archive is a derived asset; the original archive remains immutable provenance.

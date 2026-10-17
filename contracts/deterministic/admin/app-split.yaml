@@ -1,0 +1,55 @@
+version: "1.0"
+area: admin
+canonical: true
+description: "Deterministic route-to-application assignment for the admin surface split."
+adr: docs/adr/0018-admin-app-split.md
+applications:
+  apps/web:
+    surface_prefix: /admin
+    classification: NON_DESTRUCTIVE
+    route_count: 45
+    route_source: contracts/permissions/admin-rbac.json
+    selection: risk IN [LOW, MEDIUM] AND approval == NONE
+    hosting: appwrite_sites
+    network: public
+    runtime: astro
+  apps/admin:
+    surface_prefix: standalone
+    classification: DESTRUCTIVE
+    route_count: 8
+    route_source: contracts/permissions/admin-rbac-admin-app.json
+    selection: risk IN [HIGH, CRITICAL] AND approval == REQUIRED
+    runtime: "@sveltejs/adapter-node"
+    toolchain: nub
+    package_manager: pnpm
+    hosting: fly_io_then_private_intranet
+    network: restricted
+destructive_routes:
+  - /admin/payments/refunds
+  - /admin/security/private-message-access
+  - /admin/operations/media-distribution
+  - /admin/support/settings
+  - /admin/economics/governance
+  - /admin/economics/pricing
+  - /admin/economics/reserves
+  - /admin/economics/tax
+scaffold:
+  admin_app:
+    tool: official_sveltekit_cli
+    command: npx sv create apps/admin --template minimal --types ts
+    note: verify_the_exact_sv_create_flags_against_the_official_cli_at_implementation_time
+    adapter: "@sveltejs/adapter-node"
+    node_version: resolve_latest_stable_lts_at_implementation
+    toolchain_install: curl -fsSL https://nubjs.com/install.sh | bash
+  pwa:
+    manifest_path: apps/web/public/manifest.webmanifest
+    service_worker: generated_via_vite_plugin_pwa_or_serwist_resolved_to_latest_stable
+    offline_policy_source: docs/DOWNLOAD_OFFLINE.md
+rules:
+  - every_route_resolves_to_exactly_one_application
+  - destructive_app_is_never_served_from_the_public_surface
+  - missing_mapping: BLOCK
+  - ambiguous_route: BLOCK
+  - destructive_mutation_requires_approval_audit_idempotency
+  - no_browser_api_key_in_apps_admin
+  - share_code_via_packages_ui_domain_config_appwrite_client

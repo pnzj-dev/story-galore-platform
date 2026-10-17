@@ -1,0 +1,27 @@
+version: 1
+domain: social
+post:
+  fields:
+    - postId
+    - authorActorId
+    - projectId
+    - publicationId
+    - text
+    - mediaAssetIds
+    - visibility
+    - entitlementRequirement
+    - adultClassification
+    - moderationStatus
+    - revisionId
+    - createdAt
+    - updatedAt
+visibility:
+  - PUBLIC
+  - FOLLOWERS
+  - SUBSCRIBERS
+  - PRIVATE_DRAFT
+rules:
+  - Published posts MUST reference immutable revision state.
+  - Post visibility MUST be evaluated server-side.
+  - Client supplied visibility decisions MUST be ignored as authorization.
+  - Post edits MUST create a new immutable revision.

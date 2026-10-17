@@ -1,0 +1,15 @@
+schema: storygalore.pricing-lifecycle-tests/v1
+version: 1
+cases:
+- id: draft-cannot-activate
+  given: policy_state_is_draft
+  expect: activation_blocked
+- id: simulation-required
+  given: policy_state_is_reviewed_without_simulation
+  expect: activation_blocked
+- id: human-approval-required
+  given: policy_state_is_approved_without_human_approval
+  expect: activation_blocked
+- id: promotion-funding-required
+  given: promotion_has_no_funding_source
+  expect: BLOCK

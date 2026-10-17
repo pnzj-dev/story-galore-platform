@@ -1,0 +1,15 @@
+version: 1
+domain: social
+collection:
+  visibility:
+    - PRIVATE
+    - PUBLIC
+  itemTypes:
+    - PUBLICATION
+    - EPISODE
+    - POST
+    - CREATOR
+rules:
+  - Adding an item MUST re-evaluate visibility and authorization.
+  - A collection MUST NOT expose an item that the viewer cannot currently access.
+  - Public collections MUST be filtered by adult/content policy before discovery.

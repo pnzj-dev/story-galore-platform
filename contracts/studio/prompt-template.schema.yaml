@@ -1,0 +1,13 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://storygalore.dev/contracts/studio/prompt-template.schema.yaml
+title: Studio Prompt Template
+version: 1
+required: [id, projectId, name, template, revision]
+properties:
+  id: {type: string}
+  projectId: {type: string}
+  name: {type: string}
+  template: {type: string}
+  variables: {type: array, items: {type: string}}
+  revision: {type: integer, minimum: 1}
+additionalProperties: false

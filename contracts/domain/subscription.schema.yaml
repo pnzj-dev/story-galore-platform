@@ -1,0 +1,40 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+title: StoryGalore Subscription
+type: object
+required: [id, userId, planId, planVersion, status, currency, amount, billingInterval, billingIntervalCount, currentPeriodStart, currentPeriodEnd, cancelAtPeriodEnd, version]
+properties:
+  id: {type: string}
+  userId: {type: string}
+  creatorId: {type: [string, 'null']}
+  workspaceId: {type: [string, 'null']}
+  planId: {type: string}
+  planVersion: {type: integer, minimum: 1}
+  provider: {type: [string, 'null']}
+  providerCustomerId: {type: [string, 'null']}
+  providerSubscriptionId: {type: [string, 'null']}
+  status:
+    type: string
+    enum: [CREATED, CHECKOUT_STARTED, AWAITING_PROVIDER, ACTIVE, PAST_DUE, GRACE_PERIOD, CANCEL_AT_PERIOD_END, PAUSED, CANCELLED, EXPIRED]
+  billingMode: {type: string, enum: [FIAT, CRYPTO, OTHER]}
+  billingStrategy: {type: string, enum: [NATIVE_RECURRING, MERCHANT_MANAGED, MANUAL]}
+  renewalRequiresUserAction: {type: boolean}
+  currency: {type: string, pattern: '^[A-Z]{3}$'}
+  amount: {type: integer, minimum: 0}
+  billingInterval: {type: string, enum: [DAY, WEEK, MONTH, YEAR]}
+  billingIntervalCount: {type: integer, minimum: 1}
+  trialStartedAt: {type: [string, 'null'], format: date-time}
+  trialEndsAt: {type: [string, 'null'], format: date-time}
+  currentPeriodStart: {type: string, format: date-time}
+  currentPeriodEnd: {type: string, format: date-time}
+  cancelAtPeriodEnd: {type: boolean}
+  cancelledAt: {type: [string, 'null'], format: date-time}
+  cancellationReason: {type: [string, 'null']}
+  endedAt: {type: [string, 'null'], format: date-time}
+  lastPaymentId: {type: [string, 'null']}
+  nextPaymentAt: {type: [string, 'null'], format: date-time}
+  gracePeriodEndsAt: {type: [string, 'null'], format: date-time}
+  policyDecisionId: {type: [string, 'null']}
+  version: {type: integer, minimum: 1}
+  createdAt: {type: string, format: date-time}
+  updatedAt: {type: string, format: date-time}
+additionalProperties: false

@@ -1,0 +1,16 @@
+version: "1.0"
+canonical: true
+userPreferences:
+  uiLocale: BCP_47
+  contentLanguages: ordered list of BCP 47 tags
+  contentLanguageMode: ALL | ONLY_SELECTED
+  timezone: IANA timezone identifier
+  direction: derived from uiLocale; never user-authored
+defaults:
+  contentLanguages: []
+  contentLanguageMode: ALL
+validation:
+  maxContentLanguages: 20
+  requireUniqueNormalizedTags: true
+  rejectMalformedTags: true
+  ONLY_SELECTED_requires_non_empty_selection: true

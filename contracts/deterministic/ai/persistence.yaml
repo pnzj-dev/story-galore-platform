@@ -1,0 +1,21 @@
+version: "1.0"
+area: ai
+canonical: true
+description: "Deterministic implementation contract for {area}."
+persistence:
+  - resource: ai_providers
+    partitionKey: "providerId"
+    authority: "provider/model policy registry"
+    requiredIndexes: "providerId,status,executionLocation,ownerType,creditEligible"
+  - resource: ai_generations
+    partitionKey: "generationId"
+    authority: "authoritative generation job"
+    requiredIndexes: "generationId,status,creatorId"
+  - resource: ai_generation_outputs
+    partitionKey: "generationId"
+    authority: "immutable output provenance"
+    requiredIndexes: "generationId,outputId"
+  - resource: ai_credit_transactions
+    partitionKey: "transactionId"
+    authority: "financial AI credit ledger"
+    requiredIndexes: "creatorId,status,createdAt"

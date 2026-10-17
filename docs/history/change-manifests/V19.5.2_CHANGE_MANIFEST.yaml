@@ -1,0 +1,49 @@
+schema: storygalore.release-change-manifest/v1
+version: 1
+release: V19.5.2
+base: V19.5.1
+status: DETERMINISTIC_EXECUTION_KIT
+summary: Consumer economics, infrastructure cost attribution, unit economics, Admin
+  observability and operational-agent coverage.
+principles:
+- Consumer media consumption is economically modeled without exposing raw infrastructure
+  billing to ordinary users.
+- Free access is bounded by registered entitlements; overage is explicit and opt-in.
+- Creator rights override consumer entitlements.
+- Actual, estimated, projected and unavailable costs remain distinct.
+- Admin monitoring is read-only by default and never a runtime dependency.
+- Cost Guardian, Data Analysis & Reporting, CEO and Media Operations receive scoped
+  read-only economics tools.
+- Unknown, ambiguous, unregistered or unauthorized economic data paths block.
+newContracts:
+- contracts/business/consumer-plans.yaml
+- contracts/business/consumption-units.yaml
+- contracts/business/consumption-metering.yaml
+- contracts/business/consumer-media-policy.yaml
+- contracts/business/video-quality-policy.yaml
+- contracts/business/consumer-fair-use.yaml
+- contracts/business/consumer-overage.yaml
+- contracts/business/family-plan.yaml
+- contracts/business/consumer-sponsored-consumption.yaml
+- contracts/business/unit-economics.yaml
+- contracts/analytics/consumer-economics-metrics.yaml
+- contracts/analytics/consumer-economics-dashboards.yaml
+- contracts/state-machines/consumer-consumption.yaml
+- contracts/state-machines/consumer-sponsored-consumption.yaml
+- contracts/verification/consumer-economics-contract-to-test.yaml
+- docs/ADMIN_CONSUMER_ECONOMICS.md
+- contracts/ui/admin/consumer-economics.yaml
+- contracts/deterministic/economics/api.yaml
+- contracts/deterministic/economics/persistence.yaml
+verification:
+- global_determinism_gate: REQUIRED
+- contract_syntax: REQUIRED
+- consumer_economics_contract_to_test: REQUIRED
+- admin_rbac: REQUIRED
+- agent_tool_registry: REQUIRED
+humanApprovalRequiredFor:
+- activating consumer plan prices or limits
+- changing overage pricing
+- changing fair-use enforcement thresholds
+- changing provider routing
+- changing economic attribution rules

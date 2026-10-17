@@ -1,0 +1,39 @@
+name: subscription
+version: 1
+states:
+  - CREATED
+  - CHECKOUT_STARTED
+  - AWAITING_PROVIDER
+  - ACTIVE
+  - PAST_DUE
+  - GRACE_PERIOD
+  - CANCEL_AT_PERIOD_END
+  - PAUSED
+  - CANCELLED
+  - EXPIRED
+transitions:
+  - {from: CREATED, event: CHECKOUT_STARTED, to: CHECKOUT_STARTED}
+  - {from: CHECKOUT_STARTED, event: PROVIDER_PENDING, to: AWAITING_PROVIDER}
+  - {from: AWAITING_PROVIDER, event: PROVIDER_ACTIVATED, to: ACTIVE}
+  - {from: ACTIVE, event: RENEWAL_SUCCEEDED, to: ACTIVE}
+  - {from: ACTIVE, event: RENEWAL_FAILED, to: PAST_DUE}
+  - {from: PAST_DUE, event: PAYMENT_RECOVERED, to: ACTIVE}
+  - {from: PAST_DUE, event: GRACE_STARTED, to: GRACE_PERIOD}
+  - {from: GRACE_PERIOD, event: PAYMENT_RECOVERED, to: ACTIVE}
+  - {from: GRACE_PERIOD, event: GRACE_EXPIRED, to: CANCELLED}
+  - {from: ACTIVE, event: CANCEL_AT_PERIOD_END, to: CANCEL_AT_PERIOD_END}
+  - {from: CANCEL_AT_PERIOD_END, event: PERIOD_ENDED, to: EXPIRED}
+  - {from: ACTIVE, event: PAUSE, to: PAUSED}
+  - {from: PAUSED, event: RESUME, to: ACTIVE}
+  - {from: ACTIVE, event: CANCEL_NOW, to: CANCELLED}
+  - {from: PAST_DUE, event: CANCEL_NOW, to: CANCELLED}
+  - {from: PAUSED, event: CANCEL_NOW, to: CANCELLED}
+  - {from: CANCELLED, event: EXPIRE, to: EXPIRED}
+  - {from: ACTIVE, event: PLAN_CHANGED, to: ACTIVE}
+  - {from: PAST_DUE, event: PLAN_CHANGED, to: PAST_DUE}
+invariants:
+  - subscription_status_is_not_entitlement_status
+  - payment_success_does_not_directly_grant_entitlement
+  - all_external_mutations_require_idempotency_key
+  - provider_webhook_and_reconciliation_are_authoritative
+  - historical_plan_version_is_immutable

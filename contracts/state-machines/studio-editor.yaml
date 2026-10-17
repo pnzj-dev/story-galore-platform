@@ -1,0 +1,18 @@
+version: 1
+name: studio-editor
+states: [OPENING, READY, EDITING, SAVING, SAVED, OFFLINE, SYNCING, CONFLICT, SAVE_FAILED, CLOSED]
+transitions:
+  - {from: OPENING, event: OPENED, to: READY}
+  - {from: READY, event: EDIT, to: EDITING}
+  - {from: EDITING, event: SAVE_REQUESTED, to: SAVING}
+  - {from: SAVING, event: SAVE_ACCEPTED, to: SAVED}
+  - {from: SAVING, event: CONFLICT_DETECTED, to: CONFLICT}
+  - {from: SAVING, event: SAVE_FAILED, to: SAVE_FAILED}
+  - {from: EDITING, event: NETWORK_LOST, to: OFFLINE}
+  - {from: OFFLINE, event: NETWORK_RESTORED, to: SYNCING}
+  - {from: SYNCING, event: SYNC_ACCEPTED, to: SAVED}
+  - {from: SYNCING, event: CONFLICT_DETECTED, to: CONFLICT}
+  - {from: CONFLICT, event: RESOLVED, to: EDITING}
+  - {from: SAVE_FAILED, event: RETRY, to: SAVING}
+  - {from: READY, event: CLOSE, to: CLOSED}
+  - {from: SAVED, event: CLOSE, to: CLOSED}

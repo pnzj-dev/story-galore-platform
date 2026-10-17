@@ -1,0 +1,22 @@
+version: "1.0"
+scenarios:
+  - id: platform-model-consumes-credits
+    given: { billingMode: PLATFORM_CREDITS, ownerType: STORYGALORE, executionLocation: CLOUD, creditEligible: true }
+    when: ai_generation_create
+    then: { creditReserve: ALLOWED }
+  - id: byok-never-consumes-credits
+    given: { billingMode: BYOK, ownerType: WORKSPACE, executionLocation: CLOUD, creditEligible: false }
+    when: ai_generation_create
+    then: { creditReserve: FORBIDDEN }
+  - id: self-hosted-never-consumes-credits
+    given: { billingMode: USER_HOSTED, ownerType: WORKSPACE, executionLocation: USER_HOSTED, creditEligible: false }
+    when: ai_generation_create
+    then: { creditReserve: FORBIDDEN }
+  - id: missing-credit-record-fails-closed
+    given: { billingMode: PLATFORM_CREDITS, creditEligibilityRecord: MISSING }
+    when: ai_generation_create
+    then: { decision: DENY }
+  - id: higgsfield-is-media-provider
+    given: { providerId: higgsfield }
+    when: ai_provider_capabilities_get
+    then: { requiredCapabilities: [VIDEO_GENERATION] }

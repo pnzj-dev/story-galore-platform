@@ -1,0 +1,39 @@
+schema: storygalore.unit-economics-contract/v1
+version: 1
+canonical: true
+status: V19.5.2
+policy: fail_closed
+dimensions:
+- plan
+- mediaType
+- quality
+- country
+- provider
+- creator
+- content
+- date
+metrics:
+- revenue
+- payment_processing_cost
+- creator_payout_cost
+- cdn_delivery_cost
+- origin_egress_cost
+- storage_cost
+- transcode_cost
+- ai_provider_cost
+- realtime_cost
+- support_cost
+- attributable_infrastructure_cost
+- contribution_margin
+- contribution_margin_rate
+costStates:
+- ACTUAL
+- ESTIMATED
+- PROJECTED
+- UNAVAILABLE
+rules:
+- No invented provider pricing.
+- UNAVAILABLE cost MUST NOT be silently converted to zero.
+- Contribution margin MUST disclose included/excluded cost dimensions.
+- Plan profitability decisions require reconciled financial inputs or explicit provisional
+  labeling.

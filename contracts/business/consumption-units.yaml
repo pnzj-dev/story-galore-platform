@@ -1,0 +1,39 @@
+schema: storygalore.consumption-unit-contract/v1
+version: 1
+canonical: true
+status: V19.5.2
+policy: fail_closed
+principles:
+- Consumption units are entitlement/accounting dimensions, not currency.
+- Money, AI credits and consumption entitlements are non-interchangeable unless an
+  explicit conversion contract exists.
+- Every metered event carries source, unit, quantity, policyVersion and correlation
+  identifiers.
+- Actual cost is distinct from entitlement consumption.
+units:
+- unitId: VIDEO_MINUTE
+  measurement: media_playback_minute
+  precision: integer
+  costClass: VIDEO_DELIVERY
+- unitId: AUDIO_MINUTE
+  measurement: media_playback_minute
+  precision: integer
+  costClass: AUDIO_DELIVERY
+- unitId: DOWNLOAD_GIB
+  measurement: downloaded_gib
+  precision: decimal(12,6)
+  costClass: MEDIA_EGRESS
+- unitId: AI_COMPANION_UNIT
+  measurement: registered_ai_operation
+  precision: integer
+  costClass: AI
+- unitId: TRANSCODE_JOB
+  measurement: completed_transcode_job
+  precision: integer
+  costClass: MEDIA_PROCESSING
+nonUnits:
+- TEXT_PAGE
+- FOLLOW
+- COMMENT
+- REACTION
+qualityPolicyRef: consumer.video_quality.v1

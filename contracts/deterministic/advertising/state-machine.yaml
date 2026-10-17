@@ -1,0 +1,33 @@
+version: '1.0'
+area: advertising
+canonical: true
+states: [DRAFT, SCHEDULED, ACTIVE, PAUSED, COMPLETED, ARCHIVED]
+transitions:
+  - from: DRAFT
+    to: SCHEDULED
+    command: ad_campaign_schedule
+  - from: SCHEDULED
+    to: ACTIVE
+    command: ad_campaign_activate
+  - from: ACTIVE
+    to: PAUSED
+    command: ad_campaign_pause
+  - from: PAUSED
+    to: ACTIVE
+    command: ad_campaign_resume
+  - from: ACTIVE
+    to: COMPLETED
+    command: ad_campaign_complete
+  - from: PAUSED
+    to: COMPLETED
+    command: ad_campaign_complete
+  - from: COMPLETED
+    to: ARCHIVED
+    command: ad_campaign_archive
+  - from: DRAFT
+    to: ARCHIVED
+    command: ad_campaign_archive
+invariants:
+  - ACTIVE requires policy-valid creative and placement configuration.
+  - Campaign budget and frequency caps are enforced before serving.
+  - COMPLETED and ARCHIVED are terminal for serving.

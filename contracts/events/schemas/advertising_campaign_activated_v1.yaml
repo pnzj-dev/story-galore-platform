@@ -1,0 +1,19 @@
+schema: storygalore.event-schema/v1
+eventType: advertising.campaign_activated.v1
+version: 1
+producer: advertising
+payload:
+  eventId: string
+  eventType: string
+  eventVersion: integer
+  occurredAt: datetime
+  producer: advertising
+  correlationId: string|null
+  operationId: string|null
+  data: CONTRACT_SPECIFIC
+security:
+  secrets: FORBIDDEN
+  unnecessary_pii: FORBIDDEN
+consumption:
+  deduplication: REQUIRED
+  replay: REQUIRED

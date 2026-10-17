@@ -1,0 +1,95 @@
+schema: storygalore.authentication-session-runtime/v1
+version: 1
+status: canonical_implementation_contract
+authority:
+  identity: APPWRITE_AUTH
+  session_validation: APPWRITE_SERVER_SIDE_AUTH_API
+  authorization: POLICY_ENGINE
+  roles_and_capabilities: AUTHORITATIVE_SERVER_SIDE_POLICY_RECORDS
+  client_claims: UNTRUSTED
+cookie_policy:
+  http_only: true
+  secure_in_production: true
+  same_site: Lax
+  path: /
+  domain: HOST_ONLY_UNLESS_APPROVED_SHARED_DOMAIN_CONTRACT
+  no_tokens_in_local_storage: true
+  no_session_tokens_in_urls: true
+  no_session_tokens_in_logs: true
+  rotate_after_authentication_or_privilege_change: true
+request_pipeline:
+- normalize_path_and_method
+- assign_request_id
+- resolve_route_policy
+- read_session_cookie
+- validate_session_server_side
+- build_verified_actor_context
+- evaluate_route_capability
+- evaluate_resource_scope_if_route_resource_bound
+- apply_csrf_check_for_cookie_authenticated_mutations
+- continue_or_reject
+session_rules:
+  missing_session_on_public_route: ANONYMOUS_CONTEXT
+  missing_session_on_protected_page: REDIRECT_TO_LOGIN_WITH_SIGNED_OR_ALLOWLISTED_RETURN_TO
+  missing_session_on_api_or_mutation: 401_UNAUTHENTICATED
+  invalid_or_expired_session: CLEAR_SESSION_COOKIE_AND_TREAT_AS_UNAUTHENTICATED
+  revoked_session: REJECT_AND_CLEAR_COOKIE
+  appwrite_auth_unavailable: 503_FOR_API_OR_MUTATION; FAIL_CLOSED_FOR_PROTECTED_PAGE
+  session_refresh: ONLY_THROUGH_REGISTERED_SERVER_SIDE_FLOW
+  logout: REVOKE_OR_DELETE_SERVER_SESSION_WHERE_SUPPORTED_AND_CLEAR_COOKIE
+  multi_device_sessions: INDEPENDENT_SESSION_RECORDS_WITH_DEVICE_LABEL_AND_REVOCATION
+  privilege_change: REVALIDATE_POLICY_ON_EACH_REQUEST; DO_NOT_TRUST_STALE_ROLE_CLAIMS
+authorization_results:
+  allow: CONTINUE
+  unauthenticated_page: 302_LOGIN_WITH_SAFE_RETURN_TO
+  unauthenticated_api: '401'
+  forbidden: 403_OR_404_IF_RESOURCE_DISCLOSURE_POLICY_REQUIRES_HIDING_EXISTENCE
+  step_up_required: 403_WITH_REGISTERED_STEP_UP_CODE
+  approval_required: 403_WITH_REGISTERED_APPROVAL_REQUIRED_CODE
+  policy_engine_unavailable: 503_AND_NO_OPERATION
+  unknown_policy_or_capability: DENY_AND_SECURITY_AUDIT
+csrf:
+  cookie_authenticated_mutations_require_csrf_protection: true
+  same_site_cookie_is_not_the_only_csrf_control: true
+  origin_or_referer_validation_required_for_browser_mutations: true
+  csrf_token_required_for_state_changing_browser_requests: true
+  safe_methods:
+  - GET
+  - HEAD
+  - OPTIONS
+  GET_MUST_NOT_MUTATE: true
+return_to:
+  must_be_relative_same_origin_path: true
+  external_origins_forbidden: true
+  protocol_relative_urls_forbidden: true
+  encoded_path_must_be_normalized_before_validation: true
+  fallback: /
+backend_requirements:
+  every_appwrite_function_rechecks_authorization: true
+  every_domain_command_rechecks_authorization: true
+  agent_and_mcp_tools_recheck_authorization: true
+  resource_owner_and_tenant_scope_checked_authoritatively: true
+  appwrite_service_api_key_never_sent_to_browser: true
+  policy_decision_bound_to_actor_resource_action_and_tenant: true
+  privileged_mutations_require_idempotency_and_audit: true
+logging:
+  log_decision_id_actor_id_route_template_capability_result_reason_code: true
+  never_log_session_cookie_or_bearer_token: true
+  never_log_password_mfa_secret_or_byok_plaintext: true
+  sensitive_resource_identifiers_redacted_or_pseudonymized: true
+tests_required:
+- public_route_without_session
+- protected_page_without_session
+- protected_api_without_session
+- expired_session
+- revoked_session
+- appwrite_auth_unavailable
+- policy_engine_unavailable
+- role_claim_spoofing
+- creator_cross_tenant_access
+- admin_direct_api_bypass
+- csrf_missing_or_invalid
+- unsafe_return_to_rejected
+- logout_revocation
+- privilege_revocation_takes_effect
+- step_up_and_approval_enforcement

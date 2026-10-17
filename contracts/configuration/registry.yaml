@@ -1,0 +1,24 @@
+schema: storygalore.configuration-registry/v1
+version: 1
+release: V19.5
+policy: deterministic
+rules:
+  - Every behavior-affecting configuration key MUST be registered.
+  - Every key MUST declare type, default, scope, environment, mutability and validation.
+  - Unknown configuration keys MUST NOT silently alter behavior.
+  - Secrets MUST be referenced through the secret registry, never stored as ordinary configuration.
+  - Runtime hot configuration MUST be versioned and atomically replaced.
+  - Configuration changes MUST be auditable.
+required_domains:
+  - adult-policy
+  - feature-flags
+  - payments
+  - ai-providers
+  - media-distribution
+  - advertising
+  - reader
+  - localization
+  - rate-limits
+  - costs
+  - agents
+  - security

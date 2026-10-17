@@ -1,0 +1,69 @@
+schema: storygalore.reader-command-handlers/v1
+version: 1
+canonical: true
+purpose: "Deterministic command/query handler contracts for the reader lifecycle (reading progress + resume), so the api gateway and Go handlers can be implemented without guessing."
+source_of_truth:
+  reading_progress_schema: contracts/domain/reading-progress.schema.yaml
+  reader_api: contracts/deterministic/reader/api.yaml
+  reader_persistence: contracts/deterministic/reader/persistence.yaml
+  command_event_map: contracts/compatibility/command-event-map.yaml
+  errors: contracts/functions/error-catalog.yaml
+capabilities:
+  - {id: reader.progress.read, grant: owner}
+  - {id: reader.progress.write, grant: owner}
+  - {id: reader.preferences.manage, grant: owner}
+shared_rules:
+  actor_required: true
+  idempotency_required_for_mutations: true
+  reading_progress_is_server_authoritative: true
+  progress_is_scoped_to_owner: true
+  unknown_fields: REJECT
+commands:
+  - name: reading_progress_upsert
+    operation: reading_progress_upsert
+    capability: reader.progress.write
+    input:
+      publicationId: {type: string, required: true}
+      episodeId: {type: string, required: false}
+      pageId: {type: string, required: false}
+      position: {type: integer, required: false}
+      percentComplete: {type: integer, required: false}
+    state: {initial: IN_PROGRESS}
+    effects:
+      events: [reader.reading_progress_upsert.v1]
+      writes: [{table: reading_progress, kind: UPSERT}]
+    result: {readingProgressId: string}
+    errors: [FORBIDDEN, POLICY_DENIED, NOT_FOUND, INVALID_INPUT]
+    idempotency: {key: idempotencyKey, behavior: RETURN_EXISTING_RESULT}
+  - name: reading_progress_complete
+    operation: reading_progress_complete
+    capability: reader.progress.write
+    input:
+      publicationId: {type: string, required: true}
+      episodeId: {type: string, required: false}
+    state: {to: COMPLETED}
+    effects:
+      events: [reader.reading_progress_complete.v1]
+      writes: [{table: reading_progress, kind: UPDATE}]
+    result: {readingProgressId: string}
+    errors: [FORBIDDEN, POLICY_DENIED, NOT_FOUND, INVALID_STATE, INVALID_INPUT]
+    idempotency: {key: idempotencyKey, behavior: RETURN_EXISTING_RESULT}
+queries:
+  - name: reading_progress_get
+    capability: reader.progress.read
+    input: {publicationId: {type: string, required: true}, episodeId: {type: string, required: false}}
+    returns: reading_progress
+    table: reading_progress
+    errors: [FORBIDDEN, NOT_FOUND]
+  - name: continue_list
+    capability: reader.progress.read
+    input: {limit: {type: integer, required: false}}
+    returns: continue_list
+    table: reading_progress
+    join: publications
+    filters: [owner, "status=IN_PROGRESS", "orderDesc(lastAccessedAt)"]
+    pagination: cursor
+    errors: [FORBIDDEN]
+implementation_notes:
+  - continue_list returns the authenticated user's in-progress items joined with publication metadata for the Continue rail. V1 covers comics/books; video/audio playback progress is a later phase tracked through media_analytics.
+  - reading_progress is the canonical source of truth; reader_session is short-lived resumable session state, never authoritative.

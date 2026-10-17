@@ -1,0 +1,15 @@
+schema: storygalore.astro-hydration/v1
+version: 1
+strategy:
+  static_markup: NO_HYDRATION
+  visible_interaction: client:visible
+  above_fold_primary_interaction: client:load
+  noncritical_background_interaction: client:idle
+  responsive_feature: client:media
+  client_only: client:only
+rules:
+  hydration_directive_must_be_justified: true
+  no_global_svelte_app_shell: true
+  no_hydrated_layout_without_interactivity: true
+  server_data_passed_as_serializable_props: true
+  sensitive_data_not_serialized_to_client: true

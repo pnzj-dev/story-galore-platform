@@ -1,0 +1,13 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://storygalore.dev/contracts/studio/studio-asset.schema.yaml
+title: Studio Asset Reference
+version: 1
+required: [id, projectId, mediaAssetId, role]
+properties:
+  id: {type: string}
+  projectId: {type: string}
+  mediaAssetId: {type: string}
+  role: {enum: [REFERENCE, CHARACTER, BACKGROUND, PROP, PAGE_ASSET, PANEL_ASSET, STYLE_REFERENCE, AUDIO_REFERENCE]}
+  label: {type: string}
+  metadata: {type: object}
+additionalProperties: false

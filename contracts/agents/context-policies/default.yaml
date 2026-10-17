@@ -1,0 +1,11 @@
+schema: storygalore.agent-context-policy/v1
+rules:
+- least_data_necessary
+- secrets_never_in_context
+- raw_private_messages_excluded_unless_explicitly_authorized
+- payment_credentials_excluded
+- byok_secret_material_excluded
+- provider_tokens_excluded
+- source_provenance_required
+- context_version_pinned
+stop_if_context_contract_missing: true

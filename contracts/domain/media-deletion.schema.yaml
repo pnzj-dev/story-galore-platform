@@ -1,0 +1,15 @@
+version: 1
+name: media-deletion
+fields:
+  operationId: string
+  mediaId: string
+  requestedBy: string
+  reason: string
+  status: REQUESTED|ORIGIN_DELETED|DISTRIBUTION_INVALIDATED|DERIVATIVES_DELETED|SEARCH_CLEARED|VECTORS_CLEARED|COMPLETED|FAILED
+  requestedAt: datetime
+  completedAt: datetime|null
+rules:
+  - Canonical Appwrite state is deleted/restricted before downstream cleanup is considered complete.
+  - Cloudflare cache invalidation is mandatory for public/protected distributed variants.
+  - Search, vectors, projections and derivatives receive durable deletion events.
+  - Cleanup is idempotent and retryable; failed cleanup remains observable.

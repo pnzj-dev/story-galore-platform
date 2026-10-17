@@ -1,0 +1,10 @@
+schema: storygalore.function-resource-map/v1
+version: 1
+function: media-manifest
+policy: explicit_only
+resources:
+  - media_assets
+  - publications
+  - publication_snapshots
+  - publication_language_metadata
+undeclared_resource_access: BLOCK

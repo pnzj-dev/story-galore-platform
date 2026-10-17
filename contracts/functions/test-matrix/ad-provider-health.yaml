@@ -1,0 +1,15 @@
+schema: storygalore.function-test-matrix/v1
+function: ad-provider-health
+required:
+  - authentication
+  - authorization
+  - input-schema
+  - output-schema
+  - happy-path
+  - validation-failure
+  - policy-denied
+  - dependency-failure
+  - idempotency-or-safe-retry
+  - secret-redaction
+  - audit
+  - observability

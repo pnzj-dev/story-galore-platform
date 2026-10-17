@@ -1,0 +1,97 @@
+schema: storygalore.revenue-model/v1
+version: 1
+canonical: true
+policy: deterministic
+status: V19.5.1
+principles:
+- Creator-originated commerce has the lowest applicable platform fee.
+- StoryGalore-originated commerce may use a higher declared discovery commission.
+- Payment processor/network/tax costs are separate from StoryGalore platform commissions.
+- Tips have zero StoryGalore platform commission; processor/network costs may still apply.
+- Provider cost, creator earnings, platform revenue and taxes are separate ledger dimensions.
+- No entitlement is granted from a redirect; authoritative provider confirmation/reconciliation is required.
+- Stablecoin is a payout/payment rail, not a speculative StoryGalore asset.
+- No proprietary StoryGalore token is required or permitted by this model.
+creator_plans:
+- planId: CREATOR_FREE
+  monthlyPrice:
+    currency: USD
+    minor: 0
+  platformFeeBps: 1000
+  tipPlatformFeeBps: 0
+  includedAiCredits: DECLARED_CATALOG
+  includedMedia: DECLARED_CATALOG
+- planId: CREATOR_PRO
+  monthlyPrice:
+    currency: USD
+    minor: 1200
+  platformFeeBps: 500
+  tipPlatformFeeBps: 0
+  annualPrice:
+    currency: USD
+    minor: 12000
+- planId: CREATOR_STUDIO
+  monthlyPrice:
+    currency: USD
+    minor: 3900
+  platformFeeBps: 300
+  tipPlatformFeeBps: 0
+  annualPrice:
+    currency: USD
+    minor: 39000
+fan_products:
+- productId: STORYPASS
+  price:
+    currency: USD
+    minor: 999
+  billing: MONTHLY
+  allocationPolicyRef: storypass.engagement_pool.v1
+  allocationPolicy:
+    platformReserveBps: 2000
+    creatorPoolBps: 8000
+    allocationBasis: VERIFIED_ENGAGEMENT
+    unknownEngagement: BLOCK_AND_HOLD
+  processorAndTaxCosts: SEPARATE_FROM_POOL_ALLOCATION
+commerce_classes:
+  CREATOR_ORIGINATED:
+    defaultFeeBpsByPlan:
+      CREATOR_FREE: 1000
+      CREATOR_PRO: 500
+      CREATOR_STUDIO: 300
+  STORYGALORE_ORIGINATED:
+    defaultFeeBps: 1000
+    allowedRangeBps:
+    - 1000
+    - 1500
+    requiresPolicyVersion: true
+  TIP:
+    platformFeeBps: 0
+  MARKETPLACE_SERVICE:
+    feeBpsRange:
+    - 1000
+    - 1500
+  LICENSING:
+    feeBpsRange:
+    - 1000
+    - 2000
+  SPONSORED_DISCOVERY:
+    pricingModel: REGISTERED_CAMPAIGN_POLICY
+  AI_PRODUCTION_SERVICE:
+    pricingModel: REGISTERED_SERVICE_CATALOG
+  MEDIA_USAGE:
+    pricingModel: REGISTERED_USAGE_CATALOG
+currency_policy:
+  settlementCurrencies:
+  - EUR
+  - USD
+  minor_units_required: true
+  fx_source: REGISTERED_FX_PROVIDER
+  unknown_fx_source: BLOCK
+tax_policy:
+  taxes_are_separate_from_platform_fee: true
+  tax_engine: REGISTERED_TAX_POLICY
+  unknown_tax_rule: BLOCK
+
+consumerEconomicsPolicyRef: contracts/business/consumer-plans.yaml
+consumerConsumptionPolicyRef: contracts/business/consumption-metering.yaml
+unitEconomicsPolicyRef: contracts/business/unit-economics.yaml

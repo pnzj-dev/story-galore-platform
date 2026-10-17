@@ -1,0 +1,16 @@
+schema: storygalore.ui-artwork-system/v1
+version: 1
+rules:
+  artwork_is_content_not_decoration: true
+  preserve_source_aspect_ratio: true
+  focal_point_supported: true
+  responsive_sources_required: true
+  lazy_load_below_fold: true
+  eager_load_lcp_candidate: true
+  protected_media_uses_authorized_delivery: true
+  no_permanent_protected_urls_in_html: true
+asset_classes:
+  editorial: astro_assets
+  creator_media: appwrite_storage_distribution
+  ui_icons: lucide
+  illustrations: approved_asset_pipeline

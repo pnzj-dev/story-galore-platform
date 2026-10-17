@@ -1,0 +1,14 @@
+schema: storygalore.contract-scenario-suite/v1
+version: 1
+policy: fail_closed
+cases:
+  - id: free-plan-limits
+    expected: PASS
+  - id: plus-plan-limits
+    expected: PASS
+  - id: premium-plan-limits
+    expected: PASS
+  - id: family-pool-limits
+    expected: PASS
+  - id: unknown-plan-block
+    expected: PASS

@@ -1,0 +1,34 @@
+version: 1.0.0
+release: V1
+policy: deterministic
+stop_conditions:
+  - requirement has two materially different interpretations
+  - contract reference is missing
+  - source owner is missing or duplicated
+  - API shape is unspecified for a new endpoint
+  - persistence resource is unspecified for durable state
+  - provider capability is unknown
+  - authorization rule is unspecified for protected data/action
+  - test mapping is missing for a critical invariant
+  - migration compatibility is unspecified for a schema change
+  - deployment impact is unknown for infrastructure changes
+block_reason_codes:
+  - MISSING_CONTRACT
+  - AMBIGUOUS_REQUIREMENT
+  - MISSING_IMPLEMENTATION_MAP
+  - MISSING_TEST_MAPPING
+  - MISSING_PROVIDER_CONTRACT
+  - MISSING_AUTHORIZATION
+  - CONTRACT_CONFLICT
+  - UNSAFE_SIDE_EFFECT
+  - EXTERNAL_DEPENDENCY_UNVERIFIED
+required_output:
+  status: BLOCKED
+  fields: [reason, affectedTask, missingInformation, proposedQuestions]
+forbidden_behavior:
+  - infer_business_policy_from_neighboring_code
+  - invent_resource_ids
+  - invent_provider_pricing
+  - silently_change_contract
+  - weaken_authorization
+  - skip_regression_test_for_bug_fix

@@ -1,0 +1,49 @@
+version: '1.0'
+area: admin
+states:
+- REQUESTED
+- APPROVAL_REQUIRED
+- APPROVED
+- EXECUTING
+- COMPLETED
+- DENIED
+- EXPIRED
+- REVOKED
+transitionRules:
+- Only listed transitions are legal.
+- Authorization MUST be evaluated separately from transition legality.
+- Retries MUST preserve idempotency.
+- State changes MUST emit the event declared by the command/event compatibility graph.
+transitions:
+- from: REQUESTED
+  event: APPROVE
+  to: APPROVAL_REQUIRED
+- from: REQUESTED
+  event: DENY
+  to: DENIED
+- from: APPROVAL_REQUIRED
+  event: APPROVE
+  to: APPROVED
+- from: APPROVAL_REQUIRED
+  event: DENY
+  to: DENIED
+- from: APPROVED
+  event: EXECUTE
+  to: EXECUTING
+- from: EXECUTING
+  event: COMPLETE
+  to: COMPLETED
+- from: EXECUTING
+  event: REVOKE
+  to: REVOKED
+- from: APPROVAL_REQUIRED
+  event: EXPIRE
+  to: EXPIRED
+- from: APPROVED
+  event: EXPIRE
+  to: EXPIRED
+terminalStates:
+- COMPLETED
+- DENIED
+- EXPIRED
+- REVOKED

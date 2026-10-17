@@ -1,0 +1,57 @@
+schema: storygalore.appwrite-function/v1
+id: mcp
+runtime:
+  platform: APPWRITE_FUNCTIONS
+  language: GO_LATEST_STABLE_EXACT_PIN_REQUIRED
+  state: STATELESS
+class: REQUEST_HANDLER
+purpose: application MCP endpoint, subject to same auth/entitlement controls
+authority:
+  job_state: NONE
+  domain_state: CANONICAL_DOMAIN_RESOURCE
+input:
+  transport: CONTRACT_DEFINED
+  schema: contracts/functions/schemas/mcp-input.yaml
+output:
+  schema: contracts/functions/schemas/mcp-output.yaml
+security:
+  authentication: CONTRACT_DEFINED
+  authorization: POLICY_ENGINE
+  capability: FUNCTION_CAPABILITY_MCP
+  secret_policy: PROTECTED_SECRET_REFERENCE
+idempotency:
+  required: true
+  duplicate_behavior: RETURN_EXISTING_RESULT_OR_SAFE_NOOP
+execution:
+  operation_id: REQUIRED_FOR_OPERATIONAL_SIDE_EFFECTS
+  retry_policy: NONE
+  schedule: NONE
+  timeout: CONTRACT_DEFINED
+  concurrency: CONTRACT_DEFINED
+side_effects:
+  policy: TOOL_INVOCATION_ONLY
+  external_side_effects_require_idempotency: true
+resources:
+  access_mode: EXPLICIT_REGISTRY_ONLY
+  map: contracts/functions/resource-maps/mcp.yaml
+  undeclared_resource_access: BLOCK
+events:
+  emitted: REGISTRY_DEFINED
+  consumed: REGISTRY_DEFINED
+observability:
+  request_id: REQUIRED
+  correlation_id: REQUIRED
+  operation_id: REQUIRED_WHEN_APPLICABLE
+  secrets_redacted: true
+audit:
+  required: true
+errors:
+  catalog: contracts/functions/error-catalog.yaml
+  unknown_error_behavior: SAFE_FAILURE
+tests:
+  contract: contracts/functions/test-matrix/mcp.yaml
+  missing_test_behavior: BLOCK
+implementation:
+  source_owner: infrastructure-appwrite
+  source_path: backend/appwrite/functions/mcp
+  implementation_status: CONTRACT_ONLY

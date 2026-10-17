@@ -1,0 +1,54 @@
+schema: storygalore.ui-astro-implementation-registry/v1
+version: 1
+source_of_truth:
+  visual: contracts/ui/design-system/visual-system.yaml
+  components: contracts/ui/components/component-registry.yaml
+  astro: contracts/astro/architecture.yaml
+  sites: contracts/appwrite/sites/deployment.yaml
+implementation_targets:
+  tokens:
+    source: packages/ui/src/tokens
+  components:
+    source: packages/ui/src/components
+  layouts:
+    source: apps/web/src/layouts
+  routes:
+    source: apps/web/src/pages
+    surfaces:
+      public: apps/web/src/pages
+      creator_studio: apps/web/src/pages
+      admin: apps/web/src/pages
+  content:
+    source: apps/web/src/content
+    config: apps/web/src/content.config.ts
+  middleware:
+    source: apps/web/src/middleware.ts
+  actions:
+    source: apps/web/src/actions
+  server:
+    source: apps/web/src/server
+  visual_tests: tests/visual
+  e2e_tests: tests/e2e
+  appwrite_site_config: appwrite.config.json
+execution_order:
+  - read_design_contract
+  - read_astro_contract
+  - read_appwrite_sites_contract
+  - implement_or_extend_tokens
+  - implement_or_extend_shared_components
+  - implement_layout
+  - implement_route
+  - implement_server_data_boundary
+  - implement_svelte_islands_only_where_required
+  - implement_states
+  - implement_accessibility
+  - implement_visual_regression
+  - run_build_and_typecheck
+  - run_appwrite_site_smoke
+blockers:
+  missing_design_contract: BLOCK
+  missing_route_rendering_contract: BLOCK
+  missing_hydration_reason: BLOCK
+  missing_appwrite_site_mapping: BLOCK
+  new_component_without_registry_entry: BLOCK
+  visual_regression_failure: BLOCK

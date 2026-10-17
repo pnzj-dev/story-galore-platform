@@ -1,0 +1,6 @@
+schema: storygalore.agent-tool-output/v1
+tool: coding-dev.github.issue.read
+required:
+- status
+- correlationId
+additionalProperties: false

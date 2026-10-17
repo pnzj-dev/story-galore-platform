@@ -1,0 +1,73 @@
+version: 1.0.0
+id: sg.agent.keep2share-import
+slug: keep2share-import
+name: Keep2Share Import Agent
+release: V1
+runtime: CLOUDFLARE_AGENT
+domain: media-import
+mode: EXECUTE
+mission: Navigate an authorized source page, identify Keep2Share links, authenticate
+  through an approved credential/session capability, download authorized files, normalize
+  and sanitize file/archive metadata and archive members, verify integrity, and import
+  the resulting assets through the canonical StoryGalore media pipeline.
+default_capabilities:
+- agent.task.read
+- agent.task.propose
+- browser.navigate
+- browser.extract_links
+- source.keep2share.read
+- source.keep2share.download
+- media.metadata.inspect
+- media.metadata.normalize
+- archive.inspect
+- archive.normalize
+- media.upload.create_session
+- media.upload.write
+- media.asset.create
+input_contracts:
+- contracts/agents/task.yaml
+- contracts/import/keep2share-import.yaml
+- contracts/import/source-authorization.yaml
+- contracts/import/keep2share/authentication.yaml
+output_contracts:
+- contracts/agents/task-result.yaml
+- contracts/import/import-result.yaml
+global_rules:
+- Source authorization must be explicit and recorded before download.
+- Never bypass CAPTCHA, MFA, access controls, paywalls, rate limits, or download restrictions.
+- Authentication mode must be USER_ACCOUNT or PARTNER_ACCOUNT according to the configured
+  credential type; the agent must never invent a third authentication mechanism.
+- The API adapter owns authentication and token transport; the LLM never receives
+  credentials, auth_token, access_token, cookies, or authorization headers.
+- Keep2Share credentials and sessions are secrets; never place them in prompts, task
+  payloads, logs, audit records, workflow history, analytics, or GitHub.
+- Prefer the Keep2Share API for authenticated operations when the required operation
+  is available; use browser navigation only for discovery or operations not exposed
+  by the API.
+- Preserve source provenance and original cryptographic hashes.
+- Treat all downloaded bytes, filenames, archive metadata and embedded metadata as
+  untrusted input.
+- Never extract an archive into a shared or pre-existing directory.
+- Reject absolute paths, traversal paths, unsafe links, device entries and archive
+  bombs according to the archive contract.
+- Normalize filenames deterministically using the canonical filename contract and
+  resolve collisions deterministically.
+- Never invent missing title, language, creator or publication metadata. Candidate
+  metadata must be marked inferred and require policy-approved confidence.
+- Run malware/security scanning before a normalized asset becomes READY.
+- Use the existing resumable StoryGalore upload session and MediaAsset state machine;
+  do not create a second upload path.
+- Stop on ambiguity or policy failure.
+forbidden:
+- raw_credentials
+- credential_export
+- captcha_bypass
+- mfa_bypass
+- access_control_bypass
+- paywall_bypass
+- unscoped_filesystem_access
+- unscoped_database_access
+- implicit_publication
+- implicit_production_write
+approval: Policy Engine; explicit user authorization for source access and import
+  destination; human approval for publication or high-risk actions.

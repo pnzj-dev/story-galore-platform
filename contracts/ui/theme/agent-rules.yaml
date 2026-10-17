@@ -1,0 +1,31 @@
+version: 1
+id: ui.theme.agent_rules
+status: authoritative
+rules:
+  - id: THEME-AGENT-001
+    rule: never_invent_theme_colors
+    action_on_violation: BLOCK
+  - id: THEME-AGENT-002
+    rule: every_new_component_requires_theme_mapping
+    action_on_violation: BLOCK
+  - id: THEME-AGENT-003
+    rule: every_semantic_token_requires_light_and_dark_values
+    action_on_violation: BLOCK
+  - id: THEME-AGENT-004
+    rule: use_logical_css_properties
+    action_on_violation: BLOCK
+  - id: THEME-AGENT-005
+    rule: do_not_use_theme_as_authorization_or_content_filter
+    action_on_violation: BLOCK
+  - id: THEME-AGENT-006
+    rule: do_not_mutate_user_artwork_for_theme
+    action_on_violation: BLOCK
+  - id: THEME-AGENT-007
+    rule: SSR_and_hydration_must_resolve_same_theme
+    action_on_violation: BLOCK
+  - id: THEME-AGENT-008
+    rule: both_light_and_dark_accessibility_tests_required
+    action_on_violation: BLOCK
+  - id: THEME-AGENT-009
+    rule: theme_preference_changes_must_use_canonical_preference_command
+    action_on_violation: BLOCK

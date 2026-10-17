@@ -1,0 +1,13 @@
+version: 1
+domain: social
+reactionTypes:
+  - LIKE
+  - LOVE
+  - FIRE
+  - FUNNY
+  - WOW
+rules:
+  - A user MAY have at most one active reaction of each configured reaction policy per target unless policy explicitly permits multiple.
+  - Setting the same reaction twice MUST be idempotent.
+  - Removing a reaction MUST be idempotent.
+  - Reaction counts are projections.

@@ -1,0 +1,8 @@
+{
+  "version":"1.0",
+  "rule":"Every V1 domain must map to at least one analytics event or operational metric and an owning analytics projection.",
+  "domains":[
+    "auth","creator_onboarding","profiles","projects_story_bible","drafts_recovery","publications","reader","library_follows","community","messaging","search","recommendations","media_upload_processing","downloads_offline_exports","moderation","adult_policy","ai_credits_byok","payments","subscriptions_entitlements","advertising","support","notifications","admin_operations","mcp_operations","cloudflare_workflows","security_abuse","agent_operations","dynamic_configuration","marketing_attribution","retention_cohorts","creator_revenue_payouts","platform_revenue_cost","provider_health"
+  ],
+  "required_mapping_fields":["domain","event_or_metric","projection","privacy_class","owner"]
+}

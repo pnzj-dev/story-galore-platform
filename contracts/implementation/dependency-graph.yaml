@@ -1,0 +1,36 @@
+version: 1.0.0
+release: V1
+policy: deterministic
+nodes:
+  - id: recon
+  - id: toolchain
+    depends_on: [recon]
+  - id: contracts
+    depends_on: [toolchain]
+  - id: domain
+    depends_on: [contracts]
+  - id: persistence
+    depends_on: [domain]
+  - id: infrastructure
+    depends_on: [persistence]
+  - id: authorization-policy
+    depends_on: [domain, persistence]
+  - id: api
+    depends_on: [authorization-policy]
+  - id: ui
+    depends_on: [api]
+  - id: agents
+    depends_on: [api, authorization-policy]
+  - id: integrations
+    depends_on: [api, infrastructure]
+  - id: tests
+    depends_on: [domain, persistence, api, ui, agents, integrations]
+  - id: release-candidate
+    depends_on: [tests]
+  - id: production
+    depends_on: [release-candidate]
+    approval: explicit
+forbidden:
+  - implement-downstream-before-contract
+  - production-before-explicit-approval
+  - bypass-policy-for-tests

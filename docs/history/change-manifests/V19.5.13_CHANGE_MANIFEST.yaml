@@ -1,0 +1,18 @@
+version: 19.5.13
+title: Authorization Blocker Resolution
+status: specification_complete_runtime_implementation_pending
+base_version: 19.5.12
+changes:
+  - Added a canonical planned V1 route inventory with 96 route templates across public, auth, account, support, creator, admin and system surfaces.
+  - Replaced examples-only Admin RBAC with 53 exact route entries covering all Admin routes currently named in V1 documentation.
+  - Defined explicit role-to-capability grants and validation that checks route entries, roles and capability mappings.
+  - Added server-side Appwrite session validation, cookie, CSRF, return-to, revocation, failure and authorization error semantics.
+  - Added an 18-case authorization acceptance matrix covering spoofing, direct-call bypass, cross-tenant access, CSRF, revocation, policy outage and sensitive investigations.
+  - Added authorization implementation handoff and explicit specification-versus-runtime status semantics.
+  - Added validate:authorization and integrated it into validate:docs.
+not_claimed:
+  - Astro route files matching the planned 96 route templates are implemented.
+  - Production authentication middleware is implemented.
+  - Backend authorization enforcement is implemented.
+  - Acceptance matrix runtime tests have passed.
+  - Passing contract validation proves production security.

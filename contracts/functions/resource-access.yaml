@@ -1,0 +1,17 @@
+schema: storygalore.appwrite-function-resource-access/v1
+version: 1
+policy: deterministic
+rule: A Function MAY access only resources explicitly listed by its definition and this registry.
+undeclared_resource_access: BLOCK
+wildcard_resource_access: FORBIDDEN
+client_credentials_in_function: FORBIDDEN
+service_credentials_in_logs: FORBIDDEN
+resource_classes:
+  - TABLESDB
+  - DOCUMENTSDB
+  - STORAGE
+  - VECTORSDB
+  - USERS
+  - TEAMS
+  - MESSAGING
+  - REALTIME

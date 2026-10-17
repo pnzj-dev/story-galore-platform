@@ -1,0 +1,28 @@
+version: 1
+domain: social
+events:
+  - social.creator_profile_updated.v1
+  - social.creator_followed.v1
+  - social.creator_unfollowed.v1
+  - social.post_created.v1
+  - social.post_updated.v1
+  - social.post_deleted.v1
+  - social.reaction_set.v1
+  - social.comment_created.v1
+  - social.comment_updated.v1
+  - social.comment_deleted.v1
+  - social.mention_created.v1
+  - social.collection_created.v1
+  - social.collection_item_added.v1
+  - social.collection_item_removed.v1
+  - social.share_created.v1
+  - social.poll_vote_cast.v1
+  - social.user_blocked.v1
+  - social.user_unblocked.v1
+  - social.user_muted.v1
+  - social.user_unmuted.v1
+  - moderation.social_report_created.v1
+rules:
+  - Event payloads MUST use stable IDs and versioned schemas.
+  - Events MUST NOT contain passwords, secrets, payment credentials, BYOK values, or unnecessary private message content.
+  - Event consumers MUST be idempotent.

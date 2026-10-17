@@ -1,0 +1,18 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+title: StoryGalore BookPage
+description: >
+  An ordered page of a book publication (sequential-art), referencing an IMAGE
+  media asset. Page ordering and reading semantics are owned by the publication's
+  readingFormat. Prose books (novels, nonfiction) use a separate chapter content
+  model (blocked until approved).
+type: object
+required: [publicationId, position, createdAt, updatedAt]
+properties:
+  publicationId: {type: string, minLength: 1, description: The BOOK publication this page belongs to.}
+  position: {type: integer, minimum: 0}
+  mediaAssetId: {type: string, description: IMAGE media asset ID; populated once the page image is uploaded/rendered.}
+  width: {type: integer}
+  height: {type: integer}
+  createdAt: {type: string, format: date-time}
+  updatedAt: {type: string, format: date-time}
+additionalProperties: false

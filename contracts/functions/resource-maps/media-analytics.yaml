@@ -1,0 +1,8 @@
+schema: storygalore.function-resource-map/v1
+version: 1
+function: media-analytics
+policy: explicit_only
+resources:
+  - analytics_events
+  - reading_progress
+undeclared_resource_access: BLOCK

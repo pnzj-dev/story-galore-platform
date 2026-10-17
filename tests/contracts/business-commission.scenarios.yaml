@@ -1,0 +1,16 @@
+schema: storygalore.contract-scenarios/v1
+version: 1
+policy: fail_closed
+scenarios:
+- id: fee-order
+  given: gross+tax+processor_cost+policy
+  when: calculate
+  then: creator_net_is_deterministic
+- id: policy-immutability
+  given: finalized_transaction
+  when: pricing-policy-changes
+  then: historical_fee_policy_unchanged
+- id: negative-rounding
+  given: negative_adjustment
+  when: round
+  then: symmetric_round_half_up

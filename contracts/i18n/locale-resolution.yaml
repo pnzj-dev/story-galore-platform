@@ -1,0 +1,14 @@
+version: "1.0"
+canonical: true
+resolutionOrder:
+  - explicit_user_ui_locale
+  - persisted_user_ui_locale
+  - supported_browser_locale
+  - product_default_locale
+rules:
+  - Normalize locale tags before matching.
+  - Prefer exact tag matches, then configured language fallback, then product default.
+  - Region fallback must never silently change content-language filtering.
+  - Direction is derived from resolved locale language/script metadata.
+  - SSR and client hydration must use the same resolved locale.
+  - Locale-sensitive caches must be invalidated when locale preferences change.

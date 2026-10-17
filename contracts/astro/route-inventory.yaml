@@ -1,0 +1,707 @@
+schema: storygalore.route-inventory/v1
+version: 1
+status: canonical_v1_planned_inventory
+source_of_truth: contracts/astro/route-inventory.yaml
+scope: planned V1 routes; not a claim that route files are implemented
+dynamic_path_syntax: Colon-prefixed segments are Astro dynamic route parameters and
+  must match actual [param] route files. Catch-all segments require explicit entries
+  and are forbidden by default.
+route_count: 96
+rules:
+  every_route_must_have_exactly_one_policy: true
+  unknown_route: BLOCK
+  admin_routes_must_match_admin_rbac_exactly: true
+  route_files_must_be_generated_from_astro_files_at_implementation_time: true
+  planned_inventory_must_equal_scaffolded_inventory_before_route_implementation: true
+  route_override_may_only_strengthen_parent_policy: true
+  api_endpoints_and_actions_are_registered_separately: true
+  trailing_slash_normalization: remove trailing slash except root
+  method_specific_policies_required_for_api_routes: true
+admin_app_split:
+  non_destructive_surface: /admin (apps/web)
+  destructive_app: apps/admin (standalone, intranet)
+  classification_rule: risk IN [HIGH, CRITICAL] AND approval == REQUIRED => destructive => apps/admin
+  contract: contracts/admin/admin-app-split.yaml
+  note: destructive routes remain in this inventory for registry parity but are served by apps/admin at runtime, not the public /admin surface
+routes:
+- path: /
+  group: public
+  authentication: OPTIONAL
+  capability: public.read
+  kind: page
+  notes: ''
+- path: /stories/:storyId
+  group: public
+  authentication: OPTIONAL
+  capability: story.read
+  kind: page
+  notes: ''
+- path: /discover
+  group: public
+  authentication: OPTIONAL
+  capability: discovery.read
+  kind: page
+  notes: ''
+- path: /discover/:category
+  group: public
+  authentication: OPTIONAL
+  capability: discovery.read
+  kind: page
+  notes: ''
+- path: /creators/:creatorId
+  group: public
+  authentication: OPTIONAL
+  capability: creator.profile.read
+  kind: page
+  notes: ''
+- path: /editorial/:slug
+  group: public
+  authentication: OPTIONAL
+  capability: editorial.read
+  kind: page
+  notes: ''
+- path: /help
+  group: public
+  authentication: OPTIONAL
+  capability: help.read
+  kind: page
+  notes: ''
+- path: /help/articles/:slug
+  group: public
+  authentication: OPTIONAL
+  capability: help.read
+  kind: page
+  notes: ''
+- path: /auth/login
+  group: auth
+  authentication: CONTEXT_DEPENDENT
+  capability: auth.login
+  kind: page
+  notes: Auth endpoints must have explicit CSRF, returnTo allowlist and rate-limit
+    policy; callback is not an authorization grant.
+- path: /auth/register
+  group: auth
+  authentication: CONTEXT_DEPENDENT
+  capability: auth.register
+  kind: page
+  notes: Auth endpoints must have explicit CSRF, returnTo allowlist and rate-limit
+    policy; callback is not an authorization grant.
+- path: /auth/forgot-password
+  group: auth
+  authentication: CONTEXT_DEPENDENT
+  capability: auth.password_recovery
+  kind: page
+  notes: Auth endpoints must have explicit CSRF, returnTo allowlist and rate-limit
+    policy; callback is not an authorization grant.
+- path: /auth/reset-password
+  group: auth
+  authentication: CONTEXT_DEPENDENT
+  capability: auth.password_reset
+  kind: page
+  notes: Auth endpoints must have explicit CSRF, returnTo allowlist and rate-limit
+    policy; callback is not an authorization grant.
+- path: /auth/verify-email
+  group: auth
+  authentication: CONTEXT_DEPENDENT
+  capability: auth.email_verify
+  kind: page
+  notes: Auth endpoints must have explicit CSRF, returnTo allowlist and rate-limit
+    policy; callback is not an authorization grant.
+- path: /auth/callback
+  group: auth
+  authentication: CONTEXT_DEPENDENT
+  capability: auth.callback
+  kind: page
+  notes: Auth endpoints must have explicit CSRF, returnTo allowlist and rate-limit
+    policy; callback is not an authorization grant.
+- path: /auth/logout
+  group: auth
+  authentication: CONTEXT_DEPENDENT
+  capability: auth.logout
+  kind: page
+  notes: Auth endpoints must have explicit CSRF, returnTo allowlist and rate-limit
+    policy; callback is not an authorization grant.
+- path: /account
+  group: authenticated
+  authentication: REQUIRED
+  capability: account.read
+  kind: page
+  notes: ''
+- path: /account/billing
+  group: authenticated
+  authentication: REQUIRED
+  capability: account.billing.read
+  kind: page
+  notes: ''
+- path: /account/ai
+  group: authenticated
+  authentication: REQUIRED
+  capability: account.ai.read
+  kind: page
+  notes: ''
+- path: /library
+  group: authenticated
+  authentication: REQUIRED
+  capability: library.read
+  kind: page
+  notes: ''
+- path: /settings
+  group: authenticated
+  authentication: REQUIRED
+  capability: account.settings.manage
+  kind: page
+  notes: ''
+- path: /support
+  group: authenticated
+  authentication: REQUIRED
+  capability: support.self.read
+  kind: page
+  notes: ''
+- path: /support/new
+  group: authenticated
+  authentication: REQUIRED
+  capability: support.ticket.create
+  kind: page
+  notes: ''
+- path: /support/tickets
+  group: authenticated
+  authentication: REQUIRED
+  capability: support.ticket.read
+  kind: page
+  notes: ''
+- path: /support/tickets/:ticketId
+  group: authenticated
+  authentication: REQUIRED
+  capability: support.ticket.read
+  kind: page
+  notes: ''
+- path: /support/tickets/:ticketId/attachments
+  group: authenticated
+  authentication: REQUIRED
+  capability: support.ticket.attachment.read
+  kind: page
+  notes: ''
+- path: /creator/:creatorId
+  group: creator
+  authentication: REQUIRED
+  capability: creator.workspace.access
+  kind: page
+  notes: Creator membership and project ownership are checked against authoritative
+    domain records.
+- path: /studio
+  group: creator
+  authentication: REQUIRED
+  capability: creator.workspace.access
+  kind: page
+  notes: Creator membership and project ownership are checked against authoritative
+    domain records.
+- path: /studio/dashboard
+  group: creator
+  authentication: REQUIRED
+  capability: creator.workspace.access
+  kind: page
+  notes: Creator membership and project ownership are checked against authoritative
+    domain records.
+- path: /studio/projects
+  group: creator
+  authentication: REQUIRED
+  capability: creator.workspace.access
+  kind: page
+  notes: Creator membership and project ownership are checked against authoritative
+    domain records.
+- path: /studio/projects/:projectId
+  group: creator
+  authentication: REQUIRED
+  capability: creator.project.read
+  kind: page
+  notes: Creator membership and project ownership are checked against authoritative
+    domain records.
+- path: /studio/projects/:projectId/story-bible
+  group: creator
+  authentication: REQUIRED
+  capability: creator.story.manage
+  kind: page
+  notes: Creator membership and project ownership are checked against authoritative
+    domain records.
+- path: /studio/projects/:projectId/characters
+  group: creator
+  authentication: REQUIRED
+  capability: creator.story.manage
+  kind: page
+  notes: Creator membership and project ownership are checked against authoritative
+    domain records.
+- path: /studio/projects/:projectId/world
+  group: creator
+  authentication: REQUIRED
+  capability: creator.story.manage
+  kind: page
+  notes: Creator membership and project ownership are checked against authoritative
+    domain records.
+- path: /studio/projects/:projectId/assets
+  group: creator
+  authentication: REQUIRED
+  capability: creator.story.manage
+  kind: page
+  notes: Creator membership and project ownership are checked against authoritative
+    domain records.
+- path: /studio/projects/:projectId/prompts
+  group: creator
+  authentication: REQUIRED
+  capability: creator.story.manage
+  kind: page
+  notes: Creator membership and project ownership are checked against authoritative
+    domain records.
+- path: /studio/projects/:projectId/ai
+  group: creator
+  authentication: REQUIRED
+  capability: creator.ai.use
+  kind: page
+  notes: Creator membership and project ownership are checked against authoritative
+    domain records.
+- path: /studio/projects/:projectId/drafts
+  group: creator
+  authentication: REQUIRED
+  capability: creator.story.manage
+  kind: page
+  notes: Creator membership and project ownership are checked against authoritative
+    domain records.
+- path: /studio/projects/:projectId/editor
+  group: creator
+  authentication: REQUIRED
+  capability: creator.story.manage
+  kind: page
+  notes: Creator membership and project ownership are checked against authoritative
+    domain records.
+- path: /studio/projects/:projectId/publications
+  group: creator
+  authentication: REQUIRED
+  capability: creator.publication.manage
+  kind: page
+  notes: Creator membership and project ownership are checked against authoritative
+    domain records.
+- path: /studio/projects/:projectId/analytics
+  group: creator
+  authentication: REQUIRED
+  capability: creator.analytics.read
+  kind: page
+  notes: Creator membership and project ownership are checked against authoritative
+    domain records.
+- path: /admin
+  group: admin
+  authentication: REQUIRED
+  capability: admin.dashboard.read
+  kind: page
+  notes: Must satisfy exact admin-rbac entry, role grant, scope, projection, risk
+    and approval policy.
+- path: /admin/ads
+  group: admin
+  authentication: REQUIRED
+  capability: ads.policy.read
+  kind: page
+  notes: Must satisfy exact admin-rbac entry, role grant, scope, projection, risk
+    and approval policy.
+- path: /admin/analytics
+  group: admin
+  authentication: REQUIRED
+  capability: analytics.dashboard.read
+  kind: page
+  notes: Must satisfy exact admin-rbac entry, role grant, scope, projection, risk
+    and approval policy.
+- path: /admin/analytics/acquisition
+  group: admin
+  authentication: REQUIRED
+  capability: analytics.acquisition.read
+  kind: page
+  notes: Must satisfy exact admin-rbac entry, role grant, scope, projection, risk
+    and approval policy.
+- path: /admin/analytics/advertising
+  group: admin
+  authentication: REQUIRED
+  capability: analytics.advertising.read
+  kind: page
+  notes: Must satisfy exact admin-rbac entry, role grant, scope, projection, risk
+    and approval policy.
+- path: /admin/analytics/ai
+  group: admin
+  authentication: REQUIRED
+  capability: analytics.ai.read
+  kind: page
+  notes: Must satisfy exact admin-rbac entry, role grant, scope, projection, risk
+    and approval policy.
+- path: /admin/analytics/cohorts
+  group: admin
+  authentication: REQUIRED
+  capability: analytics.cohorts.read
+  kind: page
+  notes: Must satisfy exact admin-rbac entry, role grant, scope, projection, risk
+    and approval policy.
+- path: /admin/analytics/community
+  group: admin
+  authentication: REQUIRED
+  capability: analytics.community.read
+  kind: page
+  notes: Must satisfy exact admin-rbac entry, role grant, scope, projection, risk
+    and approval policy.
+- path: /admin/analytics/content
+  group: admin
+  authentication: REQUIRED
+  capability: analytics.content.read
+  kind: page
+  notes: Must satisfy exact admin-rbac entry, role grant, scope, projection, risk
+    and approval policy.
+- path: /admin/analytics/creators
+  group: admin
+  authentication: REQUIRED
+  capability: analytics.creators.read
+  kind: page
+  notes: Must satisfy exact admin-rbac entry, role grant, scope, projection, risk
+    and approval policy.
+- path: /admin/analytics/funnels
+  group: admin
+  authentication: REQUIRED
+  capability: analytics.funnels.read
+  kind: page
+  notes: Must satisfy exact admin-rbac entry, role grant, scope, projection, risk
+    and approval policy.
+- path: /admin/analytics/marketing
+  group: admin
+  authentication: REQUIRED
+  capability: analytics.marketing.read
+  kind: page
+  notes: Must satisfy exact admin-rbac entry, role grant, scope, projection, risk
+    and approval policy.
+- path: /admin/analytics/operations
+  group: admin
+  authentication: REQUIRED
+  capability: analytics.operations.read
+  kind: page
+  notes: Must satisfy exact admin-rbac entry, role grant, scope, projection, risk
+    and approval policy.
+- path: /admin/analytics/payments
+  group: admin
+  authentication: REQUIRED
+  capability: analytics.payments.read
+  kind: page
+  notes: Must satisfy exact admin-rbac entry, role grant, scope, projection, risk
+    and approval policy.
+- path: /admin/analytics/reports
+  group: admin
+  authentication: REQUIRED
+  capability: analytics.reports.read
+  kind: page
+  notes: Must satisfy exact admin-rbac entry, role grant, scope, projection, risk
+    and approval policy.
+- path: /admin/analytics/retention
+  group: admin
+  authentication: REQUIRED
+  capability: analytics.retention.read
+  kind: page
+  notes: Must satisfy exact admin-rbac entry, role grant, scope, projection, risk
+    and approval policy.
+- path: /admin/analytics/revenue
+  group: admin
+  authentication: REQUIRED
+  capability: analytics.revenue.read
+  kind: page
+  notes: Must satisfy exact admin-rbac entry, role grant, scope, projection, risk
+    and approval policy.
+- path: /admin/analytics/subscriptions
+  group: admin
+  authentication: REQUIRED
+  capability: analytics.subscriptions.read
+  kind: page
+  notes: Must satisfy exact admin-rbac entry, role grant, scope, projection, risk
+    and approval policy.
+- path: /admin/analytics/support
+  group: admin
+  authentication: REQUIRED
+  capability: analytics.support.read
+  kind: page
+  notes: Must satisfy exact admin-rbac entry, role grant, scope, projection, risk
+    and approval policy.
+- path: /admin/consumer-economics
+  group: admin
+  authentication: REQUIRED
+  capability: economics.consumer.read
+  kind: page
+  notes: Must satisfy exact admin-rbac entry, role grant, scope, projection, risk
+    and approval policy.
+- path: /admin/content
+  group: admin
+  authentication: REQUIRED
+  capability: content.operations.read
+  kind: page
+  notes: Must satisfy exact admin-rbac entry, role grant, scope, projection, risk
+    and approval policy.
+- path: /admin/creator
+  group: admin
+  authentication: REQUIRED
+  capability: creator.operations.read
+  kind: page
+  notes: Must satisfy exact admin-rbac entry, role grant, scope, projection, risk
+    and approval policy.
+- path: /admin/function
+  group: admin
+  authentication: REQUIRED
+  capability: admin.functions.read
+  kind: page
+  notes: Must satisfy exact admin-rbac entry, role grant, scope, projection, risk
+    and approval policy.
+- path: /admin/operations
+  group: admin
+  authentication: REQUIRED
+  capability: operations.read
+  kind: page
+  notes: Must satisfy exact admin-rbac entry, role grant, scope, projection, risk
+    and approval policy.
+- path: /admin/settings
+  group: admin
+  authentication: REQUIRED
+  capability: admin.settings.read
+  kind: page
+  notes: Must satisfy exact admin-rbac entry, role grant, scope, projection, risk
+    and approval policy.
+- path: /admin/state-machine
+  group: admin
+  authentication: REQUIRED
+  capability: admin.state_machine.read
+  kind: page
+  notes: Must satisfy exact admin-rbac entry, role grant, scope, projection, risk
+    and approval policy.
+- path: /admin/users
+  group: admin
+  authentication: REQUIRED
+  capability: admin.users.read
+  kind: page
+  notes: Must satisfy exact admin-rbac entry, role grant, scope, projection, risk
+    and approval policy.
+- path: /admin/support
+  group: admin
+  authentication: REQUIRED
+  capability: support.ticket.read
+  kind: page
+  notes: Must satisfy exact admin-rbac entry, role grant, scope, projection, risk
+    and approval policy.
+- path: /admin/support/inbox
+  group: admin
+  authentication: REQUIRED
+  capability: support.ticket.read
+  kind: page
+  notes: Must satisfy exact admin-rbac entry, role grant, scope, projection, risk
+    and approval policy.
+- path: /admin/support/tickets
+  group: admin
+  authentication: REQUIRED
+  capability: support.ticket.read
+  kind: page
+  notes: Must satisfy exact admin-rbac entry, role grant, scope, projection, risk
+    and approval policy.
+- path: /admin/support/tickets/:ticketId
+  group: admin
+  authentication: REQUIRED
+  capability: support.ticket.manage
+  kind: page
+  notes: Must satisfy exact admin-rbac entry, role grant, scope, projection, risk
+    and approval policy.
+- path: /admin/support/users/:userId
+  group: admin
+  authentication: REQUIRED
+  capability: support.user_context.read
+  kind: page
+  notes: Must satisfy exact admin-rbac entry, role grant, scope, projection, risk
+    and approval policy.
+- path: /admin/support/escalations
+  group: admin
+  authentication: REQUIRED
+  capability: support.escalation.manage
+  kind: page
+  notes: Must satisfy exact admin-rbac entry, role grant, scope, projection, risk
+    and approval policy.
+- path: /admin/support/sla
+  group: admin
+  authentication: REQUIRED
+  capability: support.sla.read
+  kind: page
+  notes: Must satisfy exact admin-rbac entry, role grant, scope, projection, risk
+    and approval policy.
+- path: /admin/support/knowledge
+  group: admin
+  authentication: REQUIRED
+  capability: support.knowledge.manage
+  kind: page
+  notes: Must satisfy exact admin-rbac entry, role grant, scope, projection, risk
+    and approval policy.
+- path: /admin/support/macros
+  group: admin
+  authentication: REQUIRED
+  capability: support.macro.manage
+  kind: page
+  notes: Must satisfy exact admin-rbac entry, role grant, scope, projection, risk
+    and approval policy.
+- path: /admin/support/settings
+  group: admin
+  authentication: REQUIRED
+  capability: support.policy.manage
+  kind: page
+  notes: Must satisfy exact admin-rbac entry, role grant, scope, projection, risk
+    and approval policy.
+- path: /admin/support/audit
+  group: admin
+  authentication: REQUIRED
+  capability: support.audit.read
+  kind: page
+  notes: Must satisfy exact admin-rbac entry, role grant, scope, projection, risk
+    and approval policy.
+- path: /admin/moderation/reports
+  group: admin
+  authentication: REQUIRED
+  capability: moderation.report.read
+  kind: page
+  notes: Must satisfy exact admin-rbac entry, role grant, scope, projection, risk
+    and approval policy.
+- path: /admin/payments/refunds
+  group: admin
+  authentication: REQUIRED
+  capability: finance.refund.request
+  kind: page
+  notes: Must satisfy exact admin-rbac entry, role grant, scope, projection, risk
+    and approval policy.
+- path: /admin/security/private-message-access
+  group: admin
+  authentication: REQUIRED
+  capability: security.private_message.investigate
+  kind: page
+  notes: Must satisfy exact admin-rbac entry, role grant, scope, projection, risk
+    and approval policy.
+- path: /admin/operations/media-distribution
+  group: admin
+  authentication: REQUIRED
+  capability: operations.media_distribution.configure
+  kind: page
+  notes: Must satisfy exact admin-rbac entry, role grant, scope, projection, risk
+    and approval policy.
+- path: /admin/economics
+  group: admin
+  authentication: REQUIRED
+  capability: economics.consumer.read
+  kind: page
+  notes: Must satisfy exact admin-rbac entry, role grant, scope, projection, risk
+    and approval policy.
+- path: /admin/economics/consumption
+  group: admin
+  authentication: REQUIRED
+  capability: economics.consumption.read
+  kind: page
+  notes: Must satisfy exact admin-rbac entry, role grant, scope, projection, risk
+    and approval policy.
+- path: /admin/economics/media
+  group: admin
+  authentication: REQUIRED
+  capability: economics.media_cost.read
+  kind: page
+  notes: Must satisfy exact admin-rbac entry, role grant, scope, projection, risk
+    and approval policy.
+- path: /admin/economics/plans
+  group: admin
+  authentication: REQUIRED
+  capability: economics.plan_profitability.read
+  kind: page
+  notes: Must satisfy exact admin-rbac entry, role grant, scope, projection, risk
+    and approval policy.
+- path: /admin/economics/unit-economics
+  group: admin
+  authentication: REQUIRED
+  capability: economics.unit_economics.read
+  kind: page
+  notes: Must satisfy exact admin-rbac entry, role grant, scope, projection, risk
+    and approval policy.
+- path: /admin/economics/anomalies
+  group: admin
+  authentication: REQUIRED
+  capability: economics.anomaly.read
+  kind: page
+  notes: Must satisfy exact admin-rbac entry, role grant, scope, projection, risk
+    and approval policy.
+- path: /admin/economics/governance
+  group: admin
+  authentication: REQUIRED
+  capability: economics.governance.read
+  kind: page
+  notes: Must satisfy exact admin-rbac entry, role grant, scope, projection, risk
+    and approval policy.
+- path: /admin/economics/pricing
+  group: admin
+  authentication: REQUIRED
+  capability: economics.pricing.read
+  kind: page
+  notes: Must satisfy exact admin-rbac entry, role grant, scope, projection, risk
+    and approval policy.
+- path: /admin/economics/reserves
+  group: admin
+  authentication: REQUIRED
+  capability: economics.reserve.read
+  kind: page
+  notes: Must satisfy exact admin-rbac entry, role grant, scope, projection, risk
+    and approval policy.
+- path: /admin/economics/simulator
+  group: admin
+  authentication: REQUIRED
+  capability: economics.simulator.run
+  kind: page
+  notes: Must satisfy exact admin-rbac entry, role grant, scope, projection, risk
+    and approval policy.
+- path: /admin/economics/tax
+  group: admin
+  authentication: REQUIRED
+  capability: economics.tax.read
+  kind: page
+  notes: Must satisfy exact admin-rbac entry, role grant, scope, projection, risk
+    and approval policy.
+- path: /403
+  group: system
+  authentication: OPTIONAL
+  capability: system.error.read
+  kind: page
+  notes: Error rendering must not disclose protected resource existence or details.
+- path: /404
+  group: system
+  authentication: OPTIONAL
+  capability: system.error.read
+  kind: page
+  notes: Error rendering must not disclose protected resource existence or details.
+- path: /500
+  group: system
+  authentication: OPTIONAL
+  capability: system.error.read
+  kind: page
+  notes: Error rendering must not disclose protected resource existence or details.
+implementation_status: PLANNED_NOT_IMPLEMENTED
+completeness_scope: All concrete route templates explicitly documented in V1 docs
+  at V19.5.13; this is not proof that Astro route files exist.
+change_control:
+  new_route_requires_contract_update_before_code: true
+  unmapped_actual_route: BLOCK
+  planned_route_without_file_during_implementation: BLOCK
+  route_implementation_may_not_be_claimed_complete_until_parity_passes: true
+
+- path: /admin/users/:userId
+  group: admin
+  authentication: REQUIRED
+  capability: admin.users.read
+  kind: page
+  notes: Must satisfy exact admin-rbac entry, role grant, scope, projection, risk
+    and approval policy.
+- path: /admin/content/:publicationId
+  group: admin
+  authentication: REQUIRED
+  capability: content.operations.read
+  kind: page
+  notes: Must satisfy exact admin-rbac entry, role grant, scope, projection, risk
+    and approval policy.
+- path: /admin/creators/:actorId
+  group: admin
+  authentication: REQUIRED
+  capability: creator.operations.read
+  kind: page
+  notes: Must satisfy exact admin-rbac entry, role grant, scope, projection, risk
+    and approval policy.

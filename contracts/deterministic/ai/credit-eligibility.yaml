@@ -1,0 +1,29 @@
+version: "1.0"
+area: ai
+canonical: true
+
+rule: >-
+  Creator Studio credits may be consumed only for a model explicitly registered as
+  StoryGalore-managed and creditEligible=true. BYOK and USER_HOSTED executions are
+  always credit-ineligible.
+
+eligibility:
+  eligibleBillingMode: PLATFORM_CREDITS
+  eligibleOwnerType: STORYGALORE
+  eligibleExecutionLocation: CLOUD
+  requiredFlag: creditEligible
+  ineligibleBillingModes: [BYOK, USER_HOSTED]
+  ineligibleOwnerTypes: [WORKSPACE]
+  ineligibleExecutionLocations: [USER_HOSTED]
+
+creditCommands:
+  allowedWhenEligible: [ai_credit_reserve, ai_credit_settle, ai_credit_refund]
+  forbiddenWhenIneligible: [ai_credit_reserve, ai_credit_settle, ai_credit_refund]
+
+failClosed:
+  - missing eligibility record
+  - expired provider/model policy
+  - provider disabled
+  - model disabled
+  - owner type mismatch
+  - billing mode mismatch

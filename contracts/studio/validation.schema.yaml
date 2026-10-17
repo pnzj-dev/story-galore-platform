@@ -1,0 +1,22 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+title: Studio Validation Result
+version: 1
+type: object
+required: [validationId, status, checks, createdAt]
+properties:
+  validationId: {type: string}
+  status: {enum: [PASS, FAIL, PASS_WITH_WARNINGS]}
+  checks:
+    type: array
+    items:
+      type: object
+      required: [code, severity, status, path, message]
+      properties:
+        code: {type: string}
+        severity: {enum: [BLOCKING, WARNING, INFO]}
+        status: {enum: [PASS, FAIL, SKIPPED]}
+        path: {type: string}
+        entityId: {type: string}
+        message: {type: string}
+        remediation: {type: string}
+  createdAt: {type: string, format: date-time}

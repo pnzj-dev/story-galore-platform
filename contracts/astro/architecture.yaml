@@ -1,0 +1,49 @@
+schema: storygalore.astro-architecture/v2
+version: 2
+framework: ASTRO
+ui_framework: SVELTE_5
+hosting: APPWRITE_SITES
+hosting_mode: SSR
+astro_adapter: "@astrojs/node"
+principle: ASTRO_NATIVE_FIRST
+rules:
+  canonical_web_application_count: 1
+  destructive_admin_application_count: 1
+  destructive_admin_is_standalone_sveltekit_app: true
+  destructive_admin_served_by_apps_admin_intranet_only: true
+  admin_split_adr: docs/adr/0018-admin-app-split.md
+  default_component: ASTRO
+  interactive_framework_only_when_needed: true
+  prefer_server_or_build_rendering: true
+  prefer_file_based_routing: true
+  prefer_content_collections: true
+  prefer_markdown_for_posts: true
+  prefer_astro_assets: true
+  prefer_view_transitions: true
+  prefer_astro_actions_for_web_mutations: true
+  use_middleware_for_request_context: true
+  use_api_endpoints_only_when_action_or_domain_contract_requires: true
+  minimize_hydration: true
+  do_not_build_custom_router: true
+  do_not_build_full_client_spa_by_default: true
+  do_not_duplicate_server_and_client_fetching: true
+  public_creator_studio_and_non_destructive_admin_surfaces_are_routes_within_same_app: true
+  route_protection_is_independent_per_route_group: true
+  route_registry_is_mandatory: true
+  middleware_is_not_authorization_authority: true
+  backend_authorization_recheck_is_mandatory: true
+  missing_astro_capability_mapping: BLOCK
+rendering:
+  route_must_select_one: [PRERENDER, ON_DEMAND]
+  site_default: ON_DEMAND
+  static_routes_should_override_to_prerender: true
+  dynamic_authenticated_routes: ON_DEMAND
+  editorial_content: PRERENDER_WHEN_DATA_IS_BUILD_TIME_STABLE
+  creator_posts: PRERENDER_WHEN_CONTENT_COLLECTION_BACKED
+  personalized_content: ON_DEMAND
+  protected_content: ON_DEMAND_UNLESS_EXPLICITLY_PUBLIC
+hydration:
+  allowed: [client:load, client:idle, client:visible, client:media, client:only]
+  default: NO_HYDRATION
+  client:only_requires_justification: true
+  every_hydrated_component_declares_reason: true

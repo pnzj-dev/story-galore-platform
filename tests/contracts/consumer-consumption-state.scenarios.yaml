@@ -1,0 +1,12 @@
+schema: storygalore.contract-scenario-suite/v1
+version: 1
+policy: fail_closed
+cases:
+  - id: legal-transition
+    expected: PASS
+  - id: illegal-transition-block
+    expected: PASS
+  - id: idempotent-replay
+    expected: PASS
+  - id: reconciliation
+    expected: PASS

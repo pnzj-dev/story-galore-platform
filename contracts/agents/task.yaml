@@ -1,0 +1,45 @@
+version: 1.0.0
+required_fields:
+- taskId
+- type
+- title
+- objective
+- requesterAgentId
+- ownerAgentId
+- priority
+- scope
+- capabilities
+- inputs
+- constraints
+- acceptanceCriteria
+- requiredEvidence
+- createdAt
+- expiresAt
+- idempotencyKey
+types:
+  BUG_FIX: engineering defect remediation
+  FEATURE: new capability implementation
+  ANALYSIS: data/business analysis
+  REPORT: deterministic report generation
+  CREATIVE: story/creative production
+  OPERATIONS: operational task
+  REVIEW: review/verification
+  SUPPORT_ESCALATION: support to engineering escalation
+states:
+- CREATED
+- AUTHORIZED
+- QUEUED
+- RUNNING
+- WAITING_APPROVAL
+- WAITING_DEPENDENCY
+- SUCCEEDED
+- FAILED
+- CANCELLED
+- EXPIRED
+invariants:
+- No task executes without authorization.
+- Acceptance criteria are immutable after execution starts unless a new revision is
+  authorized.
+- Every external side effect has an idempotency key.
+- Every result records evidence and provenance.
+- Task state is authoritative; realtime delivery is not.

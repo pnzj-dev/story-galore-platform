@@ -1,0 +1,36 @@
+---
+import AdminLayout from "../../layouts/AdminLayout.astro";
+import { DataTable } from "@storygalore/ui";
+import { fetchAdminUsers } from "../../lib/gateway";
+
+const user = Astro.locals.user;
+const users = user ? await fetchAdminUsers(user.$id) : [];
+
+const columns = [
+  { key: "name", label: "Name" },
+  { key: "email", label: "Email" },
+  { key: "labels", label: "Labels" },
+  { key: "createdAt", label: "Created" },
+];
+
+const rows = users.map((u) => ({
+  $id: u.$id,
+  name: u.name ?? "—",
+  email: u.email ?? "—",
+  labels: (u.labels ?? []).join(", ") || "—",
+  createdAt: (u.createdAt ?? "").slice(0, 10),
+}));
+---
+
+<AdminLayout title="Admin — Users">
+  <main class="mx-auto max-w-[1600px] px-6 py-10">
+    <header>
+      <h1 class="text-3xl font-bold">Users</h1>
+      <p class="mt-1 text-sm text-foreground-muted">{users.length} user(s).</p>
+    </header>
+
+    <div class="mt-8">
+      <DataTable columns={columns} rows={rows} rowKey="$id" searchable />
+    </div>
+  </main>
+</AdminLayout>

@@ -1,0 +1,70 @@
+version: '2.0'
+area: notifications
+model: INBOX_LIFECYCLE
+states:
+  - ACTIVE
+  - DISMISSED
+stateRules:
+  - Read/unread is an independent timestamp projection: readAt=null means unread; readAt!=null means read.
+  - Channel delivery is modeled only by notification_delivery_attempts and MUST NOT change inbox lifecycle or read state.
+  - Authorization MUST be evaluated separately from transition legality.
+  - Every state change MUST be idempotent and emit the event declared by the command/event compatibility graph.
+transitions:
+  - from: ACTIVE
+    event: DISMISS
+    to: DISMISSED
+  - from: DISMISSED
+    event: RESTORE
+    to: ACTIVE
+terminalStates: []
+readState:
+  unread: readAt_is_null
+  read: readAt_is_not_null
+  transitions:
+    - from: unread
+      event: MARK_READ
+      to: read
+    - from: read
+      event: MARK_UNREAD
+      to: unread
+  markAllRead:
+    scope: authenticated_user_only
+    selection: active_notifications_only
+    idempotent: true
+deliveryStateMachine:
+  resource: notification_delivery_attempts
+  states:
+    - QUEUED
+    - SENDING
+    - SENT
+    - DELIVERED
+    - FAILED_RETRYABLE
+    - FAILED_PERMANENT
+    - SUPPRESSED
+  transitions:
+    - from: QUEUED
+      event: START
+      to: SENDING
+    - from: SENDING
+      event: PROVIDER_ACCEPTED
+      to: SENT
+    - from: SENT
+      event: VERIFIED_DELIVERY_RECEIPT
+      to: DELIVERED
+    - from: SENDING
+      event: RETRYABLE_FAILURE
+      to: FAILED_RETRYABLE
+    - from: SENDING
+      event: PERMANENT_FAILURE
+      to: FAILED_PERMANENT
+    - from: QUEUED
+      event: POLICY_SUPPRESS
+      to: SUPPRESSED
+    - from: FAILED_RETRYABLE
+      event: RETRY_APPROVED
+      to: QUEUED
+  rules:
+    - DELIVERED requires a verified provider receipt contract.
+    - Providers without receipt support MUST remain SENT after provider acceptance.
+    - Retries are bounded and require a registered retry policy.
+    - SUPPRESSED is not retryable without a new policy decision.

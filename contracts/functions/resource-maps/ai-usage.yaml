@@ -1,0 +1,7 @@
+schema: storygalore.function-resource-map/v1
+version: 1
+function: ai-usage
+policy: explicit_only
+resources:
+  - ai_credit_transactions
+undeclared_resource_access: BLOCK

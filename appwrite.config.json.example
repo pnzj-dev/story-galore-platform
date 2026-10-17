@@ -1,0 +1,22 @@
+{
+  "projectId": "<APPWRITE_PROJECT_ID>",
+  "endpoint": "http://<APPWRITE_HOST>/v1",
+  "sites": [
+    {
+      "$id": "<SITE_ID>",
+      "name": "StoryGalore Web",
+      "enabled": true,
+      "logging": true,
+      "framework": "astro",
+      "timeout": 30,
+      "installCommand": "pnpm install --frozen-lockfile",
+      "buildCommand": "pnpm --filter @storygalore/web build",
+      "outputDirectory": "./dist",
+      "specification": "<APPWRITE_SITE_SPECIFICATION>",
+      "buildRuntime": "node-22",
+      "adapter": "ssr",
+      "fallbackFile": "",
+      "path": "apps/web"
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+schema: storygalore.function-resource-map/v1
+version: 1
+function: ad-event-ingest
+policy: explicit_only
+resources:
+  - NONE
+undeployed_resources: BLOCKED_UNTIL_REGISTERED
+undeclared_resource_access: BLOCK

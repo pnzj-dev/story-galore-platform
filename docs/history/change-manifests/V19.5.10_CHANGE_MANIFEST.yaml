@@ -1,0 +1,24 @@
+version: 19.5.10
+codename: canonical-astro-appwrite-sites-ssr
+status: canonical
+changes:
+  - id: one-astro-web-app
+    type: simplification
+    description: Replace the obsolete public/admin dual-site model with one Astro web application and one Appwrite Site.
+  - id: astro-node-ssr
+    type: architecture
+    description: Make @astrojs/node the canonical Astro SSR adapter for Appwrite Sites.
+  - id: appwrite-site-ssr
+    type: deployment
+    description: Appwrite Sites framework is astro and Site adapter is ssr; this is distinct from the Astro package adapter.
+  - id: route-surfaces
+    type: architecture
+    description: Public, Creator Studio and Admin are route surfaces within the same Astro application.
+  - id: appwrite-cli-authority
+    type: determinism
+    description: Appwrite CLI-generated Site configuration remains authoritative; generated platform structure must be inspected before implementation.
+blockers:
+  - unverified-appwrite-site-capability
+  - unknown-astro-node-adapter-contract
+  - undocumented-second-web-site
+  - alternate-hosting-without-adr

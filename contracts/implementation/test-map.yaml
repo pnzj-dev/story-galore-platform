@@ -1,0 +1,45 @@
+version: 1.0.0
+release: V1
+policy: deterministic
+rules:
+  critical_invariants:
+  - unit
+  - integration
+  - e2e
+  authorization:
+  - unit
+  - integration
+  - e2e
+  payments:
+  - unit
+  - integration
+  - e2e
+  protected_media:
+  - integration
+  - e2e
+  UI_mutations:
+  - e2e
+  provider_adapters:
+  - unit
+  - integration
+  migrations:
+  - migration
+  - integration
+  infrastructure:
+  - smoke
+  - integration
+  agent_tasks:
+  - contract
+  - integration
+  deployment:
+  - build
+  - smoke
+  - integration
+source_to_test:
+  packages/domain: tests/contracts
+  packages/appwrite-client: tests/contracts
+  packages/ui: packages/ui/tests
+  apps/web: tests/ui
+  agents: tests/contracts
+  backend/appwrite/functions: tests/contracts
+  backend/cloudflare/workflows: tests/contracts

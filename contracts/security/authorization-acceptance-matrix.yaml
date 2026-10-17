@@ -1,0 +1,65 @@
+schema: storygalore.authorization-acceptance-matrix/v1
+version: 1
+status: mandatory_implementation_gate
+test_layers:
+- astro_middleware
+- astro_actions_and_api_routes
+- appwrite_functions
+- domain_commands
+- agent_tools
+- mcp_tools
+cases:
+- id: AUTH-001
+  scenario: Anonymous user requests public story route
+  expected: ALLOW_ANONYMOUS_OR_AUTHENTICATED_PUBLIC_POLICY
+- id: AUTH-002
+  scenario: Anonymous user requests protected account page
+  expected: REDIRECT_LOGIN_WITH_SAFE_RETURN_TO
+- id: AUTH-003
+  scenario: Anonymous user calls protected API or mutation
+  expected: 401_NO_SIDE_EFFECT
+- id: AUTH-004
+  scenario: Reader spoofs creator/admin role in request body or headers
+  expected: DENY; CLIENT_CLAIMS_IGNORED
+- id: AUTH-005
+  scenario: Creator accesses another tenant project by changing projectId
+  expected: 403_OR_404_NO_DATA_LEAK
+- id: AUTH-006
+  scenario: Creator directly calls an admin backend operation
+  expected: 403_NO_SIDE_EFFECT
+- id: AUTH-007
+  scenario: Admin role lacks route-specific capability
+  expected: 403_NO_SIDE_EFFECT
+- id: AUTH-008
+  scenario: Required approval absent for high-risk operation
+  expected: APPROVAL_REQUIRED_NO_SIDE_EFFECT
+- id: AUTH-009
+  scenario: Policy Engine unavailable
+  expected: 503_OR_FAIL_CLOSED_NO_SIDE_EFFECT
+- id: AUTH-010
+  scenario: Concrete Astro route has no exact effective policy
+  expected: BUILD_GATE_FAIL
+- id: AUTH-011
+  scenario: Two policies conflict for one route
+  expected: BUILD_GATE_FAIL
+- id: AUTH-012
+  scenario: Cookie-authenticated mutation has invalid CSRF token or Origin
+  expected: 403_NO_SIDE_EFFECT
+- id: AUTH-013
+  scenario: Return-to URL points to external or protocol-relative destination
+  expected: FALLBACK_TO_SAFE_LOCAL_PATH
+- id: AUTH-014
+  scenario: Session revoked after prior authorization
+  expected: NEXT_REQUEST_DENIED
+- id: AUTH-015
+  scenario: Admin private-message investigation lacks case-bound approval
+  expected: DENY_AND_AUDIT
+- id: AUTH-016
+  scenario: Unknown capability appears in a contract
+  expected: CONTRACT_VALIDATION_FAIL
+- id: AUTH-017
+  scenario: Appwrite service credential appears in browser bundle
+  expected: BUILD_GATE_FAIL
+- id: AUTH-018
+  scenario: Agent/MCP tool bypasses UI and calls domain operation
+  expected: BACKEND_POLICY_RECHECK_DENIES_UNAUTHORIZED_ACTOR

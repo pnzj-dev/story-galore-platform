@@ -1,0 +1,3 @@
+schema: storygalore.agent-tool-input/v1
+tool: story-producer.agent.task.delegate
+additionalProperties: false

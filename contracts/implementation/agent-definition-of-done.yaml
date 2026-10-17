@@ -1,0 +1,18 @@
+schema: storygalore.agent-definition-of-done/v1
+all_agents_must_pass:
+- manifest-validation
+- tool-schema-validation
+- state-machine-validation
+- capability-policy-validation
+- delegation-graph-validation
+- context-redaction-tests
+- approval-tests
+- idempotency-tests
+- failure-path-tests
+- audit-tests
+- agent-specific-e2e
+- build
+- typecheck
+- lint
+release_gate: ALL_V1_AGENTS_GREEN
+production_gate: HUMAN_APPROVAL

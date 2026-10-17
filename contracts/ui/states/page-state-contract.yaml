@@ -1,0 +1,13 @@
+schema: storygalore.ui-page-state-contract/v1
+version: 1
+required_states:
+  public_content: [loading, empty, populated, partial, error, offline, forbidden, adult_hidden]
+  studio: [loading, empty, populated, saving, saved, conflict, offline, reconnecting, error, forbidden]
+  admin: [loading, empty, populated, filtering, refreshing, error, forbidden, permission_denied]
+async_rules:
+  mutation_success_after_authoritative_acceptance: true
+  operation_progress_source: OperationProjection
+  realtime_is_delivery_optimization: true
+  polling_fallback_required: true
+  optimistic_state_must_be_marked_pending: true
+  never_claim_saved_before_server_acceptance: true

@@ -1,0 +1,1 @@
+{"name":"DownloadClientContract","version":"1.0","platforms":["WEB","ANDROID","IOS","DESKTOP"],"requirements":["policy authorization","entitlement authorization","short-lived signed access","client-local storage adapter","revocation/expiry handling"]}

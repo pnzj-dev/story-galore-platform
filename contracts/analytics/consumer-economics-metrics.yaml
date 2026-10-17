@@ -1,0 +1,92 @@
+schema: storygalore.consumer-economics-metrics/v1
+version: 1
+canonical: true
+status: V19.5.2
+policy: deterministic
+metricSource: REGISTERED_PROJECTIONS_AND_RECONCILED_LEDGER
+requiredDimensions:
+- date
+- plan
+- mediaType
+- quality
+- country
+- provider
+metrics:
+- id: consumer_paid_subscribers
+  unit: users
+  source: subscriptions_projection
+- id: consumer_arpu
+  unit: EUR_per_paid_user
+  source: reconciled_revenue
+- id: consumer_video_minutes
+  unit: minutes
+  source: verified_playback
+- id: consumer_audio_minutes
+  unit: minutes
+  source: verified_playback
+- id: consumer_download_gib
+  unit: GiB
+  source: verified_downloads
+- id: consumer_ai_companion_units
+  unit: units
+  source: ai_usage_ledger
+- id: consumer_entitlement_utilization_rate
+  unit: ratio
+  source: entitlement_projection
+- id: consumer_overage_revenue
+  unit: EUR
+  source: payments_ledger
+- id: media_delivery_cost
+  unit: EUR
+  source: provider_cost_ledger
+- id: media_origin_egress_cost
+  unit: EUR
+  source: provider_cost_ledger
+- id: media_storage_cost
+  unit: EUR
+  source: provider_cost_ledger
+- id: media_transcode_cost
+  unit: EUR
+  source: provider_cost_ledger
+- id: consumer_attributable_infrastructure_cost
+  unit: EUR
+  source: cost_attribution_projection
+- id: consumer_contribution_margin
+  unit: EUR
+  source: unit_economics_projection
+- id: consumer_contribution_margin_rate
+  unit: ratio
+  source: unit_economics_projection
+- id: cost_per_video_minute
+  unit: EUR_per_minute
+  source: unit_economics_projection
+- id: cost_per_audio_minute
+  unit: EUR_per_minute
+  source: unit_economics_projection
+- id: cost_per_download_gib
+  unit: EUR_per_GiB
+  source: unit_economics_projection
+- id: fair_use_throttle_rate
+  unit: ratio
+  source: risk_policy_events
+- id: sponsored_consumption_hours
+  unit: hours
+  source: campaign_projection
+- id: sponsored_consumption_cost
+  unit: EUR
+  source: campaign_projection
+costStateDisclosure:
+  required: true
+  values:
+  - ACTUAL
+  - ESTIMATED
+  - PROJECTED
+  - UNAVAILABLE
+privacy:
+  rawContentExcluded: true
+  rawMediaPayloadExcluded: true
+  userIdentityInAggregateOnly: PSEUDONYMIZED_OR_AUTHORIZED
+freshness:
+  overview: <=5m_target
+  financial: RECONCILED_OR_PROVISIONAL_LABEL
+  daily: DAILY_REBUILDABLE

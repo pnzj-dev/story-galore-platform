@@ -1,0 +1,7 @@
+schema: storygalore.function-resource-map/v1
+version: 1
+function: image-processing
+policy: explicit_only
+resources:
+  - media_assets
+undeclared_resource_access: BLOCK

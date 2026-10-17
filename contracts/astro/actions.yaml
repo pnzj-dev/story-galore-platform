@@ -1,0 +1,15 @@
+schema: storygalore.astro-actions/v1
+version: 1
+rules:
+  actions_are_web_adapters: true
+  domain_command_is_authoritative: true
+  policy_check_required: true
+  idempotency_required_for_mutations: true
+  validation_required: true
+  audit_required_when_contract_requires: true
+  operation_id_required_for_async_work: true
+forbidden:
+  - direct_database_mutation_without_domain_command
+  - client_supplied_authorization_as_authority
+  - payment_success_from_redirect
+  - bypassing_appwrite_permissions_without_server_contract

@@ -1,0 +1,16 @@
+version: 1
+name: media-delivery
+fields:
+  mediaId: string
+  variant: ORIGINAL|THUMBNAIL|SMALL|MEDIUM|LARGE|READER|PREVIEW|POSTER|PLAYBACK|OG
+  accessClass: PUBLIC|PRIVATE|ENTITLEMENT_PROTECTED|AGE_RESTRICTED|SIGNED_DOWNLOAD|STREAMING_PROTECTED
+  deliveryUrl: string
+  expiresAt: datetime|null
+  authorizationId: string
+  cachePolicyVersion: string
+  policyDecisionId: string
+rules:
+  - Cloudflare is the distribution layer; Appwrite remains the origin.
+  - Protected delivery requires a server-side authorization decision before token issuance.
+  - Delivery credentials are resource/variant scoped and short-lived according to access class.
+  - Origin URLs and Appwrite credentials never appear in client delivery responses.

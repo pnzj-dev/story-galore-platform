@@ -1,0 +1,24 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+title: StoryGalore ReadingProgress
+description: >
+  Cross-device reading/consumption progress. Media-agnostic key: publicationId is
+  the canonical published-content reference (V1 comics are BOOK publications with
+  format COMIC; episodeId scopes episodic publications). Server-authoritative:
+  one current row per user+publication(+episode).
+type: object
+required: [userId, publicationId, status, lastAccessedAt, startedAt, version, createdAt, updatedAt]
+properties:
+  userId: {type: string, minLength: 1, description: Appwrite Auth user ID.}
+  publicationId: {type: string, minLength: 1, description: Publication being consumed.}
+  episodeId: {type: string, description: Series episode/issue for episodic publications.}
+  pageId: {type: string, description: Current page within the publication.}
+  position: {type: integer, minimum: 0, description: Page/position index to resume at.}
+  status: {type: string, enum: [IN_PROGRESS, COMPLETED, ABANDONED]}
+  percentComplete: {type: integer, minimum: 0, maximum: 100}
+  lastAccessedAt: {type: string, format: date-time, description: Sort key for the Continue rail.}
+  startedAt: {type: string, format: date-time}
+  completedAt: {type: [string, 'null'], format: date-time}
+  version: {type: integer, minimum: 1}
+  createdAt: {type: string, format: date-time}
+  updatedAt: {type: string, format: date-time}
+additionalProperties: false

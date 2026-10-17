@@ -1,0 +1,27 @@
+schema: storygalore.appwrite-function-dod/v1
+version: 1
+release: V19.5
+policy: fail_closed
+required:
+  - registry-entry
+  - execution-class
+  - input-schema
+  - output-schema
+  - capability
+  - resource-access-map
+  - secret-policy
+  - idempotency-policy
+  - retry-policy
+  - timeout-policy
+  - event-map
+  - error-catalog
+  - test-matrix
+  - audit-contract
+  - observability-contract
+  - implementation-owner
+production_gate:
+  - validate-appwrite-functions
+  - validate-determinism
+  - typecheck
+  - test
+  - build

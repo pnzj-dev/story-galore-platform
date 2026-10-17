@@ -1,0 +1,14 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://storygalore.dev/contracts/studio/editor-session.schema.yaml
+title: Studio Editor Session
+version: 1
+required: [sessionId, draftId, clientId, status, openedAt]
+properties:
+  sessionId: {type: string}
+  draftId: {type: string}
+  clientId: {type: string}
+  status: {enum: [OPEN, SAVING, SYNCING, OFFLINE, CONFLICT, CLOSED]}
+  lastKnownRevisionId: {type: string}
+  openedAt: {type: string, format: date-time}
+  lastSeenAt: {type: string, format: date-time}
+additionalProperties: false

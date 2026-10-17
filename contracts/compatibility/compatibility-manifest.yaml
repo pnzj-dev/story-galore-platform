@@ -1,0 +1,26 @@
+version: '1.0'
+contractVersion: '18.1'
+breakingChange: true
+affectedConsumers:
+- media-distribution-service
+- domain-services
+- MCP
+- Admin UI
+- Cloudflare Workflows-workflows
+- analytics-projections
+- coding-agents
+migrationRequired: true
+compatibilityWindow: 18.0 -> 18.1
+owner: architecture
+changes:
+- Introduces deterministic PRIMARY/SECONDARY media distribution contracts.
+- Adds runtime-configurable SECONDARY enable/disable.
+- Adds Cloudflare PRIMARY and Bunny SECONDARY adapter contracts.
+- Adds regional failover and circuit state machine.
+- Preserves Appwrite Storage as canonical origin.
+
+- Adds deterministic execution classes: IMMEDIATE, DURABLE_JOB, DURABLE_WORKFLOW.
+- Uses Cloudflare Workflows as the preferred DURABLE_JOB executor.
+- Replaces the previous secondary executor model with Cloudflare Workflows as the sole V1 durable executor and Appwrite operation state.
+- Keeps Cloudflare Workflows for complex DURABLE_WORKFLOW operations.
+- Adds the Execution Dispatcher and explicit execution classification for asynchronous commands.

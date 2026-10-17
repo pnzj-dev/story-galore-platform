@@ -1,0 +1,219 @@
+{
+  "database": {
+    "id": "main",
+    "name": "StoryGalore"
+  },
+  "columns_source": "backend/appwrite/tables/columns.yaml",
+  "tables": [
+    {
+      "id": "profiles",
+      "purpose": "application profile",
+      "security": "row-level"
+    },
+    {
+      "id": "creators",
+      "purpose": "creator profiles",
+      "security": "row-level"
+    },
+    {
+      "id": "projects",
+      "purpose": "creator projects",
+      "security": "row-level"
+    },
+    {
+      "id": "media_assets",
+      "purpose": "provider-neutral media asset metadata and processing state",
+      "security": "owner/entitlement-controlled"
+    },
+    {
+      "id": "publications",
+      "purpose": "published cross-media content versions",
+      "security": "published-public + creator-write"
+    },
+    {
+      "id": "creator_posts",
+      "purpose": "creator feed posts and mixed-media updates",
+      "security": "published-public + creator-write"
+    },
+    {
+      "id": "series",
+      "purpose": "published series",
+      "security": "published-public + creator-write"
+    },
+    {
+      "id": "volumes",
+      "purpose": "optional volume grouping",
+      "security": "published-public + creator-write"
+    },
+    {
+      "id": "book_pages",
+      "purpose": "ordered pages of a book publication (sequential-art)",
+      "security": "entitlement-controlled"
+    },
+    {
+      "id": "drafts",
+      "purpose": "draft revisions",
+      "security": "creator-write"
+    },
+    {
+      "id": "comments",
+      "purpose": "page comments and flat replies",
+      "security": "reader access + author/moderator"
+    },
+    {
+      "id": "subscriptions",
+      "purpose": "commercial subscription state",
+      "security": "user + privileged server"
+    },
+    {
+      "id": "plans",
+      "purpose": "commercial plans",
+      "security": "public-readable active plans + admin-write"
+    },
+    {
+      "id": "entitlements",
+      "purpose": "resolved commercial entitlements",
+      "security": "privileged server"
+    },
+    {
+      "id": "payments",
+      "purpose": "provider-neutral payment records",
+      "security": "user limited + privileged server"
+    },
+    {
+      "id": "payment_attempts",
+      "purpose": "provider attempts",
+      "security": "privileged server"
+    },
+    {
+      "id": "payment_events",
+      "purpose": "idempotent provider events",
+      "security": "privileged server"
+    },
+    {
+      "id": "ledger_entries",
+      "purpose": "financial ledger",
+      "security": "privileged server"
+    },
+    {
+      "id": "refunds",
+      "purpose": "refund records",
+      "security": "privileged server"
+    },
+    {
+      "id": "library_entries",
+      "purpose": "user library",
+      "security": "user"
+    },
+    {
+      "id": "reading_progress",
+      "purpose": "cross-device reader progress",
+      "security": "user"
+    },
+    {
+      "id": "follows",
+      "purpose": "creator/series follows",
+      "security": "user"
+    },
+    {
+      "id": "reactions",
+      "purpose": "content reactions",
+      "security": "user"
+    },
+    {
+      "id": "ai_jobs",
+      "purpose": "AI generation state",
+      "security": "creator + privileged server"
+    },
+    {
+      "id": "ai_usage",
+      "purpose": "AI usage accounting",
+      "security": "creator + privileged server"
+    },
+    {
+      "id": "moderation_cases",
+      "purpose": "moderation workflow",
+      "security": "staff"
+    },
+    {
+      "id": "reports",
+      "purpose": "user reports",
+      "security": "reporter limited + staff"
+    },
+    {
+      "id": "audit_events",
+      "purpose": "high-risk audit trail",
+      "security": "staff/server"
+    },
+    {
+      "id": "analytics_events",
+      "purpose": "behavioral event ingestion",
+      "security": "server"
+    },
+    {
+      "id": "creator_metrics",
+      "purpose": "aggregated creator analytics",
+      "security": "creator + staff"
+    },
+    {
+      "id": "feature_flags",
+      "purpose": "runtime feature controls",
+      "security": "staff/server"
+    },
+    {
+      "id": "provider_health",
+      "purpose": "payment/integration health",
+      "security": "staff/server"
+    },
+    {
+      "id": "ad_inventory",
+      "purpose": "controlled ad placements/slots",
+      "security": "public placement metadata + staff-write"
+    },
+    {
+      "id": "ad_campaigns",
+      "purpose": "scheduled advertising campaigns and targeting",
+      "security": "staff"
+    },
+    {
+      "id": "ad_creatives",
+      "purpose": "creative assets and provider references",
+      "security": "staff"
+    },
+    {
+      "id": "ad_placements",
+      "purpose": "campaign-to-placement configuration",
+      "security": "staff"
+    },
+    {
+      "id": "ad_frequency_caps",
+      "purpose": "campaign/user frequency controls",
+      "security": "staff/server"
+    },
+    {
+      "id": "ad_events",
+      "purpose": "append-oriented ad impression/click events",
+      "security": "server"
+    },
+    {
+      "id": "ad_metrics_daily",
+      "purpose": "daily advertising performance aggregates",
+      "security": "staff"
+    },
+    {
+      "id": "notifications",
+      "purpose": "user-scoped in-app notification inbox; immutable event identity plus presentation and navigation metadata; delivery state is not read state",
+      "security": "owner-read + privileged-server-write"
+    },
+    {
+      "id": "notification_preferences",
+      "purpose": "per-user category/channel preferences, quiet-hours and locale policy; server-authoritative",
+      "security": "owner-read/write-through-command + privileged-server-write"
+    },
+    {
+      "id": "notification_delivery_attempts",
+      "purpose": "append-oriented per-notification/per-channel delivery attempt history with provider-neutral status and redacted failure metadata",
+      "security": "privileged-server-only"
+    }
+  ]
+}

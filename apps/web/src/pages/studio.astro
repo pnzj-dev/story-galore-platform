@@ -1,0 +1,178 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { actions } from "astro:actions";
+import { fetchCreator, fetchProjects, fetchMediaAssets } from "../lib/gateway";
+
+const user = Astro.locals.user;
+const creator = user ? await fetchCreator(user.$id) : null;
+const projects = creator && user ? await fetchProjects(user.$id) : [];
+const mediaAssets = user ? await fetchMediaAssets(user.$id) : [];
+
+const becomeResult = Astro.getActionResult(actions.becomeCreator);
+if (becomeResult?.data?.ok) {
+  return Astro.redirect("/studio");
+}
+const projectResult = Astro.getActionResult(actions.createProject);
+if (projectResult?.data?.ok) {
+  return Astro.redirect("/studio");
+}
+const profileResult = Astro.getActionResult(actions.updateCreatorProfile);
+if (profileResult?.data?.ok) {
+  return Astro.redirect("/studio");
+}
+const becomeError = becomeResult?.error?.message;
+const projectError = projectResult?.error?.message;
+const profileError = profileResult?.error?.message;
+---
+
+<Layout title="Creator Studio">
+  <main class="mx-auto max-w-4xl px-6 py-12">
+    {creator ? (
+      <>
+        <h1 class="text-3xl font-bold">Creator Studio</h1>
+        <p class="mt-2 text-foreground-muted">@{creator.handle}</p>
+
+        <section class="mt-8">
+          <h2 class="text-xl font-semibold">Profile image</h2>
+          <form method="POST" action={actions.updateCreatorProfile} class="mt-4 max-w-sm space-y-4">
+            <div>
+              <label for="avatarMediaAssetId" class="mb-1 block text-sm text-foreground-muted">Avatar</label>
+              <select
+                id="avatarMediaAssetId"
+                name="avatarMediaAssetId"
+                class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
+              >
+                <option value="">— none —</option>
+                {mediaAssets.map((a) => (
+                  <option value={a.$id} selected={a.$id === creator.avatarMediaAssetId}>
+                    {a.mimeType}
+                    {a.width && a.height ? ` ${a.width}×${a.height}` : ""}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {profileError && (
+              <p class="rounded-lg border border-danger bg-danger/15 px-3 py-2 text-sm text-danger" role="alert">
+                {profileError}
+              </p>
+            )}
+            <button
+              type="submit"
+              class="rounded-lg bg-primary px-4 py-2 font-semibold text-primary-foreground transition hover:opacity-90"
+            >
+              Set avatar
+            </button>
+          </form>
+        </section>
+
+        <section class="mt-8">
+          <h2 class="text-xl font-semibold">New project</h2>
+          <form method="POST" action={actions.createProject} class="mt-4 max-w-sm space-y-4">
+            <div>
+              <label for="name" class="mb-1 block text-sm text-foreground-muted">Name</label>
+              <input
+                id="name"
+                name="name"
+                type="text"
+                required
+                maxlength="200"
+                class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
+              />
+            </div>
+            <div>
+              <label for="description" class="mb-1 block text-sm text-foreground-muted">Description</label>
+              <textarea
+                id="description"
+                name="description"
+                class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
+              ></textarea>
+            </div>
+            {projectError && (
+              <p class="rounded-lg border border-danger bg-danger/15 px-3 py-2 text-sm text-danger" role="alert">
+                {projectError}
+              </p>
+            )}
+            <button
+              type="submit"
+              class="w-full rounded-lg bg-primary px-4 py-2 font-semibold text-primary-foreground transition hover:opacity-90"
+            >
+              Create project
+            </button>
+          </form>
+        </section>
+
+        <section class="mt-10">
+          <h2 class="text-xl font-semibold">Your projects</h2>
+          {projects.length > 0 ? (
+            <ul class="mt-4 space-y-2">
+              {projects.map((p) => (
+                <li class="flex items-center justify-between rounded-lg border border-border bg-surface p-3">
+                  <a href={`/studio/projects/${p.$id}`} class="min-w-0 flex-1">
+                    <p class="truncate font-medium text-foreground transition hover:text-primary">{p.name}</p>
+                    {p.description && <p class="truncate text-sm text-foreground-muted">{p.description}</p>}
+                  </a>
+                  <span class="ml-4 shrink-0 text-xs text-foreground-muted">{p.status}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p class="mt-4 rounded-xl border border-dashed border-border px-6 py-8 text-sm text-foreground-muted">
+              No projects yet.
+            </p>
+          )}
+        </section>
+      </>
+    ) : (
+      <>
+        <h1 class="text-3xl font-bold">Become a creator</h1>
+        <p class="mt-2 text-foreground-muted">Create your creator profile to start publishing stories.</p>
+
+        <form method="POST" action={actions.becomeCreator} class="mt-6 max-w-sm space-y-4">
+          <div>
+            <label for="handle" class="mb-1 block text-sm text-foreground-muted">Handle</label>
+            <input
+              id="handle"
+              name="handle"
+              type="text"
+              required
+              maxlength="255"
+              class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
+            />
+          </div>
+          <div>
+            <label for="displayName" class="mb-1 block text-sm text-foreground-muted">Display name</label>
+            <input
+              id="displayName"
+              name="displayName"
+              type="text"
+              required
+              maxlength="255"
+              class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
+            />
+          </div>
+          <div>
+            <label for="bio" class="mb-1 block text-sm text-foreground-muted">Bio</label>
+            <textarea
+              id="bio"
+              name="bio"
+              class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
+            ></textarea>
+          </div>
+
+          {becomeError && (
+            <p class="rounded-lg border border-danger bg-danger/15 px-3 py-2 text-sm text-danger" role="alert">
+              {becomeError}
+            </p>
+          )}
+
+          <button
+            type="submit"
+            class="w-full rounded-lg bg-primary px-4 py-2 font-semibold text-primary-foreground transition hover:opacity-90"
+          >
+            Become a creator
+          </button>
+        </form>
+      </>
+    )}
+  </main>
+</Layout>

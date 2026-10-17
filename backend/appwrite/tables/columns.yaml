@@ -1,0 +1,619 @@
+schema: storygalore.tables-columns/v1
+version: 1
+canonical: true
+status: partial_reconciliation
+purpose: "Canonical TablesDB column definitions derived from domain/studio schema contracts. Fail-closed: a table without a schema source is listed as pending_columns and must NOT have columns invented."
+source_manifest: backend/appwrite/tables/desired-schema.json
+rules:
+  - every_column_requires_a_schema_source
+  - no_invented_columns
+  - pending_columns_block_row_writes
+  - table_naming_must_match_desired_schema_manifest
+type_translation:
+  string_short: {appwrite: varchar, size: 255}
+  string_long: {appwrite: text}
+  string_id: {appwrite: varchar, size: 255}
+  integer: {appwrite: integer}
+  integer_large: {appwrite: bigint}
+  boolean: {appwrite: boolean}
+  datetime: {appwrite: datetime}
+  enum: {appwrite: enum}
+  array_string: {appwrite: varchar, array: true}
+  array_object: {appwrite: text, array: true}
+  nullable: {required: false}
+tables_with_columns:
+  - table: media_assets
+    source: contracts/domain/media-asset.schema.yaml
+    columns:
+      - {key: id, type: varchar, size: 255, required: true}
+      - {key: tenantId, type: varchar, size: 255, required: false}
+      - {key: creatorId, type: varchar, size: 255, required: true}
+      - {key: publicationId, type: varchar, size: 255, required: false}
+      - {key: type, type: enum, elements: [IMAGE, VIDEO, AUDIO, DOCUMENT], required: true}
+      - {key: status, type: enum, elements: [UPLOADING, UPLOADED, PROCESSING, READY, RESTRICTED, QUARANTINED, FAILED, DELETED], required: true}
+      - {key: originProvider, type: varchar, size: 64, required: true}
+      - {key: originBucketKey, type: varchar, size: 255, required: true}
+      - {key: originFileId, type: varchar, size: 255, required: true}
+      - {key: mimeType, type: varchar, size: 128, required: true}
+      - {key: sizeBytes, type: bigint, required: true}
+      - {key: checksumSha256, type: varchar, size: 64, required: false}
+      - {key: width, type: integer, required: false}
+      - {key: height, type: integer, required: false}
+      - {key: durationMs, type: integer, required: false}
+      - {key: orientation, type: enum, elements: [PORTRAIT, LANDSCAPE, SQUARE, UNKNOWN], required: false}
+      - {key: variantOf, type: varchar, size: 255, required: false}
+      - {key: variant, type: enum, elements: [ORIGINAL, THUMBNAIL, SMALL, MEDIUM, LARGE, READER, PREVIEW, POSTER, PLAYBACK, OG], required: false}
+      - {key: processingVersion, type: varchar, size: 64, required: false}
+      - {key: moderationStatus, type: enum, elements: [PENDING, APPROVED, REJECTED, RESTRICTED], required: true}
+      - {key: contentRating, type: enum, elements: [ALL_AGES, TEEN, ADULT_18_PLUS], required: true}
+      - {key: createdAt, type: datetime, required: true}
+      - {key: updatedAt, type: datetime, required: true}
+      - {key: deletedAt, type: datetime, required: false}
+  - table: media_authorizations
+    source: contracts/domain/media-authorization.schema.yaml
+    indexes: [mediaId, actorId]
+    columns:
+      - {key: actorId, type: varchar, size: 255, required: false}
+      - {key: mediaId, type: varchar, size: 255, required: true}
+      - {key: variant, type: varchar, size: 64, required: false}
+      - {key: action, type: enum, elements: [VIEW, STREAM, DOWNLOAD], required: true}
+      - {key: result, type: enum, elements: [ALLOW, DENY], required: true}
+      - {key: reasons, type: text, required: false}
+      - {key: policyDecisionId, type: varchar, size: 255, required: false}
+      - {key: expiresAt, type: datetime, required: false}
+      - {key: createdAt, type: datetime, required: true}
+  - table: ad_placements
+    source: contracts/deterministic/advertising/persistence.yaml
+    indexes: [placementKey]
+    columns:
+      - {key: placementKey, type: varchar, size: 128, required: true}
+      - {key: label, type: varchar, size: 255, required: false}
+      - {key: status, type: enum, elements: [ACTIVE, INACTIVE], required: true}
+      - {key: createdAt, type: datetime, required: true}
+      - {key: updatedAt, type: datetime, required: true}
+  - table: ad_campaigns
+    source: contracts/deterministic/advertising/persistence.yaml
+    indexes: [status, startAt]
+    columns:
+      - {key: name, type: varchar, size: 255, required: true}
+      - {key: status, type: enum, elements: [DRAFT, SCHEDULED, ACTIVE, PAUSED, COMPLETED, ARCHIVED], required: true}
+      - {key: advertiser, type: varchar, size: 255, required: false}
+      - {key: priority, type: integer, required: false}
+      - {key: budgetCents, type: integer, required: false}
+      - {key: impressionCap, type: integer, required: false}
+      - {key: clickCap, type: integer, required: false}
+      - {key: startAt, type: datetime, required: false}
+      - {key: endAt, type: datetime, required: false}
+      - {key: placementIds, type: varchar, array: true, required: true}
+      - {key: creativeIds, type: varchar, array: true, required: true}
+      - {key: contentRatingCompat, type: enum, elements: [ALL_AGES, TEEN, ADULT_18_PLUS], required: false}
+      - {key: targetingRules, type: text, required: false}
+      - {key: createdAt, type: datetime, required: true}
+      - {key: updatedAt, type: datetime, required: true}
+  - table: ad_creatives
+    source: contracts/deterministic/advertising/persistence.yaml
+    indexes: [campaignId, status]
+    columns:
+      - {key: campaignId, type: varchar, size: 255, required: true}
+      - {key: name, type: varchar, size: 255, required: false}
+      - {key: assetType, type: enum, elements: [IMAGE, HTML, VIDEO], required: true}
+      - {key: storageBucketKey, type: varchar, size: 255, required: false}
+      - {key: storageFileId, type: varchar, size: 255, required: false}
+      - {key: status, type: enum, elements: [DRAFT, REVIEW, APPROVED, REJECTED], required: true}
+      - {key: width, type: integer, required: false}
+      - {key: height, type: integer, required: false}
+      - {key: createdAt, type: datetime, required: true}
+      - {key: updatedAt, type: datetime, required: true}
+  - table: ad_events
+    source: contracts/deterministic/advertising/persistence.yaml
+    indexes: [occurredAt, campaignId]
+    columns:
+      - {key: eventType, type: enum, elements: [IMPRESSION, CLICK, VIEWABLE_IMPRESSION, FREQUENCY_CAP_HIT, FILL_MISS], required: true}
+      - {key: campaignId, type: varchar, size: 255, required: false}
+      - {key: placementId, type: varchar, size: 255, required: false}
+      - {key: creativeId, type: varchar, size: 255, required: false}
+      - {key: actorId, type: varchar, size: 255, required: false}
+      - {key: occurredAt, type: datetime, required: true}
+      - {key: correlationId, type: varchar, size: 255, required: false}
+  - table: destructive_requests
+    source: contracts/permissions/admin-rbac-admin-app.json
+    indexes: [status, action]
+    columns:
+      - {key: action, type: varchar, size: 128, required: true}
+      - {key: targetId, type: varchar, size: 255, required: false}
+      - {key: reason, type: text, required: true}
+      - {key: status, type: enum, elements: [PENDING, APPROVED, REJECTED, EXECUTED], required: true}
+      - {key: requestedBy, type: varchar, size: 255, required: true}
+      - {key: approvedBy, type: varchar, size: 255, required: false}
+      - {key: createdAt, type: datetime, required: true}
+      - {key: approvedAt, type: datetime, required: false}
+      - {key: executedAt, type: datetime, required: false}
+  - table: analytics_events
+    source: docs/analytics/ANALYTICS_V1.md
+    indexes: [eventType, occurredAt, aggregateId]
+    columns:
+      - {key: eventType, type: varchar, size: 255, required: true}
+      - {key: aggregateId, type: varchar, size: 255, required: true}
+      - {key: occurredAt, type: datetime, required: true}
+      - {key: correlationId, type: varchar, size: 255, required: false}
+      - {key: actorId, type: varchar, size: 255, required: false}
+      - {key: properties, type: text, required: false}
+  - table: analytics_metrics_daily
+    source: docs/analytics/ANALYTICS_V1.md
+    indexes: [metricDate, metric]
+    columns:
+      - {key: metricDate, type: varchar, size: 10, required: true}
+      - {key: metric, type: varchar, size: 255, required: true}
+      - {key: dimension, type: varchar, size: 255, required: false}
+      - {key: dimensionValue, type: varchar, size: 255, required: false}
+      - {key: value, type: integer, required: true}
+      - {key: updatedAt, type: datetime, required: true}
+  - table: plans
+    source: contracts/domain/plan.schema.yaml
+    columns:
+      - {key: id, type: varchar, size: 255, required: true}
+      - {key: code, type: varchar, size: 128, required: true}
+      - {key: name, type: varchar, size: 255, required: true}
+      - {key: description, type: text, required: false}
+      - {key: status, type: enum, elements: [DRAFT, ACTIVE, RETIRED], required: true}
+      - {key: scope, type: enum, elements: [PLATFORM, CREATOR, WORKSPACE], required: true}
+      - {key: currency, type: varchar, size: 3, required: true}
+      - {key: amount, type: integer, required: true}
+      - {key: billingInterval, type: enum, elements: [DAY, WEEK, MONTH, YEAR], required: true}
+      - {key: billingIntervalCount, type: integer, required: true}
+      - {key: trialDays, type: integer, required: false}
+      - {key: entitlementClassIds, type: varchar, array: true, required: false}
+      - {key: features, type: varchar, array: true, required: false}
+      - {key: adultEligible, type: boolean, required: false}
+      - {key: adFree, type: boolean, required: false}
+      - {key: effectiveAt, type: datetime, required: false}
+      - {key: retiredAt, type: datetime, required: false}
+      - {key: version, type: integer, required: true}
+      - {key: createdAt, type: datetime, required: true}
+      - {key: updatedAt, type: datetime, required: true}
+  - table: subscriptions
+    source: contracts/domain/subscription.schema.yaml
+    columns:
+      - {key: id, type: varchar, size: 255, required: true}
+      - {key: userId, type: varchar, size: 255, required: true}
+      - {key: creatorId, type: varchar, size: 255, required: false}
+      - {key: workspaceId, type: varchar, size: 255, required: false}
+      - {key: planId, type: varchar, size: 255, required: true}
+      - {key: planVersion, type: integer, required: true}
+      - {key: provider, type: varchar, size: 64, required: false}
+      - {key: providerCustomerId, type: varchar, size: 255, required: false}
+      - {key: providerSubscriptionId, type: varchar, size: 255, required: false}
+      - {key: status, type: enum, elements: [CREATED, CHECKOUT_STARTED, AWAITING_PROVIDER, ACTIVE, PAST_DUE, GRACE_PERIOD, CANCEL_AT_PERIOD_END, PAUSED, CANCELLED, EXPIRED], required: true}
+      - {key: billingMode, type: enum, elements: [FIAT, CRYPTO, OTHER], required: true}
+      - {key: billingStrategy, type: enum, elements: [NATIVE_RECURRING, MERCHANT_MANAGED, MANUAL], required: true}
+      - {key: renewalRequiresUserAction, type: boolean, required: false}
+      - {key: currency, type: varchar, size: 3, required: true}
+      - {key: amount, type: integer, required: true}
+      - {key: billingInterval, type: enum, elements: [DAY, WEEK, MONTH, YEAR], required: true}
+      - {key: billingIntervalCount, type: integer, required: true}
+      - {key: trialStartedAt, type: datetime, required: false}
+      - {key: trialEndsAt, type: datetime, required: false}
+      - {key: currentPeriodStart, type: datetime, required: true}
+      - {key: currentPeriodEnd, type: datetime, required: true}
+      - {key: cancelAtPeriodEnd, type: boolean, required: true}
+      - {key: cancelledAt, type: datetime, required: false}
+      - {key: cancellationReason, type: text, required: false}
+      - {key: endedAt, type: datetime, required: false}
+      - {key: lastPaymentId, type: varchar, size: 255, required: false}
+      - {key: nextPaymentAt, type: datetime, required: false}
+      - {key: gracePeriodEndsAt, type: datetime, required: false}
+      - {key: policyDecisionId, type: varchar, size: 255, required: false}
+      - {key: version, type: integer, required: true}
+      - {key: createdAt, type: datetime, required: true}
+      - {key: updatedAt, type: datetime, required: true}
+  - table: subscription_renewals
+    source: contracts/domain/subscription-renewal.schema.yaml
+    note: not_in_desired_schema_manifest; maps to renewal_attempts in appwrite-resource-registry.yaml
+    columns:
+      - {key: id, type: varchar, size: 255, required: true}
+      - {key: subscriptionId, type: varchar, size: 255, required: true}
+      - {key: paymentId, type: varchar, size: 255, required: false}
+      - {key: status, type: enum, elements: [DRAFT, PAYMENT_PENDING, PAID, FAILED, EXPIRED, CANCELLED], required: true}
+      - {key: amount, type: integer, required: true}
+      - {key: currency, type: varchar, size: 3, required: true}
+      - {key: dueAt, type: datetime, required: false}
+      - {key: paymentUrl, type: varchar, size: 2048, required: false}
+      - {key: idempotencyKey, type: varchar, size: 255, required: true}
+      - {key: createdAt, type: datetime, required: true}
+      - {key: updatedAt, type: datetime, required: false}
+  - table: publication_language_metadata
+    source: contracts/domain/publication-language.schema.yaml
+    note: not_in_desired_schema_manifest
+    columns:
+      - {key: publicationId, type: varchar, size: 255, required: true}
+      - {key: contentLanguageMode, type: enum, elements: [LANGUAGE_BEARING, NOT_APPLICABLE], required: true}
+      - {key: primaryLanguage, type: varchar, size: 32, required: false}
+      - {key: contentLanguages, type: varchar, array: true, required: true}
+      - {key: localizations, type: text, array: true, required: false}
+  - table: user_language_preferences
+    source: contracts/domain/user-language-preferences.schema.yaml
+    note: not_in_desired_schema_manifest
+    columns:
+      - {key: userId, type: varchar, size: 255, required: true}
+      - {key: uiLocale, type: varchar, size: 32, required: true}
+      - {key: contentLanguages, type: varchar, array: true, required: true}
+      - {key: contentLanguageMode, type: enum, elements: [ALL, ONLY_SELECTED], required: true}
+      - {key: direction, type: enum, elements: [LTR, RTL], required: false}
+      - {key: updatedAt, type: datetime, required: false}
+  - table: publications
+    source: docs/DOMAIN_MODEL.md
+    note: canonical published content record; id is the row $id
+    columns:
+      - {key: creatorId, type: varchar, size: 255, required: true}
+      - {key: projectId, type: varchar, size: 255, required: true}
+      - {key: seriesId, type: varchar, size: 255, required: false}
+      - {key: volumeId, type: varchar, size: 255, required: false}
+      - {key: type, type: enum, elements: [BOOK, POST, VIDEO, AUDIO, MIXED], required: true}
+      - {key: status, type: enum, elements: [DRAFT, PENDING_REVIEW, APPROVED, PUBLISHED, HIDDEN, REMOVED], required: true}
+      - {key: accessClass, type: enum, elements: [FREE, SUBSCRIPTION, PURCHASE], required: false}
+      - {key: title, type: varchar, size: 255, required: false}
+      - {key: description, type: text, required: false}
+      - {key: contentRating, type: enum, elements: [ALL_AGES, TEEN, ADULT_18_PLUS], required: false}
+      - {key: contentOrigin, type: enum, elements: [HUMAN, AI_ASSISTED, AI_GENERATED, HYBRID], required: false}
+      - {key: mediaAssetIds, type: varchar, array: true, required: false}
+      - {key: format, type: varchar, size: 255, required: false}
+      - {key: episodeId, type: varchar, size: 255, required: false}
+      - {key: readingFormat, type: enum, elements: [PAGINATED, VERTICAL, HORIZONTAL, WEBTOON, STRIP, MIXED], required: false}
+      - {key: pageCount, type: integer, required: false}
+      - {key: pageWidth, type: integer, required: false}
+      - {key: pageHeight, type: integer, required: false}
+      - {key: publishedAt, type: datetime, required: false}
+      - {key: createdAt, type: datetime, required: true}
+      - {key: updatedAt, type: datetime, required: true}
+  - table: reading_progress
+    source: contracts/domain/reading-progress.schema.yaml
+    partition_key: userId,publicationId,episodeId
+    indexes: [userId_updatedAt]
+    columns:
+      - {key: userId, type: varchar, size: 255, required: true}
+      - {key: publicationId, type: varchar, size: 255, required: true}
+      - {key: episodeId, type: varchar, size: 255, required: false}
+      - {key: pageId, type: varchar, size: 255, required: false}
+      - {key: position, type: integer, required: false}
+      - {key: status, type: enum, elements: [IN_PROGRESS, COMPLETED, ABANDONED], required: true}
+      - {key: percentComplete, type: integer, required: false}
+      - {key: lastAccessedAt, type: datetime, required: true}
+      - {key: startedAt, type: datetime, required: true}
+      - {key: completedAt, type: datetime, required: false}
+      - {key: version, type: integer, required: true}
+      - {key: createdAt, type: datetime, required: true}
+      - {key: updatedAt, type: datetime, required: true}
+  - table: creators
+    source: contracts/domain/creator.schema.yaml
+    partition_key: actorId
+    indexes: [actorId]
+    columns:
+      - {key: actorId, type: varchar, size: 255, required: true}
+      - {key: handle, type: varchar, size: 255, required: true}
+      - {key: displayName, type: varchar, size: 255, required: true}
+      - {key: avatarMediaAssetId, type: varchar, size: 255, required: false}
+      - {key: coverMediaAssetId, type: varchar, size: 255, required: false}
+      - {key: bio, type: text, required: false}
+      - {key: links, type: varchar, array: true, required: false}
+      - {key: creatorStatus, type: enum, elements: [ACTIVE, PENDING, SUSPENDED], required: true}
+      - {key: verificationStatus, type: enum, elements: [UNVERIFIED, PENDING, VERIFIED], required: true}
+      - {key: followerCountProjection, type: integer, required: false}
+      - {key: featuredPublicationIds, type: varchar, array: true, required: false}
+      - {key: createdAt, type: datetime, required: true}
+      - {key: updatedAt, type: datetime, required: true}
+  - table: book_pages
+    source: contracts/domain/book-page.schema.yaml
+    partition_key: publicationId
+    indexes: [publicationId_position]
+    columns:
+      - {key: publicationId, type: varchar, size: 255, required: true}
+      - {key: position, type: integer, required: true}
+      - {key: mediaAssetId, type: varchar, size: 255, required: false}
+      - {key: width, type: integer, required: false}
+      - {key: height, type: integer, required: false}
+      - {key: createdAt, type: datetime, required: true}
+      - {key: updatedAt, type: datetime, required: true}
+  - table: comments
+    source: contracts/domain/comment.schema.yaml
+    partition_key: targetId
+    indexes: [targetId, userId]
+    columns:
+      - {key: targetType, type: enum, elements: [PAGE, COMMENT, PUBLICATION], required: true}
+      - {key: targetId, type: varchar, size: 255, required: true}
+      - {key: userId, type: varchar, size: 255, required: true}
+      - {key: parentCommentId, type: varchar, size: 255, required: false}
+      - {key: body, type: text, required: true}
+      - {key: status, type: enum, elements: [PENDING_REVIEW, PUBLISHED, HIDDEN, REMOVED, DELETED], required: true}
+      - {key: createdAt, type: datetime, required: true}
+      - {key: updatedAt, type: datetime, required: true}
+  - table: reactions
+    source: contracts/domain/reaction.schema.yaml
+    partition_key: userId
+    indexes: [targetId, userId]
+    columns:
+      - {key: userId, type: varchar, size: 255, required: true}
+      - {key: targetType, type: enum, elements: [COMMENT, PUBLICATION], required: true}
+      - {key: targetId, type: varchar, size: 255, required: true}
+      - {key: reactionType, type: varchar, size: 255, required: true}
+      - {key: createdAt, type: datetime, required: true}
+  - table: reports
+    source: contracts/domain/report.schema.yaml
+    partition_key: targetId
+    indexes: [targetId, reporterId]
+    columns:
+      - {key: reporterId, type: varchar, size: 255, required: true}
+      - {key: targetType, type: enum, elements: [COMMENT, PUBLICATION], required: true}
+      - {key: targetId, type: varchar, size: 255, required: true}
+      - {key: reason, type: text, required: true}
+      - {key: status, type: enum, elements: [OPEN, REVIEWED, RESOLVED, DISMISSED], required: true}
+      - {key: createdAt, type: datetime, required: true}
+  - table: payments
+    source: contracts/domain/payment.schema.yaml
+    partition_key: userId
+    indexes: [userId, subscriptionId]
+    columns:
+      - {key: userId, type: varchar, size: 255, required: true}
+      - {key: amount, type: integer, required: true}
+      - {key: currency, type: varchar, size: 3, required: true}
+      - {key: provider, type: enum, elements: [STRIPE_CONNECT, NOWPAYMENTS, ZEN_PAYMENTS, SECUREGLOBALPAY], required: true}
+      - {key: status, type: enum, elements: [CREATED, AWAITING_PROVIDER, CAPTURED, FAILED, REFUNDED, RECONCILED, EXPIRED], required: true}
+      - {key: idempotencyKey, type: varchar, size: 255, required: false}
+      - {key: subscriptionId, type: varchar, size: 255, required: false}
+      - {key: providerPaymentId, type: varchar, size: 255, required: false}
+      - {key: createdAt, type: datetime, required: true}
+      - {key: updatedAt, type: datetime, required: true}
+  - table: payment_events
+    source: contracts/domain/payment-event.schema.yaml
+    partition_key: providerEventId
+    indexes: [providerEventId]
+    columns:
+      - {key: provider, type: varchar, size: 255, required: true}
+      - {key: providerEventId, type: varchar, size: 255, required: true}
+      - {key: eventType, type: varchar, size: 255, required: true}
+      - {key: receivedAt, type: datetime, required: true}
+      - {key: signatureVerified, type: boolean, required: false}
+      - {key: processingState, type: enum, elements: [RECEIVED, PROCESSING, PROCESSED, FAILED], required: true}
+      - {key: processingAttempts, type: integer, required: true}
+      - {key: paymentId, type: varchar, size: 255, required: false}
+      - {key: createdAt, type: datetime, required: true}
+  - table: refunds
+    source: contracts/domain/refund.schema.yaml
+    partition_key: paymentId
+    indexes: [paymentId]
+    columns:
+      - {key: paymentId, type: varchar, size: 255, required: true}
+      - {key: providerRefundId, type: varchar, size: 255, required: false}
+      - {key: amount, type: integer, required: true}
+      - {key: currency, type: varchar, size: 3, required: true}
+      - {key: status, type: enum, elements: [REQUESTED, APPROVED, REJECTED, PROCESSED], required: true}
+      - {key: reason, type: text, required: false}
+      - {key: createdAt, type: datetime, required: true}
+studio_tables_note: "studio entities map to studio_* TablesDB tables (contracts/studio/persistence-mapping.yaml), separate from the desired-schema manifest."
+studio_tables:
+  - table: studio_projects
+    source: contracts/studio/project.schema.yaml
+    partition_key: workspaceId
+    indexes: [workspaceId_status, workspaceId_updatedAt]
+    columns:
+      - {key: id, type: varchar, size: 255, required: true}
+      - {key: creatorId, type: varchar, size: 255, required: true}
+      - {key: workspaceId, type: varchar, size: 255, required: false}
+      - {key: name, type: varchar, size: 200, required: true}
+      - {key: description, type: text, required: false}
+      - {key: status, type: enum, elements: [DRAFT, ACTIVE, ARCHIVED], required: true}
+      - {key: defaultContentRating, type: enum, elements: [ALL_AGES, TEEN, ADULT_18_PLUS], required: false}
+      - {key: createdAt, type: datetime, required: true}
+      - {key: updatedAt, type: datetime, required: true}
+      - {key: archivedAt, type: datetime, required: false}
+  - table: studio_story_bibles
+    source: contracts/studio/story-bible.schema.yaml
+    partition_key: projectId
+    columns:
+      - {key: projectId, type: varchar, size: 255, required: true}
+      - {key: revisionId, type: varchar, size: 255, required: true}
+      - {key: premise, type: text, required: true}
+      - {key: themes, type: varchar, array: true, required: false}
+      - {key: tone, type: varchar, size: 255, required: false}
+      - {key: canonVersion, type: integer, required: true}
+      - {key: continuityRules, type: varchar, array: true, required: false}
+      - {key: updatedAt, type: datetime, required: true}
+  - table: studio_characters
+    source: contracts/studio/character.schema.yaml
+    partition_key: projectId
+    indexes: [projectId_name]
+    columns:
+      - {key: id, type: varchar, size: 255, required: true}
+      - {key: projectId, type: varchar, size: 255, required: true}
+      - {key: name, type: varchar, size: 200, required: true}
+      - {key: description, type: text, required: false}
+      - {key: traits, type: varchar, array: true, required: false}
+      - {key: visualReferences, type: varchar, array: true, required: false}
+      - {key: status, type: enum, elements: [ACTIVE, ARCHIVED], required: true}
+      - {key: revision, type: integer, required: true}
+  - table: studio_worlds
+    source: contracts/studio/world.schema.yaml
+    partition_key: projectId
+    columns:
+      - {key: id, type: varchar, size: 255, required: true}
+      - {key: projectId, type: varchar, size: 255, required: true}
+      - {key: name, type: varchar, size: 200, required: true}
+      - {key: description, type: text, required: false}
+      - {key: locations, type: text, array: true, required: false}
+      - {key: rules, type: varchar, array: true, required: false}
+      - {key: revision, type: integer, required: true}
+  - table: studio_prompt_templates
+    source: contracts/studio/prompt-template.schema.yaml
+    partition_key: projectId
+    columns:
+      - {key: id, type: varchar, size: 255, required: true}
+      - {key: projectId, type: varchar, size: 255, required: true}
+      - {key: name, type: varchar, size: 255, required: true}
+      - {key: template, type: text, required: true}
+      - {key: variables, type: varchar, array: true, required: false}
+      - {key: revision, type: integer, required: true}
+  - table: studio_assets
+    source: contracts/studio/studio-asset.schema.yaml
+    partition_key: projectId
+    indexes: [projectId_mediaAssetId]
+    columns:
+      - {key: id, type: varchar, size: 255, required: true}
+      - {key: projectId, type: varchar, size: 255, required: true}
+      - {key: mediaAssetId, type: varchar, size: 255, required: true}
+      - {key: role, type: enum, elements: [REFERENCE, CHARACTER, BACKGROUND, PROP, PAGE_ASSET, PANEL_ASSET, STYLE_REFERENCE, AUDIO_REFERENCE], required: true}
+      - {key: label, type: varchar, size: 255, required: false}
+      - {key: metadata, type: text, required: false}
+  - table: studio_documents
+    source: contracts/studio/document.schema.yaml
+    partition_key: projectId
+    indexes: [projectId_status]
+    columns:
+      - {key: id, type: varchar, size: 255, required: true}
+      - {key: projectId, type: varchar, size: 255, required: true}
+      - {key: draftId, type: varchar, size: 255, required: true}
+      - {key: title, type: varchar, size: 255, required: false}
+      - {key: type, type: enum, elements: [BOOK, POST, VIDEO, AUDIO, MIXED], required: true}
+      - {key: format, type: enum, elements: [COMIC, MANGA, MANHWA, MANHUA, BANDE_DESSINEE, GRAPHIC_NOVEL, WEBTOON, NOVEL, LIGHT_NOVEL, NONFICTION, EDUCATIONAL], required: false}
+      - {key: readingFormat, type: enum, elements: [PAGINATED, VERTICAL, HORIZONTAL, WEBTOON, STRIP, MIXED], required: false}
+      - {key: pageWidth, type: integer, required: false}
+      - {key: pageHeight, type: integer, required: false}
+      - {key: pages, type: varchar, array: true, required: false}
+      - {key: revisionId, type: varchar, size: 255, required: true}
+  - table: studio_pages
+    source: contracts/studio/page.schema.yaml
+    partition_key: documentId
+    indexes: [documentId_position]
+    columns:
+      - {key: id, type: varchar, size: 255, required: true}
+      - {key: documentId, type: varchar, size: 255, required: true}
+      - {key: position, type: integer, required: true}
+      - {key: templateId, type: varchar, size: 255, required: false}
+      - {key: width, type: integer, required: false}
+      - {key: height, type: integer, required: false}
+      - {key: backgroundAssetId, type: varchar, size: 255, required: false}
+      - {key: panels, type: varchar, array: true, required: true}
+      - {key: revisionId, type: varchar, size: 255, required: true}
+  - table: studio_publication_snapshots
+    source: contracts/studio/publication-snapshot.schema.yaml
+    partition_key: publicationId
+    immutable: true
+    indexes: [publicationId, sourceRevisionId]
+    columns:
+      - {key: snapshotId, type: varchar, size: 255, required: true}
+      - {key: publicationId, type: varchar, size: 255, required: true}
+      - {key: sourceRevisionId, type: varchar, size: 255, required: true}
+      - {key: sourceDocumentId, type: varchar, size: 255, required: false}
+      - {key: mediaAssetIds, type: varchar, array: true, required: false}
+      - {key: contentHash, type: varchar, size: 255, required: false}
+      - {key: createdAt, type: datetime, required: true}
+      - {key: immutable, type: boolean, required: true}
+  - table: studio_panels
+    source: contracts/studio/panel.schema.yaml
+    partition_key: pageId
+    indexes: [pageId_position]
+    columns:
+      - {key: id, type: varchar, size: 255, required: true}
+      - {key: pageId, type: varchar, size: 255, required: true}
+      - {key: position, type: integer, required: true}
+      - {key: bounds, type: text, required: true}
+      - {key: shape, type: enum, elements: [RECTANGLE, ROUNDED, CIRCLE, CUSTOM], required: false}
+      - {key: layers, type: varchar, array: true, required: true}
+      - {key: revisionId, type: varchar, size: 255, required: true}
+  - table: studio_editor_operations
+    source: contracts/studio/editor-operation.schema.yaml
+    partition_key: documentId
+    append_only: true
+    indexes: [documentId_revision, mutationId]
+    columns:
+      - {key: mutationId, type: varchar, size: 255, required: true}
+      - {key: draftId, type: varchar, size: 255, required: true}
+      - {key: baseRevisionId, type: varchar, size: 255, required: true}
+      - {key: operation, type: enum, elements: [CREATE, UPDATE, DELETE, REORDER, DUPLICATE, APPLY_GENERATION, RESTORE_REVISION], required: true}
+      - {key: targetType, type: enum, elements: [DOCUMENT, PAGE, PANEL, LAYER, TEXT, DIALOGUE, ASSET, READING_ORDER], required: true}
+      - {key: targetId, type: varchar, size: 255, required: false}
+      - {key: payload, type: text, required: true}
+      - {key: actorId, type: varchar, size: 255, required: true}
+      - {key: clientId, type: varchar, size: 255, required: true}
+      - {key: clientTimestamp, type: datetime, required: true}
+  - table: studio_editor_revisions
+    source: contracts/studio/persistence-mapping.yaml
+    partition_key: documentId
+    immutable: true
+    indexes: [documentId_revision]
+    columns:
+      - {key: id, type: varchar, size: 255, required: true}
+      - {key: documentId, type: varchar, size: 255, required: true}
+      - {key: revision, type: integer, required: true}
+      - {key: immutable, type: boolean, required: true}
+      - {key: createdAt, type: datetime, required: true}
+  - table: studio_generation_requests
+    source: contracts/studio/generation-request.schema.yaml
+    partition_key: projectId
+    columns:
+      - {key: requestId, type: varchar, size: 255, required: true}
+      - {key: projectId, type: varchar, size: 255, required: true}
+      - {key: draftId, type: varchar, size: 255, required: false}
+      - {key: targetType, type: enum, elements: [PAGE, PANEL, IMAGE, CHARACTER, BACKGROUND, DIALOGUE, STORY_TEXT], required: true}
+      - {key: promptTemplateId, type: varchar, size: 255, required: false}
+      - {key: prompt, type: text, required: false}
+      - {key: inputAssetIds, type: varchar, array: true, required: false}
+      - {key: billingMode, type: enum, elements: [PLATFORM_CREDITS, BYOK, USER_HOSTED], required: true}
+      - {key: creditEligible, type: boolean, required: false}
+      - {key: creditEligibilityReason, type: text, required: false}
+      - {key: executionLocation, type: enum, elements: [CLOUD, USER_HOSTED], required: true}
+      - {key: policyContext, type: text, required: true}
+  - table: studio_publication_validation_runs
+    source: contracts/studio/validation.schema.yaml
+    partition_key: documentId
+    columns:
+      - {key: validationId, type: varchar, size: 255, required: true}
+      - {key: status, type: enum, elements: [PASS, FAIL, PASS_WITH_WARNINGS], required: true}
+      - {key: checks, type: text, required: true}
+      - {key: createdAt, type: datetime, required: true}
+  - table: studio_editor_sessions
+    source: contracts/studio/editor-session.schema.yaml
+    partition_key: draftId
+    columns:
+      - {key: sessionId, type: varchar, size: 255, required: true}
+      - {key: draftId, type: varchar, size: 255, required: true}
+      - {key: clientId, type: varchar, size: 255, required: true}
+      - {key: status, type: enum, elements: [OPEN, SAVING, SYNCING, OFFLINE, CONFLICT, CLOSED], required: true}
+      - {key: lastKnownRevisionId, type: varchar, size: 255, required: false}
+      - {key: openedAt, type: datetime, required: true}
+      - {key: lastSeenAt, type: datetime, required: false}
+pending_columns_note: "desired-schema tables with NO schema source found; columns are BLOCKED until a schema contract exists."
+pending_columns:
+  - table: profiles
+  - table: projects
+  - table: creator_posts
+  - table: series
+  - table: volumes
+  - table: drafts
+  - table: entitlements
+  - table: payment_attempts
+  - table: ledger_entries
+  - table: library_entries
+  - table: follows
+  - table: ai_jobs
+  - table: ai_usage
+  - table: moderation_cases
+  - table: audit_events
+  - table: analytics_events
+  - table: creator_metrics
+  - table: feature_flags
+  - table: provider_health
+  - table: ad_inventory
+  - table: ad_campaigns
+  - table: ad_creatives
+  - table: ad_placements
+  - table: ad_frequency_caps
+  - table: ad_events
+  - table: ad_metrics_daily
+  - table: notifications
+  - table: notification_preferences
+  - table: notification_delivery_attempts
+reconciliation_notes:
+  - desired_schema_manifest_lists_43_coarse_tables_without_columns
+  - domain_schema_files_cover_media_assets_plans_subscriptions_language_metadata_reading_progress_creators_book_pages_comments_reactions_reports_payments_and_refunds_only
+  - studio_schema_files_cover_the_creator_studio_entities_and_map_to_a_separate_studio_prefixed_table_set_via_persistence_mapping
+  - appwrite_resource_registry_defines_a_finer_logical_resource_list_that_overlaps_neither_fully
+  - columns_for_29_of_43_tables_are_undefined_and_must_be_added_to_a_schema_contract_before_those_tables_can_hold_rows

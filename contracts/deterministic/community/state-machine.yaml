@@ -1,0 +1,46 @@
+version: '1.0'
+area: community
+states:
+- VISIBLE
+- PENDING_MODERATION
+- HIDDEN
+- DELETED
+- LOCKED
+transitionRules:
+- Only listed transitions are legal.
+- Authorization MUST be evaluated separately from transition legality.
+- Retries MUST preserve idempotency.
+- State changes MUST emit the event declared by the command/event compatibility graph.
+transitions:
+- from: VISIBLE
+  event: MODERATE
+  to: PENDING_MODERATION
+- from: PENDING_MODERATION
+  event: APPROVE
+  to: VISIBLE
+- from: PENDING_MODERATION
+  event: HIDE
+  to: HIDDEN
+- from: VISIBLE
+  event: HIDE
+  to: HIDDEN
+- from: HIDDEN
+  event: RESTORE
+  to: VISIBLE
+- from: VISIBLE
+  event: LOCK
+  to: LOCKED
+- from: LOCKED
+  event: UNLOCK
+  to: VISIBLE
+- from: VISIBLE
+  event: DELETE
+  to: DELETED
+- from: HIDDEN
+  event: DELETE
+  to: DELETED
+- from: LOCKED
+  event: DELETE
+  to: DELETED
+terminalStates:
+- DELETED

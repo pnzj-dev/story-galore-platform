@@ -1,0 +1,25 @@
+schema: storygalore.economic-ledger-boundaries/v1
+version: 1
+canonical: true
+status: V19.5.3
+policy: fail_closed
+financial_dimensions:
+- cash_received
+- deferred_revenue
+- recognized_platform_revenue
+- creator_payable
+- creator_reserve
+- tax_payable
+- processor_payable
+- refund_liability
+- chargeback_exposure
+- infrastructure_cost
+- contribution_margin
+rules:
+- Cash received MUST NOT be treated as recognized revenue automatically.
+- Creator payable MUST NOT be treated as platform revenue.
+- Tax payable MUST NOT be treated as platform revenue.
+- Processor cost MUST remain separately attributable.
+- Reserve balances MUST remain separately identifiable from available creator earnings.
+- Annual/prepaid subscriptions MUST support deferred-revenue accounting boundaries.
+- Unknown accounting classification MUST BLOCK financial finalization.

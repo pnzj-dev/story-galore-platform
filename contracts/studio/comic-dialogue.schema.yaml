@@ -1,0 +1,12 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://storygalore.dev/contracts/studio/comic-dialogue.schema.yaml
+title: Comic Dialogue
+version: 1
+required: [id, speakerCharacterId, text, bubbleType]
+properties:
+  id: {type: string}
+  speakerCharacterId: {type: string}
+  text: {type: string, minLength: 1}
+  bubbleType: {enum: [SPEECH, THOUGHT, SHOUT, WHISPER, NARRATION, CAPTION, SFX]}
+  tailTarget: {type: object}
+additionalProperties: false

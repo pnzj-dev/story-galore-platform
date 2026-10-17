@@ -1,0 +1,25 @@
+schema: storygalore.economic-governance-contract-to-test/v1
+version: 1
+policy: fail_closed
+requiredMappings:
+- contract: contracts/business/governance/jurisdiction-policy.yaml
+  tests: tests/contracts/business-governance/us-first.scenarios.yaml
+- contract: contracts/tax/us-launch-policy.yaml
+  tests: tests/contracts/business-governance/us-first.scenarios.yaml
+- contract: contracts/accounting/economic-ledger-boundaries.yaml
+  tests: tests/contracts/business-governance/us-first.scenarios.yaml
+- contract: contracts/business/governance/reserve-and-chargeback-policy.yaml
+  tests: tests/contracts/business-governance/us-first.scenarios.yaml
+- contract: contracts/rights/revenue-participation-agreement.yaml
+  tests: tests/contracts/business-governance/revenue-participation.scenarios.yaml
+- contract: contracts/pricing/pricing-policy-lifecycle.yaml
+  tests: tests/contracts/business-governance/pricing-lifecycle.scenarios.yaml
+- contract: contracts/pricing/promotion-policy.yaml
+  tests: tests/contracts/business-governance/pricing-lifecycle.scenarios.yaml
+- contract: contracts/business/governance/economic-simulator.yaml
+  tests: tests/contracts/business-governance/economic-simulator.scenarios.yaml
+- contract: contracts/business/governance/commercial-products.yaml
+  tests: tests/contracts/business-governance/pricing-lifecycle.scenarios.yaml
+- contract: contracts/business/governance/economic-safety-thresholds.yaml
+  tests: tests/contracts/business-governance/economic-simulator.scenarios.yaml
+missingMapping: BLOCK

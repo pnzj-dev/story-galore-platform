@@ -1,0 +1,25 @@
+schema: storygalore.durable-execution-provider/v1
+version: 1
+policy: fail_closed
+executionEngine: CLOUDFLARE_WORKFLOWS
+status: V1_ACTIVE
+providerNeutralBoundary: DurableExecution
+domainStateAuthority: domain_persistence
+workflowStateIsDomainSourceOfTruth: false
+registeredCapabilities:
+  - durable_steps
+  - automatic_retry
+  - sleep_and_wait
+  - external_event_resume
+  - human_approval_wait
+  - long_running_execution
+  - execution_observability
+constraints:
+  - Large media MUST remain in Appwrite Storage and MUST be referenced by ID, never embedded in workflow state.
+  - Secrets and raw credentials MUST NOT be placed in workflow state, arguments, logs, analytics or audit records.
+  - Payment success MUST remain provider-webhook/reconciliation driven.
+  - Domain state transitions MUST be committed through registered commands/services.
+  - Executor selection MUST NOT be made ad hoc by agents or application code.
+futureAlternativePolicy:
+  enabled: false
+  rule: A different durable engine may be introduced only through a new registered provider contract, capability-gap decision, migration plan and human approval.

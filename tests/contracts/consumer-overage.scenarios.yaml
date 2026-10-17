@@ -1,0 +1,12 @@
+schema: storygalore.contract-scenario-suite/v1
+version: 1
+policy: fail_closed
+cases:
+  - id: explicit-opt-in
+    expected: PASS
+  - id: unknown-pack-block
+    expected: PASS
+  - id: price-version-required
+    expected: PASS
+  - id: no-silent-charge
+    expected: PASS

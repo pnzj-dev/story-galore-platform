@@ -1,0 +1,27 @@
+schema: storygalore.authorization-completeness/v1
+version: 1
+policy: fail_closed
+rules:
+  - Every command, query, API endpoint, Function, Agent tool and MCP tool MUST map to a capability.
+  - Every capability MUST map to Policy Engine evaluation.
+  - Every resource mutation MUST map to ownership/tenant policy where applicable.
+  - Entitlement, age, jurisdiction and moderation policy MUST be evaluated where declared by the resource.
+  - Missing authorization mapping is BLOCKED.
+
+route_authorization:
+  route_registry: contracts/astro/routes.yaml
+  route_protection_contract: contracts/astro/route-protection.yaml
+  every_concrete_route_must_be_mapped: true
+  astro_middleware_is_not_authority: true
+  backend_rechecks_authorization: true
+  client_claims_are_untrusted: true
+  unknown_or_missing_route_policy: BLOCK
+
+authentication_runtime_contract: contracts/security/authentication-session-runtime.yaml
+authorization_acceptance_matrix: contracts/security/authorization-acceptance-matrix.yaml
+planned_route_inventory: contracts/astro/route-inventory.yaml
+admin_rbac_registry: contracts/permissions/admin-rbac.json
+implementation_gate:
+  contract_specification_complete: true
+  runtime_security_implemented: false
+  runtime_security_claim_must_not_be_inferred_from_contract_validation: true

@@ -1,0 +1,15 @@
+schema: storygalore.contract-to-test/v1
+version: 1
+policy: fail_closed
+rule: Every executable or behavior contract MUST map to at least one verification artifact.
+required_test_classes:
+  - schema
+  - authorization
+  - state-transition
+  - idempotency
+  - failure-path
+  - audit
+  - observability
+  - security
+  - e2e
+missing_test_mapping: BLOCK

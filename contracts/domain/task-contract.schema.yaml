@@ -1,0 +1,6 @@
+version: 1
+name: storygalore-task-contract
+required: [id, area, goal, owner_agent, depends_on, allowed_paths, required_tests, acceptance, risk]
+properties:
+  risk: [low, medium, high, critical]
+  required_tests: [unit, integration, contract, e2e, security, migration, performance]

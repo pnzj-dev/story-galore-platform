@@ -1,0 +1,14 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: storygalore://contracts/media/upload-completion/v1
+title: Media Upload Completion
+version: 1
+type: object
+additionalProperties: false
+required: [uploadId, mediaAssetId, appwriteFileId, completedAt]
+properties:
+  uploadId: {type: string, minLength: 1}
+  mediaAssetId: {type: string, minLength: 1}
+  appwriteFileId: {type: string, minLength: 1}
+  sizeBytes: {type: integer, minimum: 1}
+  checksum: {type: string}
+  completedAt: {type: string, format: date-time}

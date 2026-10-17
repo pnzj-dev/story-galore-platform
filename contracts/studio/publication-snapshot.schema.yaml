@@ -1,0 +1,14 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+title: Studio Publication Snapshot
+version: 1
+type: object
+required: [snapshotId, publicationId, sourceRevisionId, createdAt, immutable]
+properties:
+  snapshotId: {type: string}
+  publicationId: {type: string}
+  sourceRevisionId: {type: string}
+  sourceDocumentId: {type: string}
+  mediaAssetIds: {type: array, items: {type: string}}
+  contentHash: {type: string}
+  createdAt: {type: string, format: date-time}
+  immutable: {const: true}

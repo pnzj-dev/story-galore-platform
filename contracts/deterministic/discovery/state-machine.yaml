@@ -1,0 +1,45 @@
+version: '1.0'
+area: discovery
+states:
+- INDEXING
+- READY
+- DEGRADED
+- REBUILD_REQUIRED
+- DISABLED_BY_POLICY
+transitionRules:
+- Only listed transitions are legal.
+- Authorization MUST be evaluated separately from transition legality.
+- Retries MUST preserve idempotency.
+- State changes MUST emit the event declared by the command/event compatibility graph.
+transitions:
+- from: INDEXING
+  event: READY
+  to: READY
+- from: INDEXING
+  event: FAIL
+  to: REBUILD_REQUIRED
+- from: READY
+  event: DEGRADE
+  to: DEGRADED
+- from: DEGRADED
+  event: RECOVER
+  to: READY
+- from: READY
+  event: REBUILD
+  to: REBUILD_REQUIRED
+- from: DEGRADED
+  event: REBUILD
+  to: REBUILD_REQUIRED
+- from: REBUILD_REQUIRED
+  event: START
+  to: INDEXING
+- from: READY
+  event: DISABLE_POLICY
+  to: DISABLED_BY_POLICY
+- from: DEGRADED
+  event: DISABLE_POLICY
+  to: DISABLED_BY_POLICY
+- from: DISABLED_BY_POLICY
+  event: ENABLE_POLICY
+  to: INDEXING
+terminalStates: []

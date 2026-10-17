@@ -1,0 +1,20 @@
+version: 1
+profiles:
+  CORE:
+    required: true
+    mechanisms: [appwrite, domain, ui, auth, policy, critical_state_machines, audit, tests]
+  WORKFLOW:
+    required: false
+    activation_when: [long_running, retryable_external_work, durable_execution, reconciliation, bulk_operation]
+    mechanisms: [cloudflare_workflows, operation_state, reconciliation]
+  EXTENSION:
+    required: false
+    activation_when: [optional_product_capability]
+    examples: [ai, byok, payments, ads, vector_search, additional_media, specialized_agents, mcp_tools]
+complexity_budget:
+  new_service: justification_required
+  new_database: justification_required
+  new_state_machine: justification_required
+  new_workflow: justification_required
+  new_agent: justification_required
+  new_external_dependency: justification_required

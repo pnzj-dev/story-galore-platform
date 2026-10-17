@@ -1,0 +1,35 @@
+version: 1
+name: media-cache-policy
+classes:
+  PUBLIC:
+    cache: true
+    authorization: none
+    sharedCache: true
+  PRIVATE:
+    cache: false
+    authorization: required
+    sharedCache: false
+  ENTITLEMENT_PROTECTED:
+    cache: true
+    authorization: required
+    sharedCache: true
+    cacheKeyMustExclude: [userIdentity]
+    rule: Cache only the authorized distribution object; authorization must be revalidated before token issuance.
+  AGE_RESTRICTED:
+    cache: true
+    authorization: required
+    sharedCache: true
+    rule: Adult eligibility and opt-in are evaluated before delivery authorization.
+  SIGNED_DOWNLOAD:
+    cache: controlled
+    authorization: required
+    sharedCache: false
+  STREAMING_PROTECTED:
+    cache: true
+    authorization: required
+    sharedCache: true
+    rule: Manifest and segment authorization must not allow an unauthorized alternate path to origin content.
+security:
+  - Never cache an authorization-denied response as a successful media response.
+  - Never use a user-specific authorization decision as a public cache key.
+  - Invalidate distribution objects after deletion or policy-restricting transitions.

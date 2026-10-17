@@ -1,0 +1,11 @@
+version: 1
+kind: creator-studio-undo-redo
+rules:
+  history_basis: editor_operations
+  undo_creates_new_revision: true
+  redo_creates_new_revision: true
+  server_ack_required: true
+  undo_never_mutates_past_revisions: true
+  ai_application_is_one_undo_transaction: true
+  user_gesture_operations_may_be_grouped: true
+  conflicted_operations_cannot_be_undone_until_resolved: true

@@ -1,0 +1,46 @@
+version: '1.0'
+area: reader
+states:
+- AVAILABLE
+- ENTITLEMENT_REQUIRED
+- AGE_RESTRICTED
+- CONTENT_RESTRICTED
+- OFFLINE
+- TEMPORARILY_UNAVAILABLE
+transitionRules:
+- Only listed transitions are legal.
+- Authorization MUST be evaluated separately from transition legality.
+- Retries MUST preserve idempotency.
+- State changes MUST emit the event declared by the command/event compatibility graph.
+transitions:
+- from: AVAILABLE
+  event: REQUIRE_ENTITLEMENT
+  to: ENTITLEMENT_REQUIRED
+- from: AVAILABLE
+  event: AGE_RESTRICT
+  to: AGE_RESTRICTED
+- from: AVAILABLE
+  event: CONTENT_RESTRICT
+  to: CONTENT_RESTRICTED
+- from: AVAILABLE
+  event: OFFLINE
+  to: OFFLINE
+- from: AVAILABLE
+  event: UNAVAILABLE
+  to: TEMPORARILY_UNAVAILABLE
+- from: OFFLINE
+  event: ONLINE
+  to: AVAILABLE
+- from: ENTITLEMENT_REQUIRED
+  event: ENTITLEMENT_GRANTED
+  to: AVAILABLE
+- from: AGE_RESTRICTED
+  event: AGE_ELIGIBLE
+  to: AVAILABLE
+- from: CONTENT_RESTRICTED
+  event: POLICY_ALLOWED
+  to: AVAILABLE
+- from: TEMPORARILY_UNAVAILABLE
+  event: RECOVER
+  to: AVAILABLE
+terminalStates: []

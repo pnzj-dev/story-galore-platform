@@ -1,0 +1,50 @@
+version: "1.0"
+area: internationalization
+canonical: true
+principles:
+  - UI locale and preferred content languages are independent settings.
+  - Content-language filtering is server-authoritative and applies before discovery pagination.
+  - ONLY_SELECTED excludes publications with no intersection with the selected language set.
+  - UNKNOWN language metadata is not treated as matching a selected language.
+  - RTL direction is derived from the resolved UI locale, never guessed from text content.
+  - Language tags use BCP 47 syntax and normalized fallback rules.
+commands:
+  - name: language_preferences_set
+    requiresAuthorization: true
+    requiresIdempotency: true
+    emitsVersionedEvent: true
+    sourceOfTruthWrite: true
+  - name: ui_locale_set
+    requiresAuthorization: true
+    requiresIdempotency: true
+    emitsVersionedEvent: true
+    sourceOfTruthWrite: true
+  - name: publication_language_set
+    requiresAuthorization: true
+    requiresIdempotency: true
+    emitsVersionedEvent: true
+    sourceOfTruthWrite: true
+  - name: publication_localization_upsert
+    requiresAuthorization: true
+    requiresIdempotency: true
+    emitsVersionedEvent: true
+    sourceOfTruthWrite: true
+  - name: publication_localization_remove
+    requiresAuthorization: true
+    requiresIdempotency: true
+    emitsVersionedEvent: true
+    sourceOfTruthWrite: true
+queries:
+  - resolve_locale
+  - get_language_preferences
+  - list_supported_languages
+  - resolve_publication_languages
+filter_contract:
+  modes: [ALL, ONLY_SELECTED]
+  defaultMode: ALL
+  onlySelectedRule: "publication.contentLanguages intersects user.selectedContentLanguages"
+  emptySelectionRule: "ONLY_SELECTED requires a non-empty selection"
+  unknownLanguageRule: EXCLUDE_FROM_ONLY_SELECTED
+  disabledPublicationRule: APPLY_NORMAL_PUBLICATION_POLICY_FIRST
+  adultPolicyRule: APPLY_ADULT_POLICY_INDEPENDENTLY
+  entitlementRule: APPLY_ENTITLEMENT_INDEPENDENTLY

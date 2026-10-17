@@ -1,0 +1,13 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: storygalore://contracts/media/upload-recovery/v1
+title: Media Upload Recovery
+version: 1
+type: object
+additionalProperties: false
+required: [uploadId, recoveryMode, clientState, serverState]
+properties:
+  uploadId: {type: string, minLength: 1}
+  recoveryMode: {enum: [RECONNECT, BROWSER_RESTART, APP_RESTART, SESSION_REATTACH]}
+  clientState: {type: object}
+  serverState: {type: object}
+  action: {enum: [RESUME, RESTART, COMPLETE, CANCEL, EXPIRE]}

@@ -1,0 +1,15 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+title: StoryGalore Comment
+description: Flat parent-comment model for page-level and media-level comments.
+type: object
+required: [targetType, targetId, userId, body, status, createdAt, updatedAt]
+properties:
+  targetType: {type: string, enum: [PAGE, COMMENT, PUBLICATION]}
+  targetId: {type: string, minLength: 1}
+  userId: {type: string, minLength: 1}
+  parentCommentId: {type: string, description: Parent comment for flat replies.}
+  body: {type: string, minLength: 1}
+  status: {type: string, enum: [PENDING_REVIEW, PUBLISHED, HIDDEN, REMOVED, DELETED]}
+  createdAt: {type: string, format: date-time}
+  updatedAt: {type: string, format: date-time}
+additionalProperties: false

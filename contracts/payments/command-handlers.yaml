@@ -1,0 +1,167 @@
+schema: storygalore.payments-command-handlers/v1
+version: 1
+canonical: true
+purpose: "Deterministic command/query handler contracts for the payment domain, so the api gateway and Go handlers can be implemented without guessing."
+source_of_truth:
+  payments_doc: docs/PAYMENTS.md
+  financial_invariants: docs/FINANCIAL_INVARIANTS.md
+  ledger_boundaries: contracts/accounting/economic-ledger-boundaries.yaml
+  provider_registry: contracts/providers/payment-providers.yaml
+  provider_policy: contracts/business/payment-provider-policy.yaml
+  command_event_map: contracts/compatibility/command-event-map.yaml
+  errors: contracts/functions/error-catalog.yaml
+capabilities:
+  - {id: consumer.payment.read, grant: owner_or_staff}
+  - {id: consumer.payment.create, grant: authenticated}
+  - {id: finance.payment.refund, grant: staff}
+  - {id: finance.payment.reconcile, grant: staff}
+shared_rules:
+  actor_required: true
+  idempotency_required_for_mutations: true
+  payment_succeeded_ne_subscription_active_ne_entitlement_granted: true
+  webhooks_are_authenticated_immutable_deduplicated_normalized_idempotent: true
+  provider_adapters_are_replaceable_ledger_is_authoritative: true
+  provider_is_conditional_until_activation_gates_pass: true
+  unknown_fields: REJECT
+commands:
+  - name: payment_create
+    operation: payment_create
+    capability: consumer.payment.create
+    input:
+      userId: {type: string, required: true}
+      amount: {type: integer, required: true}
+      currency: {type: string, required: true}
+      provider: {type: enum, elements: [STRIPE_CONNECT, NOWPAYMENTS, ZEN_PAYMENTS, SECUREGLOBALPAY], required: true}
+      subscriptionId: {type: string, required: false}
+    state: {initial: CREATED}
+    effects:
+      events: [payments.payment_create.v1]
+      writes: [{table: payments, kind: INSERT}]
+    result: {paymentId: string}
+    errors: [FORBIDDEN, POLICY_DENIED, INVALID_INPUT]
+    idempotency: {key: idempotencyKey, behavior: RETURN_EXISTING_RESULT}
+  - name: payment_confirm_from_webhook
+    operation: payment_confirm_from_webhook
+    capability: finance.payment.reconcile
+    input:
+      provider: {type: string, required: true}
+      providerEventId: {type: string, required: true}
+      paymentId: {type: string, required: false}
+      eventType: {type: string, required: true}
+      signatureVerified: {type: boolean, required: true}
+    effects:
+      events: [payments.payment_confirm_from_webhook.v1]
+      writes: [{table: payment_events, kind: INSERT}, {table: payments, kind: UPDATE}]
+    result: {eventId: string}
+    errors: [FORBIDDEN, POLICY_DENIED, DUPLICATE_EVENT, INVALID_INPUT]
+    idempotency: {key: providerEventId, behavior: DUPLICATE_EVENT_HARMLESS}
+  - name: payment_refund
+    operation: payment_refund
+    capability: finance.payment.refund
+    input:
+      paymentId: {type: string, required: true}
+      amount: {type: integer, required: true}
+      reason: {type: string, required: false}
+    effects:
+      events: [payments.payment_refund.v1]
+      writes: [{table: refunds, kind: INSERT}, {table: payments, kind: UPDATE}]
+    result: {refundId: string}
+    errors: [FORBIDDEN, POLICY_DENIED, NOT_FOUND, INVALID_STATE, INVALID_INPUT]
+    idempotency: {key: idempotencyKey, behavior: RETURN_EXISTING_RESULT}
+  - name: payment_reconcile
+    operation: payment_reconcile
+    capability: finance.payment.reconcile
+    input:
+      paymentId: {type: string, required: true}
+      providerPaymentId: {type: string, required: false}
+      status: {type: string, required: false}
+    effects:
+      events: [payments.payment_reconcile.v1]
+      writes: [{table: payments, kind: UPDATE}]
+    result: {paymentId: string}
+    errors: [FORBIDDEN, POLICY_DENIED, NOT_FOUND, INVALID_INPUT]
+    idempotency: {key: idempotencyKey, behavior: RETURN_EXISTING_RESULT}
+  - name: payment_mark_failed
+    operation: payment_mark_failed
+    capability: finance.payment.reconcile
+    input:
+      paymentId: {type: string, required: true}
+    state: {to: FAILED}
+    effects:
+      events: [payments.payment_mark_failed.v1]
+      writes: [{table: payments, kind: UPDATE}]
+    result: {paymentId: string}
+    errors: [FORBIDDEN, POLICY_DENIED, NOT_FOUND, INVALID_STATE, INVALID_INPUT]
+    idempotency: {key: idempotencyKey, behavior: RETURN_EXISTING_RESULT}
+queries:
+  - name: payment_get
+    capability: consumer.payment.read
+    input: {paymentId: {type: string, required: true}}
+    returns: payment
+    table: payments
+    errors: [FORBIDDEN, NOT_FOUND]
+  - name: payment_list
+    capability: consumer.payment.read
+    input: {userId: {type: string, required: false}, cursor: {type: string, required: false}, limit: {type: integer, required: false}}
+    returns: payment_list
+    table: payments
+    pagination: cursor
+    errors: [FORBIDDEN]
+tables:
+  payments:
+    source: docs/PAYMENTS.md
+    columns:
+      - {key: userId, type: varchar, size: 255, required: true}
+      - {key: subscriptionId, type: varchar, size: 255, required: false}
+      - {key: provider, type: enum, elements: [STRIPE_CONNECT, NOWPAYMENTS, ZEN_PAYMENTS, SECUREGLOBALPAY], required: true}
+      - {key: providerPaymentId, type: varchar, size: 255, required: false}
+      - {key: currency, type: varchar, size: 3, required: true}
+      - {key: amount, type: integer, required: true}
+      - {key: status, type: enum, elements: [CREATED, AUTHORIZED, CAPTURED, FAILED, REFUNDED, PARTIALLY_REFUNDED], required: true}
+      - {key: idempotencyKey, type: varchar, size: 255, required: true}
+      - {key: createdAt, type: datetime, required: true}
+      - {key: updatedAt, type: datetime, required: true}
+  payment_attempts:
+    source: docs/PAYMENTS.md
+    columns:
+      - {key: paymentId, type: varchar, size: 255, required: true}
+      - {key: provider, type: varchar, size: 64, required: true}
+      - {key: providerAttemptId, type: varchar, size: 255, required: false}
+      - {key: status, type: enum, elements: [PENDING, SUCCEEDED, FAILED], required: true}
+      - {key: errorCode, type: varchar, size: 255, required: false}
+      - {key: createdAt, type: datetime, required: true}
+  payment_events:
+    source: docs/PAYMENTS.md
+    columns:
+      - {key: provider, type: varchar, size: 64, required: true}
+      - {key: providerEventId, type: varchar, size: 255, required: true}
+      - {key: paymentId, type: varchar, size: 255, required: false}
+      - {key: eventType, type: varchar, size: 255, required: true}
+      - {key: receivedAt, type: datetime, required: true}
+      - {key: signatureVerified, type: boolean, required: true}
+      - {key: processingState, type: enum, elements: [RECEIVED, PROCESSING, PROCESSED, FAILED], required: true}
+      - {key: processingAttempts, type: integer, required: false}
+      - {key: createdAt, type: datetime, required: true}
+  ledger_entries:
+    source: docs/PAYMENTS.md
+    columns:
+      - {key: entryType, type: enum, elements: [PAYMENT_AUTHORIZED, PAYMENT_CAPTURED, PAYMENT_FAILED, REFUND, CHARGEBACK, SUBSCRIPTION_RENEWAL, CREATOR_EARNING, PLATFORM_FEE, AI_COST, MANUAL_ADJUSTMENT], required: true}
+      - {key: amount, type: integer, required: true}
+      - {key: currency, type: varchar, size: 3, required: true}
+      - {key: dimension, type: enum, elements: [cash_received, deferred_revenue, recognized_platform_revenue, creator_payable, creator_reserve, tax_payable, processor_payable, refund_liability, chargeback_exposure, infrastructure_cost, contribution_margin], required: false}
+      - {key: referenceId, type: varchar, size: 255, required: false}
+      - {key: createdAt, type: datetime, required: true}
+  refunds:
+    source: docs/PAYMENTS.md
+    columns:
+      - {key: paymentId, type: varchar, size: 255, required: true}
+      - {key: providerRefundId, type: varchar, size: 255, required: false}
+      - {key: amount, type: integer, required: true}
+      - {key: currency, type: varchar, size: 3, required: true}
+      - {key: status, type: enum, elements: [REQUESTED, SUCCEEDED, FAILED], required: true}
+      - {key: reason, type: text, required: false}
+      - {key: createdAt, type: datetime, required: true}
+implementation_notes:
+  - Provider adapters are CONDITIONAL (not production-routable) until activation gates pass; the api gateway records payment intent and state but does not call providers directly.
+  - payment_confirm_from_webhook deduplicates on providerEventId (DUPLICATE_EVENT_HARMLESS).
+  - payment_succeeded, subscription_active and entitlement_granted are distinct; no handler conflates them.

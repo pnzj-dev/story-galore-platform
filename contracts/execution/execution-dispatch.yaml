@@ -1,0 +1,47 @@
+version: 1
+domain: platform
+authority: execution-policy
+rules:
+  - Every asynchronous command MUST declare an execution class before implementation.
+  - Execution class MUST determine the allowed executor set; coding agents MUST NOT select executors ad hoc.
+  - IMMEDIATE commands MUST NOT create durable jobs or Cloudflare Workflows workflows.
+  - DURABLE_JOB commands MUST have an idempotencyKey and operationId.
+  - DURABLE_WORKFLOW commands MUST use the registered Cloudflare Workflows executor.
+  - Cloudflare Workflows is the only V1 durable execution engine.
+  - Appwrite TablesDB stores authoritative domain and operation state; it is not a second execution engine.
+  - Appwrite Functions are used for synchronous domain handlers, webhooks, scheduled projections and integrations; they do not claim or execute durable jobs.
+  - Cloudflare Workflows is the V1 authoritative orchestration executor for complex long-running workflows, but it is never the domain source of truth.
+  - Automatic failover MUST be idempotency-safe and MUST NOT start a second execution when the first execution may still own an external side effect.
+commands:
+  - name: operation_create
+    executionClass: DURABLE_JOB
+    sourceOfTruthWrite: true
+    requiresIdempotency: true
+    event: execution.operation_created.v1
+  - name: operation_complete
+    executionClass: DURABLE_JOB
+    sourceOfTruthWrite: true
+    requiresIdempotency: true
+    event: execution.operation_completed.v1
+  - name: operation_retry
+    executionClass: DURABLE_JOB
+    sourceOfTruthWrite: true
+    requiresIdempotency: true
+    event: execution.operation_retry_scheduled.v1
+  - name: operation_cancel
+    executionClass: DURABLE_JOB
+    sourceOfTruthWrite: true
+    requiresIdempotency: true
+    event: execution.operation_cancelled.v1
+executionClasses:
+  IMMEDIATE:
+    primary: application
+    secondary: none
+  DURABLE_JOB:
+    primary: cloudflare_workflows
+    secondary: none
+    failover: controlled_recovery
+  DURABLE_WORKFLOW:
+    primary: cloudflare_workflows
+    secondary: none_automatic
+    failover: controlled_recovery

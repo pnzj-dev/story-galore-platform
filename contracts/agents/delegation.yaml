@@ -1,0 +1,20 @@
+version: 1.0.0
+required_fields:
+- delegationId
+- parentTaskId
+- delegatingAgentId
+- delegateAgentId
+- requestedCapabilities
+- scope
+- objective
+- constraints
+- budget
+- approvalPolicy
+- createdAt
+- expiresAt
+rules:
+- Delegation may only narrow capabilities and scope.
+- A delegate cannot grant capabilities to itself or another agent.
+- A delegate cannot extend its parent task expiry.
+- High-risk delegated actions require the parent approval policy and independent enforcement.
+- Results must link to parentTaskId and delegationId.

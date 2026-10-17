@@ -1,0 +1,13 @@
+version: 1.0.0
+release: V1
+policy: deterministic
+change_classes:
+  domain: [commands, events, state-machines, persistence, api, tests, docs]
+  persistence: [migration, compatibility, backup-restore, tests]
+  api: [client-contracts, authorization, idempotency, tests, docs]
+  ui: [route-state, accessibility, i18n, e2e]
+  agent: [capabilities, policy, task-contracts, provenance, audit, tests]
+  provider: [adapter, normalized-schema, policy, cost, health, tests]
+  infrastructure: [resource-map, deployment, secrets, health, rollback, tests]
+  security: [threat-model, policy, audit, tests]
+rule: A task cannot be complete until every affected change class has an explicit verification mapping.

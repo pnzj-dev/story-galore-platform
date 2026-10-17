@@ -1,0 +1,119 @@
+contract_id: appwrite-mcp-connection
+version: 1.0.0
+status: canonical
+purpose: Define the only permitted Appwrite MCP access path for autonomous StoryGalore
+  agents.
+implementation_decision:
+  gateway_platform: APPWRITE_FUNCTIONS
+  gateway_function_id: central-agent-gateway
+  policy_engine_form: IN_PROCESS_MODULE
+  separate_policy_engine_deployment: PROHIBITED_UNLESS_APPROVED_ADR
+  implementation_status: CONTRACT_ONLY_BLOCKED_PENDING_VERIFICATION
+  scaffold_policy: OFFICIAL_APPWRITE_CLI_ONLY
+architecture:
+  agent_to_appwrite_path:
+  - agent_runtime
+  - central_agent_gateway
+  - policy_engine
+  - appwrite_mcp_client
+  - registered_appwrite_mcp_server
+  - appwrite_platform
+  rule: Autonomous agents MUST NOT call Appwrite APIs or SDKs directly. They MUST
+    use registered tools through the central gateway and Appwrite MCP connection.
+  appwrite_mcp_server_url: https://mcp.appwrite.io/
+  server_url_source: https://appwrite.io/docs/tooling/ai/mcp-servers
+  provider_status: OFFICIAL_ENDPOINT_VERIFIED_RUNTIME_AUTHORIZATION_MODEL_BLOCKED
+  docs_mcp: NOT_A_BACKEND_ACCESS_PATH
+identity_and_authorization:
+  agent_identity: canonical_storygalore_agent_id
+  caller_identity_from_client_payload_trusted: false
+  authorization_source: contracts/agents/capability-registry.yaml
+  tool_allowlist_source: contracts/integrations/agent-appwrite-tool-allowlists.yaml
+  resource_scope_source: canonical_domain_and_tenant_contracts
+  backend_authorization_required: true
+  appwrite_permissions_required: true
+  gateway_policy_required: true
+  shared_unrestricted_human_oauth_session_allowed: false
+  shared_admin_api_key_allowed: false
+  per_agent_api_keys_required: false
+  identity_binding: Gateway derives agent identity from authenticated runtime identity
+    and signed invocation context; never from model-generated arguments.
+  oauth_or_service_identity_resolution:
+    status: BLOCKED_VERIFICATION_REQUIRED
+    reason: The official hosted Appwrite MCP server documents OAuth for interactive
+      clients, but the autonomous unattended runtime identity/delegation semantics
+      must be verified before deployment.
+    allowed_resolution: Choose a documented official authentication mode that supports
+      unattended least-privilege execution, or deploy the official Appwrite MCP server
+      in an approved controlled environment with a narrowly scoped service identity.
+    prohibited_resolution: Reuse a developer's personal OAuth session, use a shared
+      unrestricted credential, or bypass Appwrite MCP with direct SDK/API calls.
+    evidence_required:
+    - official_authentication_documentation_url
+    - identity_type_and_scope
+    - token_lifetime_and_rotation
+    - revocation_behavior
+    - unattended_runtime_test
+    - least_privilege_permission_test
+    - security_review_approval
+  request_context_required:
+  - request_id
+  - trace_id
+  - agent_id
+  - task_id
+  - actor_id_or_system_actor_id
+  - tenant_id_when_applicable
+  - policy_decision_id
+  - capability_id
+  - idempotency_key_for_mutations
+  enforcement_order:
+  - authenticate_runtime
+  - resolve_canonical_agent_identity
+  - validate_registered_tool_and_schema
+  - evaluate_agent_allowlist
+  - evaluate_user_tenant_resource_scope
+  - evaluate_risk_and_approval_policy
+  - invoke_appwrite_mcp_tool
+  - verify_result_schema_and_data_projection
+  - emit_audit_event
+  failure_behavior: DENY_AND_AUDIT
+  fail_closed_conditions:
+  - unknown_agent
+  - unknown_tool
+  - unregistered_appwrite_mcp_tool
+  - missing_or_expired_identity
+  - missing_capability
+  - ambiguous_tenant_or_resource_scope
+  - policy_engine_unavailable
+  - unverified_authentication_mode
+  - missing_idempotency_key_for_mutation
+  - missing_approval_for_high_risk_operation
+  - response_schema_mismatch
+  secrets:
+    stored_in: approved_secret_manager_or_official_oauth_credential_store
+    available_to_model: false
+    available_in_agent_memory: false
+    log_values: false
+  mutations:
+    idempotency_required: true
+    audit_required: true
+    destructive_or_privileged_requires_approval: true
+    financial_or_permission_mutations: explicit_registered_workflow_only
+  tool_discovery:
+    dynamic_provider_catalog_is_not_authorization: true
+    only_allowlisted_tools_may_be_exposed_to_agent: true
+    provider_tool_name_must_map_to_stable_storygalore_tool_id: true
+  implementation_gate:
+    block_until:
+    - official_appwrite_go_runtime_support_and_exact_version_verified
+    - central_agent_gateway_function_registered_in_function_catalog
+    - exact_resource_ids_registered_in_gateway_resource_map
+    - gateway_request_and_response_schemas_validated
+    - gateway_security_test_matrix_passes
+    - authentication_mode_verified
+    - every_agent_allowlist_complete
+    - every_exposed_tool_registered
+    - resource_scope_and_tenant_checks_tested
+    - direct_appwrite_bypass_tests_pass
+    - audit_and_idempotency_tests_pass
+    - official_tool_catalog_snapshot_and_version_recorded

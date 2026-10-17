@@ -1,0 +1,135 @@
+---
+import Layout from "../../../layouts/Layout.astro";
+import { actions } from "astro:actions";
+import { fetchProject, fetchDocuments } from "../../../lib/gateway";
+
+const user = Astro.locals.user;
+const projectId = Astro.params.id;
+
+if (!user) {
+  return Astro.redirect("/login");
+}
+
+const project = await fetchProject(user.$id, projectId);
+if (!project) {
+  return Astro.redirect("/studio");
+}
+
+const documents = await fetchDocuments(user.$id, projectId);
+
+const createResult = Astro.getActionResult(actions.createDocument);
+if (createResult?.data?.ok) {
+  return Astro.redirect(`/studio/projects/${projectId}`);
+}
+const createError = createResult?.error?.message;
+
+const MEDIA_TYPES = [
+  { value: "BOOK", label: "Book (comic, manga, novel, …)" },
+  { value: "POST", label: "Creator post" },
+  { value: "VIDEO", label: "Video" },
+  { value: "AUDIO", label: "Audio" },
+  { value: "MIXED", label: "Mixed media" },
+] as const;
+---
+
+<Layout title={project.name ?? "Project"}>
+  <main class="mx-auto max-w-4xl px-6 py-12">
+    <a href="/studio" class="text-sm text-foreground-muted transition hover:text-foreground">
+      &larr; Back to studio
+    </a>
+
+    <header class="mt-4">
+      <h1 class="text-3xl font-bold">{project.name ?? "Untitled project"}</h1>
+      {project.description && <p class="mt-2 text-foreground-muted">{project.description}</p>}
+      {project.status && <span class="mt-3 inline-block text-xs text-foreground-muted">{project.status}</span>}
+    </header>
+
+    <section class="mt-10">
+      <h2 class="text-xl font-semibold">New document</h2>
+      <p class="mt-1 text-sm text-foreground-muted">
+        Start any kind of publication — a comic is just one book format.
+      </p>
+      <form method="POST" action={actions.createDocument} class="mt-4 max-w-sm space-y-4">
+        <input type="hidden" name="projectId" value={projectId} />
+        <div>
+          <label for="title" class="mb-1 block text-sm text-foreground-muted">Title</label>
+          <input
+            id="title"
+            name="title"
+            type="text"
+            required
+            maxlength="200"
+            class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
+          />
+        </div>
+        <div>
+          <label for="type" class="mb-1 block text-sm text-foreground-muted">Type</label>
+          <select
+            id="type"
+            name="type"
+            class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
+          >
+            {MEDIA_TYPES.map((m) => <option value={m.value}>{m.label}</option>)}
+          </select>
+        </div>
+        <div>
+          <label for="format" class="mb-1 block text-sm text-foreground-muted">Format (books only)</label>
+          <select
+            id="format"
+            name="format"
+            class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
+          >
+            <option value="">—</option>
+            <option value="COMIC">Comic</option>
+            <option value="MANGA">Manga</option>
+            <option value="MANHWA">Manhwa</option>
+            <option value="MANHUA">Manhua</option>
+            <option value="BANDE_DESSINEE">Bande dessinée</option>
+            <option value="GRAPHIC_NOVEL">Graphic novel</option>
+            <option value="WEBTOON">Webtoon</option>
+            <option value="NOVEL">Novel</option>
+            <option value="LIGHT_NOVEL">Light novel</option>
+            <option value="NONFICTION">Nonfiction</option>
+            <option value="EDUCATIONAL">Educational</option>
+          </select>
+        </div>
+
+        {createError && (
+          <p class="rounded-lg border border-danger bg-danger/15 px-3 py-2 text-sm text-danger" role="alert">
+            {createError}
+          </p>
+        )}
+
+        <button
+          type="submit"
+          class="w-full rounded-lg bg-primary px-4 py-2 font-semibold text-primary-foreground transition hover:opacity-90"
+        >
+          Create document
+        </button>
+      </form>
+    </section>
+
+    <section class="mt-10">
+      <h2 class="text-xl font-semibold">Documents</h2>
+      {documents.length > 0 ? (
+        <ul class="mt-4 space-y-2">
+          {documents.map((d) => (
+            <li class="flex items-center justify-between rounded-lg border border-border bg-surface p-3">
+              <a href={`/studio/projects/${projectId}/documents/${d.$id}`} class="min-w-0 flex-1">
+                <p class="truncate font-medium text-foreground transition hover:text-primary">
+                  {d.title || "Untitled"}
+                </p>
+                {d.format && <p class="truncate text-sm text-foreground-muted">{d.format}</p>}
+              </a>
+              <span class="ml-4 shrink-0 text-xs text-foreground-muted">{d.type}</span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p class="mt-4 rounded-xl border border-dashed border-border px-6 py-8 text-sm text-foreground-muted">
+          No documents yet. Create your first document above.
+        </p>
+      )}
+    </section>
+  </main>
+</Layout>

@@ -1,0 +1,20 @@
+version: 1
+kind: creator-studio-query-contract
+rules:
+  - queries_are_read_only
+  - all_queries_are_tenant_scoped
+  - authorization_is_applied_before_returning_records
+  - projections_may_be_used_but_canonical_records_remain_authoritative
+queries:
+  project_get: {returns: project_projection}
+  project_list: {returns: project_summary_list, pagination: cursor}
+  story_bible_get: {returns: story_bible}
+  character_list: {returns: character_list, pagination: cursor}
+  world_get: {returns: world}
+  asset_list: {returns: studio_asset_list, pagination: cursor}
+  document_get: {returns: document_with_page_summaries}
+  page_get: {returns: page_with_panels}
+  revision_list: {returns: immutable_revision_summaries, pagination: cursor}
+  operation_list: {returns: append_only_operations, pagination: cursor}
+  generation_get: {returns: generation_status}
+  publication_validation_get: {returns: validation_result}

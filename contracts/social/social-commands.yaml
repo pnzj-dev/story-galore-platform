@@ -1,0 +1,87 @@
+version: 1
+domain: social
+commands:
+  - name: creator_profile_update
+    authority: social
+    idempotency: required
+    event: social.creator_profile_updated.v1
+  - name: creator_follow
+    authority: social
+    idempotency: required
+    event: social.creator_followed.v1
+  - name: creator_unfollow
+    authority: social
+    idempotency: required
+    event: social.creator_unfollowed.v1
+  - name: social_post_create
+    authority: social
+    idempotency: required
+    event: social.post_created.v1
+  - name: social_post_update
+    authority: social
+    idempotency: required
+    event: social.post_updated.v1
+  - name: social_post_delete
+    authority: social
+    idempotency: required
+    event: social.post_deleted.v1
+  - name: social_reaction_set
+    authority: social
+    idempotency: required
+    event: social.reaction_set.v1
+  - name: social_comment_create
+    authority: social
+    idempotency: required
+    event: social.comment_created.v1
+  - name: social_comment_update
+    authority: social
+    idempotency: required
+    event: social.comment_updated.v1
+  - name: social_comment_delete
+    authority: social
+    idempotency: required
+    event: social.comment_deleted.v1
+  - name: social_mention_create
+    authority: social
+    idempotency: required
+    event: social.mention_created.v1
+  - name: social_collection_create
+    authority: social
+    idempotency: required
+    event: social.collection_created.v1
+  - name: social_collection_item_add
+    authority: social
+    idempotency: required
+    event: social.collection_item_added.v1
+  - name: social_collection_item_remove
+    authority: social
+    idempotency: required
+    event: social.collection_item_removed.v1
+  - name: social_share_create
+    authority: social
+    idempotency: required
+    event: social.share_created.v1
+  - name: social_poll_vote
+    authority: social
+    idempotency: required
+    event: social.poll_vote_cast.v1
+  - name: social_block
+    authority: social
+    idempotency: required
+    event: social.user_blocked.v1
+  - name: social_unblock
+    authority: social
+    idempotency: required
+    event: social.user_unblocked.v1
+  - name: social_mute
+    authority: social
+    idempotency: required
+    event: social.user_muted.v1
+  - name: social_unmute
+    authority: social
+    idempotency: required
+    event: social.user_unmuted.v1
+  - name: social_report_create
+    authority: moderation
+    idempotency: required
+    event: moderation.social_report_created.v1

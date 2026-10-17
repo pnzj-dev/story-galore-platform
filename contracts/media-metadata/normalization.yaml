@@ -1,0 +1,51 @@
+version: 1.0.0
+release: V1
+policy: deterministic
+purpose: Normalize external media metadata without inventing authoritative facts.
+source_metadata:
+  preserve:
+    - original_filename
+    - original_mime_type
+    - original_size
+    - original_sha256
+    - original_metadata_snapshot
+    - source_url
+    - source_provider
+    - source_file_id
+normalization:
+  filename:
+    unicode: NFC
+    trim_outer_whitespace: true
+    replace_control_characters: true
+    replace_path_separators: true
+    reject_empty: true
+    reject_dot_segments: true
+    reject_device_names: true
+    max_length: 240
+    collision_rule: append-deterministic-short-hash
+  metadata_strings:
+    encoding: UTF-8
+    normalize_unicode: NFC
+    trim_outer_whitespace: true
+    reject_control_characters_except_tab: true
+  timestamps:
+    canonical: ISO-8601
+    preserve_original_timezone_when_known: true
+    unknown_remains_unknown: true
+  language:
+    identifier: BCP-47
+    never_infer_as_authoritative_without_evidence: true
+  media_fields:
+    title: preserve_or_candidate
+    description: preserve_or_candidate
+    creator: preserve_or_candidate
+    copyright: preserve_or_candidate
+    genre: preserve_or_candidate
+    tags: preserve_or_candidate
+rules:
+  - Never overwrite original metadata; store normalized metadata separately.
+  - Candidate/inferred values require provenance and confidence.
+  - Never convert a guessed language into authoritative contentLanguages.
+  - Strip embedded secrets, authentication tokens and filesystem paths from application-visible metadata.
+  - GPS/precise location is classified sensitive and is removed from public metadata by default; original metadata remains in restricted provenance only when retention is legally and operationally required.
+  - Preserve ICC/color metadata required for correct rendering when safe.

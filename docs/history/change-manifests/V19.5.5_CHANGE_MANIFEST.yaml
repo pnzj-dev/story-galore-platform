@@ -1,0 +1,21 @@
+version: 19.5.5
+release: V1
+change: AGENT_ARCHITECTURE_SIMPLIFICATION
+previous_agent_count: 21
+current_agent_count: 17
+removed_autonomous_agents:
+  - character
+  - world
+  - creator-growth
+  - cost-guardian
+retained_as_capabilities:
+  - character
+  - world
+  - creator-growth
+  - cost-guardian
+capability_owners:
+  character: story-producer
+  world: story-producer
+  creator-growth: creator-business
+  cost-guardian: data-analysis-reporting
+policy: No capability is deleted merely because its autonomous agent boundary is removed.

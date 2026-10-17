@@ -1,0 +1,29 @@
+schema: storygalore.state-machine/v1
+id: consumer.sponsored_consumption
+version: 1
+policy: fail_closed
+states:
+- PROPOSED
+- RESERVED
+- ACTIVE
+- EXHAUSTED
+- CANCELLED
+transitions:
+- from: PROPOSED
+  event: RESERVE
+  to: RESERVED
+- from: RESERVED
+  event: ACTIVATE
+  to: ACTIVE
+- from: ACTIVE
+  event: EXHAUST
+  to: EXHAUSTED
+- from:
+  - PROPOSED
+  - RESERVED
+  - ACTIVE
+  event: CANCEL
+  to: CANCELLED
+terminalStates:
+- EXHAUSTED
+- CANCELLED

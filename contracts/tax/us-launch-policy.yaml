@@ -1,0 +1,18 @@
+schema: storygalore.us-tax-policy/v1
+version: 1
+canonical: true
+status: V19.5.3
+policy: fail_closed
+scope:
+  operatingEntityCountry: US
+  launchMarket: US
+  taxEngine: REGISTERED_TAX_PROVIDER
+rules:
+- Tax determination MUST be performed by a registered tax policy/provider or an explicitly approved tax rule.
+- Tax rates MUST NOT be hard-coded in application code.
+- Product tax classification MUST be explicit.
+- Customer and creator jurisdiction data used for tax determination MUST be provenance-traceable.
+- Unknown nexus, taxability, rate or exemption status MUST NOT be converted to zero tax; it MUST BLOCK or enter an explicitly approved pending state.
+- Tax collected, tax payable and platform revenue MUST remain separate ledger dimensions.
+- Refunds MUST produce an explicit tax adjustment according to the registered tax policy.
+- International tax behavior is DISABLED until a jurisdiction pack is approved.

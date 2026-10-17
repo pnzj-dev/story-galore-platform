@@ -1,0 +1,126 @@
+{
+  "schema": "storygalore.admin-rbac-admin-app/v1",
+  "version": "1.0",
+  "status": "canonical_v1_destructive_route_registry",
+  "source_of_truth": "contracts/permissions/admin-rbac.json",
+  "principle": "destructive_admin_is_capability_based_and_network_isolated",
+  "app": "apps/admin",
+  "classification": "DESTRUCTIVE",
+  "selection_rule": "risk IN [HIGH, CRITICAL] AND approval == REQUIRED",
+  "note": "This registry is the destructive-only DELTA (8 routes) present in apps/admin but absent from apps/web /admin. apps/admin is the complete intranet console and also contains every non-destructive route from contracts/permissions/admin-rbac.json.",
+  "required_fields": [
+    "route",
+    "capability",
+    "roles",
+    "scope",
+    "risk",
+    "approval",
+    "projection",
+    "destructive"
+  ],
+  "routes": [
+    {
+      "route": "/admin/payments/refunds",
+      "capability": "finance.refund.request",
+      "roles": ["FINANCE", "PLATFORM_ADMIN"],
+      "scope": "finance",
+      "risk": "HIGH",
+      "approval": "REQUIRED",
+      "projection": "payment_safe",
+      "destructive": true,
+      "reason": "money_movement"
+    },
+    {
+      "route": "/admin/security/private-message-access",
+      "capability": "security.private_message.investigate",
+      "roles": ["SECURITY_ABUSE", "PLATFORM_ADMIN"],
+      "scope": "approved_investigation",
+      "risk": "CRITICAL",
+      "approval": "REQUIRED",
+      "projection": "restricted_message_case",
+      "destructive": true,
+      "reason": "secret_or_private_access"
+    },
+    {
+      "route": "/admin/operations/media-distribution",
+      "capability": "operations.media_distribution.configure",
+      "roles": ["SRE_OPS", "PLATFORM_ADMIN"],
+      "scope": "global",
+      "risk": "HIGH",
+      "approval": "REQUIRED",
+      "projection": "media_distribution_safe",
+      "destructive": true,
+      "reason": "broad_blast_radius"
+    },
+    {
+      "route": "/admin/support/settings",
+      "capability": "support.policy.manage",
+      "roles": ["SUPPORT", "PLATFORM_ADMIN"],
+      "scope": "support_workspace",
+      "risk": "HIGH",
+      "approval": "REQUIRED",
+      "projection": "support_policy_safe",
+      "destructive": true,
+      "reason": "broad_blast_radius"
+    },
+    {
+      "route": "/admin/economics/governance",
+      "capability": "economics.governance.read",
+      "roles": ["FINANCE", "PLATFORM_ADMIN"],
+      "scope": "economic_governance",
+      "risk": "HIGH",
+      "approval": "REQUIRED",
+      "projection": "economic_governance_safe",
+      "destructive": true,
+      "reason": "broad_blast_radius"
+    },
+    {
+      "route": "/admin/economics/pricing",
+      "capability": "economics.pricing.read",
+      "roles": ["FINANCE", "PLATFORM_ADMIN"],
+      "scope": "pricing",
+      "risk": "HIGH",
+      "approval": "REQUIRED",
+      "projection": "pricing_policy_safe",
+      "destructive": true,
+      "reason": "broad_blast_radius"
+    },
+    {
+      "route": "/admin/economics/reserves",
+      "capability": "economics.reserve.read",
+      "roles": ["FINANCE", "PLATFORM_ADMIN"],
+      "scope": "reserves",
+      "risk": "HIGH",
+      "approval": "REQUIRED",
+      "projection": "reserves_safe",
+      "destructive": true,
+      "reason": "broad_blast_radius"
+    },
+    {
+      "route": "/admin/economics/tax",
+      "capability": "economics.tax.read",
+      "roles": ["FINANCE", "PLATFORM_ADMIN"],
+      "scope": "tax",
+      "risk": "HIGH",
+      "approval": "REQUIRED",
+      "projection": "tax_obligation_safe",
+      "destructive": true,
+      "reason": "broad_blast_radius"
+    }
+  ],
+  "global_rules": {
+    "unknown_role": "DENY",
+    "unknown_capability": "DENY",
+    "missing_actor": "DENY",
+    "scope_unresolved": "DENY",
+    "policy_engine_unavailable": "DENY",
+    "client_supplied_role_untrusted": true,
+    "approval_required_actions_cannot_execute_without_approval": true,
+    "high_risk_mutations_require_audit": true,
+    "sensitive_data_requires_safe_projection": true,
+    "raw_secrets_forbidden": true,
+    "private_message_access_requires_case_bound_approval": true,
+    "network_restriction_required": true,
+    "browser_key_forbidden": true
+  }
+}

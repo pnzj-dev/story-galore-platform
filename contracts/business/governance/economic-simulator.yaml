@@ -1,0 +1,47 @@
+schema: storygalore.economic-simulator/v1
+version: 1
+canonical: true
+status: V19.5.3
+policy: fail_closed
+scenarios:
+- CONSERVATIVE
+- BASE
+- AGGRESSIVE
+- VIRAL
+- HIGH_MEDIA_COST
+- LOW_CONVERSION
+- HIGH_CHARGEBACK
+required_inputs:
+- user_population
+- conversion_rate
+- churn_rate
+- arpu
+- creator_gmv
+- media_consumption
+- ai_consumption
+- storage_consumption
+- cdn_cost
+- origin_cost
+- payment_cost
+- creator_commission
+- refund_rate
+- chargeback_rate
+- tax_cost
+required_outputs:
+- mrr
+- arr
+- gmv
+- creator_payouts
+- gross_margin
+- contribution_margin
+- contribution_margin_rate
+- cac
+- ltv
+- ltv_cac
+- infrastructure_cost
+- cash_requirement
+rules:
+- Missing input MUST produce UNKNOWN, not zero.
+- Simulator output MUST be labeled scenario and model version.
+- Simulator output MUST NOT directly mutate production pricing.
+- A pricing policy MAY reference simulator output only through a reviewed approval record.

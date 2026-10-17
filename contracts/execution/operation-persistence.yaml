@@ -1,0 +1,24 @@
+version: 1
+resource: operations
+kind: Appwrite TablesDB
+authority: domain_authoritative
+fields:
+  id: string
+  jobType: string
+  payloadRef: string
+  status: CREATED|RUNNING|WAITING|SUCCEEDED|CANCELLED|FAILED
+  executionClass: DURABLE_JOB|DURABLE_WORKFLOW
+  primaryExecutor: cloudflare_workflows
+  operationId: string
+  idempotencyKey: string
+  startedAt: datetime|null
+  completedAt: datetime|null
+  failureCode: string|null
+  failureMessageSafe: string|null
+  createdAt: datetime
+  updatedAt: datetime
+invariants:
+  - idempotencyKey MUST be unique for the logical operation within its scope.
+  - A durable execution MUST be resumable through Cloudflare Workflows without an application-side lease.
+  - SUCCEEDED, CANCELLED, and FAILED are terminal.
+  - Payload secrets MUST NOT be stored in job records; use protected references.

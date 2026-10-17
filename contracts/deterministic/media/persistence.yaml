@@ -1,0 +1,11 @@
+version: 2
+domain: media
+persistence:
+  - resource: media_upload_sessions
+    authority: domain_authoritative
+  - resource: media_assets
+    authority: domain_authoritative
+  - resource: media_distribution_config
+    authority: domain_authoritative
+  - resource: media_distribution_health
+    authority: operational_projection

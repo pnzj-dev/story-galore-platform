@@ -1,0 +1,23 @@
+schema: storygalore.web-dependency-policy/v1
+version: 1
+rules:
+  exact_versions_required: true
+  latest_tag_for_runtime_dependency: BLOCK
+  semver_ranges_for_runtime_dependency: BLOCK
+  lockfile_required_before_implementation_execution: true
+  lockfile_must_be_generated_with_pnpm: true
+  lockfile_changes_must_be_reviewed: true
+verified_pins_2026_10_07:
+  astro: 7.3.6
+  '@astrojs/svelte': 9.0.1
+  '@astrojs/node': 11.1.6
+  svelte: 5.57.1
+  '@lucide/svelte': 1.52.0
+  bits-ui: 2.19.5
+  tailwindcss: 4.3.3
+  appwrite: 28.1.0
+  typescript: 7.0.2
+source_verification:
+  method: official_package_registry_lookup
+  date: 2026-10-07
+  rule: reverify_before_dependency_upgrade

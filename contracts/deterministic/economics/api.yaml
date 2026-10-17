@@ -1,0 +1,16 @@
+schema: storygalore.deterministic-domain-api/v1
+version: 1
+domain: economics
+policy: fail_closed
+commands:
+- name: consumption_record
+  sourceOfTruthWrite: true
+  emitsVersionedEvent: true
+- name: consumption_reconcile
+  sourceOfTruthWrite: true
+  emitsVersionedEvent: true
+queries:
+- name: consumer_consumption_get
+- name: consumer_consumption_summary_get
+- name: unit_economics_get
+- name: plan_profitability_get

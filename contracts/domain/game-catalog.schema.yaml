@@ -1,0 +1,44 @@
+schema: storygalore.game-catalog/v1
+version: 1
+canonical: true
+purpose: >-
+  First-class catalog entity for games. A Game is not a Publication, MediaAsset, or downloadable package.
+identity:
+  id: stable_string
+  slug: unique_normalized_string
+ownership:
+  source: IGDB_OR_REVIEWED_FIRST_PARTY_ENTRY
+  creator_owned_metadata: explicitly_attributed_and_audited
+fields:
+  title: required_string
+  alternateTitles: string[]
+  synopsis: localized_text|null
+  developers: registered_company_reference[]
+  publishers: registered_company_reference[]
+  releaseDate: date|null
+  releaseStatus: UPCOMING|RELEASED|EARLY_ACCESS|CANCELLED|UNKNOWN
+  platforms: registered_platform_id[]
+  categoryId: registered_taxonomy_id
+  subcategoryId: registered_taxonomy_id|null
+  genreIds: registered_taxonomy_id[]
+  tagIds: registered_taxonomy_id[]
+  contentRating: registered_rating_system_value|null
+  languages: registered_language_id[]
+  officialLinks: reviewed_url[]
+  mediaAssetIds: media_asset_id[]
+  playableBuildIds: approved_game_build_id[]
+  sourceAttribution: required_source_record
+  moderationState: PENDING|APPROVED|RESTRICTED|REJECTED
+  createdAt: datetime
+  updatedAt: datetime
+invariants:
+  - A game catalog entry can exist without any downloadable or browser-playable build.
+  - Game identity and metadata are independent from Publication.type and MediaAsset.type.
+  - Catalog metadata source and source attribution must be registered; imported metadata is normalized and deduplicated before persistence.
+  - Category, subcategory, genre and tags use stable taxonomy IDs, not localized display labels.
+  - Multiple genres are allowed; each genre must belong to the registered game-domain taxonomy.
+  - Platforms describe compatibility targets and are not genres or asset types.
+  - External store links do not imply that StoryGalore hosts or distributes the game.
+  - Play action is shown only when at least one approved GameBuild is released and its runtime health check succeeds.
+  - Rights, content rating, age access, moderation and region restrictions are checked at discovery and launch time.
+  - Deletion or restriction revokes launch authorization and invalidates cached launch manifests.

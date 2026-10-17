@@ -1,0 +1,3 @@
+schema: storygalore.agent-tool-input/v1
+tool: orchestrator.agent.task.read
+additionalProperties: false

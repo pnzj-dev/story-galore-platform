@@ -1,0 +1,19 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://storygalore.dev/contracts/studio/comic-text-element.schema.yaml
+title: Comic Text Element
+version: 1
+required: [id, text, style]
+properties:
+  id: {type: string}
+  text: {type: string}
+  style:
+    type: object
+    required: [fontFamily, fontSize, alignment]
+    properties:
+      fontFamily: {type: string}
+      fontSize: {type: number, exclusiveMinimum: 0}
+      alignment: {enum: [LEFT, CENTER, RIGHT, JUSTIFY]}
+      weight: {enum: [NORMAL, BOLD, ITALIC, BOLD_ITALIC]}
+    additionalProperties: false
+  bounds: {type: object}
+additionalProperties: false

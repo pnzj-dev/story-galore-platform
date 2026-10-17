@@ -1,0 +1,27 @@
+version: 1.0.0
+release: V1
+policy: deterministic
+request_rules:
+  auth: server-authoritative
+  authorization: policy-engine-authoritative
+  idempotency: required-for-mutations
+  pagination: stable-cursor
+  validation: schema-before-handler
+  errors: typed-domain-error
+response_rules:
+  mutation_success: only-after-authoritative-persistence
+  async_operations: return-operation-reference
+  protected_media: never-return-unauthorized-url
+  unknown_policy: fail-closed
+http_contract:
+  success_codes:
+    read: [200]
+    create: [201]
+    accepted_async: [202]
+    delete: [204]
+  client_errors: [400, 401, 403, 404, 409, 422, 429]
+  server_errors: [500, 502, 503, 504]
+error_shape:
+  fields: [code, message, correlationId, details]
+  message_policy: safe-human-readable
+  details_policy: machine-readable-without-secrets

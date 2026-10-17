@@ -1,0 +1,36 @@
+version: "1.0"
+area: entitlements
+commands:
+  - name: entitlement_grant
+    requiresAuthorization: true
+    requiresIdempotency: true
+    expectedRevision: optional
+    emitsVersionedEvent: true
+    sourceOfTruthWrite: true
+  - name: entitlement_revoke
+    requiresAuthorization: true
+    requiresIdempotency: true
+    expectedRevision: optional
+    emitsVersionedEvent: true
+    sourceOfTruthWrite: true
+  - name: entitlement_suspend
+    requiresAuthorization: true
+    requiresIdempotency: true
+    expectedRevision: optional
+    emitsVersionedEvent: true
+    sourceOfTruthWrite: true
+  - name: entitlement_reconcile
+    requiresAuthorization: true
+    requiresIdempotency: true
+    expectedRevision: optional
+    emitsVersionedEvent: true
+    sourceOfTruthWrite: true
+queries:
+  - name: entitlement_check
+    authorizationFiltered: true
+    secretsExcluded: true
+    pagination: cursor_when_collection
+  - name: entitlement_list
+    authorizationFiltered: true
+    secretsExcluded: true
+    pagination: cursor_when_collection

@@ -1,0 +1,17 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://storygalore.dev/contracts/studio/comic-layer.schema.yaml
+title: Comic Layer
+version: 1
+required: [id, ownerId, type, position, visible, locked]
+properties:
+  id: {type: string}
+  ownerId: {type: string}
+  type: {enum: [IMAGE, TEXT, DIALOGUE, CAPTION, SHAPE, EFFECT, REFERENCE]}
+  position: {type: integer, minimum: 0}
+  visible: {type: boolean}
+  locked: {type: boolean}
+  opacity: {type: number, minimum: 0, maximum: 1}
+  assetId: {type: string}
+  textElementId: {type: string}
+  dialogueId: {type: string}
+additionalProperties: false

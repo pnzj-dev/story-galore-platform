@@ -1,0 +1,19 @@
+schema: storygalore.observability-contract/v1
+version: 1
+policy: deterministic
+identity:
+  required:
+    - requestId
+    - correlationId
+  conditional:
+    - operationId
+    - jobId
+    - workflowId
+    - agentTaskId
+    - providerRequestId
+rules:
+  - Correlation identifiers MUST be propagated across runtime boundaries.
+  - Secrets, tokens, payment credentials, BYOK values and unnecessary sensitive payloads MUST NOT be logged.
+  - Logs MUST use structured schemas.
+  - Metrics MUST declare unit and source.
+  - Traces MUST preserve correlation identity without sensitive payloads.

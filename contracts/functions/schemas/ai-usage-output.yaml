@@ -1,0 +1,9 @@
+schema: storygalore.function-output/v1
+function: ai-usage
+fields:
+  status: SUCCESS|REJECTED|RETRYABLE_FAILURE|FAILED
+  operationId: string|null
+  result: CONTRACT_SPECIFIC
+  errorCode: string|null
+  retryable: boolean
+unknown_fields: REJECT

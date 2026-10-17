@@ -1,0 +1,19 @@
+schema: storygalore.cache-policy/v1
+version: 1
+policy: deterministic
+rules:
+  - Every cacheable response MUST declare a cache policy.
+  - Protected or personalized data MUST NOT be publicly cacheable.
+  - Cache keys MUST include every authorization-affecting dimension.
+  - Signed media URLs MUST never become entitlement bypasses.
+  - Invalidation MUST be owned by a declared domain command/event.
+  - Unknown cacheability MUST default to NO_STORE.
+fields:
+  - resource
+  - cacheability
+  - key
+  - vary
+  - ttl
+  - stale_policy
+  - invalidation_event
+  - authorization_boundary

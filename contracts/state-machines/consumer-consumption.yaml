@@ -1,0 +1,39 @@
+schema: storygalore.state-machine/v1
+id: consumer.consumption
+version: 1
+policy: fail_closed
+states:
+- RECEIVED
+- VERIFIED
+- POSTED
+- REJECTED
+- RECONCILIATION_REQUIRED
+transitions:
+- from: RECEIVED
+  event: VERIFY
+  to: VERIFIED
+- from: VERIFIED
+  event: POST
+  to: POSTED
+- from: RECEIVED
+  event: REJECT
+  to: REJECTED
+- from: VERIFIED
+  event: REJECT
+  to: REJECTED
+- from: POSTED
+  event: RECONCILE
+  to: RECONCILIATION_REQUIRED
+- from: RECONCILIATION_REQUIRED
+  event: RESOLVE_POST
+  to: POSTED
+- from: RECONCILIATION_REQUIRED
+  event: RESOLVE_REJECT
+  to: REJECTED
+terminalStates:
+- POSTED
+- REJECTED
+rules:
+- Every transition is explicit.
+- Duplicate eventId is idempotent.
+- Unknown transition MUST BLOCK.

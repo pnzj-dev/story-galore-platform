@@ -1,0 +1,36 @@
+---
+import AdminLayout from "../../layouts/AdminLayout.astro";
+import { DataTable } from "@storygalore/ui";
+import { fetchAdminList } from "../../lib/gateway";
+
+const user = Astro.locals.user;
+const comments = user ? await fetchAdminList("admin_comment_list", user.$id) : [];
+
+const columns = [
+  { key: "targetType", label: "Target" },
+  { key: "status", label: "Status" },
+  { key: "body", label: "Body" },
+  { key: "createdAt", label: "Created" },
+];
+
+const rows = comments.map((c) => ({
+  $id: String(c.$id ?? ""),
+  targetType: String(c.targetType ?? ""),
+  status: String(c.status ?? ""),
+  body: String(c.body ?? "").slice(0, 80),
+  createdAt: String(c.createdAt ?? "").slice(0, 10),
+}));
+---
+
+<AdminLayout title="Admin — Moderation">
+  <main class="mx-auto max-w-[1600px] px-6 py-10">
+    <header>
+      <h1 class="text-3xl font-bold">Moderation</h1>
+      <p class="mt-1 text-sm text-foreground-muted">{comments.length} comment(s).</p>
+    </header>
+
+    <div class="mt-8">
+      <DataTable columns={columns} rows={rows} rowKey="$id" searchable />
+    </div>
+  </main>
+</AdminLayout>

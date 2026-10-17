@@ -1,0 +1,19 @@
+version: 1.0.0
+release: V1
+policy: deterministic
+fields:
+  original_path: required
+  normalized_path: required
+  entry_type: required
+  compressed_size: required
+  uncompressed_size: required
+  crc_or_integrity_value: optional
+  original_metadata_hash: required
+  normalized_metadata_hash: required
+  action: required
+  reason: optional
+actions:
+  - PRESERVE
+  - RENAME
+  - REMOVE
+  - REJECT_ARCHIVE

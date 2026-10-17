@@ -1,0 +1,65 @@
+version: '1.0'
+area: payments
+canonical: true
+description: Deterministic implementation contract for {area}.
+persistence:
+- resource: payments
+  partitionKey: paymentId
+  authority: authoritative payment ledger
+  requiredIndexes: provider,providerPaymentId,status
+- resource: payment_attempts
+  partitionKey: paymentId
+  authority: append-only attempts
+  requiredIndexes: paymentId,createdAt
+- resource: payment_events
+  partitionKey: paymentId
+  authority: append-only normalized provider events
+  requiredIndexes: paymentId,occurredAt
+- resource: refunds
+  partitionKey: paymentId
+  authority: authoritative refund records
+  requiredIndexes: paymentId,status
+- resource: payment_idempotency
+  partitionKey: idempotencyKey
+  authority: dedupe record
+  requiredIndexes: idempotencyKey
+- resource: creator_earnings_ledger
+  partitionKey: creatorId
+  authority: authoritative append-only financial ledger
+  requiredIndexes: creatorId,transactionId,createdAt
+- resource: creator_balance_projections
+  partitionKey: creatorId
+  authority: rebuildable projection
+  requiredIndexes: creatorId,updatedAt
+- resource: payout_requests
+  partitionKey: payoutId
+  authority: authoritative payout lifecycle
+  requiredIndexes: creatorId,status,createdAt
+- resource: payout_events
+  partitionKey: payoutId
+  authority: append-only normalized provider events
+  requiredIndexes: payoutId,occurredAt
+- resource: payout_idempotency
+  partitionKey: idempotencyKey
+  authority: dedupe record
+  requiredIndexes: idempotencyKey
+- resource: payout_wallets
+  partitionKey: walletId
+  authority: authoritative registered destination
+  requiredIndexes: creatorId,status,asset,network
+- resource: wallet_verification_attempts
+  partitionKey: walletId
+  authority: append-only verification evidence
+  requiredIndexes: walletId,createdAt
+- resource: commerce_plan_versions
+  partitionKey: planId
+  authority: immutable pricing configuration
+  requiredIndexes: planId,effectiveAt
+- resource: commission_policy_versions
+  partitionKey: policyVersionId
+  authority: immutable fee configuration
+  requiredIndexes: policyVersionId,effectiveAt
+- resource: payment_route_policies
+  partitionKey: routePolicyId
+  authority: immutable provider routing configuration
+  requiredIndexes: routePolicyId,effectiveAt

@@ -1,0 +1,76 @@
+{
+  "buckets": [
+    {
+      "id": "public-assets",
+      "purpose": "public covers, thumbnails and safe public assets",
+      "fileSecurity": false,
+      "folderPattern": "{entityType}/{entityId}/"
+    },
+    {
+      "id": "creator-assets",
+      "purpose": "private creator source assets",
+      "fileSecurity": true,
+      "folderPattern": "creators/{creatorId}/projects/{projectId}/"
+    },
+    {
+      "id": "comic-pages",
+      "purpose": "reader page variants",
+      "fileSecurity": true,
+      "folderPattern": "comics/{comicId}/publications/{publicationId}/pages/{pageNumber}/"
+    },
+    {
+      "id": "comic-previews",
+      "purpose": "preview pages and watermarked previews",
+      "fileSecurity": true,
+      "folderPattern": "comics/{comicId}/previews/"
+    },
+    {
+      "id": "comic-downloads",
+      "purpose": "download packages",
+      "fileSecurity": true,
+      "folderPattern": "comics/{comicId}/downloads/{publicationId}/"
+    },
+    {
+      "id": "ai-generation-output",
+      "purpose": "AI outputs before/after review",
+      "fileSecurity": true,
+      "folderPattern": "jobs/{jobId}/"
+    },
+    {
+      "id": "moderation-evidence",
+      "purpose": "private moderation evidence",
+      "fileSecurity": true,
+      "folderPattern": "cases/{caseId}/"
+    },
+    {
+      "id": "exports",
+      "purpose": "user/admin exports",
+      "fileSecurity": true,
+      "folderPattern": "exports/{ownerId}/"
+    },
+    {
+      "id": "media-originals",
+      "purpose": "original images, video, audio and mixed-media source files",
+      "fileSecurity": true,
+      "folderPattern": "media/{publicationId}/originals/"
+    },
+    {
+      "id": "media-previews",
+      "purpose": "thumbnails, previews and poster frames for non-comic media",
+      "fileSecurity": true,
+      "folderPattern": "media/{publicationId}/previews/"
+    },
+    {
+      "id": "video-streaming",
+      "purpose": "video playback derivatives/manifests where the selected Appwrite-compatible pipeline stores them",
+      "fileSecurity": true,
+      "folderPattern": "video/{publicationId}/variants/"
+    },
+    {
+      "id": "audio-streaming",
+      "purpose": "audio playback derivatives and previews",
+      "fileSecurity": true,
+      "folderPattern": "audio/{publicationId}/variants/"
+    }
+  ]
+}

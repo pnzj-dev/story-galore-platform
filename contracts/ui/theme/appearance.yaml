@@ -1,0 +1,89 @@
+version: 1
+id: ui.appearance
+status: authoritative
+v1: true
+purpose: deterministic_theme_and_appearance_contract
+modes:
+  - LIGHT
+  - DARK
+  - SYSTEM
+resolution_order:
+  - authenticated_user_preference
+  - anonymous_local_preference
+  - system_preference
+  - LIGHT
+rules:
+  persisted_value: LIGHT|DARK|SYSTEM
+  system_preference_allowed_only_for: SYSTEM
+  resolved_theme_must_be: LIGHT|DARK
+  no_page_reload: true
+  no_component_local_theme_state: true
+  no_hardcoded_theme_colors: true
+  artwork_pixels_must_not_be_theme_mutated: true
+  theme_must_not_change_content_language: true
+  theme_must_not_change_authorization: true
+  theme_must_not_change_entitlement: true
+  theme_must_not_change_adult_policy: true
+  theme_must_not_change_accessibility_language_or_direction: true
+storage:
+  authenticated:
+    source: user_preferences
+    key: appearance.theme
+    values: [LIGHT, DARK, SYSTEM]
+  anonymous:
+    source: browser_local_storage
+    key: storygalore.appearance.theme
+    values: [LIGHT, DARK, SYSTEM]
+  server_sync:
+    command: SetAppearanceTheme
+    event: AppearanceThemeUpdated
+    conflict: last_accepted_server_revision_wins
+ssr:
+  requirement: resolved_theme_available_before_first_paint
+  hydration_mismatch_forbidden: true
+  strategy: server_preference_then_inline_bootstrap_for_anonymous_system_resolution
+  flash_of_wrong_theme_forbidden: true
+css:
+  required: logical_properties
+  forbidden_properties:
+    - margin-left
+    - margin-right
+    - padding-left
+    - padding-right
+    - left
+    - right
+  allowed_via_tokens: true
+  raw_hex_or_rgb_in_component_css: forbidden
+  semantic_token_reference_required: true
+accessibility:
+  contrast_target: WCAG_2_2_AA
+  focus_visible_required: true
+  reduced_motion_respected: true
+  forced_colors_must_remain_usable: true
+  color_must_not_be_sole_information_channel: true
+surfaces:
+  - public_web
+  - reader
+  - creator_studio
+  - admin
+  - authentication
+  - support
+  - mobile
+  - desktop
+  - embedded_shared_components
+reader:
+  default_theme: SYSTEM
+  content_artwork: preserve_source_pixels
+  chrome: resolved_theme
+  reading_background_must_use_semantic_tokens: true
+admin:
+  default_theme: SYSTEM
+creator_studio:
+  default_theme: SYSTEM
+  editor_canvas_must_declare_canvas_tokens: true
+charts:
+  semantic_series_tokens_required: true
+  light_dark_distinguishable: true
+email:
+  theme_behavior: provider_client_dependent
+  html_must_not_claim_app_theme_state: true

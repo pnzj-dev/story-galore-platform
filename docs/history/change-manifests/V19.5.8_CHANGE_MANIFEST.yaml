@@ -1,0 +1,10 @@
+version: 19.5.9
+title: Backend Runtime Simplification
+changes:
+  - standardize_backend_on_go
+  - prohibit_unregistered_backend_languages
+  - retain_typescript_only_for_cloudflare_platform_runtimes
+  - retain_typescript_for_frontend
+determinism:
+  runtime_choice_by_agent: forbidden
+  unregistered_backend_runtime: block

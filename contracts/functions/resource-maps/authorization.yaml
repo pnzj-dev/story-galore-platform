@@ -1,0 +1,15 @@
+schema: storygalore.function-resource-map/v1
+version: 1
+function: authorization
+policy: explicit_only
+resources:
+  - entitlements
+  - entitlement_events
+  - subscriptions
+  - subscription_events
+  - payments
+  - publications
+  - publication_snapshots
+  - publication_language_metadata
+  - user_language_preferences
+undeclared_resource_access: BLOCK

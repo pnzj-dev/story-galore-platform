@@ -1,0 +1,54 @@
+schema: storygalore.consumer-economics-implementation-map/v1
+version: 1
+policy: fail_closed
+commands:
+  consumption_record:
+    domain: economics
+    executor: ConsumptionService
+    stateMachine: consumer.consumption
+    authorization: REGISTERED_ENTITLEMENT_POLICY
+    idempotency: REQUIRED
+  consumption_reconcile:
+    domain: economics
+    executor: ConsumptionService
+    stateMachine: consumer.consumption
+    authorization: REGISTERED_OPS_POLICY
+    idempotency: REQUIRED
+  overage_purchase_create:
+    domain: payments
+    executor: PaymentService
+    stateMachine: payments.payment
+    authorization: REGISTERED_CHECKOUT_POLICY
+    idempotency: REQUIRED
+  sponsored_consumption_reserve:
+    domain: advertising
+    executor: CampaignService
+    stateMachine: consumer.sponsored_consumption
+    authorization: REGISTERED_CAMPAIGN_POLICY
+    idempotency: REQUIRED
+queries:
+  consumer_entitlement_get:
+    domain: entitlements
+    executor: EntitlementQueryService
+    authorization: REQUIRED
+    secrets: EXCLUDED
+  consumer_consumption_get:
+    domain: economics
+    executor: ConsumptionQueryService
+    authorization: REQUIRED
+    secrets: EXCLUDED
+  consumer_consumption_summary_get:
+    domain: economics
+    executor: ConsumptionQueryService
+    authorization: REQUIRED
+    secrets: EXCLUDED
+  unit_economics_get:
+    domain: economics
+    executor: EconomicsQueryService
+    authorization: REQUIRED
+    secrets: EXCLUDED
+  plan_profitability_get:
+    domain: economics
+    executor: EconomicsQueryService
+    authorization: REQUIRED
+    secrets: EXCLUDED

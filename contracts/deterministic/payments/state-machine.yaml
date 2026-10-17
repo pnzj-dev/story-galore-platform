@@ -1,0 +1,137 @@
+version: '1.0'
+area: payments
+states:
+- CREATED
+- CHECKOUT_STARTED
+- AWAITING_PROVIDER
+- SUCCEEDED
+- FAILED
+- EXPIRED
+- RECONCILIATION_REQUIRED
+transitionRules:
+- Only listed transitions are legal.
+- Authorization MUST be evaluated separately from transition legality.
+- Retries MUST preserve idempotency.
+- State changes MUST emit the event declared by the command/event compatibility graph.
+transitions:
+- from: CREATED
+  event: START_CHECKOUT
+  to: CHECKOUT_STARTED
+- from: CHECKOUT_STARTED
+  event: PROVIDER_PENDING
+  to: AWAITING_PROVIDER
+- from: AWAITING_PROVIDER
+  event: SUCCEED
+  to: SUCCEEDED
+- from: AWAITING_PROVIDER
+  event: FAIL
+  to: FAILED
+- from: AWAITING_PROVIDER
+  event: EXPIRE
+  to: EXPIRED
+- from: SUCCEEDED
+  event: RECONCILE
+  to: RECONCILIATION_REQUIRED
+- from: FAILED
+  event: RECONCILE
+  to: RECONCILIATION_REQUIRED
+- from: EXPIRED
+  event: RECONCILE
+  to: RECONCILIATION_REQUIRED
+- from: RECONCILIATION_REQUIRED
+  event: RESOLVE_SUCCESS
+  to: SUCCEEDED
+- from: RECONCILIATION_REQUIRED
+  event: RESOLVE_FAIL
+  to: FAILED
+terminalStates:
+- SUCCEEDED
+- FAILED
+- EXPIRED
+submachines:
+  earnings:
+    states:
+    - POSTED
+    - AVAILABLE
+    - REVERSED
+    - SETTLED
+    transitions:
+    - from: POSTED
+      event: MAKE_AVAILABLE
+      to: AVAILABLE
+    - from: POSTED
+      event: REVERSE
+      to: REVERSED
+    - from: AVAILABLE
+      event: SETTLE
+      to: SETTLED
+    - from: AVAILABLE
+      event: REVERSE
+      to: REVERSED
+    terminalStates:
+    - SETTLED
+    - REVERSED
+  payout:
+    states:
+    - REQUESTED
+    - ELIGIBILITY_PENDING
+    - PROVIDER_PENDING
+    - SUCCEEDED
+    - FAILED
+    - RECONCILIATION_REQUIRED
+    transitions:
+    - from: REQUESTED
+      event: ELIGIBILITY_CONFIRMED
+      to: ELIGIBILITY_PENDING
+    - from: ELIGIBILITY_PENDING
+      event: SUBMIT_TO_PROVIDER
+      to: PROVIDER_PENDING
+    - from: PROVIDER_PENDING
+      event: SUCCEED
+      to: SUCCEEDED
+    - from: PROVIDER_PENDING
+      event: FAIL
+      to: FAILED
+    - from:
+      - SUCCEEDED
+      - FAILED
+      event: RECONCILE
+      to: RECONCILIATION_REQUIRED
+    - from: RECONCILIATION_REQUIRED
+      event: RESOLVE_SUCCESS
+      to: SUCCEEDED
+    - from: RECONCILIATION_REQUIRED
+      event: RESOLVE_FAIL
+      to: FAILED
+    terminalStates:
+    - SUCCEEDED
+    - FAILED
+  wallet:
+    states:
+    - CONNECTED
+    - VERIFICATION_PENDING
+    - VERIFIED
+    - REJECTED
+    - DISCONNECTED
+    transitions:
+    - from: CONNECTED
+      event: VERIFY
+      to: VERIFICATION_PENDING
+    - from: VERIFICATION_PENDING
+      event: VERIFICATION_SUCCEEDED
+      to: VERIFIED
+    - from: VERIFICATION_PENDING
+      event: VERIFICATION_FAILED
+      to: REJECTED
+    - from: REJECTED
+      event: RECONNECT
+      to: CONNECTED
+    - from:
+      - CONNECTED
+      - VERIFICATION_PENDING
+      - VERIFIED
+      - REJECTED
+      event: DISCONNECT
+      to: DISCONNECTED
+    terminalStates:
+    - DISCONNECTED

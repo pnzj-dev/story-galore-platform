@@ -1,0 +1,79 @@
+version: 1
+id: theme.scenarios
+status: authoritative
+scenarios:
+  - id: THEME-001
+    name: explicit_light
+    given: user_has_theme_LIGHT
+    when: load_any_ui_surface
+    then: resolved_theme_is_LIGHT
+  - id: THEME-002
+    name: explicit_dark
+    given: user_has_theme_DARK
+    when: load_any_ui_surface
+    then: resolved_theme_is_DARK
+  - id: THEME-003
+    name: system_light
+    given: user_has_theme_SYSTEM_and_os_is_light
+    when: load_any_ui_surface
+    then: resolved_theme_is_LIGHT
+  - id: THEME-004
+    name: system_dark
+    given: user_has_theme_SYSTEM_and_os_is_dark
+    when: load_any_ui_surface
+    then: resolved_theme_is_DARK
+  - id: THEME-005
+    name: server_preference_sync
+    given: authenticated_user_changes_theme
+    when: preference_is_accepted
+    then: preference_is_persisted_and_emitted
+  - id: THEME-006
+    name: anonymous_persistence
+    given: anonymous_user_changes_theme
+    when: reload_browser
+    then: selected_theme_is_preserved
+  - id: THEME-007
+    name: cross_device
+    given: authenticated_user_changes_theme_on_device_A
+    when: device_B_resolves_preferences
+    then: server_preference_is_used
+  - id: THEME-008
+    name: no_flash
+    given: known_resolved_theme
+    when: first_paint_occurs
+    then: first_paint_uses_resolved_theme
+  - id: THEME-009
+    name: no_hydration_mismatch
+    given: SSR_theme_is_resolved
+    when: client_hydrates
+    then: DOM_theme_state_matches_server
+  - id: THEME-010
+    name: reader_artwork_preservation
+    given: comic_artwork_is_rendered
+    when: theme_changes
+    then: artwork_source_pixels_are_unchanged
+  - id: THEME-011
+    name: rtl_theme_independence
+    given: rtl_locale_and_dark_theme
+    when: render_ui
+    then: direction_is_RTL_and_theme_is_DARK
+  - id: THEME-012
+    name: accessibility_light
+    given: LIGHT_theme
+    when: accessibility_suite_runs
+    then: WCAG_2_2_AA_requirements_pass
+  - id: THEME-013
+    name: accessibility_dark
+    given: DARK_theme
+    when: accessibility_suite_runs
+    then: WCAG_2_2_AA_requirements_pass
+  - id: THEME-014
+    name: content_filter_independence
+    given: ONLY_SELECTED_language_filter
+    when: theme_changes
+    then: language_filter_result_is_unchanged
+  - id: THEME-015
+    name: authorization_independence
+    given: entitlement_and_policy_decision
+    when: theme_changes
+    then: authorization_decision_is_unchanged

@@ -1,0 +1,48 @@
+schema: storygalore.event-outbox/v1
+version: 1
+canonical: true
+purpose: "Reliable, append-only, immutable event outbox for domain events emitted by command handlers."
+table: domain_events
+database: main
+columns:
+  eventId: {type: varchar, size: 255, required: true, note: "event instance id; unique"}
+  eventType: {type: varchar, size: 255, required: true, note: "versioned event type, e.g. studio.project.created.v1"}
+  aggregateId: {type: varchar, size: 255, required: true, note: "aggregate/entity id the event is about"}
+  payload: {type: text, required: true, note: "JSON event payload; never contains secrets"}
+  correlationId: {type: varchar, size: 255, required: false, note: "correlation id for observability"}
+  occurredAt: {type: datetime, required: true}
+  deliveredAt: {type: datetime, required: false, note: "set once by the delivery consumer"}
+  deliveryAttempts: {type: integer, required: false, default: 0}
+rules:
+  append_only: true
+  immutable: true
+  idempotent_delivery_required: true
+  consumer_idempotency_required: true
+  secrets_forbidden_in_payload: true
+  delivery_is_async_and_at_least_once: true
+  emit_after_domain_write: true
+  unknown_fields: REJECT
+emission:
+  producer: command_handlers_in_api_function
+  mechanism: write_row_to_domain_events_after_domain_write
+  transactionality: eventual (append-only outbox; delivery is idempotent)
+delivery:
+  realtime:
+    mechanism: appwrite_built_in_realtime
+    status: BUILT_IN
+    note: "Appwrite Realtime already publishes row-level create/update/delete changes to subscribed clients; no extra code. domain_events is the durable record for downstream consumers, not the Realtime channel."
+  durable:
+    mechanism: cloudflare_workflows
+    status: SCAFFOLDED
+    workflow: backend/cloudflare/workflows/outbox-delivery
+    note: "A scheduled Cloudflare Workflow polls domain_events (deliveredAt IS NULL), delivers each event durably (webhooks/downstream function triggers/registered provider adapters) with at-least-once + idempotent semantics, and sets deliveredAt."
+  targets:
+    - webhooks
+    - downstream_functions
+    - registered_provider_adapters
+  delivery_semantics:
+    at_least_once: true
+    idempotent_consumer_required: true
+    mark_delivered_after_successful_delivery: true
+    retry_with_backoff_on_failure: true
+    appwrite_access_via_scoped_key_or_gateway: true

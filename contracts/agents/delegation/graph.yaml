@@ -1,0 +1,96 @@
+schema: storygalore.agent-delegation-graph/v1
+nodes:
+- sg.agent.story-producer
+- sg.agent.story-guardian
+- sg.agent.art-director
+- sg.agent.production
+- sg.agent.community-guardian
+- sg.agent.discovery-curator
+- sg.agent.reader-companion
+- sg.agent.creator-business
+- sg.agent.media-operations
+- sg.agent.support
+- sg.agent.qa-release
+- sg.agent.infrastructure
+- sg.agent.ceo
+- sg.agent.data-analysis-reporting
+- sg.agent.coding-dev
+- sg.agent.orchestrator
+- sg.agent.keep2share-import
+edges:
+- from: sg.agent.story-producer
+  to:
+  - sg.agent.story-guardian
+  - sg.agent.art-director
+  - sg.agent.production
+- from: sg.agent.story-guardian
+  to:
+  - sg.agent.story-producer
+  - sg.agent.production
+- from: sg.agent.art-director
+  to:
+  - sg.agent.story-producer
+  - sg.agent.production
+- from: sg.agent.production
+  to:
+  - sg.agent.story-guardian
+  - sg.agent.art-director
+  - sg.agent.qa-release
+- from: sg.agent.community-guardian
+  to:
+  - sg.agent.support
+  - sg.agent.qa-release
+- from: sg.agent.discovery-curator
+  to:
+  - sg.agent.community-guardian
+  - sg.agent.story-guardian
+- from: sg.agent.reader-companion
+  to:
+  - sg.agent.support
+- from: sg.agent.creator-business
+  to:
+  - sg.agent.data-analysis-reporting
+- from: sg.agent.media-operations
+  to:
+  - sg.agent.production
+  - sg.agent.infrastructure
+- from: sg.agent.support
+  to:
+  - sg.agent.coding-dev
+  - sg.agent.community-guardian
+  - sg.agent.reader-companion
+- from: sg.agent.qa-release
+  to:
+  - sg.agent.coding-dev
+  - sg.agent.infrastructure
+  - sg.agent.orchestrator
+- from: sg.agent.infrastructure
+  to:
+  - sg.agent.qa-release
+  - sg.agent.orchestrator
+- from: sg.agent.ceo
+  to:
+  - sg.agent.data-analysis-reporting
+  - sg.agent.creator-business
+- from: sg.agent.data-analysis-reporting
+  to:
+  - sg.agent.ceo
+  - sg.agent.creator-business
+- from: sg.agent.coding-dev
+  to:
+  - sg.agent.qa-release
+  - sg.agent.infrastructure
+- from: sg.agent.orchestrator
+  to:
+  - sg.agent.*
+- from: sg.agent.keep2share-import
+  to:
+  - sg.agent.media-operations
+  - sg.agent.support
+  - sg.agent.orchestrator
+rules:
+- no_cycles_without_orchestrator
+- delegated_scope_subset
+- expiry_required
+- provenance_required
+- policy_recheck_on_handoff

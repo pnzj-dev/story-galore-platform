@@ -1,0 +1,21 @@
+version: "1.0"
+area: publication
+canonical: true
+description: "Deterministic implementation contract for {area}."
+persistence:
+  - resource: publications
+    partitionKey: "publicationId"
+    authority: "authoritative publication snapshot metadata"
+    requiredIndexes: "publicationId,status"
+  - resource: publication_snapshots
+    partitionKey: "snapshotId"
+    authority: "immutable approved content snapshot"
+    requiredIndexes: "publicationId,revisionId"
+  - resource: publication_validation_runs
+    partitionKey: "validationRunId"
+    authority: "append-only validation result"
+    requiredIndexes: "publicationId,createdAt"
+  - resource: publication_language_metadata
+    partitionKey: "publicationId"
+    authority: "authoritative publication language metadata and approved localization references"
+    requiredIndexes: "publicationId,primaryLanguage,status"

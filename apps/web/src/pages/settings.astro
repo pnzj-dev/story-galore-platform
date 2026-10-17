@@ -1,0 +1,64 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { actions } from "astro:actions";
+
+const user = Astro.locals.user;
+if (!user) {
+  return Astro.redirect("/auth/login");
+}
+
+const result = Astro.getActionResult(actions.updateAdultSettings);
+if (result?.data?.ok) {
+  return Astro.redirect("/settings");
+}
+const error = result?.error?.message;
+---
+
+<Layout title="Settings">
+  <main class="mx-auto max-w-4xl px-6 py-12">
+    <h1 class="text-3xl font-bold">Settings</h1>
+
+    <section class="mt-8">
+      <h2 class="text-xl font-semibold">Adult content</h2>
+      <p class="mt-1 text-sm text-foreground-muted">
+        Verify your age and opt in to view 18+ content. Your age is computed server-side; this setting is never trusted from the client.
+      </p>
+      <form method="POST" action={actions.updateAdultSettings} class="mt-4 max-w-sm space-y-4">
+        <div>
+          <label for="dateOfBirth" class="mb-1 block text-sm text-foreground-muted">Date of birth</label>
+          <input
+            id="dateOfBirth"
+            name="dateOfBirth"
+            type="date"
+            required
+            class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
+          />
+        </div>
+        <div>
+          <label for="adultContentOptIn" class="mb-1 block text-sm text-foreground-muted">Enable 18+ content</label>
+          <select
+            id="adultContentOptIn"
+            name="adultContentOptIn"
+            class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
+          >
+            <option value="false">No</option>
+            <option value="true">Yes</option>
+          </select>
+        </div>
+
+        {error && (
+          <p class="rounded-lg border border-danger bg-danger/15 px-3 py-2 text-sm text-danger" role="alert">
+            {error}
+          </p>
+        )}
+
+        <button
+          type="submit"
+          class="rounded-lg bg-primary px-4 py-2 font-semibold text-primary-foreground transition hover:opacity-90"
+        >
+          Save
+        </button>
+      </form>
+    </section>
+  </main>
+</Layout>

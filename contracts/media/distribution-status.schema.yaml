@@ -1,0 +1,30 @@
+version: 1
+name: MediaDistributionStatus
+type: object
+required: [primary, secondary, effectiveMode, regions]
+properties:
+  primary:
+    type: object
+    required: [provider, state]
+    properties:
+      provider: { type: string, const: cloudflare }
+      state: { type: string, enum: [HEALTHY, DEGRADED, UNAVAILABLE] }
+  secondary:
+    type: object
+    required: [provider, enabled, state]
+    properties:
+      provider: { type: string, const: bunny }
+      enabled: { type: boolean }
+      state: { type: string, enum: [HEALTHY, DEGRADED, UNAVAILABLE, DISABLED] }
+  effectiveMode:
+    type: string
+    enum: [PRIMARY_ONLY, PRIMARY, SECONDARY, DEGRADED]
+  regions:
+    type: array
+    items:
+      type: object
+      required: [region, selectedProvider, circuitState]
+      properties:
+        region: { type: string }
+        selectedProvider: { type: string, enum: [cloudflare, bunny, none] }
+        circuitState: { type: string, enum: [CLOSED, OPEN, HALF_OPEN] }

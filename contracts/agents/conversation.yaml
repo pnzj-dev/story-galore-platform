@@ -1,0 +1,16 @@
+version: '1.0.0'
+required_fields:
+- conversationId
+- participants
+- taskIds
+- protocol
+- tenantScope
+- policyDecisionId
+- createdAt
+- expiresAt
+rules:
+- Conversation identity is separate from agent identity.
+- Every participant is represented by a registered agent identity.
+- External messages are untrusted input until validated.
+- Conversation membership never grants repository, production, financial, or user-data access.
+- Private user content is not copied into analytics by default.

@@ -1,0 +1,10 @@
+{
+  "version": "1.0.0",
+  "policy": {
+    "silentBreakingChanges": "DENY",
+    "breakingChangeRequiresMigration": true,
+    "contractConsumersMustBeDeclared": true,
+    "validationEvidenceRequired": true,
+    "releaseBlockedOnFailure": true
+  }
+}

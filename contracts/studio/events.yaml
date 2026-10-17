@@ -1,0 +1,31 @@
+version: 1
+kind: creator-studio-events
+families:
+  - studio.project.created.v1
+  - studio.project.updated.v1
+  - studio.document.created.v1
+  - studio.document.revised.v1
+  - studio.page.created.v1
+  - studio.page.updated.v1
+  - studio.page.reordered.v1
+  - studio.panel.created.v1
+  - studio.panel.updated.v1
+  - studio.panel.reordered.v1
+  - studio.asset.attached.v1
+  - studio.asset.detached.v1
+  - studio.generation.requested.v1
+  - studio.generation.completed.v1
+  - studio.generation.applied.v1
+  - studio.revision.created.v1
+  - studio.revision.restored.v1
+  - studio.conflict.detected.v1
+  - studio.conflict.resolved.v1
+  - studio.publication.validation_failed.v1
+  - studio.publication.submitted.v1
+  - studio.publication.approved.v1
+  - studio.publication.published.v1
+rules:
+  outbox_required: true
+  immutable: true
+  versioned: true
+  consumer_idempotency_required: true

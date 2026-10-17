@@ -1,0 +1,8 @@
+version: 1
+name: storygalore-mcp-risk-contract
+classes: [READ, WRITE, EXPENSIVE, DANGEROUS, DURABLE, PRIVILEGED]
+rules:
+  dangerous_requires_approval: true
+  privileged_requires_capability: true
+  durable_requires_operation_id: true
+  write_requires_idempotency: true

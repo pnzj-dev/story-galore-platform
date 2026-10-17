@@ -1,0 +1,35 @@
+schema: storygalore.execution-task/v1
+version: 1
+policy: fail_closed
+required_fields:
+  - task_id
+  - title
+  - phase
+  - canonical_contracts
+  - depends_on
+  - source_ownership
+  - required_resources
+  - required_capabilities
+  - required_tests
+  - definition_of_done
+  - blocking_conditions
+  - approval_required
+rules:
+  canonical_contracts: non_empty_unique_list
+  depends_on: unique_task_ids
+  source_ownership: non_empty_unique_list
+  required_tests: non_empty_unique_list
+  definition_of_done: non_empty_list
+  blocking_conditions: non_empty_list
+  approval_required: enum[NONE,EXPLICIT_PROVIDER_ACTIVATION,EXPLICIT_RELEASE_APPROVAL,EXPLICIT_PRODUCTION_APPROVAL,HUMAN_BUSINESS_APPROVAL]
+  implementation_status: enum[PLANNED,READY,BLOCKED,IN_PROGRESS,VERIFIED]
+forbidden:
+  - missing_required_field
+  - duplicate_task_id
+  - unknown_dependency
+  - unknown_contract_reference
+  - unregistered_source_owner
+  - unregistered_resource
+  - unregistered_capability
+  - missing_test
+  - implementation_without_prerequisites

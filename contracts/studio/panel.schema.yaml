@@ -1,0 +1,22 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://storygalore.dev/contracts/studio/panel.schema.yaml
+title: Comic Panel
+version: 1
+required: [id, pageId, position, bounds, layers, revisionId]
+properties:
+  id: {type: string}
+  pageId: {type: string}
+  position: {type: integer, minimum: 0}
+  bounds:
+    type: object
+    required: [x, y, width, height]
+    properties:
+      x: {type: number}
+      y: {type: number}
+      width: {type: number, exclusiveMinimum: 0}
+      height: {type: number, exclusiveMinimum: 0}
+    additionalProperties: false
+  shape: {enum: [RECTANGLE, ROUNDED, CIRCLE, CUSTOM]}
+  layers: {type: array, items: {type: string}}
+  revisionId: {type: string}
+additionalProperties: false

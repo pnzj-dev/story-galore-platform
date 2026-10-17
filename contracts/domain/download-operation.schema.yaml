@@ -1,0 +1,17 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+title: StoryGalore Download Operation
+type: object
+properties:
+  mode:
+    enum: [WEB_CACHE, APP_OFFLINE, EXPORT]
+  format:
+    type: [string, 'null']
+    enum: [PDF, CBZ, EPUB, null]
+  status:
+    enum: [QUEUED, AUTHORIZING, DOWNLOADING, PROCESSING, READY, FAILED, CANCELLED, REVOKED]
+  idempotencyKey:
+    type: string
+  policyDecisionId:
+    type: string
+required: [mode, status, idempotencyKey, policyDecisionId]
+additionalProperties: false

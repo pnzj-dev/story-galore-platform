@@ -1,0 +1,33 @@
+{
+  "database": {
+    "id": "flexible",
+    "name": "StoryGalore Flexible Data"
+  },
+  "collections": [
+    {
+      "id": "story_bibles",
+      "purpose": "versioned flexible story bible snapshots"
+    },
+    {
+      "id": "prompt_configs",
+      "purpose": "prompt builder state and templates"
+    },
+    {
+      "id": "ai_provider_payloads",
+      "purpose": "sanitized model/provider payload envelopes"
+    },
+    {
+      "id": "moderation_evidence",
+      "purpose": "structured moderation signals"
+    },
+    {
+      "id": "webhook_envelopes",
+      "purpose": "provider-specific raw/normalized payload metadata"
+    },
+    {
+      "id": "project_settings",
+      "purpose": "evolving project-level AI and workflow settings"
+    }
+  ],
+  "security": "Use collection/document security; sensitive payloads are server-only."
+}

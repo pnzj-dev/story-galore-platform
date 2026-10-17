@@ -1,0 +1,17 @@
+schema: storygalore.release-contract/v1
+version: 1
+policy: deterministic
+rules:
+- Build artifacts MUST be reproducible from the locked dependency graph.
+- Deployment target MUST come from the deployment registry.
+- Migrations MUST run through the migration contract.
+- Health checks MUST pass before release promotion.
+- Smoke tests MUST pass after deployment.
+- Production promotion requires explicit human authorization.
+- Rollback MUST be declared before production promotion.
+targets:
+  public-web: APPWRITE_SITES
+  admin-web: APPWRITE_SITES
+  appwrite-functions: APPWRITE_FUNCTIONS
+  cloudflare-agents: CLOUDFLARE_AGENTS
+  cloudflare-workflow-workers: CLOUDFLARE_WORKFLOWS

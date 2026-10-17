@@ -1,0 +1,14 @@
+{
+  "version": "1.0.0",
+  "mandatoryGates": [
+    "privacy-security",
+    "age-jurisdiction",
+    "financial-invariants",
+    "ai-provenance",
+    "search-authorization",
+    "migration-rollback",
+    "disaster-recovery",
+    "cross-agent-compatibility"
+  ],
+  "layoutPolicy": "preserve-v16-3"
+}

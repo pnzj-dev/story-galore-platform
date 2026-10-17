@@ -1,0 +1,17 @@
+version: 19.5.12
+title: Documentation Clarity and Consistency
+status: documentation_and_contract_repair
+base_version: 19.5.11
+changes:
+  - Established docs/README.md as canonical documentation hierarchy and first-read guide.
+  - Aligned README and architecture docs with one Astro application and one Appwrite Site.
+  - Removed duplicated apps/web path references in current contracts and docs.
+  - Corrected stale backend runtime statements and marked superseded durable-execution documentation historical.
+  - Clarified route patterns are policy templates, not a complete concrete route inventory.
+  - Added route-access capability contract and explicitly blocked admin route implementation until admin RBAC is exhaustive.
+  - Added documentation consistency validator and pnpm validate:docs.
+not_claimed:
+  - Production authentication/authorization is implemented.
+  - All concrete Astro routes are already enumerated.
+  - Admin RBAC examples are a complete route registry.
+  - Passing documentation checks proves production security.

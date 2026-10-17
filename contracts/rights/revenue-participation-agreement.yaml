@@ -1,0 +1,22 @@
+schema: storygalore.revenue-participation-agreement/v1
+version: 1
+canonical: true
+status: V19.5.3
+policy: fail_closed
+required_fields:
+- agreementId
+- contentOrRightsScope
+- participantId
+- participantRole
+- revenueCategory
+- shareBps
+- effectiveFrom
+- status
+rules:
+- Every multi-party revenue allocation MUST reference an active agreement.
+- Shares MUST sum to the declared allocation basis or the allocation MUST BLOCK.
+- Agreement precedence MUST be explicit when multiple agreements overlap.
+- Effective dates MUST be evaluated deterministically.
+- Terminated or expired agreements MUST NOT receive new allocations unless an explicit post-termination rule exists.
+- StoryPass, bundles, licensing, sponsorship and co-created content MAY use RPAs.
+- Unknown rights ownership MUST BLOCK allocation.

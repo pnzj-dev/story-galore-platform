@@ -1,0 +1,38 @@
+schema: storygalore.ui-visual-system/v1
+version: 1
+source_of_truth: DESIGN.md
+principles:
+  - artwork_first
+  - premium_editorial
+  - restrained_chrome
+  - semantic_tokens_only
+  - accessibility_by_default
+  - responsive_by_contract
+  - rtl_by_contract
+  - motion_respects_reduced_motion
+  - no_duplicate_patterns
+brand:
+  public: cinematic_editorial_entertainment
+  studio: professional_creative_tool
+  admin: operational_analytics_console
+  shared_language: true
+  separate_density_profiles: true
+tokens:
+  color: semantic
+  typography: semantic
+  spacing: semantic
+  radius: semantic
+  elevation: semantic
+  motion: semantic
+  z_index: semantic
+  breakpoints: semantic
+forbidden:
+  - hard_coded_theme_colors
+  - arbitrary_spacing_values
+  - arbitrary_border_radius_values
+  - emoji_as_ui_icons
+  - hover_only_actions
+  - component_local_design_tokens
+  - duplicate_primitives
+  - decorative_gradient_without_contract
+  - inaccessible_color_only_status

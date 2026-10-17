@@ -1,0 +1,83 @@
+schema: storygalore.deterministic-execution-plan/v1
+version: 1
+release: V19.5.4
+status: planning_only
+policy: fail_closed
+launch:
+  market: US
+  operating_entity: US
+  currency: USD
+  international_expansion: BLOCKED_UNTIL_JURISDICTION_PACK_APPROVED
+execution:
+  phases:
+    - id: G0
+      name: baseline-normalization
+      depends_on: []
+      approval: none
+    - id: G1
+      name: repository-toolchain
+      depends_on: [G0]
+      approval: none
+    - id: G2
+      name: domain-kernel
+      depends_on: [G1]
+      approval: none
+    - id: G3
+      name: persistence-migrations
+      depends_on: [G2]
+      approval: none
+    - id: G4
+      name: authorization
+      depends_on: [G2, G3]
+      approval: none
+    - id: G5
+      name: api-functions
+      depends_on: [G4]
+      approval: none
+    - id: G6
+      name: financial-consumer-economics
+      depends_on: [G5]
+      approval: none
+    - id: G7
+      name: media
+      depends_on: [G5, G6]
+      approval: none
+    - id: G8
+      name: public-consumer-ui
+      depends_on: [G5, G7]
+      approval: none
+    - id: G9
+      name: creator-studio
+      depends_on: [G5, G7]
+      approval: none
+    - id: G10
+      name: admin-control-plane
+      depends_on: [G5, G6, G7]
+      approval: none
+    - id: G11
+      name: agents
+      depends_on: [G5, G6, G10]
+      approval: none
+    - id: G12
+      name: provider-integrations
+      depends_on: [G5, G6]
+      approval: explicit_provider_activation
+    - id: G13
+      name: verification
+      depends_on: [G8, G9, G10, G11, G12]
+      approval: none
+    - id: G14
+      name: release-candidate
+      depends_on: [G13]
+      approval: explicit_release_approval
+    - id: production
+      name: production
+      depends_on: [G14]
+      approval: explicit_production_approval
+forbidden:
+  - execute_without_prerequisites
+  - invent_missing_contract
+  - silently_change_contract
+  - bypass_validator
+  - activate_unverified_provider
+  - deploy_without_explicit_approval

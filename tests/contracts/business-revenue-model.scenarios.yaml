@@ -1,0 +1,24 @@
+schema: storygalore.contract-scenarios/v1
+version: 1
+policy: fail_closed
+scenarios:
+- id: free-plan-fee
+  given: CREATOR_FREE
+  when: creator-originated-sale
+  then: platform_fee_bps=1000
+- id: pro-plan-fee
+  given: CREATOR_PRO
+  when: creator-originated-sale
+  then: platform_fee_bps=500
+- id: studio-plan-fee
+  given: CREATOR_STUDIO
+  when: creator-originated-sale
+  then: platform_fee_bps=300
+- id: tip-zero-platform-fee
+  given: TIP
+  when: finalize
+  then: platform_fee_bps=0
+- id: unknown-attribution
+  given: unknown_conversion_source
+  when: finalize
+  then: BLOCK_AND_HOLD_SETTLEMENT

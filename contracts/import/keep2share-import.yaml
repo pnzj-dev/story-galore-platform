@@ -1,0 +1,79 @@
+version: 1.0.0
+release: V1
+policy: deterministic
+provider: KEEP2SHARE
+source_api:
+  base_url: https://keep2share.cc/api/v2/
+  preferred_operations:
+  - login
+  - get_file_info
+  - get_file_status
+  - get_url
+  - find_file
+  browser_fallback: allowed_only_when_api_cannot_perform_required_discovery_or_operation
+  authentication: contracts/import/keep2share/authentication.yaml
+  download_rule: download_url_resolution_may_require_authentication; downloaded_bytes_are_untrusted
+input:
+  source_page_url: required
+  authorization_id: required
+  destination_project_id: required
+  destination_language: optional
+  requested_visibility: required
+  requested_media_kind: required
+pipeline:
+- SOURCE_VALIDATE
+- SOURCE_AUTHORIZATION
+- DISCOVER_PAGE
+- EXTRACT_KEEP2SHARE_LINKS
+- DEDUPLICATE_LINKS
+- RESOLVE_SOURCE_FILES
+- DOWNLOAD
+- HASH_AND_VERIFY
+- INSPECT_METADATA
+- NORMALIZE_METADATA
+- INSPECT_ARCHIVE_IF_APPLICABLE
+- NORMALIZE_ARCHIVE_IF_APPLICABLE
+- SECURITY_SCAN
+- CREATE_UPLOAD_SESSION
+- UPLOAD
+- VERIFY_STORAGE_OBJECT
+- CREATE_MEDIA_ASSET
+- MODERATION_HANDOFF
+- RESULT
+states:
+- RECEIVED
+- AUTHORIZING
+- DISCOVERING
+- RESOLVING
+- DOWNLOADING
+- VERIFYING
+- NORMALIZING
+- SCANNING
+- UPLOADING
+- REGISTERING
+- MODERATION_PENDING
+- COMPLETED
+- PARTIAL
+- BLOCKED
+- FAILED
+stop_conditions:
+- SOURCE_NOT_AUTHORIZED
+- KEEP2SHARE_AUTH_REQUIRED
+- CAPTCHA_REQUIRED
+- MFA_REQUIRED
+- ACCESS_CONTROL_REQUIRED
+- PAYWALL_OR_RESTRICTED_DOWNLOAD
+- PROVIDER_RATE_LIMIT
+- UNSUPPORTED_SOURCE
+- INTEGRITY_MISMATCH
+- MALWARE_DETECTED
+- ARCHIVE_UNSAFE
+- ARCHIVE_BOMB_SUSPECTED
+- METADATA_AMBIGUOUS
+- UPLOAD_VERIFICATION_FAILED
+- POLICY_DENIED
+idempotency:
+  key: authorization_id + canonical_source_file_id + original_sha256
+  rule: never create a second MediaAsset for an already registered source hash unless
+    an explicit new revision/import is requested
+authentication_contract: contracts/import/keep2share/authentication.yaml

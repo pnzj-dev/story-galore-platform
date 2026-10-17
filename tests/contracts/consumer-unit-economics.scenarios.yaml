@@ -1,0 +1,12 @@
+schema: storygalore.contract-scenario-suite/v1
+version: 1
+policy: fail_closed
+cases:
+  - id: actual-cost-attribution
+    expected: PASS
+  - id: unavailable-cost-not-zero
+    expected: PASS
+  - id: margin-disclosure
+    expected: PASS
+  - id: dimension-completeness
+    expected: PASS

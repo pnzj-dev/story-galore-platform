@@ -1,0 +1,21 @@
+version: "1.0"
+area: subscriptions
+canonical: true
+description: "Deterministic implementation contract for {area}."
+persistence:
+  - resource: subscriptions
+    partitionKey: "subscriptionId"
+    authority: "authoritative lifecycle"
+    requiredIndexes: "customerId,status,currentPeriodEnd"
+  - resource: subscription_events
+    partitionKey: "subscriptionId"
+    authority: "append-only lifecycle events"
+    requiredIndexes: "subscriptionId,occurredAt"
+  - resource: renewal_attempts
+    partitionKey: "subscriptionId"
+    authority: "renewal execution history"
+    requiredIndexes: "subscriptionId,periodStart"
+  - resource: plans
+    partitionKey: "planId"
+    authority: "authoritative plan catalog"
+    requiredIndexes: "planId,status"

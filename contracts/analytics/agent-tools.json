@@ -1,0 +1,20 @@
+{
+  "version":"1.0",
+  "tools":[
+    {"tool":"analytics_overview","capability":"analytics.overview.read","roles":["PLATFORM_ADMIN","ANALYTICS","FINANCE","MARKETING"]},
+    {"tool":"analytics_revenue","capability":"analytics.revenue.read","roles":["PLATFORM_ADMIN","ANALYTICS","FINANCE"]},
+    {"tool":"analytics_subscriptions","capability":"analytics.subscriptions.read","roles":["PLATFORM_ADMIN","ANALYTICS","FINANCE"]},
+    {"tool":"analytics_acquisition","capability":"analytics.acquisition.read","roles":["PLATFORM_ADMIN","ANALYTICS","MARKETING"]},
+    {"tool":"analytics_campaign","capability":"analytics.campaign.read","roles":["PLATFORM_ADMIN","ANALYTICS","MARKETING"]},
+    {"tool":"analytics_content","capability":"analytics.content.read","roles":["PLATFORM_ADMIN","ANALYTICS","DISCOVERY","CREATOR_SUPPORT"]},
+    {"tool":"analytics_creator","capability":"analytics.creator.read","roles":["PLATFORM_ADMIN","ANALYTICS","CREATOR_SUPPORT"]},
+    {"tool":"analytics_retention","capability":"analytics.retention.read","roles":["PLATFORM_ADMIN","ANALYTICS","MARKETING"]},
+    {"tool":"analytics_advertising","capability":"analytics.advertising.read","roles":["PLATFORM_ADMIN","ANALYTICS"]},
+    {"tool":"analytics_ai","capability":"analytics.ai.read","roles":["PLATFORM_ADMIN","ANALYTICS","AI_OPERATIONS","FINANCE"]},
+    {"tool":"analytics_support","capability":"analytics.support.read","roles":["PLATFORM_ADMIN","ANALYTICS","SUPPORT","CREATOR_SUPPORT"]},
+    {"tool":"analytics_funnel","capability":"analytics.funnel.read","roles":["PLATFORM_ADMIN","ANALYTICS","MARKETING"]},
+    {"tool":"analytics_cohort","capability":"analytics.cohort.read","roles":["PLATFORM_ADMIN","ANALYTICS","MARKETING","FINANCE"]},
+    {"tool":"analytics_report_create","capability":"analytics.report.manage","roles":["PLATFORM_ADMIN","ANALYTICS"]}
+  ],
+  "rules":["Agent analytics access is capability and scope based.","Creator analytics is tenant/workspace scoped.","Analytics never grants access to private content or payment credentials.","Raw private messages and secrets are forbidden in analytics responses."]
+}

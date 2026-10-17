@@ -1,0 +1,18 @@
+version: 1
+name: media-authorization
+fields:
+  authorizationId: string
+  actorId: string|null
+  tenantId: string|null
+  mediaId: string
+  variant: string
+  action: VIEW|STREAM|DOWNLOAD
+  result: ALLOW|DENY
+  reasons: string[]
+  policyDecisionId: string
+  expiresAt: datetime|null
+  createdAt: datetime
+rules:
+  - Evaluate authentication, age, adult opt-in, entitlement, publication state, moderation, jurisdiction and policy before protected delivery.
+  - Unknown sensitive policy state fails closed.
+  - Authorization is independent from CDN cache state.

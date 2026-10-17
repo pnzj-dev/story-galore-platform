@@ -1,0 +1,34 @@
+schema: storygalore.marketplace-growth-model/v1
+version: 1
+canonical: true
+policy: deterministic
+revenueStreams:
+- id: STORYPASS
+  pricing: contracts/business/revenue-model.yaml#fan_products.STORYPASS
+  allocation: engagement_pool
+  status: TARGET
+- id: CREATOR_SERVICES_MARKETPLACE
+  feeBpsRange:
+  - 1000
+  - 1500
+  status: TARGET
+- id: LICENSING_MARKETPLACE
+  feeBpsRange:
+  - 1000
+  - 2000
+  status: TARGET
+- id: SPONSORED_DISCOVERY
+  pricing: registered_campaign_policy
+  organic_ranking_protected: true
+  status: TARGET
+- id: AI_PRODUCTION_SERVICES
+  pricing: registered_service_catalog
+  status: TARGET
+- id: MEDIA_USAGE
+  pricing: registered_usage_catalog
+  status: TARGET
+rules:
+- Sponsored discovery must never silently alter organic ranking.
+- Licensing rights must be explicitly scoped by territory, medium, duration and exclusivity.
+- Marketplace commissions are charged only when the marketplace transaction closes.
+- StoryPass creator allocation is based on the registered engagement policy and not manual discretionary allocation.

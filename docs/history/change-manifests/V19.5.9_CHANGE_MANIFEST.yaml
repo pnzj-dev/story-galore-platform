@@ -1,0 +1,8 @@
+version: 19.5.9
+title: Platform-Native Scaffolding
+changes:
+  - use_official_platform_scaffolding
+  - pin_scaffolder_versions
+  - register_exact_scaffold_commands
+  - inspect_and_validate_generated_layouts
+  - prohibit_manual_platform_layout_reimplementation

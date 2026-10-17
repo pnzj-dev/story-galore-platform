@@ -1,0 +1,47 @@
+schema: storygalore.commission-policy/v1
+version: 1
+canonical: true
+policy: fail_closed
+calculation_order:
+- gross_amount
+- taxes
+- processor_cost
+- platform_commission
+- creator_net
+rules:
+- id: creator_originated_by_plan
+  commerceClass: CREATOR_ORIGINATED
+  feeSource: revenue-model.creator_plans
+- id: storygalore_originated
+  commerceClass: STORYGALORE_ORIGINATED
+  feeBps: REGISTERED_POLICY
+  rangeBps:
+  - 1000
+  - 1500
+  requiresAttributionEvidence: true
+- id: tips_zero_platform_fee
+  commerceClass: TIP
+  platformFeeBps: 0
+- id: marketplace_services
+  commerceClass: MARKETPLACE_SERVICE
+  feeBpsRange:
+  - 1000
+  - 1500
+- id: licensing
+  commerceClass: LICENSING
+  feeBpsRange:
+  - 1000
+  - 2000
+attribution:
+  creator_originated: customer_conversion_source_must_be_creator_attributed
+  storygalore_originated: customer_conversion_source_must_be_storygalore_attributed
+  unknown: BLOCK_AND_HOLD_SETTLEMENT
+rounding:
+  method: ROUND_HALF_UP
+  precision: currency_minor_unit
+  negative_rounding: SYMMETRIC
+immutability: Applied fee policy version is immutable on a finalized transaction.
+basePolicy:
+  platformCommissionBase: GROSS_EXCLUDING_TAX
+  processorCostTreatment: DEDUCT_FROM_CREATOR_NET
+  taxTreatment: SEPARATE_LEDGER_DIMENSION

@@ -1,0 +1,77 @@
+version: '1.0'
+rules:
+- MCP operations MUST map to an existing domain command/query.
+- MCP adds risk/auth/audit metadata but MUST NOT define alternate business semantics.
+operations:
+- namespace: community
+  operation: comment_create
+  command: comment_create
+- namespace: community
+  operation: comment_list
+  command: comment_list
+- namespace: community
+  operation: comment_reply
+  command: comment_reply
+- namespace: community
+  operation: comment_report
+  command: comment_report
+- namespace: community
+  operation: conversation_create
+  command: conversation_create
+- namespace: community
+  operation: conversation_list
+  command: conversation_list
+- namespace: community
+  operation: message_list
+  command: message_list
+- namespace: community
+  operation: message_mark_read
+  command: message_mark_read
+- namespace: community
+  operation: message_report
+  command: message_report
+- namespace: community
+  operation: message_request_accept
+  command: message_request_accept
+- namespace: community
+  operation: message_request_decline
+  command: message_request_decline
+- namespace: community
+  operation: message_send
+  command: message_send
+- namespace: community
+  operation: messaging_settings_get
+  command: messaging_settings_get
+- namespace: community
+  operation: messaging_settings_update
+  command: messaging_settings_update
+- namespace: community
+  operation: user_block
+  command: user_block
+- namespace: community
+  operation: user_unblock
+  command: user_unblock
+- operation: mcp_media_upload_create
+  command: media_upload_create
+- operation: mcp_media_upload_start
+  command: media_upload_start
+- operation: mcp_media_upload_pause
+  command: media_upload_pause
+- operation: mcp_media_upload_resume
+  command: media_upload_resume
+- operation: mcp_media_upload_complete
+  command: media_upload_complete
+- operation: mcp_media_upload_cancel
+  command: media_upload_cancel
+- operation: mcp_media_upload_recover
+  command: media_upload_recover
+
+- namespace: admin
+  operation: mcp_media_distribution_config_get
+  command: media_distribution_config_get
+- namespace: admin
+  operation: mcp_media_distribution_status_get
+  command: media_distribution_status_get
+- namespace: admin
+  operation: mcp_media_distribution_config_update
+  command: media_distribution_config_update

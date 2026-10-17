@@ -1,0 +1,570 @@
+{
+  "version": "1.0",
+  "scenarioCount": 47,
+  "scenarios": [
+    {
+      "id": "reader-reading_progress_upsert",
+      "area": "reader",
+      "command": "reading_progress_upsert",
+      "mustVerify": [
+        "authorization",
+        "idempotency",
+        "sourceOfTruth",
+        "versionedEvent",
+        "stableFailureCode"
+      ]
+    },
+    {
+      "id": "reader-reading_progress_complete",
+      "area": "reader",
+      "command": "reading_progress_complete",
+      "mustVerify": [
+        "authorization",
+        "idempotency",
+        "sourceOfTruth",
+        "versionedEvent",
+        "stableFailureCode"
+      ]
+    },
+    {
+      "id": "reader-reader_preference_update",
+      "area": "reader",
+      "command": "reader_preference_update",
+      "mustVerify": [
+        "authorization",
+        "idempotency",
+        "sourceOfTruth",
+        "versionedEvent",
+        "stableFailureCode"
+      ]
+    },
+    {
+      "id": "entitlements-entitlement_grant",
+      "area": "entitlements",
+      "command": "entitlement_grant",
+      "mustVerify": [
+        "authorization",
+        "idempotency",
+        "sourceOfTruth",
+        "versionedEvent",
+        "stableFailureCode"
+      ]
+    },
+    {
+      "id": "entitlements-entitlement_revoke",
+      "area": "entitlements",
+      "command": "entitlement_revoke",
+      "mustVerify": [
+        "authorization",
+        "idempotency",
+        "sourceOfTruth",
+        "versionedEvent",
+        "stableFailureCode"
+      ]
+    },
+    {
+      "id": "entitlements-entitlement_suspend",
+      "area": "entitlements",
+      "command": "entitlement_suspend",
+      "mustVerify": [
+        "authorization",
+        "idempotency",
+        "sourceOfTruth",
+        "versionedEvent",
+        "stableFailureCode"
+      ]
+    },
+    {
+      "id": "payments-payment_create",
+      "area": "payments",
+      "command": "payment_create",
+      "mustVerify": [
+        "authorization",
+        "idempotency",
+        "sourceOfTruth",
+        "versionedEvent",
+        "stableFailureCode"
+      ]
+    },
+    {
+      "id": "payments-payment_confirm_from_webhook",
+      "area": "payments",
+      "command": "payment_confirm_from_webhook",
+      "mustVerify": [
+        "authorization",
+        "idempotency",
+        "sourceOfTruth",
+        "versionedEvent",
+        "stableFailureCode"
+      ]
+    },
+    {
+      "id": "payments-payment_refund",
+      "area": "payments",
+      "command": "payment_refund",
+      "mustVerify": [
+        "authorization",
+        "idempotency",
+        "sourceOfTruth",
+        "versionedEvent",
+        "stableFailureCode"
+      ]
+    },
+    {
+      "id": "subscriptions-subscription_create",
+      "area": "subscriptions",
+      "command": "subscription_create",
+      "mustVerify": [
+        "authorization",
+        "idempotency",
+        "sourceOfTruth",
+        "versionedEvent",
+        "stableFailureCode"
+      ]
+    },
+    {
+      "id": "subscriptions-subscription_renew",
+      "area": "subscriptions",
+      "command": "subscription_renew",
+      "mustVerify": [
+        "authorization",
+        "idempotency",
+        "sourceOfTruth",
+        "versionedEvent",
+        "stableFailureCode"
+      ]
+    },
+    {
+      "id": "subscriptions-subscription_cancel",
+      "area": "subscriptions",
+      "command": "subscription_cancel",
+      "mustVerify": [
+        "authorization",
+        "idempotency",
+        "sourceOfTruth",
+        "versionedEvent",
+        "stableFailureCode"
+      ]
+    },
+    {
+      "id": "ai-ai_generation_create",
+      "area": "ai",
+      "command": "ai_generation_create",
+      "mustVerify": [
+        "authorization",
+        "idempotency",
+        "sourceOfTruth",
+        "versionedEvent",
+        "stableFailureCode"
+      ]
+    },
+    {
+      "id": "ai-ai_generation_cancel",
+      "area": "ai",
+      "command": "ai_generation_cancel",
+      "mustVerify": [
+        "authorization",
+        "idempotency",
+        "sourceOfTruth",
+        "versionedEvent",
+        "stableFailureCode"
+      ]
+    },
+    {
+      "id": "ai-ai_generation_retry",
+      "area": "ai",
+      "command": "ai_generation_retry",
+      "mustVerify": [
+        "authorization",
+        "idempotency",
+        "sourceOfTruth",
+        "versionedEvent",
+        "stableFailureCode"
+      ]
+    },
+    {
+      "id": "discovery-discovery_reindex",
+      "area": "discovery",
+      "command": "discovery_reindex",
+      "mustVerify": [
+        "authorization",
+        "idempotency",
+        "sourceOfTruth",
+        "versionedEvent",
+        "stableFailureCode"
+      ]
+    },
+    {
+      "id": "discovery-recommendation_feedback_record",
+      "area": "discovery",
+      "command": "recommendation_feedback_record",
+      "mustVerify": [
+        "authorization",
+        "idempotency",
+        "sourceOfTruth",
+        "versionedEvent",
+        "stableFailureCode"
+      ]
+    },
+    {
+      "id": "discovery-search_index_delete",
+      "area": "discovery",
+      "command": "search_index_delete",
+      "mustVerify": [
+        "authorization",
+        "idempotency",
+        "sourceOfTruth",
+        "versionedEvent",
+        "stableFailureCode"
+      ]
+    },
+    {
+      "id": "community-comment_create",
+      "area": "community",
+      "command": "comment_create",
+      "mustVerify": [
+        "authorization",
+        "idempotency",
+        "sourceOfTruth",
+        "versionedEvent",
+        "stableFailureCode"
+      ]
+    },
+    {
+      "id": "community-comment_edit",
+      "area": "community",
+      "command": "comment_edit",
+      "mustVerify": [
+        "authorization",
+        "idempotency",
+        "sourceOfTruth",
+        "versionedEvent",
+        "stableFailureCode"
+      ]
+    },
+    {
+      "id": "community-comment_delete",
+      "area": "community",
+      "command": "comment_delete",
+      "mustVerify": [
+        "authorization",
+        "idempotency",
+        "sourceOfTruth",
+        "versionedEvent",
+        "stableFailureCode"
+      ]
+    },
+    {
+      "id": "messaging-conversation_create",
+      "area": "messaging",
+      "command": "conversation_create",
+      "mustVerify": [
+        "authorization",
+        "idempotency",
+        "sourceOfTruth",
+        "versionedEvent",
+        "stableFailureCode"
+      ]
+    },
+    {
+      "id": "messaging-message_send",
+      "area": "messaging",
+      "command": "message_send",
+      "mustVerify": [
+        "authorization",
+        "idempotency",
+        "sourceOfTruth",
+        "versionedEvent",
+        "stableFailureCode"
+      ]
+    },
+    {
+      "id": "messaging-message_edit",
+      "area": "messaging",
+      "command": "message_edit",
+      "mustVerify": [
+        "authorization",
+        "idempotency",
+        "sourceOfTruth",
+        "versionedEvent",
+        "stableFailureCode"
+      ]
+    },
+    {
+      "id": "notifications-notification_create",
+      "area": "notifications",
+      "command": "notification_create",
+      "mustVerify": [
+        "authorization",
+        "idempotency",
+        "sourceOfTruth",
+        "versionedEvent",
+        "stableFailureCode"
+      ]
+    },
+    {
+      "id": "notifications-notification_mark_read",
+      "area": "notifications",
+      "command": "notification_mark_read",
+      "mustVerify": [
+        "authorization",
+        "idempotency",
+        "sourceOfTruth",
+        "versionedEvent",
+        "stableFailureCode"
+      ]
+    },
+    {
+      "id": "notifications-notification_mark_all_read",
+      "area": "notifications",
+      "command": "notification_mark_all_read",
+      "mustVerify": [
+        "authorization",
+        "idempotency",
+        "sourceOfTruth",
+        "versionedEvent",
+        "stableFailureCode"
+      ]
+    },
+    {
+      "id": "analytics-analytics_event_ingest",
+      "area": "analytics",
+      "command": "analytics_event_ingest",
+      "mustVerify": [
+        "authorization",
+        "idempotency",
+        "sourceOfTruth",
+        "versionedEvent",
+        "stableFailureCode"
+      ]
+    },
+    {
+      "id": "analytics-analytics_projection_rebuild",
+      "area": "analytics",
+      "command": "analytics_projection_rebuild",
+      "mustVerify": [
+        "authorization",
+        "idempotency",
+        "sourceOfTruth",
+        "versionedEvent",
+        "stableFailureCode"
+      ]
+    },
+    {
+      "id": "analytics-analytics_projection_backfill",
+      "area": "analytics",
+      "command": "analytics_projection_backfill",
+      "mustVerify": [
+        "authorization",
+        "idempotency",
+        "sourceOfTruth",
+        "versionedEvent",
+        "stableFailureCode"
+      ]
+    },
+    {
+      "id": "admin-admin_action_request",
+      "area": "admin",
+      "command": "admin_action_request",
+      "mustVerify": [
+        "authorization",
+        "idempotency",
+        "sourceOfTruth",
+        "versionedEvent",
+        "stableFailureCode"
+      ]
+    },
+    {
+      "id": "admin-admin_action_approve",
+      "area": "admin",
+      "command": "admin_action_approve",
+      "mustVerify": [
+        "authorization",
+        "idempotency",
+        "sourceOfTruth",
+        "versionedEvent",
+        "stableFailureCode"
+      ]
+    },
+    {
+      "id": "admin-admin_action_execute",
+      "area": "admin",
+      "command": "admin_action_execute",
+      "mustVerify": [
+        "authorization",
+        "idempotency",
+        "sourceOfTruth",
+        "versionedEvent",
+        "stableFailureCode"
+      ]
+    },
+    {
+      "id": "support-support_ticket_create",
+      "area": "support",
+      "command": "support_ticket_create",
+      "mustVerify": [
+        "authorization",
+        "idempotency",
+        "sourceOfTruth",
+        "versionedEvent",
+        "stableFailureCode"
+      ]
+    },
+    {
+      "id": "support-support_ticket_update",
+      "area": "support",
+      "command": "support_ticket_update",
+      "mustVerify": [
+        "authorization",
+        "idempotency",
+        "sourceOfTruth",
+        "versionedEvent",
+        "stableFailureCode"
+      ]
+    },
+    {
+      "id": "support-support_ticket_assign",
+      "area": "support",
+      "command": "support_ticket_assign",
+      "mustVerify": [
+        "authorization",
+        "idempotency",
+        "sourceOfTruth",
+        "versionedEvent",
+        "stableFailureCode"
+      ]
+    },
+    {
+      "id": "publication-publication_validate",
+      "area": "publication",
+      "command": "publication_validate",
+      "mustVerify": [
+        "authorization",
+        "idempotency",
+        "sourceOfTruth",
+        "versionedEvent",
+        "stableFailureCode"
+      ]
+    },
+    {
+      "id": "publication-publication_submit",
+      "area": "publication",
+      "command": "publication_submit",
+      "mustVerify": [
+        "authorization",
+        "idempotency",
+        "sourceOfTruth",
+        "versionedEvent",
+        "stableFailureCode"
+      ]
+    },
+    {
+      "id": "publication-publication_approve",
+      "area": "publication",
+      "command": "publication_approve",
+      "mustVerify": [
+        "authorization",
+        "idempotency",
+        "sourceOfTruth",
+        "versionedEvent",
+        "stableFailureCode"
+      ]
+    },
+    {
+      "id": "media-upload-create",
+      "area": "media",
+      "command": "media_upload_create",
+      "mustVerify": [
+        "authorization",
+        "idempotency",
+        "sourceOfTruth",
+        "versionedEvent",
+        "stableFailureCode"
+      ]
+    },
+    {
+      "id": "media-upload-retry",
+      "area": "media",
+      "command": "media_upload_resume",
+      "mustVerify": [
+        "authorization",
+        "idempotency",
+        "sourceOfTruth",
+        "versionedEvent",
+        "stableFailureCode"
+      ]
+    },
+    {
+      "id": "media-upload-offline-resume",
+      "area": "media",
+      "command": "media_upload_recover",
+      "mustVerify": [
+        "authorization",
+        "idempotency",
+        "sourceOfTruth",
+        "versionedEvent",
+        "stableFailureCode"
+      ]
+    },
+    {
+      "id": "media-upload-browser-restart",
+      "area": "media",
+      "command": "media_upload_recover",
+      "mustVerify": [
+        "authorization",
+        "idempotency",
+        "sourceOfTruth",
+        "versionedEvent",
+        "stableFailureCode"
+      ]
+    },
+    {
+      "id": "media-upload-stale-progress",
+      "area": "media",
+      "command": "media_upload_complete",
+      "mustVerify": [
+        "authorization",
+        "idempotency",
+        "sourceOfTruth",
+        "versionedEvent",
+        "stableFailureCode"
+      ]
+    },
+    {
+      "id": "media-upload-complete-processing-separation",
+      "area": "media",
+      "command": "media_upload_complete",
+      "mustVerify": [
+        "authorization",
+        "idempotency",
+        "sourceOfTruth",
+        "versionedEvent",
+        "stableFailureCode"
+      ]
+    },
+    {
+      "id": "media-upload-expiry",
+      "area": "media",
+      "command": "media_upload_expire",
+      "mustVerify": [
+        "authorization",
+        "idempotency",
+        "sourceOfTruth",
+        "versionedEvent",
+        "stableFailureCode"
+      ]
+    },
+    {
+      "id": "media-upload-cancel",
+      "area": "media",
+      "command": "media_upload_cancel",
+      "mustVerify": [
+        "authorization",
+        "idempotency",
+        "sourceOfTruth",
+        "versionedEvent",
+        "stableFailureCode"
+      ]
+    }
+  ]
+}

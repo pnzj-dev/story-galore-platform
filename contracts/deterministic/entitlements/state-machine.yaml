@@ -1,0 +1,45 @@
+version: '1.0'
+area: entitlements
+states:
+- PENDING
+- ACTIVE
+- GRACE
+- SUSPENDED
+- EXPIRED
+- REVOKED
+transitionRules:
+- Only listed transitions are legal.
+- Authorization MUST be evaluated separately from transition legality.
+- Retries MUST preserve idempotency.
+- State changes MUST emit the event declared by the command/event compatibility graph.
+transitions:
+- from: PENDING
+  event: ACTIVATE
+  to: ACTIVE
+- from: ACTIVE
+  event: ENTER_GRACE
+  to: GRACE
+- from: GRACE
+  event: RECOVER
+  to: ACTIVE
+- from: GRACE
+  event: EXPIRE
+  to: EXPIRED
+- from: ACTIVE
+  event: SUSPEND
+  to: SUSPENDED
+- from: SUSPENDED
+  event: RESUME
+  to: ACTIVE
+- from: ACTIVE
+  event: REVOKE
+  to: REVOKED
+- from: SUSPENDED
+  event: REVOKE
+  to: REVOKED
+- from: PENDING
+  event: REVOKE
+  to: REVOKED
+terminalStates:
+- EXPIRED
+- REVOKED

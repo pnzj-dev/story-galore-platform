@@ -1,0 +1,36 @@
+schema: storygalore.commercial-products/v1
+version: 1
+canonical: true
+status: V19.5.3
+policy: fail_closed
+launch:
+  annualPlans:
+    enabled: true
+    currency: USD
+    creatorProMinor: 12000
+    creatorStudioMinor: 39000
+    readerPlusMinor: 7900
+    readerPremiumMinor: 14900
+    familyMinor: 19900
+    discountsArePolicyData: true
+  gifts:
+    enabled: true
+  referrals:
+    enabled: true
+    rewardModel: FIXED_QUALIFIED_REWARD
+    permanentRevenueShare: FORBIDDEN
+  bundles:
+    enabled: true
+    rightsPolicyRef: storygalore.revenue-participation-agreement.v1
+  premieres:
+    enabled: true
+    pricing: REGISTERED_EVENT_POLICY
+  b2b:
+    enabled: false
+    status: FUTURE_REGISTERED_ONLY
+rules:
+- Annual plans require explicit deferred-revenue boundaries.
+- Gift entitlement ownership MUST be explicit.
+- Referral rewards MUST be capped and qualification-based.
+- Bundles MUST resolve revenue participation before sale activation.
+- B2B execution is blocked until a dedicated jurisdiction, tax, contract and entitlement pack is approved.

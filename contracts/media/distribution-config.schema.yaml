@@ -1,0 +1,36 @@
+version: 1
+name: MediaDistributionConfig
+type: object
+required:
+  - revision
+  - primaryProvider
+  - secondaryProvider
+  - secondaryEnabled
+  - failoverMode
+  - regionalFailoverEnabled
+  - circuitBreaker
+  - updatedAt
+  - updatedBy
+properties:
+  revision: { type: integer, minimum: 1 }
+  primaryProvider: { type: string, const: cloudflare }
+  secondaryProvider: { type: string, const: bunny }
+  secondaryEnabled: { type: boolean }
+  failoverMode:
+    type: string
+    enum: [PRIMARY_ONLY, AUTOMATIC_FAILOVER, SECONDARY_ONLY]
+  regionalFailoverEnabled: { type: boolean }
+  circuitBreaker:
+    type: object
+    required: [failureThreshold, recoveryProbeSeconds, openSeconds]
+    properties:
+      failureThreshold: { type: integer, minimum: 1 }
+      recoveryProbeSeconds: { type: integer, minimum: 5 }
+      openSeconds: { type: integer, minimum: 1 }
+  updatedAt: { type: string, format: date-time }
+  updatedBy: { type: string }
+  reason: { type: string, minLength: 1, maxLength: 500 }
+invariants:
+  - secondaryEnabled=false MUST force effective failoverMode=PRIMARY_ONLY unless an explicit SECONDARY_ONLY configuration is rejected.
+  - secondaryProvider MUST remain configured even when disabled so re-enablement is deterministic.
+  - provider credentials MUST NOT be stored in this document.

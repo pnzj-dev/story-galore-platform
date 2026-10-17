@@ -1,0 +1,96 @@
+schema: storygalore.admin-destructive-operations/v1
+version: 1
+canonical: true
+status: canonical
+policy: fail_closed
+principle: non_destructive_is_read_only_or_reversible_soft_state_without_money_secret_or_deletion
+adr: docs/adr/0018-admin-app-split.md
+non_destructive:
+  - family: analytics
+    surface: /admin/analytics
+    operations: [read dashboards, read aggregates, read reports, read funnels, read cohorts]
+    capabilities: [analytics.*.read]
+  - family: support
+    surface: /admin/support
+    operations: [ticket read, ticket manage, escalate, manage knowledge base, manage macros, read SLA, read audit, read user context]
+    capabilities: [support.ticket.read, support.ticket.manage, support.escalation.manage, support.knowledge.manage, support.macro.manage, support.sla.read, support.audit.read, support.user_context.read]
+    reversibility: versioned_and_audited
+  - family: moderation
+    surface: /admin/moderation
+    operations: [triage, assign, classify, approve, reject, hide, unhide, restore, resolve report, appeal]
+    capabilities: [moderation.report.read, moderation.*.manage]
+    reversibility: appeal_and_restore
+  - family: content_operations
+    surface: /admin/content
+    operations: [inspect, hide, unhide, restore, soft lifecycle transition, publication repair]
+    capabilities: [content.operations.read, content.operations.manage]
+    reversibility: restore_and_lifecycle
+  - family: operations
+    surface: /admin/operations
+    operations: [inspect health, retry when permitted, cancel when permitted, DLQ inspect/replay, incident lifecycle, alerts, feature flags, dynamic config activate/version/rollback/simulate]
+    capabilities: [operations.read, operations.manage, admin.functions.read, admin.state_machine.read]
+    reversibility: rollback_and_replay
+  - family: ai
+    surface: /admin/analytics/ai
+    operations: [provider health, enable, disable, generation inspect, retry, cancel]
+    capabilities: [analytics.ai.read]
+    reversibility: enable_disable_rollback
+  - family: notifications
+    surface: /admin/operations
+    operations: [inspect delivery health, retry failed deliveries, manage templates, manage settings]
+    reversibility: rollback_and_replay
+  - family: discovery
+    surface: /admin/content
+    operations: [index health, rebuild index, authorization diagnostics]
+    capabilities: [analytics.content.read, content.operations.read]
+    reversibility: idempotent_rebuild
+  - family: economics_simulation
+    surface: /admin/economics/simulator
+    operations: [run simulator]
+    capabilities: [economics.simulator.run]
+    reversibility: pure_compute
+  - family: administration_read
+    surface: /admin
+    operations: [dashboard read, settings read, users read]
+    capabilities: [admin.dashboard.read, admin.settings.read, admin.users.read]
+destructive:
+  - family: finance
+    surface: /admin/payments/refunds
+    operations: [refund, adjust ledger, reserve or settle AI credits, grant or revoke entitlement, finalize reconciliation]
+    capabilities: [finance.refund.request, finance.*.manage]
+    reason: money_movement
+  - family: data_lifecycle
+    operations: [permanently delete content, permanently delete media, permanently delete user, retention purge, deletion propagation]
+    reason: irreversible_deletion
+  - family: private_content_access
+    surface: /admin/security/private-message-access
+    operations: [private-message investigation, read raw secrets, read BYOK credentials]
+    capabilities: [security.private_message.investigate]
+    reason: secret_or_private_access
+  - family: account_hard_lifecycle
+    operations: [permanent suspend, permanent ban, impersonation, credential rotation, credential reset]
+    reason: hard_account_lifecycle
+  - family: policy_broad_blast_radius
+    surface: /admin/economics/{governance,pricing,reserves,tax}
+    operations: [pricing activation, reserve policy change, tax policy change, economic governance change, adult-policy change, media-distribution mode change, production configuration change]
+    capabilities: [economics.pricing.manage, economics.reserve.manage, economics.tax.manage, economics.governance.manage, operations.media_distribution.configure]
+    reason: broad_blast_radius
+  - family: agent_privilege
+    operations: [register agent, scope agent, lease agent, suspend agent, rotate agent, approve risky agent action, issue or rotate API key]
+    reason: privilege_change
+  - family: backup_restore
+    operations: [restore from backup, delete backup]
+    reason: overwrite_live_data
+  - family: security_hard_sanctions
+    operations: [permanent sanctions, permanent rate-limit overrides]
+    reason: irreversible_sanction
+safety_controls:
+  approval: REQUIRED
+  break_glass: ALLOWED_ONLY_WITH_AUDIT
+  idempotency: REQUIRED
+  audit: REQUIRED
+  reason_field: REQUIRED
+  correlation: REQUIRED
+  four_eyes: REQUIRED_FOR_CRITICAL
+  safe_projection: REQUIRED
+  raw_secrets_forbidden: true

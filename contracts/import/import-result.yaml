@@ -1,0 +1,19 @@
+version: 1.0.0
+release: V1
+policy: deterministic
+fields:
+  taskId: required
+  sourcePageUrl: required
+  sourceProvider: required
+  authorizationId: required
+  discoveredLinks: required
+  importedAssets: required
+  rejectedItems: required
+  originalHashes: required
+  normalizedHashes: required
+  metadataChanges: required
+  archiveChanges: required
+  securityScan: required
+  provenance: required
+  operationId: required
+  status: required

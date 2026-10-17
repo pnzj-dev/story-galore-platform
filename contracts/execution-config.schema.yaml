@@ -1,0 +1,16 @@
+version: 1
+name: execution-config
+type: object
+required: [durableJob]
+properties:
+  durableJob:
+    type: object
+    required: [primary, secondary, failoverEnabled]
+    properties:
+      primary: {type: string, const: cloudflare_workflows}
+      secondary: {type: string, const: appwrite_job_store}
+      secondaryWorker: {type: string, const: appwrite_functions}
+      failoverEnabled: {type: boolean}
+      recoveryProbeIntervalSeconds: {type: integer, minimum: 5}
+      maxConsecutivePrimaryFailures: {type: integer, minimum: 1}
+      maxConsecutiveSecondaryFailures: {type: integer, minimum: 1}

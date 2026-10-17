@@ -1,0 +1,1 @@
+{"name":"DeviceSessionContract","version":"1.0","requirements":["device registration","session listing","revocation","lastSeenAt","clientPlatform","clientVersion","security events"]}

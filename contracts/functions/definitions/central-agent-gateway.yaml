@@ -1,0 +1,60 @@
+schema: storygalore.appwrite-function/v1
+id: central-agent-gateway
+runtime:
+  platform: APPWRITE_FUNCTIONS
+  language: GO_LATEST_STABLE_EXACT_PIN_REQUIRED
+  state: STATELESS
+class: REQUEST_HANDLER
+purpose: Enforce one authorization path for autonomous-agent access to registered Appwrite MCP tools.
+authority:
+  job_state: NONE
+  domain_state: CANONICAL_DOMAIN_RESOURCES_ONLY_THROUGH_REGISTERED_ADAPTERS
+input:
+  transport: CONTRACT_DEFINED
+  schema: contracts/functions/schemas/central-agent-gateway-input.yaml
+output:
+  schema: contracts/functions/schemas/central-agent-gateway-output.yaml
+security:
+  authentication: BLOCKED_UNTIL_UNATTENDED_AGENT_IDENTITY_VERIFIED
+  authorization: IN_PROCESS_POLICY_ENGINE
+  capability: FUNCTION_CAPABILITY_CENTRAL_AGENT_GATEWAY
+  secret_policy: APPROVED_SECRET_STORE_ONLY
+idempotency:
+  required: true
+  duplicate_behavior: RETURN_EXISTING_RESULT_OR_SAFE_NOOP
+execution:
+  operation_id: REQUIRED_FOR_MUTATIONS
+  retry_policy: NO_AUTOMATIC_RETRY_FOR_NON_IDEMPOTENT_EXTERNAL_CALLS
+  schedule: NONE
+  timeout: EXACT_PLATFORM_LIMIT_REQUIRED_BEFORE_IMPLEMENTATION
+  concurrency: CONTRACT_DEFINED
+side_effects:
+  policy: REGISTERED_MCP_TOOL_ONLY
+  external_side_effects_require_idempotency: true
+resources:
+  access_mode: EXPLICIT_REGISTRY_ONLY
+  map: contracts/functions/resource-maps/central-agent-gateway.yaml
+  undeclared_resource_access: BLOCK
+events:
+  emitted: REGISTERED_AUDIT_EVENTS_ONLY
+  consumed: NONE
+observability:
+  request_id: REQUIRED
+  correlation_id: REQUIRED
+  operation_id: REQUIRED_WHEN_APPLICABLE
+  secrets_redacted: true
+audit:
+  required: true
+errors:
+  catalog: contracts/functions/error-catalog.yaml
+  unknown_error_behavior: SAFE_FAILURE
+tests:
+  contract: contracts/functions/test-matrix/central-agent-gateway.yaml
+  missing_test_behavior: BLOCK
+implementation:
+  source_owner: infrastructure-appwrite
+  source_path: backend/appwrite/functions/central-agent-gateway
+  implementation_status: BLOCKED_PENDING_AUTH_TOOL_CATALOG_RESOURCE_MAP_AND_RUNTIME_PIN
+  scaffold_source: OFFICIAL_APPWRITE_CLI_ONLY
+  policy_engine_deployment: IN_PROCESS_MODULE
+  separate_policy_engine_service: PROHIBITED_UNLESS_APPROVED_ADR

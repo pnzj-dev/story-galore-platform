@@ -1,0 +1,61 @@
+schema: storygalore.payment-provider-policy/v1
+version: 1
+canonical: true
+policy: fail_closed
+selectionOrder:
+- businessEligibility
+- jurisdiction
+- paymentMethod
+- currency
+- transactionType
+- providerCapability
+- providerHealth
+- registeredRoutePolicy
+rules:
+- Provider adapters are replaceable execution rails; StoryGalore financial ledger remains authoritative.
+- No provider is production-active solely because an adapter exists.
+- Adult/AI/UGC business-model approval must be verified separately for each provider before activation.
+- Provider fallback is only permitted when an explicit registered route policy declares it.
+- Technical failure may use a declared fallback; customer/payment declines must not be blindly retried across providers.
+- Provider-specific SDK objects must not cross the adapter boundary.
+- Provider webhooks require signature verification, durable storage, deduplication and reconciliation.
+- Provider pricing/cost claims must come from authoritative provider data; unknown pricing is BLOCKED.
+providerCandidates:
+- providerId: STRIPE_CONNECT
+  category: payments
+  activation: CONDITIONAL
+  intendedRoles:
+  - FIAT_CHECKOUT
+  - CREATOR_PAYOUT
+  - USDC_PAYOUT
+  productionApproval: REQUIRED
+- providerId: NOWPAYMENTS
+  category: payments
+  activation: CONDITIONAL
+  intendedRoles:
+  - CRYPTO_CHECKOUT
+  - CRYPTO_PAYOUT
+  productionApproval: REQUIRED
+- providerId: ZEN_PAYMENTS
+  category: payments
+  activation: CONDITIONAL
+  intendedRoles:
+  - FIAT_CHECKOUT
+  - ACQUIRING_FALLBACK
+  productionApproval: REQUIRED
+- providerId: SECUREGLOBALPAY
+  category: payments
+  activation: CONDITIONAL
+  intendedRoles:
+  - FIAT_CHECKOUT
+  - ACQUIRING_FALLBACK
+  productionApproval: REQUIRED
+productionActivationRequirements:
+- providerContractRegistered
+- businessModelApproval
+- jurisdictionMatrixApproved
+- capabilityVerification
+- webhookVerification
+- reconciliationTested
+- financialTestSuitePassed
+- humanApproval

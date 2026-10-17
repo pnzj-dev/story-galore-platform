@@ -1,0 +1,20 @@
+import fs from 'node:fs';
+import path from 'node:path';
+const root=process.cwd();
+const exists=p=>fs.existsSync(path.join(root,p));
+const read=p=>fs.readFileSync(path.join(root,p),'utf8');
+const fail=m=>{console.error(`CONSUMER ECONOMICS BLOCKED: ${m}`);process.exit(1)};
+const required=[
+'contracts/business/consumer-plans.yaml','contracts/business/consumption-units.yaml','contracts/business/consumption-metering.yaml','contracts/business/consumer-media-policy.yaml','contracts/business/video-quality-policy.yaml','contracts/business/consumer-fair-use.yaml','contracts/business/consumer-overage.yaml','contracts/business/family-plan.yaml','contracts/business/consumer-sponsored-consumption.yaml','contracts/business/unit-economics.yaml','contracts/analytics/consumer-economics-metrics.yaml','contracts/analytics/consumer-economics-dashboards.yaml','contracts/state-machines/consumer-consumption.yaml','contracts/state-machines/consumer-sponsored-consumption.yaml','contracts/verification/consumer-economics-contract-to-test.yaml','docs/ADMIN_CONSUMER_ECONOMICS.md','contracts/ui/admin/consumer-economics.yaml'];
+for(const p of required) if(!exists(p)) fail(`missing ${p}`);
+const metrics=read('contracts/analytics/consumer-economics-metrics.yaml');
+for(const token of ['ACTUAL','ESTIMATED','PROJECTED','UNAVAILABLE','unit:','source:']) if(!metrics.includes(token)) fail(`metric contract missing ${token}`);
+const pages=read('contracts/ui/pages/page-registry.yaml');
+for(const r of ['/admin/economics','/admin/economics/consumption','/admin/economics/media','/admin/economics/plans','/admin/economics/unit-economics','/admin/economics/anomalies']) if(!pages.includes(r)) fail(`admin route missing ${r}`);
+const rbac=read('contracts/permissions/admin-rbac.json');
+for(const c of ['economics.consumer.read','economics.consumption.read','economics.media_cost.read','economics.plan_profitability.read','economics.unit_economics.read','economics.anomaly.read']) if(!rbac.includes(c)) fail(`admin capability missing ${c}`);
+for(const p of ['contracts/agents/manifests/data-analysis-reporting.yaml','contracts/agents/manifests/ceo.yaml','contracts/agents/manifests/media-operations.yaml']) if(!exists(p)) fail(`agent manifest missing ${p}`);
+for(const t of ['data-analysis-reporting.consumer-economics.read','data-analysis-reporting.consumption-anomaly.review','data-analysis-reporting.consumer-economics.read','data-analysis-reporting.unit-economics.read','ceo.economics.summary.read','media-operations.delivery-economics.read']) if(!read('contracts/agents/tools/registry.yaml').includes(t)) fail(`agent tool missing ${t}`);
+for(const t of ['consumer.fair_use.v1','consumer.video_quality.v1']) if(!read('contracts/business/consumer-fair-use.yaml').includes(t) && !read('contracts/business/video-quality-policy.yaml').includes(t)) console.warn(`warning: policy reference ${t} is represented by contract IDs`);
+console.log('CONSUMER ECONOMICS GATE: PASS');
+console.log('Consumer plans, metering, cost attribution, unit economics, Admin routes/RBAC and operational-agent observability are registered.');

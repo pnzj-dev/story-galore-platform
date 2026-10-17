@@ -1,0 +1,24 @@
+schema: storygalore.contract-scenarios/v1
+version: 1
+policy: fail_closed
+scenarios:
+- id: payout-happy-path
+  given: REQUESTED
+  when: ELIGIBILITY_CONFIRMED
+  then: ELIGIBILITY_PENDING
+- id: payout-submit
+  given: ELIGIBILITY_PENDING
+  when: SUBMIT_TO_PROVIDER
+  then: PROVIDER_PENDING
+- id: wallet-verification
+  given: CONNECTED
+  when: VERIFY
+  then: VERIFICATION_PENDING
+- id: wallet-verified
+  given: VERIFICATION_PENDING
+  when: VERIFICATION_SUCCEEDED
+  then: VERIFIED
+- id: illegal-payout-transition
+  given: REQUESTED
+  when: SUCCEED
+  then: BLOCK

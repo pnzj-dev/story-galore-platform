@@ -1,0 +1,24 @@
+version: "1.0"
+canonical: true
+errorClasses:
+  - VALIDATION_ERROR
+  - AUTHENTICATION_REQUIRED
+  - AUTHORIZATION_DENIED
+  - ENTITLEMENT_REQUIRED
+  - AGE_VERIFICATION_REQUIRED
+  - POLICY_DENIED
+  - CONFLICT
+  - IDEMPOTENCY_REPLAY
+  - NOT_FOUND
+  - RATE_LIMITED
+  - BACKPRESSURE
+  - PROVIDER_UNAVAILABLE
+  - TEMPORARILY_UNAVAILABLE
+  - DEPENDENCY_FAILURE
+  - INTERNAL_ERROR
+Rules:
+  - error codes are stable contract identifiers
+  - clients MUST branch on code, not human-readable message
+  - retryable errors MUST be explicitly marked
+  - mutation failures MUST state whether the source-of-truth write occurred
+  - partial success is forbidden unless the contract explicitly defines a compensating action

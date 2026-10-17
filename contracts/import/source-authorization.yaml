@@ -1,0 +1,16 @@
+version: 1.0.0
+release: V1
+policy: deterministic
+required:
+  authorizationId: required
+  actorId: required
+  sourceProvider: KEEP2SHARE
+  confirmed: true
+  grantedAt: required
+  expiresAt: optional
+  purpose: MEDIA_IMPORT
+rules:
+  - authorization is separate from Keep2Share authentication
+  - authentication proves account access; authorization confirms StoryGalore may import and process the content
+  - no import proceeds when confirmed is false or expired
+  - authorization must not be inferred from possession of a URL or credentials

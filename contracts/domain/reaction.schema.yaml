@@ -1,0 +1,11 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+title: StoryGalore Reaction
+type: object
+required: [userId, targetType, targetId, reactionType, createdAt]
+properties:
+  userId: {type: string, minLength: 1}
+  targetType: {type: string, enum: [COMMENT, PUBLICATION]}
+  targetId: {type: string, minLength: 1}
+  reactionType: {type: string, minLength: 1}
+  createdAt: {type: string, format: date-time}
+additionalProperties: false

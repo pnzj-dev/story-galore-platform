@@ -1,0 +1,83 @@
+schema: storygalore.consumer-plan-contract/v1
+version: 1
+canonical: true
+status: V19.5.2
+policy: fail_closed
+commercial_status: LAUNCH_DEFAULT_REQUIRES_HUMAN_ACTIVATION
+principles:
+- Consumer plans monetize access and experience, not raw infrastructure units exposed
+  as money.
+- Text reading is included without metered consumption under the launch defaults.
+- Media-heavy consumption receives explicit entitlements and fair-use protection.
+- Overage is opt-in and never silently charged.
+- Creator rights and content entitlements remain authoritative over consumer plan
+  entitlements.
+- Plan limits are policy data; UI and services MUST NOT hard-code commercial limits.
+plans:
+- planId: READER_FREE
+  monthlyPrice:
+    currency: USD
+    minor: 0
+  entitlements:
+    audioMinutes: 600
+    videoMinutes: 120
+    downloadGiB: 2
+    aiCompanionUnits: 100
+    ads: ALLOWED
+    videoQualityMax: STANDARD
+    offline: LIMITED
+  fairUsePolicyRef: consumer.fair_use.v1
+- planId: READER_PLUS
+  monthlyPrice:
+    currency: USD
+    minor: 799
+  entitlements:
+    audioMinutes: 3000
+    videoMinutes: 1200
+    downloadGiB: 20
+    aiCompanionUnits: 1000
+    ads: NONE
+    videoQualityMax: HD
+    offline: STANDARD
+  fairUsePolicyRef: consumer.fair_use.v1
+- planId: READER_PREMIUM
+  monthlyPrice:
+    currency: USD
+    minor: 1499
+  entitlements:
+    audioMinutes: 12000
+    videoMinutes: 6000
+    downloadGiB: 100
+    aiCompanionUnits: 5000
+    ads: NONE
+    videoQualityMax: HIGHEST_REGISTERED
+    offline: ENHANCED
+  fairUsePolicyRef: consumer.fair_use.v1
+- planId: READER_FAMILY
+  monthlyPrice:
+    currency: USD
+    minor: 1999
+  entitlements:
+    profilesMax: 5
+    audioMinutesPool: 36000
+    videoMinutesPool: 18000
+    downloadGiBPool: 100
+    aiCompanionUnitsPool: 10000
+    ads: NONE
+    videoQualityMax: HIGHEST_REGISTERED
+    offline: ENHANCED
+  fairUsePolicyRef: consumer.fair_use.v1
+textPolicy:
+  readingConsumptionCharge: NONE
+  entitlementRequired: true
+  entitlementType: CONTENT_ACCESS
+overage:
+  mode: OPT_IN_ONLY
+  silentCharge: FORBIDDEN
+  catalogRef: consumer.overage.v1
+qualityMultipliers:
+  source: REGISTERED_COST_POLICY
+  unknown: BLOCK
+familyPooling:
+  enabled: true
+  poolingPolicyRef: consumer.family_pool.v1

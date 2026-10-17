@@ -1,0 +1,3 @@
+schema: storygalore.agent-tool-input/v1
+tool: art-director.character.read
+additionalProperties: false

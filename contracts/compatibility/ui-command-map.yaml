@@ -1,0 +1,48 @@
+version: '1.0'
+rules:
+- UI mutations MUST call a registered domain command through application services.
+- UI components MUST NOT write directly to Appwrite.
+- Read-only UI queries may map to domain queries.
+mutationPrefixes:
+- create
+- update
+- delete
+- save
+- publish
+- schedule
+- cancel
+- pause
+- resume
+- apply
+- restore
+- reorder
+- move
+- attach
+- detach
+- send
+- report
+- block
+- unblock
+- grant
+- revoke
+- suspend
+- reconcile
+- change_plan
+mappings:
+- mutation: studio_media_upload_create
+  command: media_upload_create
+- mutation: studio_media_upload_start
+  command: media_upload_start
+- mutation: studio_media_upload_pause
+  command: media_upload_pause
+- mutation: studio_media_upload_resume
+  command: media_upload_resume
+- mutation: studio_media_upload_complete
+  command: media_upload_complete
+- mutation: studio_media_upload_cancel
+  command: media_upload_cancel
+- mutation: studio_media_upload_recover
+  command: media_upload_recover
+
+- mutation: admin_media_distribution_config_update
+  command: media_distribution_config_update

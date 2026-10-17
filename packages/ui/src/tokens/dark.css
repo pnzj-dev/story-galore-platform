@@ -1,0 +1,37 @@
+/*
+ * Dark theme color tokens (the default presentation).
+ * Token names map to contracts/ui/theme/design-tokens.yaml.
+ */
+@theme {
+  --color-background: #0a0a0a;
+  --color-surface: #18181b;
+  --color-surface-elevated: #27272a;
+  --color-foreground: #f4f4f5;
+  --color-foreground-muted: #a1a1aa;
+  --color-border: #3f3f46;
+  --color-focus-ring: #c084fc;
+  --color-primary: #a855f7;
+  --color-primary-foreground: #ffffff;
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --color-info: #3b82f6;
+  --color-link: #c084fc;
+  --color-disabled: #52525b;
+  --color-overlay: rgb(0 0 0 / 0.6);
+  --color-reader-background: #0a0a0a;
+  --color-reader-foreground: #f4f4f5;
+  --color-editor-canvas: #18181b;
+  --color-chart-1: #a855f7;
+  --color-chart-2: #22c55e;
+  --color-chart-3: #f59e0b;
+  --color-chart-4: #3b82f6;
+  --color-chart-5: #ef4444;
+  --color-selection: #7c3aed;
+  --color-code-background: #18181b;
+  --color-code-foreground: #f4f4f5;
+}
+
+:root {
+  color-scheme: dark;
+}

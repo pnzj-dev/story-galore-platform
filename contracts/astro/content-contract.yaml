@@ -1,0 +1,30 @@
+schema: storygalore.astro-content/v1
+version: 1
+principle: content_collections_are_for_repository_backed_content_not_authoritative_runtime_domain_state
+collections:
+  posts:
+    format: markdown_or_mdx
+    schema_fields: [title, description, slug, author, publishedAt, updatedAt, language, tags, cover, status, adult, canonical]
+  guides:
+    format: markdown_or_mdx
+    schema_fields: [title, description, slug, publishedAt, updatedAt, language, tags, status]
+  announcements:
+    format: markdown_or_mdx
+    schema_fields: [title, description, slug, publishedAt, language, status]
+  help:
+    format: markdown_or_mdx
+    schema_fields: [title, slug, language, category, updatedAt, status]
+  changelog:
+    format: markdown_or_mdx
+    schema_fields: [title, slug, version, publishedAt, language]
+runtime_domain_boundary:
+  appwrite_authoritative: [users, projects, publications, entitlements, comments, likes, subscriptions, payments, media_assets]
+  content_collection_allowed: [editorial_posts, guides, announcements, help, changelog]
+  prohibited_mirror_without_contract: true
+language:
+  identifier: BCP47
+  translated_label_not_identifier: true
+  filtering_server_authoritative: true
+adult:
+  default_hidden: true
+  policy_engine_required: true

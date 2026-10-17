@@ -1,0 +1,17 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://storygalore.dev/contracts/studio/editor-operation.schema.yaml
+title: Editor Operation
+version: 1
+required: [mutationId, draftId, baseRevisionId, operation, actorId, clientId, clientTimestamp]
+properties:
+  mutationId: {type: string}
+  draftId: {type: string}
+  baseRevisionId: {type: string}
+  operation: {enum: [CREATE, UPDATE, DELETE, REORDER, DUPLICATE, APPLY_GENERATION, RESTORE_REVISION]}
+  targetType: {enum: [DOCUMENT, PAGE, PANEL, LAYER, TEXT, DIALOGUE, ASSET, READING_ORDER]}
+  targetId: {type: string}
+  payload: {type: object}
+  actorId: {type: string}
+  clientId: {type: string}
+  clientTimestamp: {type: string, format: date-time}
+additionalProperties: false

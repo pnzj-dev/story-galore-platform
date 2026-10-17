@@ -1,0 +1,12 @@
+version: 1
+domain: social
+poll:
+  maxOptions: 12
+  votingModes:
+    - SINGLE
+    - MULTIPLE
+rules:
+  - Poll ownership belongs to the post author.
+  - Vote mutations MUST be idempotent.
+  - Poll results MUST NOT reveal restricted voter identity.
+  - Closed polls reject new votes deterministically.

@@ -1,0 +1,24 @@
+schema: storygalore.consumer-media-policy/v1
+version: 1
+canonical: true
+status: V19.5.2
+policy: fail_closed
+mediaClasses:
+  VIDEO:
+    meterUnit: VIDEO_MINUTE
+    qualityPolicyRef: consumer.video_quality.v1
+  AUDIO:
+    meterUnit: AUDIO_MINUTE
+  DOWNLOAD:
+    meterUnit: DOWNLOAD_GIB
+    rightsPolicyRef: content.download-rights.v1
+rightsPrecedence:
+- creator_rights
+- content_entitlement
+- jurisdiction_policy
+- consumer_plan_entitlement
+- fair_use_policy
+protectedMediaRule: CDN delivery MUST NOT bypass authorization or content entitlement.
+downloadRule: A creator/content prohibition MUST override consumer plan download entitlement.
+offlineRule: Offline cache is an entitlement with registered expiry and revocation
+  behavior.

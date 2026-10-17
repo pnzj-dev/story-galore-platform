@@ -1,0 +1,38 @@
+schema: storygalore.appwrite-sites-deployment/v2
+version: 2
+platform: APPWRITE_SITES
+source_of_truth: official_appwrite_sites_configuration
+current_verified_capabilities:
+  astro: [STATIC, SSR]
+  git_deployments: true
+  branch_previews: true
+  custom_domains: true
+  tls: true
+  cli_deployments: true
+  rollback_via_deployment_activation: true
+site:
+  site_id_env: STORYGALORE_SITE_ID
+  root_directory: apps/web
+  framework: astro
+  rendering: SSR
+  install_command: pnpm install --frozen-lockfile
+  build_command: pnpm --filter @storygalore/web build
+  output_directory: ./dist
+  adapter: ssr
+  build_runtime: node-22
+  branch_strategy:
+    production: main
+    non_production: preview
+rules:
+  appwrite_sites_is_canonical_web_host: true
+  canonical_site_count: 1
+  public_and_non_destructive_admin_are_routes_within_one_astro_application: true
+  destructive_admin_is_standalone_non_appwrite_sites_app: true
+  destructive_admin_hosting: fly_io_initial_then_private_intranet
+  destructive_admin_adr: docs/adr/0018-admin-app-split.md
+  other_hosting_platform_without_adr: BLOCK
+  deployment_config_must_be_versioned: true
+  production_deploy_requires_release_gate: true
+  preview_deployments_must_not_change_production: true
+  site_secrets_must_use_appwrite_site_environment_configuration: true
+  APPWRITE_ prefix_reserved: true

@@ -1,0 +1,67 @@
+schema: storygalore.admin-economics-dashboard/v1
+version: 1
+canonical: true
+status: V19.5.2
+policy: fail_closed
+routes:
+- route: /admin/economics
+  purpose: executive consumer economics overview
+  roles:
+  - PLATFORM_ADMIN
+  - FINANCE
+  - ANALYTICS
+  - SRE_OPS
+- route: /admin/economics/consumption
+  purpose: plan and media consumption
+  roles:
+  - PLATFORM_ADMIN
+  - ANALYTICS
+  - SRE_OPS
+- route: /admin/economics/media
+  purpose: media delivery/storage/transcode economics
+  roles:
+  - PLATFORM_ADMIN
+  - FINANCE
+  - SRE_OPS
+- route: /admin/economics/plans
+  purpose: consumer plan utilization and profitability
+  roles:
+  - PLATFORM_ADMIN
+  - FINANCE
+  - ANALYTICS
+- route: /admin/economics/unit-economics
+  purpose: contribution margin and cost per unit
+  roles:
+  - PLATFORM_ADMIN
+  - FINANCE
+  - ANALYTICS
+- route: /admin/economics/anomalies
+  purpose: fair-use and cost anomalies
+  roles:
+  - PLATFORM_ADMIN
+  - SRE_OPS
+  - SECURITY_ABUSE
+  - ANALYTICS
+overviewKpis:
+- consumer_paid_subscribers
+- consumer_arpu
+- consumer_video_minutes
+- consumer_attributable_infrastructure_cost
+- consumer_contribution_margin
+- consumer_contribution_margin_rate
+- cost_per_video_minute
+- cost_per_download_gib
+drilldowns:
+- plan
+- mediaType
+- quality
+- provider
+- country
+- creator
+- content
+actions:
+  default: READ_ONLY
+  policy_change: EXPLICIT_REGISTERED_ADMIN_ACTION
+  provider_routing_change: APPROVAL_REQUIRED
+  plan_activation: APPROVAL_REQUIRED
+noRuntimeDependency: true

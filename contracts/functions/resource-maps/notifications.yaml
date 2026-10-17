@@ -1,0 +1,9 @@
+schema: storygalore.function-resource-map/v1
+version: 1
+function: notifications
+policy: explicit_only
+resources:
+  - notifications
+  - notification_preferences
+  - notification_delivery_attempts
+undeclared_resource_access: BLOCK

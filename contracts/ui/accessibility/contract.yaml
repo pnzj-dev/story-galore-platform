@@ -1,0 +1,17 @@
+schema: storygalore.accessibility-contract/v1
+version: 1
+policy: deterministic
+rules:
+  - Every interactive component MUST declare keyboard behavior.
+  - Every interactive component MUST have an accessible name.
+  - Focus management MUST be explicit for dialogs, drawers, navigation and async errors.
+  - Reduced motion MUST be respected.
+  - Color MUST NOT be the sole carrier of meaning.
+  - Loading and error state announcements MUST be declared.
+  - Automated accessibility verification is mandatory for release-critical journeys.
+required_profiles:
+  - keyboard
+  - screen-reader
+  - reduced-motion
+  - forced-colors
+  - mobile-touch

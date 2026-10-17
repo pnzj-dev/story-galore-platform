@@ -1,0 +1,66 @@
+schema: storygalore.astro-routes/v2
+version: 2
+source: apps/web/src/pages
+rules:
+  file_based_routing_only: true
+  dynamic_segments_must_match_contract: true
+  route_grouping_allowed: true
+  custom_router_forbidden: true
+  every_route_requires_protection_mapping: true
+  patterns_are_policy_templates_not_route_inventory: true
+  canonical_planned_inventory: contracts/astro/route-inventory.yaml
+  concrete_route_inventory_source: apps/web/src/pages
+  planned_route_inventory: contracts/astro/route-inventory.yaml
+  concrete_route_inventory_must_be_generated_from_astro_files: true
+  exactly_one_effective_policy_per_concrete_route: true
+  route_protection_contract: contracts/astro/route-protection.yaml
+  unregistered_route: BLOCK
+route_rendering:
+  public_home: ON_DEMAND
+  discovery: ON_DEMAND
+  series: ON_DEMAND
+  comic_reader: ON_DEMAND
+  creator_profile: ON_DEMAND
+  editorial_post: PRERENDER
+  studio: ON_DEMAND
+  admin: ON_DEMAND
+route_density:
+  public: PUBLIC
+  studio: STUDIO
+  admin: ADMIN
+route_protection:
+  public:
+    patterns: ['/','/stories/**','/discover/**','/creators/:creatorId','/editorial/**']
+    authentication: OPTIONAL
+    authorization: PUBLIC_POLICY
+  authenticated:
+    patterns: ['/account/**','/library/**','/settings/**']
+    authentication: REQUIRED
+    authorization: ACCOUNT_ROUTE_CAPABILITY_REGISTRY
+  creator:
+    patterns: ['/creator/**','/studio/**']
+    authentication: REQUIRED
+    authorization: CREATOR_ACCESS_AND_RESOURCE_POLICY
+  admin:
+    patterns: ['/admin/**']
+    authentication: REQUIRED
+    authorization: ADMIN_RBAC_EXACT_ROUTE_REGISTRY
+    app_split: destructive_routes_served_by_apps_admin_not_this_astro_app
+    app_split_contract: contracts/admin/admin-app-split.yaml
+    non_destructive_only: true
+  required_registries:
+    account: contracts/permissions/route-access.yaml
+    concrete_inventory: contracts/astro/route-inventory.yaml
+    admin: contracts/permissions/admin-rbac.json
+  route_specific_overrides:
+    required: true
+    may_strengthen_parent_policy: true
+    may_weaken_parent_policy: false
+    must_be_registered: true
+404:
+  framework_native: true
+  themed: true
+  accessible: true
+redirects:
+  source_of_truth: explicit_route_contract
+  no_client_only_redirect_for_authorization: true

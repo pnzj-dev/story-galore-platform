@@ -1,0 +1,116 @@
+version: '1.0'
+area: payments
+commands:
+- name: payment_create
+  requiresAuthorization: true
+  requiresIdempotency: true
+  expectedRevision: optional
+  emitsVersionedEvent: true
+  sourceOfTruthWrite: true
+- name: payment_confirm_from_webhook
+  requiresAuthorization: true
+  requiresIdempotency: true
+  expectedRevision: optional
+  emitsVersionedEvent: true
+  sourceOfTruthWrite: true
+- name: payment_refund
+  requiresAuthorization: true
+  requiresIdempotency: true
+  expectedRevision: optional
+  emitsVersionedEvent: true
+  sourceOfTruthWrite: true
+- name: payment_reconcile
+  requiresAuthorization: true
+  requiresIdempotency: true
+  expectedRevision: optional
+  emitsVersionedEvent: true
+  sourceOfTruthWrite: true
+- name: payment_mark_failed
+  requiresAuthorization: true
+  requiresIdempotency: true
+  expectedRevision: optional
+  emitsVersionedEvent: true
+  sourceOfTruthWrite: true
+- name: creator_earnings_post
+  requiresAuthorization: true
+  requiresIdempotency: true
+  expectedRevision: optional
+  emitsVersionedEvent: true
+  sourceOfTruthWrite: true
+  stateMachine: payments.earnings
+- name: creator_earnings_reverse
+  requiresAuthorization: true
+  requiresIdempotency: true
+  expectedRevision: optional
+  emitsVersionedEvent: true
+  sourceOfTruthWrite: true
+  stateMachine: payments.earnings
+- name: payout_create
+  requiresAuthorization: true
+  requiresIdempotency: true
+  expectedRevision: optional
+  emitsVersionedEvent: true
+  sourceOfTruthWrite: true
+  stateMachine: payments.payout
+- name: payout_confirm
+  requiresAuthorization: true
+  requiresIdempotency: true
+  expectedRevision: optional
+  emitsVersionedEvent: true
+  sourceOfTruthWrite: true
+  stateMachine: payments.payout
+- name: payout_fail
+  requiresAuthorization: true
+  requiresIdempotency: true
+  expectedRevision: optional
+  emitsVersionedEvent: true
+  sourceOfTruthWrite: true
+  stateMachine: payments.payout
+- name: payout_reconcile
+  requiresAuthorization: true
+  requiresIdempotency: true
+  expectedRevision: optional
+  emitsVersionedEvent: true
+  sourceOfTruthWrite: true
+  stateMachine: payments.payout
+- name: payout_wallet_connect
+  requiresAuthorization: true
+  requiresIdempotency: true
+  expectedRevision: optional
+  emitsVersionedEvent: true
+  sourceOfTruthWrite: true
+  stateMachine: payments.wallet
+- name: payout_wallet_verify
+  requiresAuthorization: true
+  requiresIdempotency: true
+  expectedRevision: optional
+  emitsVersionedEvent: true
+  sourceOfTruthWrite: true
+  stateMachine: payments.wallet
+- name: payout_wallet_disconnect
+  requiresAuthorization: true
+  requiresIdempotency: true
+  expectedRevision: optional
+  emitsVersionedEvent: true
+  sourceOfTruthWrite: true
+  stateMachine: payments.wallet
+queries:
+- name: payment_get
+  authorizationFiltered: true
+  secretsExcluded: true
+  pagination: cursor_when_collection
+- name: payment_status_get
+  authorizationFiltered: true
+  secretsExcluded: true
+  pagination: cursor_when_collection
+- name: payment_reconciliation_get
+  authorizationFiltered: true
+  secretsExcluded: true
+  pagination: cursor_when_collection
+- creator_earnings_get
+- creator_balance_get
+- payout_get
+- payout_list
+- payout_wallet_list
+- payout_policy_get
+- payment_provider_capabilities_get

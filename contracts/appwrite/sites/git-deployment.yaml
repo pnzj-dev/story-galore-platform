@@ -1,0 +1,15 @@
+schema: storygalore.appwrite-sites-git-deployment/v1
+version: 1
+source_control: GIT
+production_branch: main
+rules:
+  main_push_creates_production_deployment: true
+  non_main_push_creates_preview_deployment: true
+  preview_requires_authorized_appwrite_org_access: true
+  production_requires_all_validation_gates: true
+  deployment_logs_are_retained_for_debugging: true
+  configuration_changes_require_redeploy: true
+release:
+  candidate_state: DEPLOYMENT_CANDIDATE
+  activation: explicit_release_step
+  rollback: activate_known_good_deployment

@@ -1,0 +1,12 @@
+schema: storygalore.function-resource-map/v1
+version: 1
+function: subscription-lifecycle
+policy: explicit_only
+resources:
+  - subscriptions
+  - subscription_events
+  - renewal_attempts
+  - plans
+  - entitlements
+  - entitlement_events
+undeclared_resource_access: BLOCK

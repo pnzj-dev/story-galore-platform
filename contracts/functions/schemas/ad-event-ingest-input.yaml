@@ -1,0 +1,10 @@
+schema: storygalore.function-input/v1
+function: ad-event-ingest
+fields:
+  requestId: string
+  correlationId: string
+  actorId: string|null
+  operationId: string|null
+  idempotencyKey: string|null
+  payload: CONTRACT_SPECIFIC
+unknown_fields: REJECT

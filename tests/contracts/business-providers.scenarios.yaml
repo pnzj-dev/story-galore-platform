@@ -1,0 +1,20 @@
+schema: storygalore.contract-scenarios/v1
+version: 1
+policy: fail_closed
+scenarios:
+- id: conditional-provider
+  given: provider_status=CONDITIONAL
+  when: production_route
+  then: BLOCK
+- id: decline-no-blind-fallback
+  given: customer_payment_declined
+  when: route_retry
+  then: BLOCK_UNLESS_EXPLICIT_POLICY
+- id: technical-fallback
+  given: provider_technical_failure
+  when: fallback
+  then: ONLY_REGISTERED_ROUTE
+- id: unknown-capability
+  given: provider_capability_unknown
+  when: execute
+  then: BLOCK

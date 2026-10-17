@@ -1,0 +1,21 @@
+version: 19.5.11
+codename: independent-route-authorization
+status: canonical
+changes:
+  - id: route-protection-registry
+    type: security
+    description: Register route classes and minimum authentication/authorization policies for public, authenticated, creator, studio and admin surfaces.
+  - id: backend-authorization-recheck
+    type: security
+    description: Require authoritative policy enforcement at every backend command, Function, Action/API, Agent tool and MCP tool boundary.
+  - id: fail-closed-route-mapping
+    type: determinism
+    description: Missing or ambiguous route/capability mappings block implementation.
+  - id: astro-validator-route-security
+    type: verification
+    description: Extend Astro/Appwrite validator to require route protection contracts and backend authorization invariants.
+blockers:
+  - unregistered-route
+  - unknown-capability
+  - middleware-used-as-sole-security-boundary
+  - client-supplied-authorization-claim-trusted

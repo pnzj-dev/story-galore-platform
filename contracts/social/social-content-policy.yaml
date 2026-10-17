@@ -1,0 +1,20 @@
+version: 1
+domain: social
+policy_order:
+  - authentication
+  - actor_status
+  - block_mute
+  - publication_status
+  - age_eligibility
+  - adult_preference
+  - entitlement
+  - jurisdiction
+  - moderation
+  - policy_engine
+  - social_visibility
+rules:
+  - Policy evaluation MUST occur before content is returned to feeds, collections, search, notifications, or shared previews.
+  - Adult content MUST remain hidden unless every required adult policy decision is satisfied.
+  - Subscriber-only social content MUST use Entitlements; following MUST NOT substitute for subscription.
+  - Blocked actors MUST NOT receive newly generated mentions, notifications, messages, or feed exposure where the block policy excludes it.
+  - A removed or unpublished publication MUST be removed from social projections without deleting the authoritative publication record.

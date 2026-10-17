@@ -1,0 +1,12 @@
+schema: storygalore.economic-simulator-tests/v1
+version: 1
+cases:
+- id: missing-input-is-unknown
+  given: cdn_cost_is_missing
+  expect: result_is_unknown
+- id: simulator-cannot-change-production
+  given: scenario_output_is_generated
+  expect: no_production_policy_mutation
+- id: threshold-breach-requires-review
+  given: simulated_margin_is_below_threshold
+  expect: human_review_required

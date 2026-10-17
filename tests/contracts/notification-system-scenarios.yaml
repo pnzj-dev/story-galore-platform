@@ -1,0 +1,74 @@
+version: 1
+suite: notification-system
+principle: unknown-or-ambiguous-contracts-block
+scenarios:
+  - id: NS-001
+    name: authorized event creates one inbox record
+    given: registered event, valid recipient resolver, authorized recipient, valid template and route
+    when: event is consumed twice with the same stable idempotency identity
+    then: exactly one canonical inbox record exists and duplicate consumption is a safe no-op
+  - id: NS-002
+    name: inbox survives external provider outage
+    given: notification creation is authorized and external provider is unavailable
+    when: notification is created
+    then: canonical in-app notification remains queryable and delivery attempt records retryable failure
+  - id: NS-003
+    name: read state is independent of email state
+    given: an unread notification whose email attempt is failed
+    when: the user marks the notification read
+    then: readAt is set and the email attempt state remains unchanged
+  - id: NS-004
+    name: delivery state does not mark inbox read
+    given: an unread notification whose provider accepted an email
+    when: the attempt moves to SENT
+    then: readAt remains null
+  - id: NS-005
+    name: cross-user inbox read is denied
+    given: user A owns a notification and user B is authenticated
+    when: user B requests the notification by identifier
+    then: access is denied without disclosing whether the record exists
+  - id: NS-006
+    name: protected deep link does not grant resource access
+    given: a notification references a protected publication
+    when: an unauthorized recipient opens the notification
+    then: normal resource authorization denies access and notification metadata reveals no protected payload
+  - id: NS-007
+    name: unregistered provider blocks external delivery
+    given: a channel/provider pair is absent from the verified adapter registry
+    when: delivery is requested
+    then: external send is blocked, redacted operational evidence is recorded, and no fallback provider is guessed
+  - id: NS-008
+    name: muted or blocked actor cannot trigger social notification
+    given: actor is blocked or muted under the applicable policy, or target is not visible to recipient
+    when: a social event is consumed
+    then: notification is suppressed and no protected content is disclosed
+  - id: NS-009
+    name: retry is bounded and idempotent
+    given: an attempt failed with a registered retryable provider error
+    when: approved retry workflow replays the same operation
+    then: retry policy bounds attempts and idempotency prevents duplicate logical sends
+  - id: NS-010
+    name: unverified receipt cannot claim delivered
+    given: provider contract supports acceptance but not delivery receipts
+    when: provider accepts the message
+    then: attempt state is SENT and never DELIVERED
+  - id: NS-011
+    name: realtime is user-scoped
+    given: two authenticated users subscribe to the notification updates
+    when: one user receives a notification
+    then: only that user's authorized subscription observes the update
+  - id: NS-012
+    name: agent provider bypass is denied
+    given: an autonomous agent requests direct email or push delivery
+    when: the request bypasses the Central Agent Gateway notification capability
+    then: the request is denied and audited
+  - id: NS-013
+    name: mandatory policy is not inferred
+    given: mandatory channel policy or jurisdictional consent contract is unresolved
+    when: external delivery is requested
+    then: channel enablement blocks rather than guessing a channel or consent status
+  - id: NS-014
+    name: staff delivery retry is capability-gated
+    given: a staff user without notification retry capability
+    when: they request retry of a failed attempt
+    then: retry is denied and audit records the authorization decision

@@ -1,0 +1,44 @@
+version: 1.0.0
+release: V1
+policy: deterministic
+provider_adapter_required_fields:
+  - providerId
+  - capabilitySet
+  - authMode
+  - requestSchema
+  - responseSchema
+  - normalizedErrorMap
+  - timeoutPolicy
+  - retryPolicy
+  - idempotencyPolicy
+  - webhookPolicy
+  - costSource
+  - creditEligibilityPolicy
+  - contentPolicy
+  - regionPolicy
+  - healthPolicy
+rules:
+  - provider SDKs stay behind adapters
+  - provider responses are normalized before domain use
+  - unknown capabilities fail closed
+  - provider pricing is never invented
+  - user-owned/BYOK providers never consume platform credits
+  - provider credentials never enter agent prompts, analytics or workflow history
+  - external provider webhooks require signature verification and idempotency
+media_provider_examples:
+  - higgsfield
+  - runway
+  - fal
+  - replicate
+  - comfyui-user-hosted
+llm_provider_examples:
+  - openai
+  - anthropic
+  - google-gemini
+  - mistral
+  - deepseek
+  - xai
+  - openrouter
+  - ollama-user-hosted
+  - vllm-user-hosted
+  - lmstudio-user-hosted

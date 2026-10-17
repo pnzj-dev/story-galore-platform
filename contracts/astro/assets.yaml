@@ -1,0 +1,14 @@
+schema: storygalore.astro-assets/v1
+version: 1
+rules:
+  site_owned_images_use_astro_assets: true
+  creator_media_uses_media_distribution: true
+  lcp_image_must_be_identified: true
+  below_fold_images_lazy: true
+  responsive_dimensions_required: true
+  alt_text_required_unless_decorative: true
+  source_artwork_not_recompressed_without_contract: true
+protected_media:
+  no_permanent_storage_url: true
+  entitlement_before_delivery: true
+  signed_or_authorized_delivery: true

@@ -1,0 +1,31 @@
+version: 1
+id: ui.component_theme_map
+status: authoritative
+entries:
+  - component_family: Button
+    package: packages/ui
+    token_groups: [primary, foreground, border, focus_ring, disabled]
+  - component_family: Form
+    package: packages/ui
+    token_groups: [background, surface, foreground, foreground_muted, border, focus_ring, danger]
+  - component_family: Navigation
+    package: packages/ui
+    token_groups: [surface, foreground, foreground_muted, border, focus_ring]
+  - component_family: ReaderChrome
+    package: packages/ui
+    token_groups: [reader_background, reader_foreground, surface, foreground_muted, border, focus_ring]
+  - component_family: StudioEditor
+    package: packages/ui
+    token_groups: [editor_canvas, surface, foreground, border, selection, focus_ring]
+  - component_family: AdminDataGrid
+    package: packages/ui
+    token_groups: [surface, foreground, foreground_muted, border, selection, focus_ring, danger, warning]
+  - component_family: Charts
+    package: packages/ui
+    token_groups: [chart_1, chart_2, chart_3, chart_4, chart_5, foreground, border]
+  - component_family: CodeEditor
+    package: packages/ui
+    token_groups: [code_background, code_foreground, selection, focus_ring]
+  - component_family: Modal
+    package: packages/ui
+    token_groups: [overlay, surface_elevated, foreground, border, focus_ring]

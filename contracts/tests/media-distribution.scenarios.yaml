@@ -1,0 +1,63 @@
+version: 1
+name: media-distribution-scenarios
+scenarios:
+  - id: md-001
+    name: primary-healthy-selects-cloudflare
+    given: { mode: AUTOMATIC_FAILOVER, secondaryEnabled: true, cloudflare: HEALTHY, bunny: HEALTHY }
+    when: authorized_media_delivery
+    then: { selectedProvider: cloudflare }
+  - id: md-002
+    name: primary-failure-selects-secondary
+    given: { mode: AUTOMATIC_FAILOVER, secondaryEnabled: true, cloudflare: UNAVAILABLE, bunny: HEALTHY }
+    when: authorized_media_delivery
+    then: { selectedProvider: bunny }
+  - id: md-003
+    name: secondary-disabled-never-selects-secondary
+    given: { mode: AUTOMATIC_FAILOVER, secondaryEnabled: false, cloudflare: UNAVAILABLE, bunny: HEALTHY }
+    when: authorized_media_delivery
+    then: { selectedProvider: none, degraded: true }
+  - id: md-004
+    name: unauthorized-request-denied-before-selection
+    given: { mode: AUTOMATIC_FAILOVER, secondaryEnabled: true, cloudflare: UNAVAILABLE, bunny: HEALTHY, authorization: DENIED }
+    when: media_delivery
+    then: { decision: DENY, providerSelection: none }
+  - id: md-005
+    name: adult-policy-denial-applies-to-secondary
+    given: { mode: AUTOMATIC_FAILOVER, secondaryEnabled: true, cloudflare: UNAVAILABLE, bunny: HEALTHY, adultPolicy: DENIED }
+    when: media_delivery
+    then: { decision: DENY, providerSelection: none }
+  - id: md-006
+    name: deleted-media-denied-everywhere
+    given: { mode: AUTOMATIC_FAILOVER, secondaryEnabled: true, cloudflare: HEALTHY, bunny: HEALTHY, mediaState: DELETED }
+    when: media_delivery
+    then: { decision: DENY, providerSelection: none }
+  - id: md-007
+    name: regional-failure-does-not-global-switch
+    given: { mode: AUTOMATIC_FAILOVER, secondaryEnabled: true, regionA: { cloudflare: UNAVAILABLE, bunny: HEALTHY }, regionB: { cloudflare: HEALTHY, bunny: HEALTHY } }
+    when: authorized_media_delivery_in_both_regions
+    then: { regionA: bunny, regionB: cloudflare }
+  - id: md-008
+    name: primary-recovery-requires-probe
+    given: { state: SECONDARY_ACTIVE, primaryProbe: FAIL }
+    when: recovery_check
+    then: { state: SECONDARY_ACTIVE }
+  - id: md-009
+    name: primary-recovery-after-successful-probe
+    given: { state: SECONDARY_ACTIVE, primaryProbe: SUCCESS }
+    when: recovery_check
+    then: { state: PRIMARY_HEALTHY }
+  - id: md-010
+    name: admin-disable-is-revisioned-and-audited
+    given: { secondaryEnabled: true, actorCapability: operations.media_distribution.configure }
+    when: admin_update_secondary_enabled_false
+    then: { secondaryEnabled: false, effectiveMode: PRIMARY_ONLY, revisionIncremented: true, audited: true, event: media.distribution_config_updated.v1 }
+  - id: md-011
+    name: invalid-secondary-only-when-disabled-is-rejected
+    given: { secondaryEnabled: false, requestedMode: SECONDARY_ONLY }
+    when: admin_update_distribution_config
+    then: { decision: REJECT }
+  - id: md-012
+    name: no-origin-url-fallback
+    given: { secondaryEnabled: false, cloudflare: UNAVAILABLE, appwrite: HEALTHY }
+    when: authorized_media_delivery
+    then: { selectedProvider: none, originUrlExposed: false }

@@ -1,0 +1,21 @@
+version: "1.0"
+area: support
+canonical: true
+description: "Deterministic implementation contract for {area}."
+persistence:
+  - resource: support_tickets
+    partitionKey: "ticketId"
+    authority: "authoritative ticket"
+    requiredIndexes: "status,priority,createdAt"
+  - resource: support_messages
+    partitionKey: "messageId"
+    authority: "authoritative ticket communication"
+    requiredIndexes: "ticketId,createdAt"
+  - resource: support_assignments
+    partitionKey: "ticketId"
+    authority: "current assignment projection"
+    requiredIndexes: "ticketId"
+  - resource: support_sla_events
+    partitionKey: "ticketId"
+    authority: "append-only SLA history"
+    requiredIndexes: "ticketId,occurredAt"

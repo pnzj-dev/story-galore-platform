@@ -1,0 +1,17 @@
+version: 1
+domain: social
+shareTargets:
+  - CREATOR
+  - PUBLICATION
+  - EPISODE
+  - POST
+  - COLLECTION
+shareEvents:
+  - SHARE_CREATED
+  - LINK_COPIED
+  - EXTERNAL_SHARE
+  - REFERRAL_VISIT
+rules:
+  - Share URLs MUST resolve through canonical StoryGalore routes.
+  - Sharing MUST NOT grant access to protected content.
+  - OG/preview generation MUST apply the same age, entitlement, moderation, and jurisdiction policies as the underlying content.

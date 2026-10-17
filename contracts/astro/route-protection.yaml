@@ -1,0 +1,54 @@
+schema: storygalore.astro-route-protection/v1
+version: 1
+scope: single_astro_application_single_appwrite_site
+principles:
+  route_groups_are_not_security_boundaries: true
+  middleware_is_early_gate_not_authority: true
+  backend_authorization_is_mandatory: true
+  fail_closed_on_missing_or_unknown_policy: true
+  client_only_authorization_forbidden: true
+  direct_api_and_action_calls_must_be_authorized: true
+identity:
+  session_runtime_contract: contracts/security/authentication-session-runtime.yaml
+  route_inventory: contracts/astro/route-inventory.yaml
+  authorization_acceptance_matrix: contracts/security/authorization-acceptance-matrix.yaml
+  session_authority: APPWRITE_AUTH
+  actor_context_source: VERIFIED_SERVER_SIDE_SESSION
+  roles_and_capabilities_authority: POLICY_ENGINE
+  canonical_capability_registry: contracts/permissions/route-access.yaml
+  admin_capability_registry: contracts/permissions/admin-rbac.json
+route_classes:
+  public:
+    authentication: OPTIONAL
+    authorization: PUBLIC_POLICY
+  authenticated:
+    authentication: REQUIRED
+    authorization: REGISTERED_CAPABILITY
+  creator:
+    authentication: REQUIRED
+    authorization: CREATOR_ACCESS_AND_RESOURCE_POLICY
+  staff:
+    authentication: REQUIRED
+    authorization: REGISTERED_STAFF_CAPABILITY
+  admin:
+    authentication: REQUIRED
+    authorization: ADMIN_ACCESS_AND_ROUTE_SPECIFIC_CAPABILITY
+rules:
+  - Route patterns define default policy templates only; implementation must enumerate actual Astro route files and resolve each concrete route.
+  - Every concrete route must resolve to exactly one effective policy after applying the registered route-specific override rules.
+  - Account and user route capabilities must exist in contracts/permissions/route-access.yaml.
+  - Every implemented admin route must have an exact route entry in contracts/permissions/admin-rbac.json; examples are not sufficient for implementation readiness.
+  - Route-specific policy may strengthen but must not weaken a parent route group's minimum policy without an approved contract change.
+  - Every Astro Action, API endpoint, backend command, Appwrite Function, Agent tool and MCP tool must independently enforce its registered capability at the authoritative execution boundary.
+  - Middleware must reject or redirect before protected content is rendered when authentication or route policy fails.
+  - API and mutation requests must return contract-defined authorization errors; they must not rely on browser redirects as enforcement.
+  - Resource ownership, tenant scope, entitlement, age, jurisdiction and moderation rules apply where declared by the resource contract.
+  - A valid session does not imply creator, staff or admin access.
+  - Client-provided roles, capabilities, actor IDs and authorization claims are untrusted.
+  - Missing route mapping, unknown capability, unavailable policy evaluation or authorization conflict is BLOCK.
+  - Page routes, Astro Actions, API endpoints, Appwrite Functions, agent tools and MCP tools each require their own executable authorization tests.
+
+implementation_status:
+  contract_specification_complete: true
+  runtime_implementation_complete: false
+  runtime_implementation_must_pass: contracts/security/authorization-acceptance-matrix.yaml

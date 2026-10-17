@@ -1,0 +1,98 @@
+---
+import "../styles/global.css";
+import { ClientRouter } from "astro:transitions";
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description } = Astro.props;
+const user = Astro.locals.user;
+if (!user || !(user.labels ?? []).includes("admin")) {
+  return Astro.redirect("/");
+}
+
+const canonicalUrl = Astro.site ? new URL(Astro.url.pathname, Astro.site).toString() : undefined;
+
+const NAV = [
+  { href: "/admin", label: "Overview" },
+  { href: "/admin/analytics", label: "Analytics" },
+  { href: "/admin/users", label: "Users" },
+  { href: "/admin/creators", label: "Creators" },
+  { href: "/admin/content", label: "Content" },
+  { href: "/admin/moderation", label: "Moderation" },
+  { href: "/admin/payments", label: "Payments" },
+  { href: "/admin/subscriptions", label: "Subscriptions" },
+  { href: "/admin/ads", label: "Ads & Monetization" },
+];
+
+const COMING_SOON = [
+  "AI Operations",
+  "Storage",
+  "Messaging",
+  "System",
+  "Settings",
+];
+
+const active = Astro.url.pathname;
+---
+
+<!doctype html>
+<html lang="en" dir="ltr" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+    {description && <meta name="description" content={description} />}
+    {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
+    <ClientRouter />
+    <script is:inline>
+      (function () {
+        try {
+          var t = localStorage.getItem('sg-theme');
+          if (t === 'light' || t === 'dark') {
+            document.documentElement.dataset.theme = t;
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <slot name="head" />
+  </head>
+  <!-- ADMIN density profile (compact, 1600px, dense ops console). -->
+  <body class="min-h-screen bg-background text-foreground antialiased" data-density="admin">
+    <div class="flex min-h-screen">
+      <aside class="w-56 shrink-0 border-r border-border bg-surface/50 px-3 py-4">
+        <a href="/admin" class="block px-2 text-sm font-bold tracking-tight">
+          <span class="text-link">Story</span>Galore
+          <span class="text-xs font-normal text-foreground-muted"> Admin</span>
+        </a>
+        <nav class="mt-6 space-y-0.5">
+          {NAV.map((item) => (
+            <a
+              href={item.href}
+              aria-current={active === item.href ? "page" : undefined}
+              class={`block rounded-md px-3 py-1.5 text-sm transition ${
+                active === item.href
+                  ? "bg-surface-elevated font-medium text-foreground"
+                  : "text-foreground-muted hover:bg-surface-elevated hover:text-foreground"
+              }`}
+            >
+              {item.label}
+            </a>
+          ))}
+        </nav>
+        <p class="mt-6 px-3 text-xs uppercase tracking-widest text-foreground-muted/60">Coming soon</p>
+        <nav class="mt-1 space-y-0.5">
+          {COMING_SOON.map((label) => (
+            <span class="block rounded-md px-3 py-1.5 text-sm text-foreground-muted/40">{label}</span>
+          ))}
+        </nav>
+      </aside>
+      <div class="min-w-0 flex-1">
+        <slot />
+      </div>
+    </div>
+  </body>
+</html>

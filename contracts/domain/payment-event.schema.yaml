@@ -1,0 +1,16 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+title: StoryGalore PaymentEvent
+description: Idempotent provider payment event; the row ID is the provider event ID.
+type: object
+required: [provider, providerEventId, eventType, receivedAt, processingState, processingAttempts, createdAt]
+properties:
+  provider: {type: string, minLength: 1}
+  providerEventId: {type: string, minLength: 1}
+  eventType: {type: string, minLength: 1}
+  receivedAt: {type: string, format: date-time}
+  signatureVerified: {type: boolean}
+  processingState: {type: string, enum: [RECEIVED, PROCESSING, PROCESSED, FAILED]}
+  processingAttempts: {type: integer, minimum: 0}
+  paymentId: {type: string}
+  createdAt: {type: string, format: date-time}
+additionalProperties: false

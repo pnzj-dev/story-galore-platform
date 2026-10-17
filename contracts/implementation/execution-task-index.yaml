@@ -1,0 +1,201 @@
+schema: storygalore.execution-task-index/v1
+version: 1
+release: V19.5.4
+status: planning_only
+policy: fail_closed
+tasks:
+  - task_id: G0-T01
+    title: Normalize and freeze V19.5.4 baseline
+    phase: G0
+    canonical_contracts: [contracts/implementation/execution-plan.yaml, contracts/implementation/implementation-registry.yaml]
+    depends_on: []
+    source_ownership: [contract-registry]
+    required_resources: []
+    required_capabilities: []
+    required_tests: [strict_yaml_validation, global_determinism]
+    definition_of_done: [version_is_19_5_4, unique_yaml_keys, all_global_gates_pass]
+    blocking_conditions: [version_mismatch, duplicate_yaml_key, validator_failure]
+    approval_required: NONE
+    implementation_status: VERIFIED
+  - task_id: G1-T01
+    title: Establish repository and toolchain foundation
+    phase: G1
+    canonical_contracts: [contracts/implementation/implementation-registry.yaml, contracts/astro/]
+    depends_on: [G0-T01]
+    source_ownership: [repository-toolchain]
+    required_resources: []
+    required_capabilities: []
+    required_tests: [toolchain_validation]
+    definition_of_done: [workspace_matches_registry, astro_target_is_canonical, no_unregistered_package_boundary]
+    blocking_conditions: [unknown_package_boundary, alternate_hosting, custom_router]
+    approval_required: NONE
+    implementation_status: PLANNED
+  - task_id: G2-T01
+    title: Implement shared domain kernel
+    phase: G2
+    canonical_contracts: [contracts/domain/, contracts/state-machines/, contracts/security/]
+    depends_on: [G1-T01]
+    source_ownership: [domain-kernel]
+    required_resources: []
+    required_capabilities: []
+    required_tests: [unit, state_machine, error_catalog]
+    definition_of_done: [money_separation, idempotency, canonical_errors, state_machine_coverage]
+    blocking_conditions: [missing_contract, ambiguous_state, direct_provider_authority]
+    approval_required: NONE
+    implementation_status: PLANNED
+  - task_id: G3-T01
+    title: Implement registered persistence and migrations
+    phase: G3
+    canonical_contracts: [contracts/persistence/, contracts/implementation/dependency-graph.yaml]
+    depends_on: [G2-T01]
+    source_ownership: [persistence]
+    required_resources: [registered_persistence_resources]
+    required_capabilities: []
+    required_tests: [schema, permission, migration, rollback]
+    definition_of_done: [every_resource_registered, migrations_present, rollback_verified]
+    blocking_conditions: [unregistered_resource, missing_migration, missing_permission]
+    approval_required: NONE
+    implementation_status: PLANNED
+  - task_id: G4-T01
+    title: Implement universal authorization and capability enforcement
+    phase: G4
+    canonical_contracts: [contracts/security/authorization-completeness.yaml, contracts/security/capabilities/]
+    depends_on: [G2-T01, G3-T01]
+    source_ownership: [authorization-policy]
+    required_resources: []
+    required_capabilities: [registered_capabilities]
+    required_tests: [authorization, denial, audit]
+    definition_of_done: [all_commands_authorized, all_agents_authorized, all_provider_webhooks_authorized]
+    blocking_conditions: [missing_capability, missing_authorization, bypass_path]
+    approval_required: NONE
+    implementation_status: PLANNED
+  - task_id: G5-T01
+    title: Implement registered Appwrite Functions and APIs
+    phase: G5
+    canonical_contracts: [contracts/functions/, contracts/api/registry.yaml, contracts/implementation/implementation-registry.yaml]
+    depends_on: [G4-T01]
+    source_ownership: [api, functions]
+    required_resources: [registered_function_resources]
+    required_capabilities: [registered_function_capabilities]
+    required_tests: [function_contract, integration, idempotency, retry]
+    definition_of_done: [all_27_functions_closed, schemas_match, lifecycle_verified]
+    blocking_conditions: [generic_escape_hatch, missing_schema, missing_idempotency, missing_secret_policy]
+    approval_required: NONE
+    implementation_status: PLANNED
+  - task_id: G6-T01
+    title: Implement financial and consumer economics domains
+    phase: G6
+    canonical_contracts: [contracts/business/, contracts/pricing/, contracts/tax/, contracts/accounting/, contracts/rights/]
+    depends_on: [G5-T01]
+    source_ownership: [payments, economics, entitlements]
+    required_resources: [registered_financial_resources]
+    required_capabilities: [registered_financial_capabilities]
+    required_tests: [ledger, settlement, reserve, tax, consumption, margin]
+    definition_of_done: [ledger_authoritative, tax_fail_closed, reserves_supported, consumption_metered, margin_calculated]
+    blocking_conditions: [provider_as_ledger, unknown_tax, ambiguous_allocation, negative_margin_without_policy]
+    approval_required: HUMAN_BUSINESS_APPROVAL
+    implementation_status: PLANNED
+  - task_id: G7-T01
+    title: Implement media authorization, delivery and metering
+    phase: G7
+    canonical_contracts: [contracts/domain/media-*, contracts/state-machines/media.yaml, contracts/business/consumer-economics-implementation-map.yaml]
+    depends_on: [G5-T01, G6-T01]
+    source_ownership: [media, media-distribution]
+    required_resources: [media_resources]
+    required_capabilities: [media_capabilities]
+    required_tests: [authorization, playback, failover, metering, cost_attribution]
+    definition_of_done: [cdn_cannot_bypass_auth, metering_is_idempotent, failover_is_registered]
+    blocking_conditions: [unauthorized_cdn_access, unregistered_variant, missing_cost_state]
+    approval_required: NONE
+    implementation_status: PLANNED
+  - task_id: G8-T01
+    title: Implement public consumer application
+    phase: G8
+    canonical_contracts: [contracts/ui/, contracts/astro/, contracts/api/]
+    depends_on: [G5-T01, G7-T01]
+    source_ownership: [public-ui]
+    required_resources: []
+    required_capabilities: [public_read_capabilities]
+    required_tests: [accessibility, visual_regression, e2e, seo]
+    definition_of_done: [astro_first, no_financial_logic_in_ui, responsive, rtl_ready]
+    blocking_conditions: [custom_router, unnecessary_client_rendering, direct_db_access]
+    approval_required: NONE
+    implementation_status: PLANNED
+  - task_id: G9-T01
+    title: Implement Creator Studio
+    phase: G9
+    canonical_contracts: [contracts/studio/, contracts/studio/commands.yaml, contracts/studio/queries.yaml]
+    depends_on: [G5-T01, G7-T01]
+    source_ownership: [creator-studio]
+    required_resources: [studio_resources]
+    required_capabilities: [studio_capabilities]
+    required_tests: [studio_scenarios, conflict, autosave, publication]
+    definition_of_done: [server_authoritative_revisions, explicit_conflict_resolution, immutable_published_snapshots]
+    blocking_conditions: [last_write_wins, direct_db_access, ai_overwrite]
+    approval_required: NONE
+    implementation_status: PLANNED
+  - task_id: G10-T01
+    title: Implement Admin control plane and economics observability
+    phase: G10
+    canonical_contracts: [contracts/admin/, contracts/business/governance/, contracts/analytics/]
+    depends_on: [G5-T01, G6-T01, G7-T01]
+    source_ownership: [admin, analytics]
+    required_resources: [admin_resources, analytics_resources]
+    required_capabilities: [staff_admin_capabilities]
+    required_tests: [rbac, analytics, freshness, economic_metrics]
+    definition_of_done: [critical_metrics_visible, unknown_preserved, admin_commands_authorized]
+    blocking_conditions: [direct_crud_bypass, unknown_as_zero, missing_audit]
+    approval_required: NONE
+    implementation_status: PLANNED
+  - task_id: G11-T01
+    title: Implement agent control plane and agents in dependency order
+    phase: G11
+    canonical_contracts: [contracts/agents/, contracts/implementation/agent-implementation-registry.yaml]
+    depends_on: [G5-T01, G6-T01, G10-T01]
+    source_ownership: [agent-orchestrator, agents]
+    required_resources: [agent_state_resources]
+    required_capabilities: [registered_agent_capabilities]
+    required_tests: [agent_contract, tool_registration, delegation, approval]
+    definition_of_done: [17_manifests_closed, tools_registered, approvals_enforced]
+    blocking_conditions: [unregistered_tool, unregistered_agent, unauthorized_delegation]
+    approval_required: NONE
+    implementation_status: PLANNED
+  - task_id: G12-T01
+    title: Activate verified payment and wallet providers
+    phase: G12
+    canonical_contracts: [contracts/providers/, contracts/business/payment-provider-policy.yaml, contracts/business/wallets.yaml]
+    depends_on: [G5-T01, G6-T01]
+    source_ownership: [provider-adapters]
+    required_resources: [provider_credentials]
+    required_capabilities: [registered_provider_capabilities]
+    required_tests: [provider_contract, webhook, reconciliation, payout, wallet_verification]
+    definition_of_done: [only_verified_providers_active, provider_fail_closed, reconciliation_verified]
+    blocking_conditions: [unknown_provider_contract, unsupported_jurisdiction, unverified_webhook]
+    approval_required: EXPLICIT_PROVIDER_ACTIVATION
+    implementation_status: PLANNED
+  - task_id: G13-T01
+    title: Execute complete verification suite
+    phase: G13
+    canonical_contracts: [contracts/verification/, contracts/implementation/execution-plan.yaml]
+    depends_on: [G8-T01, G9-T01, G10-T01, G11-T01, G12-T01]
+    source_ownership: [qa-release]
+    required_resources: []
+    required_capabilities: []
+    required_tests: [all_registered_gates]
+    definition_of_done: [all_gates_pass, no_open_blocker, artifacts_reproducible]
+    blocking_conditions: [any_gate_failure, undocumented_executable, untested_contract]
+    approval_required: NONE
+    implementation_status: PLANNED
+  - task_id: G14-T01
+    title: Produce release candidate for human approval
+    phase: G14
+    canonical_contracts: [contracts/deployment/release-contract.yaml, contracts/verification/determinism-gate.yaml]
+    depends_on: [G13-T01]
+    source_ownership: [qa-release]
+    required_resources: [release_artifacts]
+    required_capabilities: []
+    required_tests: [release, rollback, disaster_recovery, smoke]
+    definition_of_done: [release_reproducible, rollback_verified, human_approval_pending]
+    blocking_conditions: [missing_approval, failed_rollback, failed_dr]
+    approval_required: EXPLICIT_RELEASE_APPROVAL
+    implementation_status: PLANNED

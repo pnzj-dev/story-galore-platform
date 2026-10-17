@@ -1,0 +1,37 @@
+version: 19.5.9
+id: backend-runtime-policy
+status: canonical
+rule: GO_ONLY_BACKEND
+policy:
+  default_backend_language: go
+  mandatory_for:
+  - appwrite_functions
+  - backend_services
+  - backend_workers
+  - backend_cli
+  - backend_libraries
+  - backend_jobs
+  - backend_integrations
+  prohibited:
+  - typescript
+  - javascript
+  - python
+  - rust
+  platform_exceptions:
+  - id: cloudflare-workers
+    language: typescript
+    reason: cloudflare-platform-runtime
+  - id: cloudflare-agents
+    language: typescript
+    reason: cloudflare-agents-sdk-platform-runtime
+  frontend:
+    allowed_languages:
+    - typescript
+    - javascript
+    - svelte
+    - astro
+    scope:
+    - browser
+    - astro-sites
+  agent_rule: coding_agents_must_not_choose_backend_languages
+  validation: any_non_go_backend_executable_or_unregistered_platform_exception_is_blocked

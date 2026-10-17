@@ -1,0 +1,25 @@
+version: 1.0.0
+release: V1
+policy: deterministic
+fields:
+  taskId: required
+  ticketRef: required
+  taskType: required
+  contractRefs: required
+  implementationTargets: required
+  changeClasses: required
+  acceptance: required
+  verificationPlan: required
+  authorization: required
+  provenance: required
+states: [RECEIVED, RECONCILING, READY, RUNNING, BLOCKED, REVIEW, DEPLOYMENT_CANDIDATE, COMPLETED, REJECTED]
+transition_rules:
+  RECEIVED: [RECONCILING, BLOCKED]
+  RECONCILING: [READY, BLOCKED]
+  READY: [RUNNING, BLOCKED]
+  RUNNING: [REVIEW, BLOCKED]
+  REVIEW: [DEPLOYMENT_CANDIDATE, RUNNING, BLOCKED, REJECTED]
+  DEPLOYMENT_CANDIDATE: [COMPLETED, REJECTED]
+  BLOCKED: [RECONCILING, REJECTED]
+  COMPLETED: []
+  REJECTED: []

@@ -1,0 +1,78 @@
+version: 1
+domain: social
+scenarios:
+  - id: social-001
+    name: follow creator
+    given: authenticated reader can view creator
+    when: reader follows creator
+    then: follow becomes ACTIVE and follower projection receives event
+  - id: social-002
+    name: follow does not grant subscription
+    given: reader follows subscriber-only creator content
+    when: reader opens protected content
+    then: entitlement policy is evaluated and access remains denied without entitlement
+  - id: social-003
+    name: following feed filters restricted content
+    given: followed creator publishes restricted content
+    when: reader loads following feed
+    then: restricted item is absent
+  - id: social-004
+    name: adult post remains gated
+    given: adult post exists
+    when: non-eligible reader loads following feed
+    then: post is absent and no preview metadata leaks
+  - id: social-005
+    name: reaction idempotency
+    given: reaction mutation has an idempotency key
+    when: request is delivered twice
+    then: one authoritative reaction exists
+  - id: social-006
+    name: comment reply
+    given: visible comment exists
+    when: authorized reader replies
+    then: reply is persisted and notification is generated
+  - id: social-007
+    name: creator badge
+    given: creator profile is verified
+    when: comment is rendered
+    then: creator badge is presentation-only and grants no privilege
+  - id: social-008
+    name: collection cannot bypass access
+    given: protected publication is in a public collection
+    when: unauthorized reader opens collection
+    then: protected item is filtered
+  - id: social-009
+    name: poll vote idempotency
+    given: open single-choice poll
+    when: same vote mutation is retried
+    then: one vote state exists
+  - id: social-010
+    name: block propagation
+    given: actor A blocks actor B
+    when: B attempts mention/message/social notification
+    then: configured block policy prevents prohibited interactions
+  - id: social-011
+    name: moderation removal
+    given: moderator removes a social post
+    when: following feed is rebuilt
+    then: removed post is absent and moderation action is audited
+  - id: social-012
+    name: share cannot unlock
+    given: protected episode has canonical share URL
+    when: anonymous viewer opens URL
+    then: authorization is evaluated and content remains protected
+  - id: social-013
+    name: stable feed pagination
+    given: following feed changes between requests
+    when: reader uses cursor from prior page
+    then: cursor semantics remain deterministic without duplicate/omitted boundary items caused by offset drift
+  - id: social-014
+    name: notification policy
+    given: recipient muted creator
+    when: creator publishes
+    then: muted notification category is not delivered
+  - id: social-015
+    name: realtime recovery
+    given: realtime connection drops after a social mutation
+    when: client reconnects
+    then: client reconciles from authoritative API projection

@@ -1,0 +1,14 @@
+version: 19.5.22
+title: Notifications system contract
+status: planning-contract-update
+changes:
+  - Add the canonical notification system contract covering in-app inbox, per-channel delivery state, provider adapters, durable workflows, preferences, and production blockers.
+  - Specify notification event producers, provider delivery, and deterministic per-channel state in contracts/deterministic/notifications/.
+  - Wire notification UI, event producers, and provider delivery to docs/NOTIFICATION_SYSTEM.md before implementation.
+not_claimed:
+  - Notification providers are implemented or configured.
+  - Delivery state or adapter runtimes are implemented.
+validation:
+  - pnpm validate:notifications
+  - pnpm validate:repository-coherence
+  - pnpm validate:docs

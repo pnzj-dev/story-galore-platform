@@ -1,0 +1,17 @@
+version: "1.0"
+area: analytics
+canonical: true
+description: "Deterministic implementation contract for {area}."
+persistence:
+  - resource: analytics_events
+    partitionKey: "eventId"
+    authority: "append-only product/business events subject to retention"
+    requiredIndexes: "occurredAt"
+  - resource: daily_metric_projections
+    partitionKey: "metricDate,metricKey,dimensionKey"
+    authority: "rebuildable aggregate projection"
+    requiredIndexes: "metricDate,metricKey"
+  - resource: data_dictionary
+    partitionKey: "metricKey"
+    authority: "authoritative metric definitions"
+    requiredIndexes: "metricKey,version"

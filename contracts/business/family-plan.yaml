@@ -1,0 +1,18 @@
+schema: storygalore.family-plan-contract/v1
+version: 1
+canonical: true
+status: V19.5.2
+policy: fail_closed
+planId: READER_FAMILY
+maxProfiles: 5
+poolingMode: SHARED_POOL
+isolation:
+- profile_preferences
+- history
+- recommendations
+- private_library
+rules:
+- Pool consumption is attributed to the consuming profile and aggregated to the family
+  entitlement.
+- A member cannot access another member private data through the pool.
+- Family owner controls membership; content rights remain per user/entitlement.

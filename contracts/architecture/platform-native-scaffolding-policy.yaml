@@ -1,0 +1,45 @@
+version: 19.5.9
+id: platform-native-scaffolding-policy
+status: canonical
+principle: PLATFORM_NATIVE_FIRST
+rules:
+  official_scaffolder_available: MUST_USE
+  scaffold_version: MUST_BE_PINNED
+  scaffold_command_and_flags: MUST_BE_REGISTERED
+  generated_structure: PLATFORM_OWNED
+  generated_structure_must_be_inspected: true
+  generated_structure_must_be_validated: true
+  manual_reimplementation_of_platform_layout: BLOCK
+  undocumented_layout_assumption: BLOCK
+  scaffold_output_must_be_committed_before_implementation: true
+platforms:
+  astro:
+    tool: astro-cli
+    scope: astro_application
+  appwrite:
+    tool: appwrite-cli
+    scope:
+      - sites
+      - functions
+  cloudflare:
+    tool: wrangler
+    scope:
+      - workers
+      - agents
+      - workflows
+      - mcp
+  go:
+    tool: go
+    scope:
+      - modules
+      - workspaces
+      - backend_packages
+agent_procedure:
+  - resolve_platform_component_contract
+  - resolve_pinned_scaffolder_version
+  - run_registered_scaffold_command
+  - inspect_generated_tree
+  - register_generated_structure
+  - implement_storygalore_contracts
+  - run_platform_validation
+  - run_global_determinism_validation

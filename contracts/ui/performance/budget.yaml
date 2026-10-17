@@ -1,0 +1,24 @@
+schema: storygalore.ui-performance-budget/v1
+version: 1
+principles:
+  - ship_less_javascript
+  - render_on_server_or_build_when_possible
+  - hydrate_only_interactive_islands
+  - optimize_images
+  - prefetch_navigation_when_contract_allows
+  - avoid_client_waterfalls
+budgets:
+  public:
+    first_contentful_render: "target <= 1.5s on representative mobile profile"
+    lcp: "target <= 2.5s"
+    cls: "target <= 0.1"
+    inp: "target <= 200ms"
+  studio:
+    client_js: "minimize; justify each hydrated island"
+  admin:
+    client_js: "minimize; prioritize data-table interaction performance"
+blocking_rules:
+  - full_client_render_without_contract
+  - unoptimized_lcp_image
+  - duplicate_data_fetch_server_and_client
+  - hydration_for_static_content

@@ -1,0 +1,9 @@
+schema: storygalore.function-output/v1
+function: api
+fields:
+  status: SUCCESS|REJECTED|RETRYABLE_FAILURE|FAILED
+  operationId: string|null
+  result: object|null
+  errorCode: string|null
+  retryable: boolean
+unknown_fields: REJECT

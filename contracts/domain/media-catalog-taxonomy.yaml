@@ -1,0 +1,409 @@
+schema: storygalore.media-catalog-taxonomy/v1
+version: 1
+canonical: true
+purpose: >-
+  Separate user-facing catalog types from publication persistence types, media asset types,
+  formats/capabilities, and extensible categories/genres. This contract does not assert that
+  every catalog type is currently ingestible, publishable, streamable, or playable.
+
+invariants:
+  user_facing_media_type_is_not_publication_type: true
+  user_facing_media_type_is_not_asset_type: true
+  format_and_capability_are_properties_not_new_persistence_types: true
+  categories_and_genres_are_data_driven: true
+  unknown_type_or_category_must_not_be_silently_reclassified: true
+  unsupported_capability_must_not_be_rendered_as_available: true
+  taxonomy_changes_require_registered_contract_change: true
+
+user_facing_media_types:
+  - id: VIDEOS
+    label: Videos
+    status: supported_schema_phased_product_exposure
+    description: Video publications and catalog entries; actual publication exposure remains feature-gated.
+    publication_type_mapping: [VIDEO]
+    asset_type_mapping: [VIDEO]
+    formats:
+      - id: MOVIE
+        status: catalog_subtype
+      - id: TV_SHOW
+        status: catalog_subtype
+      - id: NEWS
+        status: catalog_subtype
+      - id: DOCUMENTARY
+        status: catalog_subtype
+      - id: ANIME
+        status: catalog_subtype
+      - id: ANIMATION
+        status: catalog_subtype
+      - id: SHORT_FILM
+        status: catalog_subtype
+    properties:
+      orientation: [PORTRAIT, LANDSCAPE, SQUARE, UNKNOWN]
+      durationClass: [SHORT, MEDIUM, LONG]
+    presentation:
+      artwork: [LANDSCAPE_THUMBNAIL, PORTRAIT_POSTER_WHEN_AVAILABLE]
+      experience: [DETAIL, PLAYER_WHEN_ENABLED, RELATED_CONTENT]
+  - id: SHORTS
+    label: Shorts
+    status: derived_catalog_view
+    description: A short-form discovery and viewing surface over VIDEO assets/publications; not a new persistence type.
+    publication_type_mapping: [VIDEO]
+    asset_type_mapping: [VIDEO]
+    derivation:
+      source_type: VIDEO
+      required_properties: [durationClass]
+      duration_threshold: BLOCKED_UNTIL_PRODUCT_CONTRACT_APPROVED
+      orientation_preference: PORTRAIT
+    formats:
+      - id: COMEDY
+        status: category_example
+      - id: ENTERTAINMENT
+        status: category_example
+      - id: EDUCATION
+        status: category_example
+      - id: GAMING
+        status: category_example
+      - id: MUSIC
+        status: category_example
+      - id: LIFESTYLE
+        status: category_example
+      - id: ANIMATION
+        status: category_example
+    presentation:
+      artwork: [PORTRAIT_THUMBNAIL]
+      experience: [VERTICAL_FEED_WHEN_ENABLED]
+  - id: BOOKS
+    label: Books
+    status: partially_mapped_capability_gated
+    description: User-facing book catalog backed by the canonical BOOK publication type; concrete book formats remain capability-gated by their content contracts.
+    publication_type_mapping:
+      - publication_type: BOOK
+        scope: all book formats only when the registered format/content structure contract allows
+    asset_type_mapping: [IMAGE, DOCUMENT]
+    mapping_rule: BOOK is the canonical publication type; each format requires an approved content structure and lifecycle before it is enabled.
+    formats:
+      - id: NOVEL
+        status: proposed_catalog_category_requires_content_model_contract
+      - id: COMIC
+        status: existing_comic_format_contract_mapping
+      - id: MANGA
+        status: existing_format_guidance
+      - id: MANHWA
+        status: existing_format_guidance
+      - id: MANHUA
+        status: proposed_catalog_category_requires_format_contract
+      - id: BANDE_DESSINEE
+        status: existing_format_guidance
+      - id: GRAPHIC_NOVEL
+        status: existing_comic_format_contract_mapping
+      - id: WEBTOON
+        status: existing_format_guidance
+      - id: LIGHT_NOVEL
+        status: proposed_catalog_category_requires_format_contract
+      - id: NONFICTION
+        status: proposed_catalog_category_requires_content_model_contract
+      - id: EDUCATIONAL
+        status: proposed_catalog_category_requires_content_model_contract
+    presentation:
+      artwork: [PORTRAIT_COVER]
+      experience: [COMIC_READER_WHEN_FORMAT_SUPPORTED, TEXT_READER_ONLY_WHEN_REGISTERED]
+  - id: IMAGES
+    label: Images
+    status: supported_for_image_and_gallery_content
+    description: Image assets and catalog collections. Gallery is a presentation/layout mode, not a persisted publication type; an image asset or collection is not automatically a publication.
+    publication_type_mapping: []
+    asset_type_mapping: [IMAGE]
+    formats:
+      - id: ILLUSTRATION
+        status: category_example
+      - id: PHOTOGRAPHY
+        status: category_example
+      - id: DIGITAL_ART
+        status: category_example
+      - id: FAN_ART
+        status: category_example
+      - id: COMICS_AND_VISUAL_COLLECTIONS
+        status: category_example
+      - id: ADULT
+        status: blocked_until_legal_age_access_and_policy_contracts_allow
+      - id: HENTAI
+        status: blocked_until_legal_age_access_and_policy_contracts_allow
+    presentation:
+      artwork: [IMAGE_THUMBNAIL, GALLERY_COVER]
+      experience: [GALLERY, LIGHTBOX_WHEN_ENABLED]
+  - id: AUDIO
+    label: Audio
+    status: schema_supported_product_exposure_phased
+    description: Audio publications and assets; availability depends on registered ingestion and playback capability.
+    publication_type_mapping: [AUDIO]
+    asset_type_mapping: [AUDIO]
+    formats:
+      - id: AUDIOBOOK
+        status: proposed_catalog_category_requires_audio_chapter_content_contract
+      - id: MUSIC
+        status: catalog_category
+      - id: PODCAST
+        status: proposed_catalog_category_requires_episode_content_contract
+      - id: SPOKEN_WORD
+        status: catalog_category
+    presentation:
+      artwork: [SQUARE_COVER]
+      experience: [PLAYER_WHEN_ENABLED, PERSISTENT_MINI_PLAYER_WHEN_SUPPORTED]
+  - id: GAMES
+    label: Games
+    status: catalog_entity_contract_defined_playable_builds_release_gated
+    description: First-class game catalog entries, separate from Publication and MediaAsset. Browser-playable builds are hosted by StoryGalore only after review and release approval.
+    publication_type_mapping: []
+    asset_type_mapping: [IMAGE, VIDEO, AUDIO, DOCUMENT]
+    catalog_entity: contracts/domain/game-catalog.schema.yaml
+    game_build_contract: contracts/domain/game-build.schema.yaml
+    game_classification:
+      category: GAME
+      subcategory_examples: [VIDEO_GAME, BROWSER_GAME, TABLETOP_GAME, BOARD_GAME, CARD_GAME, INTERACTIVE_FICTION]
+      genre_examples: [ACTION, ADVENTURE, RPG, STRATEGY, SIMULATION, PUZZLE, RACING, SPORTS, PLATFORMER, TACTICAL, SURVIVAL, HORROR, RHYTHM, SANDBOX, PARTY, EDUCATIONAL]
+      genres_are_multi_valued: true
+      genre_scope: domain_scoped_data_driven_taxonomy
+    playable_in_browser:
+      default: false
+      hosting_model: STORYGALORE_HOSTED_ISOLATED_GAME_RUNTIME
+      accepted_build_targets: [WEB_WASM, WEBGL, HTML5_WEB_BUNDLE]
+      allowed_only_when: [registered_game_build, malware_and_policy_review_passed, rights_confirmed, explicit_playable_capability, authorization_contract, isolated_origin_policy, runtime_health, release_approval]
+      execution_security_contract: contracts/domain/game-build.schema.yaml
+      external_iframe_or_external_url_is_not_equivalent_to_platform_hosting: true
+    presentation:
+      artwork: [PORTRAIT_COVER, LANDSCAPE_SCREENSHOT]
+      experience: [CATALOG_DETAIL, PLAY_ONLY_WHEN_BUILD_IS_APPROVED_AND_RUNTIME_HEALTHY]
+
+publication_archetype_registry:
+  canonical: true
+  purpose: >-
+    Extensive product-level registry of publication forms users may browse, create, or consume.
+    Archetypes are not automatically new Publication.type enum values. Each entry explicitly maps
+    to an existing persistence type only where a current contract permits it; otherwise it remains
+    proposed and blocked until a content-model, API, lifecycle, permissions, analytics, and UI contract
+    is approved.
+  persistence_enum_policy:
+    existing_enum_is_unchanged: false
+    canonical_enum_after_approval: [BOOK, POST, VIDEO, AUDIO, MIXED]
+    removed_as_publication_types: [COMIC, IMAGE_GALLERY]
+    migration_status: BLOCKED_UNTIL_SCHEMA_API_DATA_MIGRATION_AND_ROLLBACK_APPROVED
+    adding_enum_value_requires: [domain_model_contract, schema_migration, API_contract, lifecycle_contract, authorization_contract, analytics_mapping, UI_and_accessibility_contract, migration_and_rollback_plan]
+    archetype_label_is_not_stable_identifier: true
+    unknown_archetype: BLOCK
+  groups:
+    editorial_and_community:
+      - {id: ARTICLE, label: Article, maps_to: POST, status: only_if_post_contract_supports_body_and_metadata}
+      - {id: BLOG_POST, label: Blog post, maps_to: POST, status: only_if_post_contract_supports_body_and_metadata}
+      - {id: NEWS_ARTICLE, label: News article, maps_to: POST, status: proposed_requires_editorial_metadata_contract}
+      - {id: REVIEW, label: Review, maps_to: POST, status: proposed_requires_review_schema_and_rating_policy}
+      - {id: INTERVIEW, label: Interview, maps_to: POST, status: proposed_requires_interview_structure}
+      - {id: ESSAY, label: Essay, maps_to: POST, status: only_if_post_contract_supports_long_form_text}
+      - {id: EDITORIAL, label: Editorial, maps_to: POST, status: proposed_requires_editorial_policy}
+      - {id: OP_ED, label: Opinion piece, maps_to: POST, status: proposed_requires_editorial_policy}
+      - {id: RESEARCH_PAPER, label: Research paper, maps_to: POST, status: proposed_requires_document_citation_and_versioning_contract}
+      - {id: WHITE_PAPER, label: White paper, maps_to: POST, status: proposed_requires_document_contract}
+      - {id: REPORT, label: Report, maps_to: POST, status: proposed_requires_document_contract}
+      - {id: CASE_STUDY, label: Case study, maps_to: POST, status: proposed_requires_document_contract}
+      - {id: PRESS_RELEASE, label: Press release, maps_to: POST, status: proposed_requires_editorial_metadata_contract}
+      - {id: ANNOUNCEMENT, label: Announcement, maps_to: POST, status: only_if_post_contract_supports_announcement_visibility}
+      - {id: NEWSLETTER, label: Newsletter, maps_to: POST, status: proposed_requires_subscription_and_delivery_contract}
+      - {id: FAQ, label: FAQ, maps_to: POST, status: proposed_requires_structured_question_answer_contract}
+      - {id: KNOWLEDGE_BASE_ARTICLE, label: Knowledge-base article, maps_to: POST, status: proposed_requires_versioning_and_search_contract}
+      - {id: DEVLOG, label: Development log, maps_to: POST, status: only_if_post_contract_supports_chronological_entries}
+      - {id: PATCH_NOTES, label: Patch notes, maps_to: POST, status: proposed_requires_versioned_release_notes_contract}
+      - {id: JOURNAL_ENTRY, label: Journal entry, maps_to: POST, status: proposed_requires_private_public_visibility_contract}
+      - {id: LISTICLE, label: List article, maps_to: POST, status: only_if_post_contract_supports_structured_blocks}
+      - {id: RESOURCE_LIST, label: Resource list, maps_to: POST, status: proposed_requires_link_validation_and_metadata_contract}
+    fiction_and_text:
+      - {id: STORY, label: Story, maps_to: POST, status: only_if_post_contract_supports_fiction_metadata}
+      - {id: SHORT_STORY, label: Short story, maps_to: POST, status: proposed_requires_fiction_metadata_contract}
+      - {id: FLASH_FICTION, label: Flash fiction, maps_to: POST, status: proposed_requires_fiction_metadata_contract}
+      - {id: NOVEL, label: Novel, maps_to: null, status: blocked_until_book_content_model_approved}
+      - {id: NOVELLA, label: Novella, maps_to: null, status: blocked_until_book_content_model_approved}
+      - {id: SERIAL_EPISODE, label: Serial episode, maps_to: POST, status: proposed_requires_series_chapter_ordering_contract}
+      - {id: CHAPTER, label: Chapter, maps_to: null, status: blocked_until_book_content_model_approved}
+      - {id: POEM, label: Poem, maps_to: POST, status: only_if_post_contract_supports_poetry_formatting}
+      - {id: POETRY_COLLECTION, label: Poetry collection, maps_to: null, status: proposed_requires_collection_content_model}
+      - {id: SCREENPLAY, label: Screenplay, maps_to: null, status: proposed_requires_script_format_contract}
+      - {id: PLAY_SCRIPT, label: Play script, maps_to: null, status: proposed_requires_script_format_contract}
+      - {id: CHARACTER_PROFILE, label: Character profile, maps_to: POST, status: only_if_story_bible_contract_allows_publication}
+      - {id: WORLD_GUIDE, label: World guide, maps_to: POST, status: only_if_story_bible_contract_allows_publication}
+      - {id: LORE_ENTRY, label: Lore entry, maps_to: POST, status: only_if_story_bible_contract_allows_publication}
+      - {id: FAN_FICTION, label: Fan fiction, maps_to: POST, status: proposed_requires_rights_moderation_and_fiction_metadata_policy}
+    comics_and_sequential_art:
+      - {id: COMIC_ISSUE, label: Comic issue, maps_to: BOOK, status: existing_comic_contract_scope_dependent}
+      - {id: GRAPHIC_NOVEL, label: Graphic novel, maps_to: BOOK, status: existing_comic_contract_scope_dependent}
+      - {id: MANGA_VOLUME, label: Manga volume, maps_to: BOOK, status: existing_comic_contract_scope_dependent}
+      - {id: MANHWA_EPISODE, label: Manhwa episode, maps_to: BOOK, status: existing_comic_contract_scope_dependent}
+      - {id: MANHUA_CHAPTER, label: Manhua chapter, maps_to: BOOK, status: proposed_requires_format_contract}
+      - {id: WEBTOON_EPISODE, label: Webtoon episode, maps_to: BOOK, status: existing_comic_contract_scope_dependent}
+      - {id: COMIC_STRIP, label: Comic strip, maps_to: BOOK, status: existing_comic_contract_scope_dependent}
+      - {id: PANEL_COLLECTION, label: Panel collection, maps_to: BOOK, status: proposed_requires_format_contract}
+      - {id: ARTBOOK, label: Art book, maps_to: null, status: requires_BOOK_format_contract_for_ordered_visual_pages}
+    image_and_visual:
+      - {id: IMAGE_GALLERY, label: Image gallery, maps_to: null, status: presentation_mode_not_publication_type}
+      - {id: PHOTO_ESSAY, label: Photo essay, maps_to: null, status: proposed_requires_collection_or_BOOK_content_contract}
+      - {id: PORTFOLIO, label: Portfolio, maps_to: null, status: proposed_requires_creator_portfolio_collection_contract}
+      - {id: ILLUSTRATION_SET, label: Illustration set, maps_to: null, status: requires_collection_layout_contract}
+      - {id: INFOGRAPHIC, label: Infographic, maps_to: null, status: requires_image_accessibility_metadata_contract}
+      - {id: MEME, label: Meme, maps_to: null, status: requires_image_caption_and_moderation_policy}
+      - {id: WALLPAPER, label: Wallpaper, maps_to: null, status: requires_download_and_resolution_metadata}
+      - {id: COMIC_PAGE_COLLECTION, label: Comic page collection, maps_to: null, status: requires_BOOK_format_contract_for_page_semantics}
+    video_and_motion:
+      - {id: MOVIE, label: Movie, maps_to: VIDEO, status: catalog_format_until_video_metadata_and_rights_contracts_allow}
+      - {id: TV_EPISODE, label: TV episode, maps_to: VIDEO, status: proposed_requires_series_season_episode_contract}
+      - {id: TRAILER, label: Trailer, maps_to: VIDEO, status: proposed_requires_video_relationship_and_rights_contract}
+      - {id: TEASER, label: Teaser, maps_to: VIDEO, status: proposed_requires_video_relationship_contract}
+      - {id: SHORT_FILM, label: Short film, maps_to: VIDEO, status: catalog_format_until_video_metadata_contract_allows}
+      - {id: VIDEO_CLIP, label: Video clip, maps_to: VIDEO, status: proposed_requires_clip_and_rights_contract}
+      - {id: VIDEO_ESSAY, label: Video essay, maps_to: VIDEO, status: proposed_requires_video_metadata_contract}
+      - {id: VIDEO_TUTORIAL, label: Video tutorial, maps_to: VIDEO, status: proposed_requires_chapter_and_transcript_contract}
+      - {id: MUSIC_VIDEO, label: Music video, maps_to: VIDEO, status: proposed_requires_music_rights_and_metadata_contract}
+      - {id: ANIMATED_SHORT, label: Animated short, maps_to: VIDEO, status: catalog_format_until_video_contract_allows}
+      - {id: DOCUMENTARY, label: Documentary, maps_to: VIDEO, status: catalog_format_until_video_metadata_and_rights_contracts_allow}
+      - {id: NEWS_BULLETIN, label: News bulletin, maps_to: VIDEO, status: proposed_requires_news_metadata_and_expiry_policy}
+      - {id: LIVESTREAM_RECORDING, label: Livestream recording, maps_to: VIDEO, status: proposed_requires_live_stream_archive_contract}
+    audio_and_music:
+      - {id: AUDIO_TRACK, label: Audio track, maps_to: AUDIO, status: only_if_audio_metadata_contract_supports_track}
+      - {id: ALBUM, label: Album, maps_to: AUDIO, status: proposed_requires_track_order_and_music_rights_contract}
+      - {id: EP_RELEASE, label: EP release, maps_to: AUDIO, status: proposed_requires_track_order_and_music_rights_contract}
+      - {id: PLAYLIST, label: Playlist, maps_to: null, status: proposed_requires_collection_and_rights_contract}
+      - {id: AUDIOBOOK, label: Audiobook, maps_to: AUDIO, status: blocked_until_audio_chapter_content_contract_approved}
+      - {id: AUDIOBOOK_CHAPTER, label: Audiobook chapter, maps_to: AUDIO, status: blocked_until_audio_chapter_content_contract_approved}
+      - {id: PODCAST_EPISODE, label: Podcast episode, maps_to: AUDIO, status: blocked_until_podcast_episode_contract_approved}
+      - {id: PODCAST_SERIES, label: Podcast series, maps_to: null, status: blocked_until_podcast_series_contract_approved}
+      - {id: AUDIO_DRAMA, label: Audio drama, maps_to: AUDIO, status: proposed_requires_episode_and_script_metadata_contract}
+      - {id: MUSIC_MIX, label: Music mix, maps_to: AUDIO, status: proposed_requires_music_rights_and_tracklist_contract}
+      - {id: SOUND_EFFECT_PACK, label: Sound-effect pack, maps_to: null, status: proposed_requires_asset_bundle_and_license_contract}
+      - {id: LECTURE_RECORDING, label: Lecture recording, maps_to: AUDIO, status: proposed_requires_transcript_and_chapter_contract}
+      - {id: GUIDED_MEDITATION, label: Guided meditation, maps_to: AUDIO, status: proposed_requires_audio_metadata_contract}
+    learning_and_reference:
+      - {id: TUTORIAL, label: Tutorial, maps_to: POST, status: proposed_requires_step_content_schema}
+      - {id: HOW_TO_GUIDE, label: How-to guide, maps_to: POST, status: proposed_requires_step_content_schema}
+      - {id: WALKTHROUGH, label: Walkthrough, maps_to: POST, status: proposed_requires_step_and_media_reference_contract}
+      - {id: COURSE, label: Course, maps_to: null, status: blocked_until_learning_content_model_approved}
+      - {id: COURSE_MODULE, label: Course module, maps_to: null, status: blocked_until_learning_content_model_approved}
+      - {id: LESSON, label: Lesson, maps_to: null, status: blocked_until_learning_content_model_approved}
+      - {id: QUIZ, label: Quiz, maps_to: null, status: proposed_requires_assessment_and_scoring_contract}
+      - {id: FLASHCARD_SET, label: Flashcard set, maps_to: null, status: proposed_requires_interactive_learning_contract}
+      - {id: WORKSHEET, label: Worksheet, maps_to: POST, status: proposed_requires_document_download_and_accessibility_contract}
+      - {id: TEMPLATE, label: Template, maps_to: POST, status: proposed_requires_versioned_download_and_license_contract}
+      - {id: SLIDE_DECK, label: Slide deck, maps_to: null, status: proposed_requires_document_publication_contract}
+      - {id: WEBINAR_RECORDING, label: Webinar recording, maps_to: VIDEO, status: proposed_requires_event_metadata_and_video_contract}
+      - {id: RECIPE, label: Recipe, maps_to: POST, status: proposed_requires_structured_ingredients_and_steps_contract}
+    collections_and_mixed_media:
+      - {id: COLLECTION, label: Collection, maps_to: MIXED, status: only_if_mixed_contract_supports_referenced_ordered_items}
+      - {id: ANTHOLOGY, label: Anthology, maps_to: MIXED, status: proposed_requires_collection_and_rights_contract}
+      - {id: BUNDLE, label: Bundle, maps_to: MIXED, status: proposed_requires_bundle_entitlement_and_commerce_contract}
+      - {id: SERIES_LANDING_PAGE, label: Series landing page, maps_to: POST, status: proposed_requires_series_projection_contract}
+      - {id: PROJECT_SHOWCASE, label: Project showcase, maps_to: MIXED, status: proposed_requires_project_publication_contract}
+      - {id: RESOURCE_PACK, label: Resource pack, maps_to: MIXED, status: proposed_requires_asset_bundle_license_and_download_contract}
+      - {id: MIXED_MEDIA_STORY, label: Mixed-media story, maps_to: MIXED, status: existing_type_scope_dependent}
+    game_catalog_and_guides:
+      - {id: GAME_LISTING, label: Game listing, maps_to: null, status: catalog_entity_not_a_publication}
+      - {id: GAME_REVIEW, label: Game review, maps_to: POST, status: proposed_requires_game_reference_and_review_policy}
+      - {id: GAME_GUIDE, label: Game guide, maps_to: POST, status: proposed_requires_game_reference_and_guide_schema}
+      - {id: GAME_WALKTHROUGH, label: Game walkthrough, maps_to: POST, status: proposed_requires_game_reference_and_step_schema}
+      - {id: GAME_MOD, label: Game mod, maps_to: null, status: blocked_until_game_mod_rights_and_asset_contract_approved}
+  mapping_rules:
+    - Existing persistence mapping is allowed only when the referenced schema supports the archetype's required fields and lifecycle.
+    - A candidate maps_to value is not proof that the archetype is implemented or publishable.
+    - Where a mapping is conditional, UI must not expose the archetype as available until its condition is verified.
+    - New persistence types require all gates listed in persistence_enum_policy.adding_enum_value_requires.
+    - Categories and genres remain separate from publication archetypes; for example HORROR is a genre, not a publication type.
+
+existing_publication_types:
+  status: proposed_canonical_model_requires_migration_approval
+  values:
+    - id: BOOK
+      canonical: true
+      purpose: A published work with a registered format/content structure, including prose books and sequential visual formats such as comics, manga, manhwa, and webtoons where supported.
+      formats_are_not_publication_types: true
+      format_contracts:
+        document_schema: contracts/studio/document.schema.yaml
+        generic_book_content_model: BLOCKED_UNTIL_APPROVED
+    - id: POST
+      canonical: true
+      purpose: Editorial or textual publication using the registered post body and metadata contract; not a generic fallback.
+    - id: VIDEO
+      canonical: true
+      purpose: Publication whose primary consumption experience is video playback.
+    - id: AUDIO
+      canonical: true
+      purpose: Publication whose primary consumption experience is audio playback.
+    - id: MIXED
+      canonical: true
+      purpose: Publication composed of explicitly ordered heterogeneous content blocks or referenced media.
+  non_publication_concepts:
+    - id: IMAGE_GALLERY
+      kind: presentation_mode
+      purpose: Render a registered collection of IMAGE assets as a gallery; does not create a Publication.type value.
+      collection_storage_contract: BLOCKED_UNTIL_COLLECTION_MODEL_APPROVED
+    - id: COMIC
+      kind: BOOK_format
+      purpose: Sequential visual narrative format; page ordering and reading semantics are part of BOOK content structure, not Publication.type.
+  migration_policy:
+    existing_COMIC_publications: map_to_BOOK_with_format_COMIC_only_after_data_audit
+    existing_IMAGE_GALLERY_publications: map_to_registered_collection_or_MIXED_only_after_data_audit; otherwise BLOCK
+    automatic_data_rewrite: forbidden
+    required_gates: [inventory_existing_data, domain_model_contract, schema_migration, API_contract, lifecycle_contract, authorization_contract, analytics_mapping, UI_and_accessibility_contract, migration_and_rollback_plan, explicit_approval]
+
+existing_media_asset_types:
+  canonical: true
+  values: [IMAGE, VIDEO, AUDIO, DOCUMENT]
+  semantics:
+    IMAGE: Image file or rendition; may be used as a cover, thumbnail, gallery item, illustration, or comic page.
+    VIDEO: Video file or rendition.
+    AUDIO: Audio file or rendition.
+    DOCUMENT: Document file or rendition.
+  rejected_unknown_type: true
+  comic_page_representation:
+    asset_type: IMAGE
+    page_order_and_reading_semantics_owner: BOOK_format_COMIC_content_structure
+    separate_asset_type: false
+
+category_and_genre_policy:
+  storage: registered_data_driven_taxonomy
+  hierarchy: [catalog_family, category, optional_subcategory, zero_or_more_genres, optional_tags]
+  semantics:
+    catalog_family: top-level discovery surface such as GAMES, BOOKS, VIDEOS, AUDIO, IMAGES
+    category: registered domain classification within a catalog family; for Games, GAME is the root classification
+    subcategory: more specific entity/form classification; for Games examples include VIDEO_GAME, BROWSER_GAME, TABLETOP_GAME, BOARD_GAME, CARD_GAME, INTERACTIVE_FICTION
+    genre: one or more subject, narrative, stylistic or gameplay classifications; for Games examples include RPG, STRATEGY, HORROR, PUZZLE, SIMULATION
+    platform: separate compatibility dimension, never a genre or subcategory by inference
+    format: separate content/build structure such as COMIC, WEB_WASM, WEBGL or EPUB; not a genre
+    media_asset_type: stored resource modality and independent from category/genre
+  examples_are_exhaustive: false
+  allow_multiple_genres: true
+  genre_scope: domain_scoped_registered_taxonomy
+  unknown_category: BLOCK_OR_SAFE_UNCLASSIFIED_STATE; never silently coerce
+  category_mutation: requires_authorized_registered_taxonomy_command
+  localization: registered_translation_keys; never use labels as stable identifiers
+  restricted_categories: enforce_legal_age_visibility_entitlement_and_moderation_contracts
+
+artwork_policy:
+  canonical_artwork_contract: contracts/ui/artwork.yaml
+  preserve_aspect_ratio: true
+  portrait_cover_required_for_catalog_cards: true
+  exceptions: media_specific_landscape_or_square_artwork_may_also_be_used
+  missing_artwork: registered_fallback_component
+  type_icon: use_registered_media_type_icon; never rely on color alone
+
+ui_contract:
+  canonical_type_registry: this_file
+  route_registry: contracts/ui/pages/page-registry.yaml
+  design_must_distinguish_catalog_type_from_publication_type: true
+  disabled_or_unavailable_capabilities_must_be_visible_as_unavailable_or_omitted: true
+  no_fake_player_reader_or_game_launch_actions: true
+
+approval_blockers:
+  - id: MEDIA_BOOK_CONTENT_MODEL
+    decision: Whether to add a first-class book/ebook publication structure for novels and non-comic books.
+  - id: MEDIA_SHORTS_THRESHOLD
+    decision: Exact registered duration/orientation rule that qualifies a video for Shorts discovery.
+  - id: MEDIA_GAME_RUNTIME_RELEASE
+    decision: Production release gates, supported build targets, isolated hosting origin, runtime resource limits, network policy, and operational rollback for StoryGalore-hosted browser games.
+  - id: MEDIA_AUDIOBOOK_PODCAST_MODEL
+    decision: Chapter/episode/series structures and supported playback capabilities.
+  - id: MEDIA_TAXONOMY_GOVERNANCE
+    decision: Authorized taxonomy mutation commands, review workflow, and category retirement behavior.

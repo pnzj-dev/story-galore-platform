@@ -1,0 +1,13 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+title: StoryGalore Refund
+type: object
+required: [paymentId, amount, currency, status, createdAt]
+properties:
+  paymentId: {type: string, minLength: 1}
+  providerRefundId: {type: string}
+  amount: {type: integer, minimum: 0, description: Minor currency units.}
+  currency: {type: string, pattern: '^[A-Z]{3}$'}
+  status: {type: string, enum: [REQUESTED, APPROVED, REJECTED, PROCESSED]}
+  reason: {type: string}
+  createdAt: {type: string, format: date-time}
+additionalProperties: false

@@ -1,0 +1,27 @@
+schema: storygalore.jurisdiction-policy/v1
+version: 1
+canonical: true
+status: V19.5.3
+policy: fail_closed
+launch:
+  operatingEntity:
+    country: US
+    entityType: US_COMPANY
+    jurisdictionCode: US
+  commercialMarket:
+    primaryCountry: US
+    allowedCountries:
+    - US
+  settlementCurrency: USD
+  supportedCustomerCurrencies:
+  - USD
+  internationalExpansion:
+    enabled: false
+    activation: HUMAN_APPROVAL_REQUIRED
+    prerequisite: REGISTERED_JURISDICTION_PACK
+rules:
+- Launch pricing MUST be expressed in USD minor units.
+- A non-US customer MUST NOT become commercially eligible merely because a provider accepts the payment method.
+- International expansion requires an explicit jurisdiction pack covering tax, payments, consumer protection, rights, payouts, sanctions and accounting.
+- Unknown jurisdiction policy MUST BLOCK.
+- No currency conversion may be inferred; an approved FX provider and policy are required.

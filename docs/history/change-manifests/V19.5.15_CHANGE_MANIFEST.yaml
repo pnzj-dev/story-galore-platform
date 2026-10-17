@@ -1,0 +1,16 @@
+version: 19.5.15
+title: Repository consolidation and coherence cleanup
+status: planning-contract-update
+changes:
+  - Canonicalize Appwrite-owned resource design under backend/appwrite/.
+  - Align pnpm workspace globs with apps/web and packages/*.
+  - Move Cloudflare MCP examples out of the implementation namespace and declare backend/cloudflare as the platform boundary.
+  - Consolidate analytics/PostHog placeholder documentation into packages/analytics/README.md.
+  - Remove forceful Appwrite push shortcut from package scripts.
+  - Remove exact duplicate retired-agent output schemas and rename retained Character/World/Creator Growth/Cost Guardian tool contracts to their owning active agents.
+  - Archive historical change manifests outside the repository root.
+  - Add repository-coherence validation.
+not_claimed:
+  - Runtime implementation is complete.
+  - The technology version lock has been populated or all existing pins verified as latest stable.
+  - Generated Appwrite or Cloudflare project structures have been scaffolded.

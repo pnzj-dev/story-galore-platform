@@ -1,0 +1,13 @@
+version: 1.0.0
+release: V19.5.17
+change: appwrite_mcp_agent_access
+status: normative_architecture_update
+changes:
+  - make_official_appwrite_mcp_connection_the_only_agent_to_appwrite_tool_path
+  - centralize_agent_identity_binding_and_policy_enforcement
+  - add_deny_by_default_per_agent_tool_allowlists
+  - require_verified_native_appwrite_tool_catalog_mappings
+  - align_cloudflare_mcp_as_external_ingress_only
+  - explicitly_block_unattended_authentication_until_verified
+  - preserve_native_sdk_paths_for_normal_application_code
+implementation_status: BLOCKED_PENDING_AUTHENTICATION_AND_TOOL_CATALOG_VERIFICATION

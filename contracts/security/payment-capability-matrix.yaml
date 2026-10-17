@@ -1,0 +1,25 @@
+schema: storygalore.payment-capability-matrix/v1
+version: 1
+policy: fail_closed
+rule: Every payment command/query and provider route MUST resolve to a declared capability.
+capabilities:
+  payments.create: customer_payment_create
+  payments.confirm: provider_webhook_ingest
+  payments.refund: finance_payment_refund
+  payments.reconcile: finance_payment_reconcile
+  creator.earnings.read: creator_earnings_read
+  creator.earnings.post: creator_earnings_post
+  creator.earnings.reverse: finance_creator_earnings_reverse
+  creator.balance.read: creator_balance_read
+  payout.create: creator_payout_create
+  payout.confirm: provider_payout_webhook
+  payout.fail: provider_payout_webhook
+  payout.reconcile: finance_payout_reconcile
+  payout.wallet.connect: creator_payout_wallet_manage
+  payout.wallet.verify: creator_payout_wallet_verify
+  payout.wallet.disconnect: creator_payout_wallet_manage
+  payout.policy.read: creator_payout_policy_read
+  payment.provider_capabilities.read: payment_provider_capabilities_read
+policyEvaluation: Policy Engine MUST evaluate actor, creator ownership, jurisdiction, entitlement where applicable, KYC/KYB
+  status and risk before mutation.
+missingCapability: BLOCK

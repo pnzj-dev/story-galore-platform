@@ -1,0 +1,16 @@
+schema: storygalore.contract-scenarios/v1
+version: 1
+policy: fail_closed
+scenarios:
+- id: network-mismatch
+  given: verified_base_wallet
+  when: payout_on_polygon
+  then: BLOCK
+- id: address-verification
+  given: unverified_wallet
+  when: payout_create
+  then: BLOCK
+- id: supported-wallet
+  given: METAMASK_EVM
+  when: connect
+  then: REGISTERED_WALLET

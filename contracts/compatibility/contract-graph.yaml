@@ -1,0 +1,705 @@
+version: '1.0'
+canonical: true
+rules:
+- Every domain has exactly one canonical state-machine source.
+- Every source-of-truth mutation maps to a command and versioned event.
+- Every persistence resource is registered exactly once.
+- MCP tools and UI mutations are adapters over domain commands/queries, never alternate
+  business logic.
+- Authorization and Policy Engine decisions are evaluated before externally visible
+  mutations.
+- Cloudflare Workflows is orchestration only; authoritative state remains in domain persistence.
+domains:
+  admin:
+    stateMachine: contracts/deterministic/admin/state-machine.yaml
+    commands:
+    - name: admin_action_request
+      event: admin.action_request.v1
+      stateMachine: admin
+      sourceOfTruthWrite: true
+    - name: admin_action_approve
+      event: admin.action_approve.v1
+      stateMachine: admin
+      sourceOfTruthWrite: true
+    - name: admin_action_execute
+      event: admin.action_execute.v1
+      stateMachine: admin
+      sourceOfTruthWrite: true
+    - name: admin_action_revoke_lease
+      event: admin.action_revoke_lease.v1
+      stateMachine: admin
+      sourceOfTruthWrite: true
+    - name: admin_break_glass_start
+      event: admin.break_glass_start.v1
+      stateMachine: admin
+      sourceOfTruthWrite: true
+    - name: admin_break_glass_end
+      event: admin.break_glass_end.v1
+      stateMachine: admin
+      sourceOfTruthWrite: true
+    queries:
+    - admin_projection_get
+    - admin_audit_list
+    - admin_approval_get
+    - admin_lease_get
+    persistence:
+    - admin_actions
+    - admin_approvals
+    - admin_leases
+  ai:
+    stateMachine: contracts/deterministic/ai/state-machine.yaml
+    commands:
+    - name: ai_generation_create
+      event: ai.generation_create.v1
+      stateMachine: ai
+      sourceOfTruthWrite: true
+    - name: ai_generation_cancel
+      event: ai.generation_cancel.v1
+      stateMachine: ai
+      sourceOfTruthWrite: true
+    - name: ai_generation_retry
+      event: ai.generation_retry.v1
+      stateMachine: ai
+      sourceOfTruthWrite: true
+    - name: ai_generation_apply
+      event: ai.generation_apply.v1
+      stateMachine: ai
+      sourceOfTruthWrite: true
+    - name: ai_generation_reject
+      event: ai.generation_reject.v1
+      stateMachine: ai
+      sourceOfTruthWrite: true
+    - name: ai_credit_reserve
+      event: ai.credit_reserve.v1
+      stateMachine: ai
+      sourceOfTruthWrite: true
+    - name: ai_credit_settle
+      event: ai.credit_settle.v1
+      stateMachine: ai
+      sourceOfTruthWrite: true
+    - name: ai_credit_refund
+      event: ai.credit_refund.v1
+      stateMachine: ai
+      sourceOfTruthWrite: true
+    queries:
+    - ai_generation_get
+    - ai_generation_list
+    - ai_provider_capabilities_get
+    - ai_cost_get
+    persistence:
+    - ai_providers
+    - ai_generations
+    - ai_generation_outputs
+    - ai_credit_transactions
+  analytics:
+    stateMachine: contracts/deterministic/analytics/state-machine.yaml
+    commands:
+    - name: analytics_event_ingest
+      event: analytics.event_ingest.v1
+      stateMachine: analytics
+      sourceOfTruthWrite: true
+    - name: analytics_projection_rebuild
+      event: analytics.projection_rebuild.v1
+      stateMachine: analytics
+      sourceOfTruthWrite: true
+    - name: analytics_projection_backfill
+      event: analytics.projection_backfill.v1
+      stateMachine: analytics
+      sourceOfTruthWrite: true
+    - name: analytics_metric_definition_update
+      event: analytics.metric_definition_update.v1
+      stateMachine: analytics
+      sourceOfTruthWrite: true
+    queries:
+    - analytics_metric_get
+    - analytics_timeseries_get
+    - analytics_funnel_get
+    - analytics_cohort_get
+    persistence:
+    - analytics_events
+    - daily_metric_projections
+    - data_dictionary
+  community:
+    stateMachine: contracts/deterministic/community/state-machine.yaml
+    commands:
+    - name: comment_create
+      event: community.comment_create.v1
+      stateMachine: community
+      sourceOfTruthWrite: true
+    - name: comment_edit
+      event: community.comment_edit.v1
+      stateMachine: community
+      sourceOfTruthWrite: true
+    - name: comment_delete
+      event: community.comment_delete.v1
+      stateMachine: community
+      sourceOfTruthWrite: true
+    - name: comment_react
+      event: community.comment_react.v1
+      stateMachine: community
+      sourceOfTruthWrite: true
+    - name: comment_report
+      event: community.comment_report.v1
+      stateMachine: community
+      sourceOfTruthWrite: true
+    - name: comment_moderate
+      event: community.comment_moderate.v1
+      stateMachine: community
+      sourceOfTruthWrite: true
+    - name: comment_reply
+      event: community.comment_reply.v1
+      stateMachine: community
+      sourceOfTruthWrite: true
+    queries:
+    - comment_thread_get
+    - comment_list
+    - moderation_report_get
+    persistence:
+    - comments
+    - comment_reactions
+    - reports
+  discovery:
+    stateMachine: contracts/deterministic/discovery/state-machine.yaml
+    commands:
+    - name: discovery_reindex
+      event: discovery.reindex.v1
+      stateMachine: discovery
+      sourceOfTruthWrite: true
+    - name: recommendation_feedback_record
+      event: discovery.recommendation_feedback_record.v1
+      stateMachine: discovery
+      sourceOfTruthWrite: true
+    - name: search_index_delete
+      event: discovery.search_index_delete.v1
+      stateMachine: discovery
+      sourceOfTruthWrite: true
+    queries:
+    - search
+    - autocomplete
+    - recommendations
+    - trending
+    persistence:
+    - search_documents
+    - recommendation_candidates
+    - discovery_events
+  entitlements:
+    stateMachine: contracts/deterministic/entitlements/state-machine.yaml
+    commands:
+    - name: entitlement_grant
+      event: entitlements.entitlement_grant.v1
+      stateMachine: entitlements
+      sourceOfTruthWrite: true
+    - name: entitlement_revoke
+      event: entitlements.entitlement_revoke.v1
+      stateMachine: entitlements
+      sourceOfTruthWrite: true
+    - name: entitlement_suspend
+      event: entitlements.entitlement_suspend.v1
+      stateMachine: entitlements
+      sourceOfTruthWrite: true
+    - name: entitlement_reconcile
+      event: entitlements.entitlement_reconcile.v1
+      stateMachine: entitlements
+      sourceOfTruthWrite: true
+    queries:
+    - entitlement_check
+    - entitlement_list
+    persistence:
+    - entitlements
+    - entitlement_events
+  messaging:
+    stateMachine: contracts/deterministic/messaging/state-machine.yaml
+    commands:
+    - name: conversation_create
+      event: messaging.conversation_create.v1
+      stateMachine: messaging
+      sourceOfTruthWrite: true
+    - name: message_send
+      event: messaging.message_send.v1
+      stateMachine: messaging
+      sourceOfTruthWrite: true
+    - name: message_edit
+      event: messaging.message_edit.v1
+      stateMachine: messaging
+      sourceOfTruthWrite: true
+    - name: message_delete
+      event: messaging.message_delete.v1
+      stateMachine: messaging
+      sourceOfTruthWrite: true
+    - name: message_mark_read
+      event: messaging.message_mark_read.v1
+      stateMachine: messaging
+      sourceOfTruthWrite: true
+    - name: conversation_mute
+      event: messaging.conversation_mute.v1
+      stateMachine: messaging
+      sourceOfTruthWrite: true
+    - name: conversation_archive
+      event: messaging.conversation_archive.v1
+      stateMachine: messaging
+      sourceOfTruthWrite: true
+    - name: conversation_block
+      event: messaging.conversation_block.v1
+      stateMachine: messaging
+      sourceOfTruthWrite: true
+    - name: conversation_report
+      event: messaging.conversation_report.v1
+      stateMachine: messaging
+      sourceOfTruthWrite: true
+    - name: message_request_accept
+      event: messaging.message_request_accept.v1
+      stateMachine: messaging
+      sourceOfTruthWrite: true
+    - name: message_request_decline
+      event: messaging.message_request_decline.v1
+      stateMachine: messaging
+      sourceOfTruthWrite: true
+    - name: messaging_settings_update
+      event: messaging.settings_update.v1
+      stateMachine: messaging
+      sourceOfTruthWrite: true
+    - name: user_block
+      event: messaging.user_block.v1
+      stateMachine: messaging
+      sourceOfTruthWrite: true
+    - name: user_unblock
+      event: messaging.user_unblock.v1
+      stateMachine: messaging
+      sourceOfTruthWrite: true
+    - name: message_report
+      event: messaging.message_report.v1
+      stateMachine: messaging
+      sourceOfTruthWrite: true
+    queries:
+    - conversation_list
+    - conversation_get
+    - message_list
+    - message_search
+    - messaging_settings_get
+    persistence:
+    - conversations
+    - conversation_participants
+    - messages
+    - message_receipts
+  notifications:
+    stateMachine: contracts/deterministic/notifications/state-machine.yaml
+    commands:
+    - name: notification_create
+      event: notifications.notification_create.v1
+      stateMachine: notifications
+      sourceOfTruthWrite: true
+    - name: notification_mark_read
+      event: notifications.notification_mark_read.v1
+      stateMachine: notifications
+      sourceOfTruthWrite: true
+    - name: notification_mark_all_read
+      event: notifications.notification_mark_all_read.v1
+      stateMachine: notifications
+      sourceOfTruthWrite: true
+    - name: notification_preference_update
+      event: notifications.notification_preference_update.v1
+      stateMachine: notifications
+      sourceOfTruthWrite: true
+    - name: notification_retry_delivery
+      event: notifications.notification_retry_delivery.v1
+      stateMachine: notifications
+      sourceOfTruthWrite: true
+    queries:
+    - notification_list
+    - notification_preferences_get
+    persistence:
+    - notifications
+    - notification_preferences
+    - notification_delivery_attempts
+  payments:
+    stateMachine: contracts/deterministic/payments/state-machine.yaml
+    commands:
+    - name: payment_create
+      event: payments.payment_create.v1
+      stateMachine: payments
+      sourceOfTruthWrite: true
+    - name: payment_confirm_from_webhook
+      event: payments.payment_confirm_from_webhook.v1
+      stateMachine: payments
+      sourceOfTruthWrite: true
+    - name: payment_refund
+      event: payments.payment_refund.v1
+      stateMachine: payments
+      sourceOfTruthWrite: true
+    - name: payment_reconcile
+      event: payments.payment_reconcile.v1
+      stateMachine: payments
+      sourceOfTruthWrite: true
+    - name: payment_mark_failed
+      event: payments.payment_mark_failed.v1
+      stateMachine: payments
+      sourceOfTruthWrite: true
+    - name: creator_earnings_post
+      event: payments.creator_earnings_post.v1
+      stateMachine: payments.earnings
+      sourceOfTruthWrite: true
+    - name: creator_earnings_reverse
+      event: payments.creator_earnings_reverse.v1
+      stateMachine: payments.earnings
+      sourceOfTruthWrite: true
+    - name: payout_create
+      event: payments.payout_create.v1
+      stateMachine: payments.payout
+      sourceOfTruthWrite: true
+    - name: payout_confirm
+      event: payments.payout_confirm.v1
+      stateMachine: payments.payout
+      sourceOfTruthWrite: true
+    - name: payout_fail
+      event: payments.payout_fail.v1
+      stateMachine: payments.payout
+      sourceOfTruthWrite: true
+    - name: payout_reconcile
+      event: payments.payout_reconcile.v1
+      stateMachine: payments.payout
+      sourceOfTruthWrite: true
+    - name: payout_wallet_connect
+      event: payments.payout_wallet_connect.v1
+      stateMachine: payments.wallet
+      sourceOfTruthWrite: true
+    - name: payout_wallet_verify
+      event: payments.payout_wallet_verify.v1
+      stateMachine: payments.wallet
+      sourceOfTruthWrite: true
+    - name: payout_wallet_disconnect
+      event: payments.payout_wallet_disconnect.v1
+      stateMachine: payments.wallet
+      sourceOfTruthWrite: true
+    - name: overage_purchase_create
+      event: payments.overage_purchase_create.v1
+      stateMachine: payments
+      sourceOfTruthWrite: true
+    queries:
+    - payment_get
+    - payment_status_get
+    - payment_reconciliation_get
+    - creator_earnings_get
+    - creator_balance_get
+    - payout_get
+    - payout_list
+    - payout_wallet_list
+    - payout_policy_get
+    - payment_provider_capabilities_get
+    persistence:
+    - payments
+    - payment_attempts
+    - payment_events
+    - refunds
+    - payment_idempotency
+    - creator_earnings_ledger
+    - creator_balance_projections
+    - payout_requests
+    - payout_events
+    - payout_idempotency
+    - payout_wallets
+    - wallet_verification_attempts
+    - commerce_plan_versions
+    - commission_policy_versions
+    - payment_route_policies
+  publication:
+    stateMachine: contracts/deterministic/publication/state-machine.yaml
+    commands:
+    - name: publication_validate
+      event: publication.validate.v1
+      stateMachine: publication
+      sourceOfTruthWrite: true
+    - name: publication_submit
+      event: publication.submit.v1
+      stateMachine: publication
+      sourceOfTruthWrite: true
+    - name: publication_approve
+      event: publication.approve.v1
+      stateMachine: publication
+      sourceOfTruthWrite: true
+    - name: publication_schedule
+      event: publication.schedule.v1
+      stateMachine: publication
+      sourceOfTruthWrite: true
+    - name: publication_publish
+      event: publication.publish.v1
+      stateMachine: publication
+      sourceOfTruthWrite: true
+    - name: publication_unpublish
+      event: publication.unpublish.v1
+      stateMachine: publication
+      sourceOfTruthWrite: true
+    queries:
+    - publication_get
+    - publication_snapshot_get
+    - publication_validation_get
+    persistence:
+    - publications
+    - publication_snapshots
+    - publication_validation_runs
+    - publication_language_metadata
+  reader:
+    stateMachine: contracts/deterministic/reader/state-machine.yaml
+    commands:
+    - name: reading_progress_upsert
+      event: reader.reading_progress_upsert.v1
+      stateMachine: reader
+      sourceOfTruthWrite: true
+    - name: reading_progress_complete
+      event: reader.reading_progress_complete.v1
+      stateMachine: reader
+      sourceOfTruthWrite: true
+    - name: reader_preference_update
+      event: reader.preference_update.v1
+      stateMachine: reader
+      sourceOfTruthWrite: true
+    - name: reader_session_resume
+      event: reader.session_resume.v1
+      stateMachine: reader
+      sourceOfTruthWrite: true
+    - name: reader_session_close
+      event: reader.session_close.v1
+      stateMachine: reader
+      sourceOfTruthWrite: true
+    queries:
+    - reader_manifest_get
+    - reading_progress_get
+    - reader_preferences_get
+    persistence:
+    - reading_progress
+    - reader_preferences
+    - reader_session
+  subscriptions:
+    stateMachine: contracts/state-machines/subscription.yaml
+    commands:
+    - name: subscription_create
+      event: subscriptions.subscription_create.v1
+      stateMachine: subscriptions
+      sourceOfTruthWrite: true
+    - name: subscription_renew
+      event: subscriptions.subscription_renew.v1
+      stateMachine: subscriptions
+      sourceOfTruthWrite: true
+    - name: subscription_cancel
+      event: subscriptions.subscription_cancel.v1
+      stateMachine: subscriptions
+      sourceOfTruthWrite: true
+    - name: subscription_pause
+      event: subscriptions.subscription_pause.v1
+      stateMachine: subscriptions
+      sourceOfTruthWrite: true
+    - name: subscription_resume
+      event: subscriptions.subscription_resume.v1
+      stateMachine: subscriptions
+      sourceOfTruthWrite: true
+    - name: subscription_change_plan
+      event: subscriptions.subscription_change_plan.v1
+      stateMachine: subscriptions
+      sourceOfTruthWrite: true
+    - name: subscription_reconcile
+      event: subscriptions.subscription_reconcile.v1
+      stateMachine: subscriptions
+      sourceOfTruthWrite: true
+    queries:
+    - subscription_get
+    - subscription_list
+    - plan_get
+    - subscription_preview_change
+    persistence:
+    - subscriptions
+    - subscription_events
+    - renewal_attempts
+    - plans
+  support:
+    stateMachine: contracts/deterministic/support/state-machine.yaml
+    commands:
+    - name: support_ticket_create
+      event: support.ticket_create.v1
+      stateMachine: support
+      sourceOfTruthWrite: true
+    - name: support_ticket_update
+      event: support.ticket_update.v1
+      stateMachine: support
+      sourceOfTruthWrite: true
+    - name: support_ticket_assign
+      event: support.ticket_assign.v1
+      stateMachine: support
+      sourceOfTruthWrite: true
+    - name: support_ticket_reply
+      event: support.ticket_reply.v1
+      stateMachine: support
+      sourceOfTruthWrite: true
+    - name: support_ticket_escalate
+      event: support.ticket_escalate.v1
+      stateMachine: support
+      sourceOfTruthWrite: true
+    - name: support_ticket_close
+      event: support.ticket_close.v1
+      stateMachine: support
+      sourceOfTruthWrite: true
+    - name: support_ticket_reopen
+      event: support.ticket_reopen.v1
+      stateMachine: support
+      sourceOfTruthWrite: true
+    queries:
+    - support_ticket_get
+    - support_ticket_list
+    - support_user_context
+    - support_kb_search
+    persistence:
+    - support_tickets
+    - support_messages
+    - support_assignments
+    - support_sla_events
+  media:
+    stateMachine: contracts/state-machines/media.yaml
+    commands:
+    - name: media_upload_create
+      event: media.upload_created.v1
+      stateMachine: media-upload
+      sourceOfTruthWrite: true
+    - name: media_upload_start
+      event: media.upload_started.v1
+      stateMachine: media-upload
+      sourceOfTruthWrite: true
+    - name: media_upload_pause
+      event: media.upload_paused.v1
+      stateMachine: media-upload
+      sourceOfTruthWrite: true
+    - name: media_upload_resume
+      event: media.upload_resumed.v1
+      stateMachine: media-upload
+      sourceOfTruthWrite: true
+    - name: media_upload_complete
+      event: media.upload_completed.v1
+      stateMachine: media-upload
+      sourceOfTruthWrite: true
+    - name: media_upload_cancel
+      event: media.upload_cancelled.v1
+      stateMachine: media-upload
+      sourceOfTruthWrite: true
+    - name: media_upload_recover
+      event: media.upload_recovered.v1
+      stateMachine: media-upload
+      sourceOfTruthWrite: true
+    - name: media_upload_expire
+      event: media.upload_expired.v1
+      stateMachine: media-upload
+      sourceOfTruthWrite: true
+    - name: media_asset_delete
+      event: media.asset_deleted.v1
+      stateMachine: media
+      sourceOfTruthWrite: true
+    - name: media_distribution_config_update
+      event: media.distribution_config_updated.v1
+      stateMachine: media-distribution
+      sourceOfTruthWrite: true
+    queries:
+    - media_upload_get
+    - media_upload_progress_get
+    - media_asset_get
+    - media_asset_delivery_policy_get
+    - media_distribution_config_get
+    - media_distribution_status_get
+    persistence:
+    - media_upload_sessions
+    - media_assets
+    - media_distribution_config
+    - media_distribution_health
+  advertising:
+    stateMachine: contracts/deterministic/advertising/state-machine.yaml
+    commands:
+    - name: ad_campaign_schedule
+      event: advertising.campaign_scheduled.v1
+      stateMachine: advertising
+      sourceOfTruthWrite: true
+    - name: ad_campaign_activate
+      event: advertising.campaign_activated.v1
+      stateMachine: advertising
+      sourceOfTruthWrite: true
+    - name: ad_campaign_pause
+      event: advertising.campaign_paused.v1
+      stateMachine: advertising
+      sourceOfTruthWrite: true
+    - name: ad_campaign_resume
+      event: advertising.campaign_resumed.v1
+      stateMachine: advertising
+      sourceOfTruthWrite: true
+    - name: ad_campaign_complete
+      event: advertising.campaign_completed.v1
+      stateMachine: advertising
+      sourceOfTruthWrite: true
+    - name: ad_campaign_archive
+      event: advertising.campaign_archived.v1
+      stateMachine: advertising
+      sourceOfTruthWrite: true
+    - name: ad_event_ingest
+      event: advertising.event_ingested.v1
+      stateMachine: advertising
+      sourceOfTruthWrite: true
+    - name: ad_metrics_aggregate
+      event: advertising.metrics_aggregated.v1
+      stateMachine: advertising
+      sourceOfTruthWrite: true
+    - name: sponsored_consumption_reserve
+      event: advertising.sponsored_consumption_reserve.v1
+      stateMachine: consumer.sponsored_consumption
+      sourceOfTruthWrite: true
+    queries:
+    - ad_campaign_get
+    - ad_campaign_list
+    - ad_eligible_creative_get
+    - ad_metrics_get
+    persistence:
+    - ad_inventory
+    - ad_campaigns
+    - ad_creatives
+    - ad_placements
+    - ad_frequency_caps
+    - ad_events
+    - ad_metrics_daily
+    - sponsored_consumption_reservations
+  economics:
+    stateMachine: contracts/state-machines/consumer-consumption.yaml
+    commands:
+    - name: consumption_record
+      event: economics.consumption_record.v1
+      stateMachine: consumer.consumption
+      sourceOfTruthWrite: true
+    - name: consumption_reconcile
+      event: economics.consumption_reconcile.v1
+      stateMachine: consumer.consumption
+      sourceOfTruthWrite: true
+    queries:
+    - consumer_consumption_get
+    - consumer_consumption_summary_get
+    - unit_economics_get
+    - plan_profitability_get
+    persistence:
+    - consumer_consumption_events
+    - consumer_entitlement_usage
+    - consumer_cost_attribution
+    - consumer_unit_economics_daily
+    - consumer_plan_profitability_daily
+specializedContexts:
+  media:
+    stateMachines:
+    - contracts/state-machines/media.yaml
+    - contracts/state-machines/media-upload.yaml
+    - contracts/state-machines/media-distribution.yaml
+    canonicalPersistence: docs/MEDIA_STORAGE_AND_DISTRIBUTION.md
+    invariants:
+    - Appwrite is canonical origin
+    - Cloudflare is PRIMARY distribution only
+    - Bunny is SECONDARY distribution only
+    - SECONDARY can be disabled by authorized admin configuration
+    - authorization precedes protected delivery
+    - distributor selection never implements business entitlement or age policy
+  studio:
+    stateMachines:
+    - contracts/state-machines/studio.yaml
+    - contracts/state-machines/studio-editor.yaml
+    canonicalPersistence: contracts/studio/persistence-mapping.yaml
+    invariants:
+    - Studio authoring state is revisioned
+    - published snapshots are immutable
+    - UI never writes Appwrite directly

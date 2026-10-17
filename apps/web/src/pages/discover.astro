@@ -1,0 +1,46 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { MediaCard } from "@storygalore/ui";
+import type { MediaCardData } from "@storygalore/ui";
+import { fetchPublications } from "../lib/gateway";
+
+const genre = Astro.url.searchParams.get("genre");
+const heading = genre ? `Browse: ${genre.replace(/-/g, " ")}` : "Discover";
+
+// Genre filtering is deferred until publications carry a registered genre/tags
+// taxonomy (contracts/domain/media-catalog-taxonomy.yaml). The `genre` param is
+// surfaced in the heading for now.
+const items = await fetchPublications("trending");
+
+function hrefFor(item: MediaCardData): string {
+  switch (item.type) {
+    case "VIDEO":
+      return `/watch/${item.id}`;
+    case "AUDIO":
+      return `/listen/${item.id}`;
+    case "POST":
+      return `/posts/${item.id}`;
+    default:
+      return `/read/${item.id}`;
+  }
+}
+---
+
+<Layout title={heading}>
+  <main class="mx-auto max-w-7xl px-6 py-12">
+    <h1 class="text-3xl font-bold capitalize">{heading}</h1>
+    <p class="mt-2 text-foreground-muted">Explore stories across every medium.</p>
+
+    {items.length > 0 ? (
+      <div class="mt-8 flex flex-wrap gap-4">
+        {items.map((item) => (
+          <MediaCard publication={item} href={hrefFor(item)} />
+        ))}
+      </div>
+    ) : (
+      <p class="mt-8 rounded-xl border border-dashed border-border px-6 py-8 text-sm text-foreground-muted">
+        No stories yet. Check back soon.
+      </p>
+    )}
+  </main>
+</Layout>

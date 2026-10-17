@@ -1,0 +1,15 @@
+version: "1.0"
+canonical: true
+events:
+  - name: i18n.ui_locale_changed.v1
+    payload: [userId, previousLocale, locale, direction, occurredAt]
+  - name: i18n.language_preferences_changed.v1
+    payload: [userId, contentLanguages, contentLanguageMode, occurredAt]
+  - name: i18n.publication_language_set.v1
+    payload: [publicationId, primaryLanguage, contentLanguages, occurredAt]
+  - name: i18n.localization_upserted.v1
+    payload: [publicationId, language, status, source, provenanceId, occurredAt]
+  - name: i18n.localization_approved.v1
+    payload: [publicationId, language, provenanceId, occurredAt]
+  - name: i18n.localization_retired.v1
+    payload: [publicationId, language, occurredAt]

@@ -1,0 +1,26 @@
+version: "1.0"
+area: ai
+canonical: true
+
+providerFamilies:
+  llm: [openai, anthropic, google-gemini, mistral, deepseek, xai, openrouter]
+  media: [higgsfield, runway, fal-ai, replicate]
+  userHosted: [ollama, vllm, lm-studio, localai, comfyui, openai-compatible]
+
+providerCatalogRules:
+  - provider/model availability MUST be dynamically refreshable.
+  - official provider documentation is authoritative for model-specific API contracts.
+  - provider names are routing metadata, never authorization grants.
+  - model capability must be declared explicitly.
+  - credit eligibility must be explicit and server-enforced.
+  - BYOK and USER_HOSTED are never credit eligible.
+
+higgsfield:
+  providerId: higgsfield
+  executionLocation: CLOUD
+  adapterProtocol: PROVIDER_NATIVE
+  mediaCapabilities: [IMAGE_GENERATION, IMAGE_EDITING, VIDEO_GENERATION, AUDIO_GENERATION]
+  catalogSource: official-provider-catalog
+  catalogRefreshRequired: true
+  exampleCurrentModels: [Seedance, Kling, MiniMax, Wan, LTX, Grok-Imagine, Soul, Ideogram, Recraft, PixVerse]
+  exampleModelsAreNotAuthoritative: true

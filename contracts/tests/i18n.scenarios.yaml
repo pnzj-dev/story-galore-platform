@@ -1,0 +1,51 @@
+version: "1.0"
+suite: internationalization-v1
+scenarios:
+  - id: I18N-001
+    name: UI locale independent from content language
+    given: UI locale fr-BE; content languages en,ja
+    expect: French UI with English/Japanese content selection
+  - id: I18N-002
+    name: ONLY_SELECTED filters before pagination
+    given: selected languages fr,en and mode ONLY_SELECTED
+    expect: publications with no fr/en match are excluded before pagination
+  - id: I18N-003
+    name: Arabic is RTL
+    given: resolved UI locale ar
+    expect: document direction rtl and logical CSS layout
+  - id: I18N-004
+    name: Hebrew is RTL
+    given: resolved UI locale he
+    expect: document direction rtl
+  - id: I18N-005
+    name: Mixed-language publication matches selected language
+    given: publication languages ja,en and selection en
+    expect: publication is included
+  - id: I18N-006
+    name: Unknown language does not match
+    given: missing or UNKNOWN publication language
+    expect: excluded from ONLY_SELECTED
+  - id: I18N-007
+    name: Region fallback is explicit
+    given: selection fr-CA and publication fr-FR
+    expect: matching follows configured BCP47 fallback, not implicit region guessing
+  - id: I18N-008
+    name: Approved localization is selectable
+    given: approved en localization
+    expect: reader can switch to en
+  - id: I18N-009
+    name: Draft localization is hidden
+    given: draft de localization
+    expect: de is not reader-selectable
+  - id: I18N-010
+    name: Language filter cannot bypass access policy
+    given: language matches but entitlement fails
+    expect: publication remains inaccessible
+  - id: I18N-011
+    name: Preference change invalidates discovery cache
+    given: selected languages change
+    expect: language-sensitive cache is invalidated or bypassed
+  - id: I18N-012
+    name: SSR and hydration preserve direction
+    given: locale ar during SSR
+    expect: client hydration remains rtl without layout flip

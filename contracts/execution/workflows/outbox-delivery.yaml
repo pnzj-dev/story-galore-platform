@@ -1,0 +1,35 @@
+schema: storygalore.workflow/v1
+version: 1
+id: outbox-delivery
+platform: cloudflare_workflows
+purpose: "Durable delivery of domain_events outbox records to registered consumers."
+source: backend/cloudflare/workflows/outbox-delivery
+outbox_contract: contracts/events/outbox.yaml
+trigger:
+  type: cron
+  schedule: "*/5 * * * *"
+input:
+  batchSize: {type: integer, required: false, default: 50}
+env:
+  APPWRITE_ENDPOINT: {kind: secret, required: true}
+  APPWRITE_PROJECT_ID: {kind: secret, required: true}
+  APPWRITE_API_KEY: {kind: secret, required: true, note: "narrowly scoped; never in workflow state"}
+steps:
+  - id: poll_outbox
+    description: "List undelivered domain_events rows (deliveredAt IS NULL) up to batchSize."
+    retry: {limit: 5, delay: 5s, backoff: exponential}
+  - id: deliver_each
+    description: "For each event, dispatch to registered targets (webhooks, downstream functions, provider adapters)."
+    retry: {limit: 10, delay: 10s, backoff: exponential}
+    note: "Skeleton logs only; target dispatch is the next implementation step."
+  - id: mark_delivered
+    description: "Set deliveredAt after successful delivery of that event."
+delivery_semantics:
+  at_least_once: true
+  idempotent_consumer_required: true
+  mark_delivered_after_successful_delivery: true
+security:
+  appwrite_access_via_scoped_key: true
+  no_raw_secrets_in_workflow_state: true
+  secrets_redacted: true
+status: SCAFFOLDED_PENDING_DELIVERY_TARGETS

@@ -1,0 +1,6 @@
+schema: storygalore.agent-tool-output/v1
+tool: art-director.visual-plan.propose
+required:
+- status
+- correlationId
+additionalProperties: false

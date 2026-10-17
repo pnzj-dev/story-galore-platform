@@ -1,0 +1,9 @@
+@import "tailwindcss";
+@import "../../../packages/ui/src/styles/theme.css";
+
+@source "../../../packages/ui/src";
+
+html,
+body {
+  @apply bg-background text-foreground;
+}

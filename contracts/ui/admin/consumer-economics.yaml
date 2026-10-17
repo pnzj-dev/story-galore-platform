@@ -1,0 +1,109 @@
+schema: storygalore.admin-consumer-economics-ui/v1
+version: 1
+canonical: true
+status: V19.5.2
+policy: fail_closed
+rendering:
+  architecture: ASTRO_FIRST
+  interactive_islands: ONLY_WHEN_STATEFUL_FILTERS_OR_DRILLDOWN_REQUIRE_CLIENT_STATE
+  server_data_boundary: ADMIN_QUERY_SERVICES_ONLY
+routes:
+  /admin/economics:
+    widgets:
+    - paidSubscribers
+    - arpu
+    - consumption
+    - attributableCost
+    - contributionMargin
+    - marginRate
+    - costPerVideoMinute
+    - costPerDownloadGiB
+    defaultPeriod: 30D
+  /admin/economics/consumption:
+    widgets:
+    - entitlementUtilization
+    - videoMinutes
+    - audioMinutes
+    - downloadGiB
+    - overageUsage
+    - fairUseRate
+    filters:
+    - plan
+    - mediaType
+    - quality
+    - country
+    - date
+  /admin/economics/media:
+    widgets:
+    - deliveryCost
+    - originEgressCost
+    - storageCost
+    - transcodeCost
+    - cacheEffectiveness
+    filters:
+    - provider
+    - mediaType
+    - quality
+    - date
+  /admin/economics/plans:
+    widgets:
+    - revenue
+    - processingCost
+    - attributableCost
+    - margin
+    - utilization
+    - churn
+    filters:
+    - plan
+    - country
+    - date
+  /admin/economics/unit-economics:
+    widgets:
+    - costPerVideoMinute
+    - costPerAudioMinute
+    - costPerDownloadGiB
+    - costPerAiUnit
+    - activeUserCost
+    - marginRate
+    filters:
+    - plan
+    - mediaType
+    - quality
+    - provider
+    - date
+  /admin/economics/anomalies:
+    widgets:
+    - costSpikes
+    - fairUseTriggers
+    - concurrencyAnomalies
+    - downloadVelocity
+    - marginDeterioration
+    actions:
+    - inspect
+    - openAuditCase
+    mutations: NONE
+commonStates:
+- LOADING
+- READY
+- EMPTY
+- STALE
+- PARTIAL
+- ERROR
+- UNAUTHORIZED
+financialDisplay:
+  costStateRequired: true
+  currencyRequired: true
+  zeroSubstitutionForUnavailable: FORBIDDEN
+  provisionalLabelRequired: true
+privacy:
+  rawContent: FORBIDDEN
+  rawPaymentCredentials: FORBIDDEN
+  walletSecrets: FORBIDDEN
+  unnecessaryPii: FORBIDDEN
+accessibility:
+  keyboardNavigation: REQUIRED
+  screenReaderLabels: REQUIRED
+  dataTableAlternative: REQUIRED
+  colorOnlyEncoding: FORBIDDEN
+authorization: contracts/permissions/admin-rbac.json
+dataContract: contracts/analytics/consumer-economics-metrics.yaml

@@ -1,0 +1,39 @@
+schema: storygalore.agent-task-state/v1
+states:
+- QUEUED
+- AUTHORIZED
+- RUNNING
+- WAITING_APPROVAL
+- WAITING_HUMAN
+- RETRY_WAIT
+- SUCCEEDED
+- BLOCKED
+- FAILED
+- CANCELLED
+transitions:
+- from: QUEUED
+  to: AUTHORIZED
+  guard: policy_decision=ALLOW
+- from: AUTHORIZED
+  to: RUNNING
+- from: RUNNING
+  to: WAITING_APPROVAL
+- from: RUNNING
+  to: WAITING_HUMAN
+- from: RUNNING
+  to: RETRY_WAIT
+- from: RUNNING
+  to: SUCCEEDED
+- from: RUNNING
+  to: BLOCKED
+- from: RUNNING
+  to: FAILED
+- from: RUNNING
+  to: CANCELLED
+- from: RETRY_WAIT
+  to: RUNNING
+invariants:
+- terminal_states_are_immutable
+- operation_id_stable_across_retry
+- progress_non_decreasing_except_explicit_reset
+- no_success_before_verification

@@ -1,0 +1,12 @@
+schema: storygalore.contract-scenario-suite/v1
+version: 1
+policy: fail_closed
+cases:
+  - id: route-rbac
+    expected: PASS
+  - id: read-only-default
+    expected: PASS
+  - id: sensitive-policy-change-approval
+    expected: PASS
+  - id: no-runtime-dependency
+    expected: PASS

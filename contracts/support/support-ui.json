@@ -1,0 +1,10 @@
+{
+  "version": "1.0",
+  "user_routes": ["/help","/help/articles/:slug","/support","/support/new","/support/tickets","/support/tickets/:ticketId"],
+  "admin_routes": ["/admin/support","/admin/support/inbox","/admin/support/tickets","/admin/support/tickets/:ticketId","/admin/support/users/:userId","/admin/support/escalations","/admin/support/sla","/admin/support/knowledge","/admin/support/macros","/admin/support/settings","/admin/support/audit"],
+  "human_only_or_approval": ["account_recovery_override","exceptional_refund","exceptional_private_data_access","permanent_deletion","ownership_transfer","mass_sanction","critical_policy_change"],
+  "forbidden_support_data": ["password","session_token","byok_secret","payment_credentials","raw_appwrite_service_credentials"],
+  "required_admin_workspace_actions": ["assign","reply","internal_note","change_priority","change_category","escalate","resolve","reopen","view_scoped_user_context","view_audit"],
+  "required_user_actions": ["search_help","create_ticket","reply","attach_file","view_status","reopen"],
+  "required_states": ["loading","empty","offline","syncing","rate_limited","permission_denied","unavailable","retryable_error","permanent_error"]
+}

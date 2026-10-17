@@ -1,0 +1,17 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+title: StoryGalore Payment
+description: Provider-neutral payment record; provider-specific IDs live here, not throughout the domain.
+type: object
+required: [userId, amount, currency, provider, status, createdAt, updatedAt]
+properties:
+  userId: {type: string, minLength: 1}
+  amount: {type: integer, minimum: 0, description: Minor currency units; never floating point.}
+  currency: {type: string, pattern: '^[A-Z]{3}$'}
+  provider: {type: string, enum: [STRIPE_CONNECT, NOWPAYMENTS, ZEN_PAYMENTS, SECUREGLOBALPAY]}
+  status: {type: string, enum: [CREATED, AWAITING_PROVIDER, CAPTURED, FAILED, REFUNDED, RECONCILED, EXPIRED]}
+  idempotencyKey: {type: string}
+  subscriptionId: {type: string}
+  providerPaymentId: {type: string}
+  createdAt: {type: string, format: date-time}
+  updatedAt: {type: string, format: date-time}
+additionalProperties: false

@@ -1,0 +1,12 @@
+version: 1
+kind: creator-studio-permission-matrix
+roles:
+  OWNER: [READ, EDIT, GENERATE_AI, MANAGE_ASSETS, SUBMIT_PUBLICATION, PUBLISH, MANAGE_MEMBERS, DELETE_PROJECT]
+  EDITOR: [READ, EDIT, GENERATE_AI, MANAGE_ASSETS, SUBMIT_PUBLICATION]
+  CONTRIBUTOR: [READ, EDIT, MANAGE_ASSETS]
+  VIEWER: [READ]
+notes:
+  - capabilities_are_additive_only_when_granted_by_workspace_policy
+  - publish_requires_explicit_publish_capability
+  - project_delete_requires_owner_and_step_up_when_policy_requires
+  - server_authorization_is_authoritative

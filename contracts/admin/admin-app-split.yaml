@@ -1,0 +1,58 @@
+schema: storygalore.admin-app-split/v1
+version: 1
+canonical: true
+status: canonical
+principle: destructive_capabilities_are_network_isolated_from_public_surface
+adr: docs/adr/0018-admin-app-split.md
+applications:
+  - id: apps/web
+    kind: astro
+    route_surface: /admin
+    classification: NON_DESTRUCTIVE
+    risk_allowed: [LOW, MEDIUM]
+    approval_allowed: [NONE]
+    hosting: appwrite_sites
+    network: public
+    note: remains_the_single_public_appwrite_site
+  - id: apps/admin
+    kind: sveltekit
+    route_surface: standalone
+    classification: COMPLETE
+    risk_allowed: [LOW, MEDIUM, HIGH, CRITICAL]
+    approval_allowed: [NONE, REQUIRED]
+    runtime: node (adapter-node) driven by the Nub toolchain
+    hosting: fly_io_initial_then_private_intranet
+    network: restricted_intranet_only
+    note: complete_intranet_console_containing_all_non_destructive_and_destructive_routes; never_reachable_from_public_internet
+classification_rule:
+  destructive_when: risk IN [HIGH, CRITICAL] OR approval == REQUIRED
+  non_destructive_when: risk IN [LOW, MEDIUM] AND approval == NONE
+  default: NON_DESTRUCTIVE
+  irreversible_operations_always_destructive: true
+  money_movement_always_destructive: true
+  secret_or_credential_access_always_destructive: true
+  broad_blast_radius_policy_change_always_destructive: true
+  hard_account_lifecycle_always_destructive: true
+registry:
+  source_of_truth: contracts/permissions/admin-rbac.json
+  classification_contract: contracts/admin/destructive-operations.yaml
+  destructive_registry: contracts/permissions/admin-rbac-admin-app.json
+  non_destructive_count: 45
+  destructive_count: 8
+  route_coverage:
+    apps_admin: all_routes_from_admin_rbac_json
+    apps_web_admin: non_destructive_only
+    destructive_delta: admin_rbac_admin_app_json
+rules:
+  - every_mutation_requires_capability_authorization_in_both_apps
+  - destructive_app_is_never_reachable_from_public_internet
+  - destructive_app_uses_server_side_appwrite_sdk_or_go_functions_only
+  - no_browser_api_key_in_destructive_app
+  - non_destructive_route_may_never_host_a_destructive_mutation
+  - route_hiding_is_not_authorization
+  - admin_ui_unavailability_must_not_break_runtime_user_traffic
+  - approval_and_break_glass_required_for_destructive_mutations
+  - audit_and_idempotency_required_for_destructive_mutations
+  - role_grant_never_implies_access_to_every_screen_or_operation
+  - non_destructive_routes_are_duplicated_in_both_apps
+  - destructive_routes_exist_only_in_apps_admin

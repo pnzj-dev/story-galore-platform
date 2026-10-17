@@ -1,0 +1,23 @@
+version: 1
+machines:
+  - machine: studio-project
+    initial: DRAFT
+    states: [DRAFT, ACTIVE, ARCHIVED]
+    transitions:
+      - {from: DRAFT, event: ACTIVATE, to: ACTIVE}
+      - {from: ACTIVE, event: ARCHIVE, to: ARCHIVED}
+      - {from: ARCHIVED, event: RESTORE, to: ACTIVE}
+  - machine: editor-session
+    initial: OPEN
+    states: [OPEN, SAVING, SYNCING, OFFLINE, CONFLICT, CLOSED]
+    transitions:
+      - {from: OPEN, event: SAVE, to: SAVING}
+      - {from: SAVING, event: ACCEPTED, to: OPEN}
+      - {from: SAVING, event: CONFLICT, to: CONFLICT}
+      - {from: SAVING, event: FAILED, to: OPEN}
+      - {from: OPEN, event: OFFLINE, to: OFFLINE}
+      - {from: OFFLINE, event: RECONNECT, to: SYNCING}
+      - {from: SYNCING, event: ACCEPTED, to: OPEN}
+      - {from: SYNCING, event: CONFLICT, to: CONFLICT}
+      - {from: CONFLICT, event: RESOLVED, to: OPEN}
+      - {from: OPEN, event: CLOSE, to: CLOSED}

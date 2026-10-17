@@ -1,0 +1,37 @@
+schema: storygalore.consumption-metering-contract/v1
+version: 1
+canonical: true
+status: V19.5.2
+policy: fail_closed
+eventSources:
+- MEDIA_PLAYBACK
+- DOWNLOAD
+- AI_COMPANION
+requiredFields:
+- eventId
+- userId
+- subscriptionEntitlementId
+- unitId
+- quantity
+- occurredAt
+- source
+- policyVersion
+- correlationId
+rules:
+- Metering MUST be server-authoritative for billable/entitlement-affecting consumption.
+- Client-reported consumption is advisory only until server verification.
+- Duplicate events MUST be deduplicated by eventId and provider/session identifiers
+  where applicable.
+- Unknown unit, policy version, media type or entitlement mapping MUST BLOCK accounting.
+- Consumption may never decrement creator earnings directly.
+- Usage projections are rebuildable; authoritative metering records are append-oriented.
+quality:
+  source: REGISTERED_MEDIA_POLICY
+  unknown: BLOCK
+reconciliation:
+  required: true
+  frequency: DAILY
+  authoritativeSources:
+  - media_playback_telemetry
+  - download_events
+  - ai_usage_ledger

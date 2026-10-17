@@ -1,0 +1,21 @@
+version: "1.0"
+area: messaging
+canonical: true
+description: "Deterministic implementation contract for {area}."
+persistence:
+  - resource: conversations
+    partitionKey: "conversationId"
+    authority: "authoritative conversation metadata"
+    requiredIndexes: "conversationId"
+  - resource: conversation_participants
+    partitionKey: "conversationId,userId"
+    authority: "membership source of truth"
+    requiredIndexes: "conversationId,userId"
+  - resource: messages
+    partitionKey: "messageId"
+    authority: "authoritative messages"
+    requiredIndexes: "conversationId,createdAt"
+  - resource: message_receipts
+    partitionKey: "messageId,userId"
+    authority: "delivery/read state"
+    requiredIndexes: "messageId,userId"

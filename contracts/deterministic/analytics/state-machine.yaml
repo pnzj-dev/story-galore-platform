@@ -1,0 +1,36 @@
+version: '1.0'
+area: analytics
+states:
+- ACCEPTED
+- REJECTED_PRIVACY
+- QUEUED
+- AGGREGATED
+- REBUILDING
+- STALE
+transitionRules:
+- Only listed transitions are legal.
+- Authorization MUST be evaluated separately from transition legality.
+- Retries MUST preserve idempotency.
+- State changes MUST emit the event declared by the command/event compatibility graph.
+transitions:
+- from: ACCEPTED
+  event: QUEUE
+  to: QUEUED
+- from: QUEUED
+  event: AGGREGATE
+  to: AGGREGATED
+- from: AGGREGATED
+  event: STALE
+  to: STALE
+- from: STALE
+  event: REBUILD
+  to: REBUILDING
+- from: REBUILDING
+  event: COMPLETE
+  to: AGGREGATED
+- from: ACCEPTED
+  event: REJECT_PRIVACY
+  to: REJECTED_PRIVACY
+terminalStates:
+- REJECTED_PRIVACY
+- AGGREGATED

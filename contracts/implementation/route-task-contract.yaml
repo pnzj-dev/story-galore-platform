@@ -1,0 +1,26 @@
+schema: storygalore.route-task-contract/v1
+version: 1
+required_fields:
+  - route
+  - site
+  - source_path
+  - rendering
+  - hydration
+  - data_sources
+  - authorization
+  - cache_policy
+  - localization
+  - adult_policy
+  - states
+  - visual_tests
+  - e2e_tests
+  - seo
+  - performance_budget
+stop_conditions:
+  - ambiguous_rendering
+  - ambiguous_hydration
+  - unknown_data_authority
+  - missing_policy_contract
+  - missing_visual_contract
+  - missing_appwrite_site_target
+  - unsupported_hosting_requirement

@@ -1,0 +1,113 @@
+schema: storygalore.v19.5.1-change-manifest/v1
+version: 1
+baseline_archive_sha256: bef3f2cf2e6464b78551d1fd7c191f71eb0476b5b88930a637fe0770760e0b1c
+baseline_version: 19.5
+updated_version: 19.5.1
+policy: fail_closed
+changed_files:
+  - path: contracts/business/commission-policy.yaml
+    sha256: a2ac8d6fa1fdb79d695a1b633dee5cd5cdd05c108db57f0f364df09524de15bc
+  - path: contracts/business/earnings-ledger.yaml
+    sha256: a3409d6f2f8b5ff1bd7a2639bfe0a39d101f3322ceb3e893ed5b60a68ec1e733
+  - path: contracts/business/implementation-map.yaml
+    sha256: 7853b37c7039044a2905b77e8a2b21ffb74f454036a53c1826da7e58394a0542
+  - path: contracts/business/marketplace-and-growth.yaml
+    sha256: ec0ee7f73a33c617140f8ec97be3017678a20ee39db5113762fdad658b30df12
+  - path: contracts/business/payment-provider-policy.yaml
+    sha256: 7d7a5f554ae62ee155030c997c9e6611ac54fb776c3bf2cb4320905ec99c5552
+  - path: contracts/business/payouts.yaml
+    sha256: 2d298b702ffa1122f326117a1e3f00bc440be46c2fe63b7ab154ac82b7d8e985
+  - path: contracts/business/revenue-model.yaml
+    sha256: 8c8d900ada00439380db94fcd6c9378399e76b43d00abef11d60d797375c9ced
+  - path: contracts/business/wallets.yaml
+    sha256: 3016317aad54a25abde57d63cfde96ec2df9c4de2af5d861403b7e6931f6a567
+  - path: contracts/providers/payment-providers.yaml
+    sha256: 1321d05a2bb9fbcda5dda45b744716fc0479538d813f3599190ef57229f6852c
+  - path: contracts/security/payment-capability-matrix.yaml
+    sha256: 6fd84e0e0ef2d3dcbb99ede2a890bcdb77f4db2caa48ebd574868a8ebf2b883f
+  - path: contracts/security/secret-registry.yaml
+    sha256: 2f0d2beb3af6133e634c872c80a3560fc24a2bc8bf1273ecabcd3e9d9e20ac01
+  - path: contracts/deterministic/payments/api.yaml
+    sha256: 38358db342fcfe4132bbe8280d18b8de09b4b6cb00ef709eee0217801ae18257
+  - path: contracts/deterministic/payments/persistence.yaml
+    sha256: 0c0821b73dfeb3a175dfbade71d3ab184ee092995fac22ef785e404c64de4c16
+  - path: contracts/deterministic/payments/state-machine.yaml
+    sha256: e0b589e77c263d6e81cfd46e995808fceed943e2f95437b4c90eb9905916b70b
+  - path: contracts/compatibility/contract-graph.yaml
+    sha256: 1f35c493279ad3fe0e1206e0fe05cfc5ff2ba13a8a8cb5081aa8fbeb5e3db535
+  - path: contracts/compatibility/command-event-map.yaml
+    sha256: cd2c9f597adf2852ef96b34ce9aba2f63e3905aeac5293a54c2ffd151002e1aa
+  - path: contracts/compatibility/persistence-registry.yaml
+    sha256: e14cf13004fe933636b71efdd84f895076fd799b26b47ebec0ae9ba53e24556e
+  - path: contracts/compatibility/appwrite-resource-registry.yaml
+    sha256: 9aa3519272c8ec6a2af46a46b9ae79a18e27ad56413457e42da7d2669eca55b2
+  - path: contracts/events/registry.yaml
+    sha256: dfb37a8c02993bfdd5f83e868a174eb42fd7cf12e5a830da13aacf01c048e990
+  - path: contracts/events/completeness.yaml
+    sha256: 343763d969d0297734fdee036a89f93e0213cfbccd2b694349019cab68880346
+  - path: contracts/domain/payment-provider-capabilities.schema.yaml
+    sha256: c7fed9091ceabcb38b5d401f0faa1d18ff93f68417488aceb3321a601336cbfa
+  - path: contracts/verification/business-contract-to-test.yaml
+    sha256: 060afd2344812db0fcc6aca1d2d6e7fc4b6a8ddc42df90b17f256aa53b6d1fbc
+  - path: scripts/validate-business-economics.mjs
+    sha256: 4f962a257fb35239b89898a05151630496ac7e0709f4e4277f1bdbc305dc8733
+  - path: scripts/validate-determinism.mjs
+    sha256: 209fb487864d750fd62848330c73eec42324adddb1a3321a8dd64a018cc64c64
+  - path: scripts/validate-cross-domain.py
+    sha256: ede00f5c68441d657e341af7990c8d93b63099d95e10de062c8ec388a049cde4
+  - path: package.json
+    sha256: c7ab3ea638ea2b4c44769c9a3ed5fb7fff5a66f5da79524732ab909300a74400
+  - path: VERSION
+    sha256: a73f7b92edbf3708f4ee0eb74b334ce760cd32947925ed592a099ff28e05b859
+  - path: docs/BUSINESS_MODEL_AND_PAYMENT_ECONOMICS.md
+    sha256: 944661760d0467ecce6ff2064de9ef9595a30d9a388e3237c511fab9c180f1b5
+  - path: docs/CONTRACT_REGISTRY.md
+    sha256: e0cdc1cb82c2ed4c0a48dd84a789022400b5eb8871b9e91226c00bb7338218df
+  - path: docs/history/releases/V19.5.1_BUSINESS_PAYMENT_RELEASE.md
+    sha256: 5c9fad692b50c7b7b2a082744364dc5757f2f0e11059b1a5238c67d78c66ac7e
+  - path: contracts/events/schemas/payments_creator_earnings_post_v1.yaml
+    sha256: d798317b9315af6c1f73880475a4c480ed80152d8ab60710149bcb8756ee300a
+  - path: contracts/events/schemas/payments_creator_earnings_reverse_v1.yaml
+    sha256: 96910ed63deb4c250b36fb76a8124dabe16ab66a25d062bcb3bddd31ffcb32ea
+  - path: contracts/events/schemas/payments_payout_confirm_v1.yaml
+    sha256: 11dadbf39a2d8ec3f9790f211bbe46744a021b9d0694b5372c9d50e576ce0b82
+  - path: contracts/events/schemas/payments_payout_create_v1.yaml
+    sha256: 3563101549bed3f65c5b3368f74cbd6e289fef67b7eb7d428b64bdfccd90a705
+  - path: contracts/events/schemas/payments_payout_fail_v1.yaml
+    sha256: 50304d757b8f02fc85086dea67231c5c4f3e4347c98d574860ce2d16af139a43
+  - path: contracts/events/schemas/payments_payout_reconcile_v1.yaml
+    sha256: c7330298f2ec69f6e4630f7103b96a43d753f5fd7c35395251f938ba9e24af79
+  - path: contracts/events/schemas/payments_payout_wallet_connect_v1.yaml
+    sha256: 8a085d234bd0361fac95766419cad7903ad65db283a086f03a17ee4fc6acdd44
+  - path: contracts/events/schemas/payments_payout_wallet_disconnect_v1.yaml
+    sha256: de887f1e273ecb546f08a82ad0fcb782e1957aad0d58ab0e1ba12b10229a34a9
+  - path: contracts/events/schemas/payments_payout_wallet_verify_v1.yaml
+    sha256: 0358ff6c2135cfa654be7a476fddae4067d666c59e6273fbef559e9584a84ec9
+  - path: tests/contracts/business-commission.scenarios.yaml
+    sha256: 882b1a65556485ba91b63f62a641a77752a4b44a9eb515c89dee06913eca269a
+  - path: tests/contracts/business-payment-state.scenarios.yaml
+    sha256: 830dd37ca753e0e63277209b947f79f1c1f6fae7704a5efca3d839abc7a9428d
+  - path: tests/contracts/business-payouts.scenarios.yaml
+    sha256: bc4f4bcdb188c665558cb3dc47623023f3baee80826a9d9b0da2b5223ded91f5
+  - path: tests/contracts/business-provider-capability.scenarios.yaml
+    sha256: 16271a437eab7ab721a6a9031dc75056ea207103a87019d0400a192131525c7e
+  - path: tests/contracts/business-provider-secrets.scenarios.yaml
+    sha256: b046cfb2e4be991e6cbdbe6f4e80617842f99de018e9fa02230ff0d96dac7cff
+  - path: tests/contracts/business-providers.scenarios.yaml
+    sha256: 4ef412cacdb99d6b49ac31a2233daccf9ee8955f0313204763224b4799fe718c
+  - path: tests/contracts/business-revenue-model.scenarios.yaml
+    sha256: 17626f454cee803c23e0540baae1ccda9892a009f759a197dd143f18da49d14f
+  - path: tests/contracts/business-wallets.scenarios.yaml
+    sha256: 0cb6e278d437bf4942d2d26d7bbfb6363e2d7e55ef6984dcb7af5fbfec04a12c
+validation_gates:
+  - scripts/validate-contract-syntax.py
+  - scripts/validate-appwrite-functions.mjs
+  - scripts/validate-determinism.mjs
+  - scripts/validate-business-economics.mjs
+  - scripts/validate-cross-domain.py
+  - scripts/validate-implementation-spec.mjs
+  - scripts/validate-agent-implementation-kit.mjs
+production_provider_activation: HUMAN_APPROVAL_REQUIRED
+default_stablecoin_payout: USDC_BASE
+secondary_stablecoin_payout: USDC_POLYGON
+provider_status_policy: CONDITIONAL_UNTIL_APPROVED

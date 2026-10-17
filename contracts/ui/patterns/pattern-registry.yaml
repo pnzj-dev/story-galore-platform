@@ -1,0 +1,25 @@
+schema: storygalore.ui-pattern-registry/v1
+version: 1
+patterns:
+  - id: artwork-first-card
+    allowed_surfaces: [PUBLIC, STUDIO]
+    purpose: discovery
+  - id: editorial-feed
+    allowed_surfaces: [PUBLIC]
+    purpose: posts_and_updates
+  - id: dense-data-table
+    allowed_surfaces: [ADMIN, STUDIO]
+    purpose: operational_data
+  - id: creator-workspace
+    allowed_surfaces: [STUDIO]
+    purpose: creative_editing
+  - id: protected-content-gate
+    allowed_surfaces: [PUBLIC, STUDIO, ADMIN]
+    purpose: authorization
+  - id: async-operation-status
+    allowed_surfaces: [PUBLIC, STUDIO, ADMIN]
+    purpose: durable_operations
+rules:
+  pattern_must_have_contract: true
+  page_must_compose_existing_patterns_before_new_pattern: true
+  missing_pattern_for_required_journey: BLOCK

@@ -1,0 +1,12 @@
+schema: storygalore.event-contract/v1
+version: 1
+policy: deterministic
+rules:
+  - Every event in contracts/events/registry.yaml and compatibility command-event maps MUST have exactly one versioned schema.
+  - Event payloads are immutable after publication.
+  - Unknown fields are ignored only when compatibility rules explicitly allow them; otherwise reject producer changes.
+  - Consumers MUST declare whether processing is authoritative or rebuildable.
+  - Every non-authoritative consumer MUST be replay-safe.
+  - Every consumer MUST deduplicate by event identity.
+  - Event identity MUST contain eventId, eventType, eventVersion, occurredAt and producer.
+  - Secrets and unnecessary PII are forbidden in event payloads.

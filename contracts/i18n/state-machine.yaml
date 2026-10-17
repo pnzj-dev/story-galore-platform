@@ -1,0 +1,25 @@
+version: "1.0"
+stateMachine: localization
+canonical: true
+states:
+  publication_language: [UNCLASSIFIED, CLASSIFIED, LOCALIZATION_DRAFT, LOCALIZATION_REVIEW, LOCALIZATION_APPROVED, LOCALIZATION_RETIRED]
+transitions:
+  - from: UNCLASSIFIED
+    to: CLASSIFIED
+    command: publication_language_set
+  - from: CLASSIFIED
+    to: LOCALIZATION_DRAFT
+    command: publication_localization_upsert
+  - from: LOCALIZATION_DRAFT
+    to: LOCALIZATION_REVIEW
+    command: publication_localization_submit_review
+  - from: LOCALIZATION_REVIEW
+    to: LOCALIZATION_APPROVED
+    command: publication_localization_approve
+  - from: LOCALIZATION_APPROVED
+    to: LOCALIZATION_RETIRED
+    command: publication_localization_retire
+invariants:
+  - No publication is exposed as a language-filter match until language metadata is authoritative.
+  - Only approved localizations are reader-selectable.
+  - Retired localizations remain auditable and are excluded from active discovery.

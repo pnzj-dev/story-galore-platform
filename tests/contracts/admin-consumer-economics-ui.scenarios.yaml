@@ -1,0 +1,12 @@
+schema: storygalore.contract-scenario-suite/v1
+version: 1
+policy: fail_closed
+cases:
+  - id: route-state-matrix
+    expected: PASS
+  - id: financial-cost-state-labels
+    expected: PASS
+  - id: privacy-boundary
+    expected: PASS
+  - id: accessibility
+    expected: PASS

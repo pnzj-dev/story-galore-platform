@@ -1,0 +1,11 @@
+version: 19.5.16
+title: Remove illustrative examples directory
+status: planning-contract-update
+changes:
+  - Remove examples/cloudflare-mcp and all empty example directories.
+  - Keep the Cloudflare MCP integration contract and platform boundary; remove only illustrative sample implementation files.
+  - Update README, Cloudflare boundary documentation, repository audit, and coherence validator.
+  - Fail repository coherence validation if a generic examples/ directory is reintroduced.
+not_claimed:
+  - Cloudflare MCP runtime implementation is complete.
+  - Platform scaffolds have been generated or deployed.

@@ -1,0 +1,17 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+title: StoryGalore Subscription Renewal Payment
+type: object
+required: [id, subscriptionId, status, amount, currency, idempotencyKey, createdAt]
+properties:
+  id: {type: string}
+  subscriptionId: {type: string}
+  paymentId: {type: [string, 'null']}
+  status: {type: string, enum: [DRAFT, PAYMENT_PENDING, PAID, FAILED, EXPIRED, CANCELLED]}
+  amount: {type: integer, minimum: 0}
+  currency: {type: string, pattern: '^[A-Z]{3}$'}
+  dueAt: {type: [string, 'null'], format: date-time}
+  paymentUrl: {type: [string, 'null']}
+  idempotencyKey: {type: string, minLength: 1}
+  createdAt: {type: string, format: date-time}
+  updatedAt: {type: [string, 'null'], format: date-time}
+additionalProperties: false

@@ -1,0 +1,16 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://storygalore.dev/contracts/studio/project.schema.yaml
+title: Creator Studio Project
+version: 1
+required: [id, creatorId, name, status, createdAt, updatedAt]
+properties:
+  id: {type: string}
+  creatorId: {type: string}
+  workspaceId: {type: string}
+  name: {type: string, minLength: 1, maxLength: 200}
+  description: {type: string, maxLength: 5000}
+  status: {enum: [DRAFT, ACTIVE, ARCHIVED]}
+  defaultContentRating: {enum: [ALL_AGES, TEEN, ADULT_18_PLUS]}
+  createdAt: {type: string, format: date-time}
+  updatedAt: {type: string, format: date-time}
+additionalProperties: false

@@ -1,0 +1,147 @@
+schema: storygalore.appwrite-function-registry/v1
+version: 1
+release: V19.5
+policy: deterministic
+unknown_function_behavior: BLOCK
+undeclared_function_behavior: BLOCK
+missing_definition_behavior: BLOCK
+missing_schema_behavior: BLOCK
+missing_test_behavior: BLOCK
+resource_access: EXPLICIT_ONLY
+capability_authorization: POLICY_ENGINE
+functions:
+  - id: api
+    definition: contracts/functions/definitions/api.yaml
+    input: contracts/functions/schemas/api-input.yaml
+    output: contracts/functions/schemas/api-output.yaml
+    tests: contracts/functions/test-matrix/api.yaml
+  - id: authorization
+    definition: contracts/functions/definitions/authorization.yaml
+    input: contracts/functions/schemas/authorization-input.yaml
+    output: contracts/functions/schemas/authorization-output.yaml
+    tests: contracts/functions/test-matrix/authorization.yaml
+  - id: uploads
+    definition: contracts/functions/definitions/uploads.yaml
+    input: contracts/functions/schemas/uploads-input.yaml
+    output: contracts/functions/schemas/uploads-output.yaml
+    tests: contracts/functions/test-matrix/uploads.yaml
+  - id: image-processing
+    definition: contracts/functions/definitions/image-processing.yaml
+    input: contracts/functions/schemas/image-processing-input.yaml
+    output: contracts/functions/schemas/image-processing-output.yaml
+    tests: contracts/functions/test-matrix/image-processing.yaml
+  - id: ai-comic-generation
+    definition: contracts/functions/definitions/ai-comic-generation.yaml
+    input: contracts/functions/schemas/ai-comic-generation-input.yaml
+    output: contracts/functions/schemas/ai-comic-generation-output.yaml
+    tests: contracts/functions/test-matrix/ai-comic-generation.yaml
+  - id: ai-usage
+    definition: contracts/functions/definitions/ai-usage.yaml
+    input: contracts/functions/schemas/ai-usage-input.yaml
+    output: contracts/functions/schemas/ai-usage-output.yaml
+    tests: contracts/functions/test-matrix/ai-usage.yaml
+  - id: moderation
+    definition: contracts/functions/definitions/moderation.yaml
+    input: contracts/functions/schemas/moderation-input.yaml
+    output: contracts/functions/schemas/moderation-output.yaml
+    tests: contracts/functions/test-matrix/moderation.yaml
+  - id: search-index
+    definition: contracts/functions/definitions/search-index.yaml
+    input: contracts/functions/schemas/search-index-input.yaml
+    output: contracts/functions/schemas/search-index-output.yaml
+    tests: contracts/functions/test-matrix/search-index.yaml
+  - id: recommendations
+    definition: contracts/functions/definitions/recommendations.yaml
+    input: contracts/functions/schemas/recommendations-input.yaml
+    output: contracts/functions/schemas/recommendations-output.yaml
+    tests: contracts/functions/test-matrix/recommendations.yaml
+  - id: payments
+    definition: contracts/functions/definitions/payments.yaml
+    input: contracts/functions/schemas/payments-input.yaml
+    output: contracts/functions/schemas/payments-output.yaml
+    tests: contracts/functions/test-matrix/payments.yaml
+  - id: payment-webhooks
+    definition: contracts/functions/definitions/payment-webhooks.yaml
+    input: contracts/functions/schemas/payment-webhooks-input.yaml
+    output: contracts/functions/schemas/payment-webhooks-output.yaml
+    tests: contracts/functions/test-matrix/payment-webhooks.yaml
+  - id: payment-reconciliation
+    definition: contracts/functions/definitions/payment-reconciliation.yaml
+    input: contracts/functions/schemas/payment-reconciliation-input.yaml
+    output: contracts/functions/schemas/payment-reconciliation-output.yaml
+    tests: contracts/functions/test-matrix/payment-reconciliation.yaml
+  - id: subscription-lifecycle
+    definition: contracts/functions/definitions/subscription-lifecycle.yaml
+    input: contracts/functions/schemas/subscription-lifecycle-input.yaml
+    output: contracts/functions/schemas/subscription-lifecycle-output.yaml
+    tests: contracts/functions/test-matrix/subscription-lifecycle.yaml
+  - id: notifications
+    definition: contracts/functions/definitions/notifications.yaml
+    input: contracts/functions/schemas/notifications-input.yaml
+    output: contracts/functions/schemas/notifications-output.yaml
+    tests: contracts/functions/test-matrix/notifications.yaml
+  - id: analytics
+    definition: contracts/functions/definitions/analytics.yaml
+    input: contracts/functions/schemas/analytics-input.yaml
+    output: contracts/functions/schemas/analytics-output.yaml
+    tests: contracts/functions/test-matrix/analytics.yaml
+  - id: audit
+    definition: contracts/functions/definitions/audit.yaml
+    input: contracts/functions/schemas/audit-input.yaml
+    output: contracts/functions/schemas/audit-output.yaml
+    tests: contracts/functions/test-matrix/audit.yaml
+  - id: cleanup
+    definition: contracts/functions/definitions/cleanup.yaml
+    input: contracts/functions/schemas/cleanup-input.yaml
+    output: contracts/functions/schemas/cleanup-output.yaml
+    tests: contracts/functions/test-matrix/cleanup.yaml
+  - id: mcp
+    definition: contracts/functions/definitions/mcp.yaml
+    input: contracts/functions/schemas/mcp-input.yaml
+    output: contracts/functions/schemas/mcp-output.yaml
+    tests: contracts/functions/test-matrix/mcp.yaml
+  - id: ad-serve
+    definition: contracts/functions/definitions/ad-serve.yaml
+    input: contracts/functions/schemas/ad-serve-input.yaml
+    output: contracts/functions/schemas/ad-serve-output.yaml
+    tests: contracts/functions/test-matrix/ad-serve.yaml
+  - id: ad-event-ingest
+    definition: contracts/functions/definitions/ad-event-ingest.yaml
+    input: contracts/functions/schemas/ad-event-ingest-input.yaml
+    output: contracts/functions/schemas/ad-event-ingest-output.yaml
+    tests: contracts/functions/test-matrix/ad-event-ingest.yaml
+  - id: ad-campaign-scheduler
+    definition: contracts/functions/definitions/ad-campaign-scheduler.yaml
+    input: contracts/functions/schemas/ad-campaign-scheduler-input.yaml
+    output: contracts/functions/schemas/ad-campaign-scheduler-output.yaml
+    tests: contracts/functions/test-matrix/ad-campaign-scheduler.yaml
+  - id: ad-metrics-aggregate
+    definition: contracts/functions/definitions/ad-metrics-aggregate.yaml
+    input: contracts/functions/schemas/ad-metrics-aggregate-input.yaml
+    output: contracts/functions/schemas/ad-metrics-aggregate-output.yaml
+    tests: contracts/functions/test-matrix/ad-metrics-aggregate.yaml
+  - id: ad-provider-health
+    definition: contracts/functions/definitions/ad-provider-health.yaml
+    input: contracts/functions/schemas/ad-provider-health-input.yaml
+    output: contracts/functions/schemas/ad-provider-health-output.yaml
+    tests: contracts/functions/test-matrix/ad-provider-health.yaml
+  - id: media-processing
+    definition: contracts/functions/definitions/media-processing.yaml
+    input: contracts/functions/schemas/media-processing-input.yaml
+    output: contracts/functions/schemas/media-processing-output.yaml
+    tests: contracts/functions/test-matrix/media-processing.yaml
+  - id: video-playback
+    definition: contracts/functions/definitions/video-playback.yaml
+    input: contracts/functions/schemas/video-playback-input.yaml
+    output: contracts/functions/schemas/video-playback-output.yaml
+    tests: contracts/functions/test-matrix/video-playback.yaml
+  - id: media-manifest
+    definition: contracts/functions/definitions/media-manifest.yaml
+    input: contracts/functions/schemas/media-manifest-input.yaml
+    output: contracts/functions/schemas/media-manifest-output.yaml
+    tests: contracts/functions/test-matrix/media-manifest.yaml
+  - id: media-analytics
+    definition: contracts/functions/definitions/media-analytics.yaml
+    input: contracts/functions/schemas/media-analytics-input.yaml
+    output: contracts/functions/schemas/media-analytics-output.yaml
+    tests: contracts/functions/test-matrix/media-analytics.yaml

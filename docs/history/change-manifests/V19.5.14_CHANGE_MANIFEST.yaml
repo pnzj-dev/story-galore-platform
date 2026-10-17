@@ -1,0 +1,15 @@
+version: 19.5.14
+title: Latest-stable technology requirement and evidence-backed version locking
+status: planning-contract-update
+changes:
+  - Require latest stable compatible releases for all languages, runtimes, frameworks, adapters, SDKs, CLIs, build tools, package managers, test tools, and dependencies.
+  - Require official-source evidence, UTC verification timestamps, exact pins, lockfiles, compatibility tests, and release-time rechecks.
+  - Block implementation until the dated technology-version lock is populated.
+  - Prohibit silent downgrades; require reviewed ADRs for exceptions.
+  - Add technology freshness validator and documentation.
+not_claimed:
+  - Current historical dependency pins have not been certified as latest stable.
+  - No production implementation or dependency upgrade is claimed by this planning-only change.
+validation:
+  - pnpm validate:technology-freshness
+  - pnpm validate:docs

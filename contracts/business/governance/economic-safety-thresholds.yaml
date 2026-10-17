@@ -1,0 +1,16 @@
+schema: storygalore.economic-safety-thresholds/v1
+version: 1
+canonical: true
+status: V19.5.3
+policy: fail_closed
+thresholds:
+  planContributionMarginMinimumBps: REGISTERED_POLICY
+  transactionContributionMarginMinimumBps: REGISTERED_POLICY
+  maximumExpectedMediaCostRatioBps: REGISTERED_POLICY
+  maximumPromotionLiabilityMinor: REGISTERED_POLICY
+  maximumChargebackExposureBps: REGISTERED_POLICY
+rules:
+- Threshold values MUST be registered policy data; no hard-coded economic thresholds are permitted in executable code.
+- Missing or stale cost inputs MUST produce an UNKNOWN safety result.
+- UNKNOWN safety result MUST prevent automatic activation.
+- Threshold breaches MAY produce a proposal but MUST NOT silently alter entitlements or pricing.

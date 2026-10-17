@@ -1,0 +1,16 @@
+version: 1.0.0
+levels:
+- id: NATIVE
+  description: StoryGalore-owned Cloudflare Agent with platform-managed identity.
+- id: TRUSTED_EXTERNAL
+  description: Externally hosted agent explicitly approved by an administrator.
+- id: USER_CONNECTED
+  description: External agent connected by a creator/user and limited to delegated
+    user scope.
+- id: UNTRUSTED_EXTERNAL
+  description: Unknown agent; read-only public/explicitly exposed capabilities only.
+rules:
+- Trust level never grants capabilities by itself.
+- Every task receives an explicit capability set, scope, expiry and policy decision.
+- External agents never receive StoryGalore infrastructure secrets.
+- Production mutation requires a separate capability and approval policy.

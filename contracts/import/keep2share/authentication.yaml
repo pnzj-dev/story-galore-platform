@@ -1,0 +1,72 @@
+version: 1.0.0
+release: V1
+policy: deterministic
+provider: KEEP2SHARE
+source_of_truth: official_keep2share_api_v2
+base_url: https://keep2share.cc/api/v2/
+authentication_modes:
+  USER_ACCOUNT:
+    enabled: true
+    login_operation: login
+    credential_inputs:
+      username: SECRET
+      password: SECRET
+    token_output: auth_token
+    token_classification: SECRET
+    token_lifetime: provider_defined
+    reauthentication: required_when_token_invalid_or_expired
+  PARTNER_ACCOUNT:
+    enabled: true
+    token_input: access_token
+    token_classification: SECRET
+    token_lifetime: provider_defined
+    reauthentication: provider_defined
+request_rules:
+  authenticated_operations:
+    - login
+    - get_file_info
+    - get_file_status
+    - get_url
+    - find_file
+  auth_token_transport: provider_defined_api_parameter
+  access_token_transport: provider_defined_api_parameter
+  secrets_never_in_url: true
+  secrets_never_in_browser_dom: true
+  secrets_never_in_llm_context: true
+  secrets_never_in_agent_task_payload: true
+  secrets_never_in_workflow_history: true
+  secrets_never_in_logs: true
+  secrets_never_in_audit_events: true
+  secrets_never_in_analytics: true
+human_interaction:
+  captcha_required:
+    action: PAUSE_AND_REQUEST_HUMAN
+    bypass: FORBIDDEN
+  mfa_required:
+    action: PAUSE_AND_REQUEST_HUMAN
+    bypass: FORBIDDEN
+  suspicious_ip_or_provider_challenge:
+    action: PAUSE_AND_REQUEST_HUMAN
+api_first:
+  preferred: true
+  browser_fallback:
+    allowed_only_when_api_cannot_complete_required_operation: true
+    purpose:
+      - source_page_discovery
+      - human_interaction_checkpoint
+    browser_must_not_receive_raw_secret: true
+security:
+  credential_storage: secret_manager_only
+  credential_scope: creator_or_workspace_explicitly_authorized
+  revocation_supported: true
+  rotation_supported: true
+  test_connection_without_exposing_secret: true
+failure_states:
+  - AUTHENTICATION_REQUIRED
+  - AUTHENTICATION_FAILED
+  - TOKEN_EXPIRED
+  - CAPTCHA_REQUIRED
+  - MFA_REQUIRED
+  - PROVIDER_CHALLENGE
+  - RATE_LIMITED
+  - PROVIDER_UNAVAILABLE

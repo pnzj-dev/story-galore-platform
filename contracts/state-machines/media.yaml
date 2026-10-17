@@ -1,0 +1,18 @@
+version: 1
+name: media-asset
+states: [UPLOADING, UPLOADED, PROCESSING, READY, RESTRICTED, QUARANTINED, FAILED, DELETED]
+transitions:
+  - {from: UPLOADING, event: UPLOAD_COMPLETED, to: UPLOADED}
+  - {from: UPLOADED, event: PROCESSING_STARTED, to: PROCESSING}
+  - {from: PROCESSING, event: PROCESSING_COMPLETED, to: READY}
+  - {from: PROCESSING, event: PROCESSING_FAILED, to: FAILED}
+  - {from: READY, event: POLICY_RESTRICTED, to: RESTRICTED}
+  - {from: READY, event: MODERATION_QUARANTINED, to: QUARANTINED}
+  - {from: RESTRICTED, event: POLICY_APPROVED, to: READY}
+  - {from: QUARANTINED, event: MODERATION_APPROVED, to: READY}
+  - {from: FAILED, event: RETRY_PROCESSING, to: PROCESSING}
+  - {from: [READY, RESTRICTED, QUARANTINED, FAILED], event: DELETE_REQUESTED, to: DELETED}
+invariants:
+  - State transitions are validated by the state machine and authorized by Policy Engine.
+  - DELETED is terminal.
+  - Appwrite origin state and media metadata are updated before downstream deletion propagation is acknowledged.

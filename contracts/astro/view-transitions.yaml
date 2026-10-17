@@ -1,0 +1,18 @@
+schema: storygalore.astro-view-transitions/v1
+version: 1
+required: true
+strategy:
+  default: enabled_for_public_and_studio_navigation
+  admin: enabled_when_navigation_is_safe
+  external_links: normal_navigation
+  file_downloads: normal_navigation
+  protected_media: no_prefetch_until_authorized
+rules:
+  preserve_accessibility: true
+  preserve_focus_or_restore_focus: true
+  support_back_forward: true
+  support_reduced_motion: true
+  persistent_elements_must_be_explicit: true
+  navigation_errors_must_surface: true
+  scripts_must_be_safe_after_dom_swap: true
+  stateful_svelte_islands_must_handle_navigation_lifecycle: true

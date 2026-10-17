@@ -1,0 +1,239 @@
+version: 1.0.1
+release: V1
+policy: deterministic
+native_runtime: CLOUDFLARE_AGENTS
+external_interop:
+- MCP
+- A2A_COMPATIBLE_GATEWAY
+- NATIVE_RPC
+agents:
+- id: sg.agent.story-producer
+  slug: story-producer
+  name: Story Producer Agent
+  domain: creative
+  mode: ORCHESTRATE
+  mission: Front door for complete story intake; turns creator input into a structured,
+    reviewable production plan.
+  release: V1
+  runtime: CLOUDFLARE_AGENT
+  trust_levels_allowed:
+  - NATIVE
+  approval_class: HUMAN_REQUIRED_FOR_HIGH_RISK
+  manifest: agents/story-producer/manifest.yaml
+- id: sg.agent.story-guardian
+  slug: story-guardian
+  name: Story / Continuity Guardian
+  domain: creative
+  mode: REVIEW
+  mission: Protects canon, continuity, provenance, character consistency, timeline
+    integrity and creator intent.
+  release: V1
+  runtime: CLOUDFLARE_AGENT
+  trust_levels_allowed:
+  - NATIVE
+  approval_class: HUMAN_REQUIRED_FOR_HIGH_RISK
+  manifest: agents/story-guardian/manifest.yaml
+- id: sg.agent.art-director
+  slug: art-director
+  name: Art Director Agent
+  domain: creative
+  mode: PROPOSE
+  mission: Converts approved story/style intent into visual direction, references,
+    prompt plans and art-production constraints.
+  release: V1
+  runtime: CLOUDFLARE_AGENT
+  trust_levels_allowed:
+  - NATIVE
+  approval_class: HUMAN_REQUIRED_FOR_HIGH_RISK
+  manifest: agents/art-director/manifest.yaml
+- id: sg.agent.production
+  slug: production
+  name: Production Agent
+  domain: production
+  mode: EXECUTE
+  mission: Orchestrates approved production tasks from scenes to pages, panels, dialogue
+    and publication drafts.
+  release: V1
+  runtime: CLOUDFLARE_AGENT
+  trust_levels_allowed:
+  - NATIVE
+  approval_class: HUMAN_REQUIRED_FOR_HIGH_RISK
+  manifest: agents/production/manifest.yaml
+- id: sg.agent.community-guardian
+  slug: community-guardian
+  name: Community Guardian Agent
+  domain: trust
+  mode: REVIEW
+  mission: Supports moderation, abuse triage, community health and social-policy enforcement
+    proposals.
+  release: V1
+  runtime: CLOUDFLARE_AGENT
+  trust_levels_allowed:
+  - NATIVE
+  approval_class: HUMAN_REQUIRED_FOR_HIGH_RISK
+  manifest: agents/community-guardian/manifest.yaml
+- id: sg.agent.discovery-curator
+  slug: discovery-curator
+  name: Discovery Curator Agent
+  domain: growth
+  mode: PROPOSE
+  mission: Builds policy-compliant discovery, recommendations, collections and creator/content
+    surfacing.
+  release: V1
+  runtime: CLOUDFLARE_AGENT
+  trust_levels_allowed:
+  - NATIVE
+  approval_class: HUMAN_REQUIRED_FOR_HIGH_RISK
+  manifest: agents/discovery-curator/manifest.yaml
+- id: sg.agent.reader-companion
+  slug: reader-companion
+  name: Reader Companion Agent
+  domain: user
+  mode: ASSIST
+  mission: Provides reader-facing assistance without bypassing entitlement, age, jurisdiction
+    or content policy.
+  release: V1
+  runtime: CLOUDFLARE_AGENT
+  trust_levels_allowed:
+  - NATIVE
+  approval_class: HUMAN_REQUIRED_FOR_HIGH_RISK
+  manifest: agents/reader-companion/manifest.yaml
+- id: sg.agent.creator-business
+  slug: creator-business
+  name: Creator Business Agent
+  domain: business
+  mode: ANALYZE
+  mission: Analyzes subscriptions, revenue, campaigns, pricing and creator business
+    performance without changing financial truth.
+  release: V1
+  runtime: CLOUDFLARE_AGENT
+  trust_levels_allowed:
+  - NATIVE
+  approval_class: HUMAN_REQUIRED_FOR_HIGH_RISK
+  manifest: agents/creator-business/manifest.yaml
+- id: sg.agent.media-operations
+  slug: media-operations
+  name: Media Operations Agent
+  domain: operations
+  mode: EXECUTE
+  mission: Handles media processing, distribution health, upload recovery and delivery
+    operations within policy.
+  release: V1
+  runtime: CLOUDFLARE_AGENT
+  trust_levels_allowed:
+  - NATIVE
+  approval_class: HUMAN_REQUIRED_FOR_HIGH_RISK
+  manifest: agents/media-operations/manifest.yaml
+- id: sg.agent.support
+  slug: support
+  name: Support Agent
+  domain: support
+  mode: ASSIST
+  mission: Handles support intake, triage, knowledge retrieval and escalation into
+    engineering tickets.
+  release: V1
+  runtime: CLOUDFLARE_AGENT
+  trust_levels_allowed:
+  - NATIVE
+  approval_class: HUMAN_REQUIRED_FOR_HIGH_RISK
+  manifest: agents/support/manifest.yaml
+- id: sg.agent.qa-release
+  slug: qa-release
+  name: QA / Release Agent
+  domain: engineering
+  mode: VERIFY
+  mission: Runs deterministic validation, regression analysis, release readiness and
+    deployment evidence checks.
+  release: V1
+  runtime: CLOUDFLARE_AGENT
+  trust_levels_allowed:
+  - NATIVE
+  approval_class: HUMAN_REQUIRED_FOR_HIGH_RISK
+  manifest: agents/qa-release/manifest.yaml
+- id: sg.agent.infrastructure
+  slug: infrastructure
+  name: Infrastructure Agent
+  domain: engineering
+  mode: EXECUTE
+  mission: Operates approved infrastructure changes, observability, migrations and
+    recovery procedures.
+  release: V1
+  runtime: CLOUDFLARE_AGENT
+  trust_levels_allowed:
+  - NATIVE
+  approval_class: HUMAN_REQUIRED_FOR_HIGH_RISK
+  manifest: agents/infrastructure/manifest.yaml
+- id: sg.agent.ceo
+  slug: ceo
+  name: CEO Agent
+  domain: executive
+  mode: ADVISE
+  mission: Provides cross-domain executive reporting, priorities, risks, decisions
+    and scenario analysis; cannot self-authorize production changes.
+  release: V1
+  runtime: CLOUDFLARE_AGENT
+  trust_levels_allowed:
+  - NATIVE
+  - TRUSTED_EXTERNAL
+  - USER_CONNECTED
+  approval_class: HUMAN_REQUIRED_FOR_HIGH_RISK
+  manifest: agents/ceo/manifest.yaml
+- id: sg.agent.data-analysis-reporting
+  slug: data-analysis-reporting
+  name: Data Analysis & Reporting Agent
+  domain: analytics
+  mode: ANALYZE
+  mission: Produces deterministic business/product/operations analysis and scheduled
+    reports from authorized datasets.
+  release: V1
+  runtime: CLOUDFLARE_AGENT
+  trust_levels_allowed:
+  - NATIVE
+  - TRUSTED_EXTERNAL
+  - USER_CONNECTED
+  approval_class: HUMAN_REQUIRED_FOR_HIGH_RISK
+  manifest: agents/data-analysis-reporting/manifest.yaml
+- id: sg.agent.coding-dev
+  slug: coding-dev
+  name: Coding / Dev Agent
+  domain: engineering
+  mode: IMPLEMENT
+  mission: Receives engineering tickets, investigates, edits code, adds tests, validates
+    and prepares deployment-ready pull requests.
+  release: V1
+  runtime: CLOUDFLARE_AGENT
+  trust_levels_allowed:
+  - NATIVE
+  - TRUSTED_EXTERNAL
+  - USER_CONNECTED
+  approval_class: HUMAN_REQUIRED_FOR_HIGH_RISK
+  manifest: agents/coding-dev/manifest.yaml
+- id: sg.agent.orchestrator
+  slug: orchestrator
+  name: Agent Orchestrator
+  domain: platform
+  mode: ORCHESTRATE
+  mission: Plans and coordinates multi-agent tasks, delegation, approvals, budgets,
+    dependencies and result synthesis.
+  release: V1
+  runtime: CLOUDFLARE_AGENT
+  trust_levels_allowed:
+  - NATIVE
+  approval_class: HUMAN_REQUIRED_FOR_HIGH_RISK
+  manifest: agents/orchestrator/manifest.yaml
+- id: sg.agent.keep2share-import
+  slug: keep2share-import
+  name: Keep2Share Import Agent
+  domain: media-import
+  mode: EXECUTE
+  mission: Imports explicitly authorized Keep2Share files, normalizes metadata and
+    archive members, verifies integrity and security, and registers media through
+    the canonical StoryGalore pipeline.
+  release: V1
+  runtime: CLOUDFLARE_AGENT
+  trust_levels_allowed:
+  - NATIVE
+  - TRUSTED_EXTERNAL
+  - USER_CONNECTED
+  approval_class: HUMAN_REQUIRED_FOR_HIGH_RISK
+  manifest: agents/keep2share-import/manifest.yaml

@@ -1,0 +1,21 @@
+schema: storygalore.reserve-chargeback-policy/v1
+version: 1
+canonical: true
+status: V19.5.3
+policy: fail_closed
+states:
+- PENDING
+- AVAILABLE
+- RESERVED
+- WITHDRAWN
+- REFUND_PENDING
+- CHARGEBACK_EXPOSED
+- ADJUSTED
+rules:
+- Creator earnings exposed to refund or chargeback risk MUST be representable as reserved funds.
+- A creator MUST NOT withdraw funds classified as unavailable by the settlement policy.
+- Reserve policy MUST be versioned and attributable to creator risk class.
+- Reserve release MUST be deterministic and auditable.
+- Chargeback reversal MUST reference the originating transaction and allocation records.
+- Negative creator balance handling MUST use an explicit recovery policy; no silent offsetting.
+- Unknown risk class or reserve policy MUST BLOCK payout finalization.

@@ -1,0 +1,7 @@
+schema: storygalore.agent-input/v1
+agent: sg.agent.support
+required:
+- taskId
+- actorId
+- operationId
+additionalProperties: false

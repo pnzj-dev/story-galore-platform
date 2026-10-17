@@ -1,0 +1,21 @@
+import fs from 'node:fs';
+const read = p => fs.readFileSync(p, 'utf8');
+const errors = [];
+const expect = (v, m) => { if (!v) errors.push(m); };
+const game = read('contracts/domain/game-catalog.schema.yaml');
+const build = read('contracts/domain/game-build.schema.yaml');
+const taxonomy = read('contracts/domain/media-catalog-taxonomy.yaml');
+const asset = read('contracts/domain/media-asset.schema.yaml');
+expect(game.includes('canonical: true'), 'Game catalog contract must be canonical');
+expect(game.includes('Game is not a Publication, MediaAsset, or downloadable package.'), 'Game domain separation missing');
+expect(game.includes('genreIds: registered_taxonomy_id[]'), 'multiple stable genre IDs required');
+expect(game.includes('playableBuildIds: approved_game_build_id[]'), 'game must link approved builds only');
+for (const target of ['WEB_WASM','WEBGL','HTML5_WEB_BUNDLE']) expect(build.includes(target), `browser target ${target} missing`);
+for (const gate of ['ownership_and_distribution_rights_verified','malware_and_policy_scan_passed','isolated_origin_configured','network_policy_registered','runtime_resource_limits_registered','explicit_release_approval']) expect(build.includes(gate), `release gate ${gate} missing`);
+for (const control of ['same_origin_with_main_app: forbidden','parent_cookie_access: forbidden','parent_dom_access: forbidden','default: deny','kill_switch: required','version_rollback: required']) expect(build.includes(control), `runtime control ${control} missing`);
+expect(build.includes('canonical_origin: APPWRITE_STORAGE'), 'Appwrite Storage must remain canonical file origin');
+expect(build.includes('dedicated isolated runtime/serving layer is required'), 'must not claim Appwrite Storage alone provides isolated hosting');
+expect(!/type: IMAGE\|VIDEO\|AUDIO\|DOCUMENT\|SOFTWARE_PACKAGE/.test(asset), 'software package must not leak into ordinary MediaAsset enum');
+expect(/id: GAMES[\s\S]*?catalog_entity: contracts\/domain\/game-catalog.schema.yaml/.test(taxonomy), 'taxonomy must link Game entity contract');
+if (errors.length) { console.error(`Game runtime contract validation FAILED (${errors.length})`); for (const e of errors) console.error(`- ${e}`); process.exit(1); }
+console.log('Game runtime contract validation PASS: first-class catalog entity, browser build targets, release gates, isolated origin, network deny-by-default, and separation from ordinary media assets verified.');

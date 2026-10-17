@@ -1,0 +1,122 @@
+version: '1.0'
+area: notifications
+architecture:
+  service: notification-service
+  entrypoint: appwrite-function-notifications
+  authoritative_store: APPWRITE_TABLESDB
+  realtime: APPWRITE_REALTIME
+  external_delivery: APPWRITE_MESSAGING_THROUGH_REGISTERED_ADAPTERS
+  durable_orchestration: CLOUDFLARE_WORKFLOWS
+  separate_job_runner: FORBIDDEN
+  direct_agent_delivery: FORBIDDEN
+  direct_client_delivery: FORBIDDEN
+invariants:
+  - Every notification-producing domain event MUST be registered and versioned.
+  - Event consumers MUST deduplicate by stable event identity plus recipient and notification type.
+  - Authorization MUST be checked at creation time and again before resolving protected deep links.
+  - Notification existence MUST NOT grant access to the referenced resource.
+  - A notification record's read state MUST be independent of every channel delivery state.
+  - In-app inbox persistence MUST NOT depend on successful email, SMS, or push delivery.
+  - Delivery adapters MUST be explicitly registered, capability-declared, and contract-tested.
+  - An unknown, disabled, or unverified provider MUST BLOCK delivery on that channel without discarding the in-app notification.
+  - Retries MUST be bounded, idempotent, observable, and use provider-specific retry guidance when verified.
+  - Provider credentials, raw device tokens, secrets, and unnecessary PII MUST NOT appear in logs, events, or notification payloads.
+  - Internal deep links MUST match the registered route allowlist; arbitrary URLs MUST be rejected.
+  - Notification content MUST NOT disclose restricted/adult content, payment details, private messages, or moderation evidence in push previews.
+  - User preferences MUST govern optional categories and channels; mandatory security and transactional messages follow explicit registered policy.
+  - Staff-only operational alerts MUST be recipient- and role-restricted and MUST NOT be sent to public topics.
+  - Realtime is a UI update mechanism, not the authoritative persistence or delivery queue.
+  - Topic membership is a subscription convenience, not an authorization decision.
+  - Notification creation, preference changes, delivery retries, and staff overrides MUST be auditable.
+notification_record:
+  required_fields:
+    - notificationId
+    - userId
+    - eventId
+    - notificationType
+    - category
+    - titleKey
+    - bodyKey
+    - safeParameters
+    - deepLinkRouteId
+    - readAt
+    - dismissedAt
+    - createdAt
+    - expiresAt
+    - idempotencyKey
+  rules:
+    - titleKey and bodyKey MUST resolve through registered localized templates.
+    - safeParameters MUST be schema-validated and MUST NOT contain arbitrary HTML or untrusted markup.
+    - deepLinkRouteId MUST reference a registered internal route; route parameters MUST be separately validated.
+    - readAt null means unread; non-null means read.
+    - dismissedAt null means active; non-null means dismissed.
+    - Expiration MUST NOT be interpreted as successful delivery.
+delivery_attempt:
+  required_fields:
+    - deliveryAttemptId
+    - notificationId
+    - userId
+    - channel
+    - providerId
+    - status
+    - attemptNumber
+    - idempotencyKey
+    - createdAt
+    - updatedAt
+  channels: [IN_APP, EMAIL, SMS, WEB_PUSH, MOBILE_PUSH]
+  statuses: [QUEUED, SENDING, SENT, DELIVERED, FAILED_RETRYABLE, FAILED_PERMANENT, SUPPRESSED]
+  rules:
+    - IN_APP persistence is canonical and independent from external channel attempts.
+    - SENT means the provider accepted the request; DELIVERED requires a verified delivery receipt contract.
+    - A provider that cannot report delivery MUST NOT fabricate DELIVERED.
+    - SUPPRESSED records policy/preference/quiet-hour suppression without retrying automatically.
+    - Provider response bodies MUST be reduced to an allowlisted error code and redacted diagnostic metadata.
+retry_policy:
+  mode: BOUNDED
+  max_attempts: CONTRACT_CONFIGURED_REQUIRED
+  backoff: PROVIDER_CONTRACT_REQUIRED
+  jitter: REQUIRED_WHEN_SUPPORTED
+  retryable_error_catalog: REGISTERED_ONLY
+  unknown_error: BLOCK_AND_ALERT_OPERATIONS
+  duplicate_delivery: IDEMPOTENCY_KEY_REQUIRED
+preferences:
+  owner: authenticated_user
+  default_behavior: explicit_category_defaults_required
+  fields:
+    - category
+    - inAppEnabled
+    - emailEnabled
+    - smsEnabled
+    - webPushEnabled
+    - mobilePushEnabled
+    - quietHours
+    - locale
+  rules:
+    - Missing defaults MUST be supplied by the approved preference policy; never infer from client state.
+    - Quiet hours apply only to optional categories unless the registered policy explicitly states otherwise.
+    - Device registration and token revocation MUST use a verified provider-specific contract.
+  mandatory_policy_categories:
+    - ACCOUNT_SECURITY
+    - ACCOUNT_RECOVERY
+    - PAYMENT_RECEIPT
+    - PAYMENT_FAILURE
+    - CREATOR_PAYOUT_STATUS
+    - MODERATION_DECISION
+  mandatory_delivery_channels: CONTRACT_APPROVAL_REQUIRED
+sources:
+  application_events: REGISTERED_DOMAIN_EVENT_CATALOG_ONLY
+  agents: CENTRAL_AGENT_GATEWAY_AUTHORIZED_NOTIFICATION_COMMAND_ONLY
+  admin_manual: EXPLICIT_CAPABILITY_AND_AUDIT_REQUIRED
+unsupported_or_unverified:
+  - provider_specific_template_ids
+  - exact Appwrite topic resource IDs
+  - device token lifecycle for each push provider
+  - provider delivery receipt semantics
+  - retry ceilings and exact backoff values
+  - exact quiet-hours timezone and localization fallback policy
+  - legal channel consent and jurisdiction-specific messaging constraints
+blockers:
+  - Resolve and approve each enabled provider adapter's official API, credential model, idempotency semantics, rate limits, errors, and delivery receipts.
+  - Resolve legal consent, unsubscribe, retention, and transactional-message policy before enabling external delivery in production.
+  - Generate Appwrite resource IDs and schemas using official tooling before provisioning.
+  - Complete authorization, privacy, retry, duplicate, replay, and failure-injection tests before enabling a channel.

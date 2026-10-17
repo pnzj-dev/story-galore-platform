@@ -1,0 +1,23 @@
+schema: storygalore.appwrite-sites-environment/v1
+version: 1
+rules:
+  appwrite_reserved_prefix: APPWRITE_
+  never_define_reserved_prefix_variables: true
+  secrets_marked_secret_in_appwrite: true
+  build_time_secret_use_requires_explicit_contract: true
+  runtime_secret_use_requires_ssr: true
+  public_env_must_be_explicitly_public: true
+  no_service_api_key_in_browser_bundle: true
+known_injected_variables:
+  - APPWRITE_SITE_API_ENDPOINT
+  - APPWRITE_VERSION
+  - APPWRITE_REGION
+  - APPWRITE_DEPLOYMENT_TYPE
+  - APPWRITE_SITE_API_KEY
+  - APPWRITE_SITE_ID
+  - APPWRITE_SITE_NAME
+  - APPWRITE_SITE_DEPLOYMENT
+security:
+  ephemeral_site_key_only_for_server_authorized_operations: true
+  visitor_authorized_operations_forward_user_session: true
+  least_scope_required: true

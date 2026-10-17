@@ -1,0 +1,21 @@
+version: "1.0"
+canonical: true
+authoritative:
+  - identity
+  - domain_records
+  - payments
+  - subscriptions
+  - entitlements
+  - policy_configuration
+  - publication_snapshots
+  - media_asset_metadata
+  - audit_records
+rebuildable:
+  - search_indexes
+  - recommendation_candidates
+  - analytics_projections
+  - PostHog_product_analytics
+  - realtime_projections
+  - CDN_cache
+  - derived_thumbnails
+  - vector_indexes

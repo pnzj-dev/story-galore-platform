@@ -1,0 +1,7 @@
+schema: storygalore.event-completeness/v1
+version: 1
+policy: fail_closed
+registry_source: contracts/compatibility/command-event-map.yaml
+schema_directory: contracts/events/schemas
+required_event_schema_count: 106
+missing_schema_behavior: BLOCK

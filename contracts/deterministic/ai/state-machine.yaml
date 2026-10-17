@@ -1,0 +1,58 @@
+version: '1.0'
+area: ai
+states:
+- QUEUED
+- POLICY_CHECK
+- ALLOWED
+- RESERVED
+- PROCESSING
+- SETTLING
+- COMPLETED
+- FAILED
+- CANCELLED
+transitionRules:
+- Only listed transitions are legal.
+- Authorization MUST be evaluated separately from transition legality.
+- Retries MUST preserve idempotency.
+- State changes MUST emit the event declared by the command/event compatibility graph.
+transitions:
+- from: QUEUED
+  event: POLICY_CHECK
+  to: POLICY_CHECK
+- from: POLICY_CHECK
+  event: ALLOW
+  to: ALLOWED
+- from: POLICY_CHECK
+  event: DENY
+  to: FAILED
+- from: ALLOWED
+  event: RESERVE
+  to: RESERVED
+- from: RESERVED
+  event: PROCESS
+  to: PROCESSING
+- from: PROCESSING
+  event: SETTLE
+  to: SETTLING
+- from: SETTLING
+  event: COMPLETE
+  to: COMPLETED
+- from: QUEUED
+  event: CANCEL
+  to: CANCELLED
+- from: POLICY_CHECK
+  event: CANCEL
+  to: CANCELLED
+- from: PROCESSING
+  event: CANCEL
+  to: CANCELLED
+- from: PROCESSING
+  event: FAIL
+  to: FAILED
+- from: SETTLING
+  event: FAIL
+  to: FAILED
+terminalStates:
+- COMPLETED
+- FAILED
+- CANCELLED

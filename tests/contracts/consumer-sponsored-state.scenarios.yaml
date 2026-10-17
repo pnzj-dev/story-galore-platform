@@ -1,0 +1,10 @@
+schema: storygalore.contract-scenario-suite/v1
+version: 1
+policy: fail_closed
+cases:
+  - id: reserve-before-active
+    expected: PASS
+  - id: exhaustion
+    expected: PASS
+  - id: cancel
+    expected: PASS

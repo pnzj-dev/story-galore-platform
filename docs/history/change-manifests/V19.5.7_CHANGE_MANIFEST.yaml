@@ -1,0 +1,39 @@
+schema: storygalore.change-manifest/v1
+version: 19.5.9
+previousVersion: 19.5.6
+title: Architecture Simplification Loop — Final V1 Boundary Set
+status: PLANNING_ONLY
+objective: preserve_v1_functionality_with_minimum_architectural_complexity
+changes:
+  - reduce_autonomous_agents_to_17
+  - move_character_world_creator_growth_cost_guardian_to_capabilities
+  - make_cloudflare_workflows_the_sole_v1_durable_executor
+  - make_appwrite_tablesdb_authoritative_for_domain_and_operation_state
+  - remove_secondary_durable_executor_and_lease_state_machine
+  - remove_temporal_runtime_artifacts
+  - remove_legacy_non_executable_agent_directories
+  - consolidate_application_mcp_to_cloudflare_stateless_mcp_worker
+  - standardize_27_appwrite_functions_on_node_22_typescript
+  - remove_go_function_template_and_toolchain
+  - make_deterministic_state_machine_validation_conditional_on_actual_state_transitions
+preserved_functionality:
+  - all_v1_product_domains
+  - all_17_agents
+  - all_27_logical_appwrite_function_contracts
+  - payments_and_payouts
+  - consumer_and_creator_economics
+  - media_origin_and_distribution_failover
+  - semantic_search_and_recommendations
+  - mcp_and_agent_interoperability
+  - durable_workflows_and_human_approval_waits
+  - appwrite_auth_storage_realtime_messaging_sites
+non_goals:
+  - no_domain_feature_removal
+  - no_production_deployment
+  - no_new_database
+  - no_new_queue_service
+  - no_new_external_provider
+  - no_architecture_substitution_without_contract
+stop_condition:
+  status: COMPLETE
+  rule: Further simplification requires a concrete capability/security/scaling/operational proof and a new deterministic change review.

@@ -1,0 +1,20 @@
+schema: storygalore.restore-contract/v1
+version: 1
+policy: deterministic
+rules:
+  - Restore order MUST be explicit.
+  - Each restore stage MUST have input, output and verification criteria.
+  - Partial restore MUST be detectable.
+  - Recovery MUST preserve financial and entitlement invariants.
+order:
+  - appwrite-project
+  - appwrite-tablesdb
+  - appwrite-storage
+  - appwrite-configuration
+  - search-indexes
+  - vectors
+  - analytics
+  - cloudflare_workflows-recovery
+  - cloudflare-configuration
+  - end-to-end-verification
+failure_behavior: STOP_AND_ESCALATE

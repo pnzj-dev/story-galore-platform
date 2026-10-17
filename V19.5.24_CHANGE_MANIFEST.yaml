@@ -1,0 +1,14 @@
+version: 19.5.24
+title: Media catalog archetypes contract
+status: planning-contract-update
+changes:
+  - Add canonical media archetypes for the publication/media model so shared projects and universes can contain multiple publication types.
+  - Enumerate V1 comic and image/gallery archetypes first, with creator posts and mixed media following the core comic workflow.
+  - Keep short video as the first video archetype and long video phased later, both feature-flagged until storage/transcoding/egress economics are validated.
+not_claimed:
+  - Media archetype runtime implementation is complete.
+  - Video processing or playback is enabled outside feature flags.
+validation:
+  - pnpm validate:media-archetypes
+  - pnpm validate:repository-coherence
+  - pnpm validate:docs

@@ -1,0 +1,17 @@
+{
+  "version": "1.0.0",
+  "provider": "posthog",
+  "purpose": "product_analytics",
+  "authoritativeSource": "storygalore_domain_and_analytics",
+  "events": [
+    "auth_started", "auth_completed", "creator_onboarding_started", "creator_onboarding_completed",
+    "content_viewed", "content_started", "content_completed", "reader_page_viewed", "reader_completed",
+    "subscription_checkout_started", "subscription_started", "ai_generation_started", "ai_generation_completed",
+    "download_started", "download_completed", "search_performed", "recommendation_clicked", "feature_experiment_exposed"
+  ],
+  "forbiddenProperties": [
+    "password", "apiKey", "providerApiKey", "sessionToken", "paymentCredential",
+    "privateMessageBody", "supportBody", "rawPrompt", "rawAiResponse", "rawAppwriteDocument"
+  ],
+  "adultContentRule": "minimal_categorical_properties_only"
+}

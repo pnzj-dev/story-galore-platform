@@ -1,0 +1,8 @@
+schema: storygalore.function-resource-map/v1
+version: 1
+function: recommendations
+policy: explicit_only
+resources:
+  - recommendation_candidates
+  - discovery_events
+undeclared_resource_access: BLOCK

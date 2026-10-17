@@ -1,0 +1,21 @@
+schema: storygalore.provider-adapter-definition/v1
+version: 1
+required:
+  - providerId
+  - category
+  - capabilitySet
+  - authMode
+  - requestSchema
+  - responseSchema
+  - normalizedErrorMap
+  - timeoutPolicy
+  - retryPolicy
+  - idempotencyPolicy
+  - webhookPolicy
+  - healthPolicy
+  - costSource
+  - contentPolicy
+  - regionPolicy
+  - implementationOwner
+unknown_capability: BLOCK
+unknown_api_behavior: BLOCK

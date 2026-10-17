@@ -1,0 +1,129 @@
+{
+  "runtime": "go",
+  "functions": [
+    {
+      "id": "api",
+      "purpose": "authenticated domain command/query gateway; keep narrow and explicit"
+    },
+    {
+      "id": "authorization",
+      "purpose": "entitlement and access decisions"
+    },
+    {
+      "id": "uploads",
+      "purpose": "authorize uploads and return Storage upload instructions"
+    },
+    {
+      "id": "image-processing",
+      "purpose": "process uploaded comic pages/assets"
+    },
+    {
+      "id": "ai-comic-generation",
+      "purpose": "queue and execute AI generation jobs"
+    },
+    {
+      "id": "ai-usage",
+      "purpose": "reserve/settle AI credits and usage"
+    },
+    {
+      "id": "moderation",
+      "purpose": "automated classification/moderation orchestration"
+    },
+    {
+      "id": "search-index",
+      "purpose": "synchronize search/vector representations"
+    },
+    {
+      "id": "recommendations",
+      "purpose": "build recommendation candidates"
+    },
+    {
+      "id": "payments",
+      "purpose": "payment orchestration and normalized provider operations"
+    },
+    {
+      "id": "payment-webhooks",
+      "purpose": "provider webhook ingestion and idempotency"
+    },
+    {
+      "id": "payment-reconciliation",
+      "purpose": "scheduled provider reconciliation"
+    },
+    {
+      "id": "subscription-lifecycle",
+      "purpose": "renewal/cancellation/entitlement lifecycle"
+    },
+    {
+      "id": "notifications",
+      "purpose": "authorized notification commands and canonical inbox persistence; external delivery starts only registered Cloudflare Workflows through verified provider adapters"
+    },
+    {
+      "id": "analytics",
+      "purpose": "event ingestion/aggregation, platform KPI counters, creator metrics, daily metric tables and dashboard query contracts",
+      "schedule": "scheduled daily aggregation plus on-demand/near-real-time overview counter queries"
+    },
+    {
+      "id": "audit",
+      "purpose": "centralized high-risk audit event writer"
+    },
+    {
+      "id": "cleanup",
+      "purpose": "scheduled retention/cache/orphan cleanup"
+    },
+    {
+      "id": "mcp",
+      "purpose": "application MCP endpoint, subject to same auth/entitlement controls"
+    },
+    {
+      "id": "ad-serve",
+      "runtime": "go",
+      "purpose": "server-side ad eligibility, campaign selection and creative response"
+    },
+    {
+      "id": "ad-event-ingest",
+      "runtime": "go",
+      "purpose": "idempotent ad impression/click event ingestion"
+    },
+    {
+      "id": "ad-campaign-scheduler",
+      "runtime": "go",
+      "purpose": "activate, pause and complete campaigns on schedule"
+    },
+    {
+      "id": "ad-metrics-aggregate",
+      "runtime": "go",
+      "purpose": "aggregate daily advertising metrics"
+    },
+    {
+      "id": "ad-provider-health",
+      "runtime": "go",
+      "purpose": "check configured advertising provider health"
+    },
+    {
+      "id": "media-processing",
+      "runtime": "go",
+      "purpose": "process images/audio/video, create previews/posters and update media processing state"
+    },
+    {
+      "id": "video-playback",
+      "runtime": "go",
+      "purpose": "authorize video playback and return entitlement-checked playback instructions"
+    },
+    {
+      "id": "media-manifest",
+      "runtime": "go",
+      "purpose": "build publication/media manifests for clients and offline-capable experiences"
+    },
+    {
+      "id": "media-analytics",
+      "runtime": "go",
+      "purpose": "ingest and normalize media playback/progress analytics"
+    },
+    {
+      "id": "central-agent-gateway",
+      "runtime": "go",
+      "purpose": "single enforcement entry point for autonomous-agent Appwrite MCP calls; policy engine is an in-process module, not a separately deployed service",
+      "implementation_status": "CONTRACT_ONLY_BLOCKED_PENDING_AUTH_AND_TOOL_CATALOG_VERIFICATION"
+    }
+  ]
+}

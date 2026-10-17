@@ -1,0 +1,23 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://storygalore.dev/contracts/studio/document.schema.yaml
+title: Document
+description: >
+  Media-agnostic draft document — the authoring form of a publication. A comic is
+  one BOOK format; prose books, posts, video, audio and mixed media are also
+  documents. Sequential-art fields (format, readingFormat, pages, dimensions) are
+  only relevant for sequential-art BOOK documents.
+version: 1
+required: [id, projectId, draftId, type, revisionId]
+properties:
+  id: {type: string}
+  projectId: {type: string}
+  draftId: {type: string}
+  title: {type: string}
+  type: {enum: [BOOK, POST, VIDEO, AUDIO, MIXED]}
+  format: {enum: [COMIC, MANGA, MANHWA, MANHUA, BANDE_DESSINEE, GRAPHIC_NOVEL, WEBTOON, NOVEL, LIGHT_NOVEL, NONFICTION, EDUCATIONAL]}
+  readingFormat: {enum: [PAGINATED, VERTICAL, HORIZONTAL, WEBTOON, STRIP, MIXED]}
+  pageWidth: {type: integer, minimum: 1}
+  pageHeight: {type: integer, minimum: 1}
+  pages: {type: array, items: {type: string}}
+  revisionId: {type: string}
+additionalProperties: false

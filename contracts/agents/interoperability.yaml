@@ -1,0 +1,24 @@
+version: 1.0.0
+protocol_priority:
+- MCP
+- A2A_COMPATIBLE_GATEWAY
+- NATIVE_RPC
+adapter_model: provider-neutral
+required_agent_metadata:
+- agentId
+- provider
+- model
+- protocols
+- capabilities
+- trustLevel
+- dataResidency
+- costClass
+rules:
+- StoryGalore agents use the Agent Gateway rather than provider-specific business
+  logic.
+- MCP is the primary tool/capability interface.
+- A2A-compatible transport is an interoperability adapter, not an authorization boundary.
+- Provider/model names are metadata and routing inputs, never permission grants.
+- External agent output is untrusted input until validated against task contracts
+  and domain policies.
+- No external agent receives Appwrite, Cloudflare, payment, database, or BYOK secrets.

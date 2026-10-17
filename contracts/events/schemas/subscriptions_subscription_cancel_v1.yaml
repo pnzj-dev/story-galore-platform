@@ -1,0 +1,19 @@
+schema: storygalore.event-schema/v1
+eventType: subscriptions.subscription_cancel.v1
+version: 1
+producer: CONTRACT_REGISTRY
+payload:
+  eventId: string
+  eventType: string
+  eventVersion: integer
+  occurredAt: datetime
+  producer: string
+  correlationId: string|null
+  operationId: string|null
+  data: CONTRACT_SPECIFIC
+security:
+  secrets: FORBIDDEN
+  unnecessary_pii: FORBIDDEN
+consumption:
+  deduplication: REQUIRED
+  replay: REQUIRED_UNLESS_AUTHORITATIVE_CONSUMER

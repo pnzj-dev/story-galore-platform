@@ -1,0 +1,25 @@
+{
+  "name": "@storygalore/web",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "typecheck": "astro check"
+  },
+  "dependencies": {
+    "@astrojs/svelte": "9.0.1",
+    "astro": "7.3.8",
+    "svelte": "5.57.2",
+    "@storygalore/domain": "workspace:*",
+    "@storygalore/appwrite-client": "workspace:*",
+    "@storygalore/ui": "workspace:*",
+    "@storygalore/config": "workspace:*",
+    "@astrojs/node": "11.1.7"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "4.3.3"
+  }
+}

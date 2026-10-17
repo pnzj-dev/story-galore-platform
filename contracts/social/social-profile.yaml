@@ -1,0 +1,21 @@
+version: 1
+domain: social
+profile:
+  fields:
+    - actorId
+    - handle
+    - displayName
+    - avatarMediaAssetId
+    - coverMediaAssetId
+    - bio
+    - links
+    - creatorStatus
+    - verificationStatus
+    - followerCountProjection
+    - featuredPublicationIds
+    - createdAt
+    - updatedAt
+rules:
+  - Profile media MUST use MediaAsset IDs.
+  - Creator verification MUST NOT grant moderation or administrative privileges.
+  - Follower counts are projections and MUST be rebuildable.

@@ -1,0 +1,22 @@
+schema: storygalore.agent-capability-ownership/v1
+version: 1.0.0
+policy: deterministic
+rule: CAPABILITY_DOES_NOT_IMPLY_AUTONOMOUS_AGENT
+merged_domains:
+  story-producer:
+    agent_id: sg.agent.story-producer
+    capabilities:
+      - character
+      - world
+    rationale: Character and world authoring share the story-production context and approval boundary.
+  creator-business:
+    agent_id: sg.agent.creator-business
+    capabilities:
+      - creator-growth
+    rationale: Growth is a business-analysis capability, not an independent trust or lifecycle boundary.
+  data-analysis-reporting:
+    agent_id: sg.agent.data-analysis-reporting
+    capabilities:
+      - cost-guardian
+    rationale: Cost and consumption analysis shares the analytics data boundary and has no distinct execution authority.
+forbidden: Independent agent manifests for merged domains require an explicit architecture revision.

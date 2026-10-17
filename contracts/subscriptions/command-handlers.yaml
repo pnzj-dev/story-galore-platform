@@ -1,0 +1,136 @@
+schema: storygalore.subscriptions-command-handlers/v1
+version: 1
+canonical: true
+purpose: "Deterministic command/query handler contracts for the subscription lifecycle, so the api gateway and Go handlers can be implemented without guessing."
+source_of_truth:
+  subscription_schema: contracts/domain/subscription.schema.yaml
+  plan_schema: contracts/domain/plan.schema.yaml
+  renewal_schema: contracts/domain/subscription-renewal.schema.yaml
+  command_event_map: contracts/compatibility/command-event-map.yaml
+  errors: contracts/functions/error-catalog.yaml
+capabilities:
+  - {id: consumer.subscription.read, grant: owner_or_staff}
+  - {id: consumer.subscription.create, grant: authenticated}
+  - {id: consumer.subscription.manage, grant: owner}
+  - {id: finance.subscription.reconcile, grant: staff}
+shared_rules:
+  actor_required: true
+  idempotency_required_for_mutations: true
+  plan_is_immutable_versioned: true
+  subscription_state_is_server_authoritative: true
+  provider_webhooks_are_normalized_before_mutation: true
+  unknown_fields: REJECT
+commands:
+  - name: subscription_create
+    operation: subscription_create
+    capability: consumer.subscription.create
+    input:
+      userId: {type: string, required: true}
+      planId: {type: string, required: true}
+      planVersion: {type: integer, required: true}
+      billingMode: {type: enum, elements: [FIAT, CRYPTO, OTHER], required: true}
+      billingStrategy: {type: enum, elements: [NATIVE_RECURRING, MERCHANT_MANAGED, MANUAL], required: true}
+    state: {initial: CREATED}
+    effects:
+      events: [subscriptions.subscription_create.v1]
+      writes: [{table: subscriptions, kind: INSERT}]
+    result: {subscriptionId: string}
+    errors: [FORBIDDEN, POLICY_DENIED, NOT_FOUND, INVALID_INPUT]
+    idempotency: {key: idempotencyKey, behavior: RETURN_EXISTING_RESULT}
+  - name: subscription_cancel
+    operation: subscription_cancel
+    capability: consumer.subscription.manage
+    input:
+      subscriptionId: {type: string, required: true}
+      cancellationReason: {type: string, required: false}
+    state: {to: CANCELLED}
+    effects:
+      events: [subscriptions.subscription_cancel.v1]
+      writes: [{table: subscriptions, kind: UPDATE}]
+    result: {subscriptionId: string}
+    errors: [FORBIDDEN, POLICY_DENIED, NOT_FOUND, INVALID_STATE, INVALID_INPUT]
+    idempotency: {key: idempotencyKey, behavior: RETURN_EXISTING_RESULT}
+  - name: subscription_pause
+    operation: subscription_pause
+    capability: consumer.subscription.manage
+    input:
+      subscriptionId: {type: string, required: true}
+    state: {to: PAUSED}
+    effects:
+      events: [subscriptions.subscription_pause.v1]
+      writes: [{table: subscriptions, kind: UPDATE}]
+    result: {subscriptionId: string}
+    errors: [FORBIDDEN, POLICY_DENIED, NOT_FOUND, INVALID_STATE, INVALID_INPUT]
+    idempotency: {key: idempotencyKey, behavior: RETURN_EXISTING_RESULT}
+  - name: subscription_resume
+    operation: subscription_resume
+    capability: consumer.subscription.manage
+    input:
+      subscriptionId: {type: string, required: true}
+    state: {to: ACTIVE}
+    effects:
+      events: [subscriptions.subscription_resume.v1]
+      writes: [{table: subscriptions, kind: UPDATE}]
+    result: {subscriptionId: string}
+    errors: [FORBIDDEN, POLICY_DENIED, NOT_FOUND, INVALID_STATE, INVALID_INPUT]
+    idempotency: {key: idempotencyKey, behavior: RETURN_EXISTING_RESULT}
+  - name: subscription_change_plan
+    operation: subscription_change_plan
+    capability: consumer.subscription.manage
+    input:
+      subscriptionId: {type: string, required: true}
+      planId: {type: string, required: true}
+      planVersion: {type: integer, required: true}
+    effects:
+      events: [subscriptions.subscription_change_plan.v1]
+      writes: [{table: subscriptions, kind: UPDATE}]
+    result: {subscriptionId: string}
+    errors: [FORBIDDEN, POLICY_DENIED, NOT_FOUND, INVALID_STATE, INVALID_INPUT]
+    idempotency: {key: idempotencyKey, behavior: RETURN_EXISTING_RESULT}
+  - name: subscription_renew
+    operation: subscription_renew
+    capability: consumer.subscription.manage
+    input:
+      subscriptionId: {type: string, required: true}
+    effects:
+      events: [subscriptions.subscription_renew.v1]
+      writes: [{table: subscriptions, kind: UPDATE}]
+    result: {subscriptionId: string}
+    errors: [FORBIDDEN, POLICY_DENIED, NOT_FOUND, INVALID_STATE, INVALID_INPUT]
+    idempotency: {key: idempotencyKey, behavior: RETURN_EXISTING_RESULT}
+  - name: subscription_reconcile
+    operation: subscription_reconcile
+    capability: finance.subscription.reconcile
+    input:
+      subscriptionId: {type: string, required: true}
+      providerSubscriptionId: {type: string, required: false}
+      status: {type: string, required: false}
+    effects:
+      events: [subscriptions.subscription_reconcile.v1]
+      writes: [{table: subscriptions, kind: UPDATE}]
+    result: {subscriptionId: string}
+    errors: [FORBIDDEN, POLICY_DENIED, NOT_FOUND, INVALID_INPUT]
+    idempotency: {key: idempotencyKey, behavior: RETURN_EXISTING_RESULT}
+queries:
+  - name: plan_get
+    capability: consumer.subscription.read
+    input: {planId: {type: string, required: true}}
+    returns: plan
+    table: plans
+    errors: [FORBIDDEN, NOT_FOUND]
+  - name: plan_list
+    capability: consumer.subscription.read
+    input: {cursor: {type: string, required: false}, limit: {type: integer, required: false}}
+    returns: plan_list
+    table: plans
+    pagination: cursor
+    errors: [FORBIDDEN]
+  - name: subscription_get
+    capability: consumer.subscription.read
+    input: {subscriptionId: {type: string, required: true}}
+    returns: subscription
+    table: subscriptions
+    errors: [FORBIDDEN, NOT_FOUND]
+implementation_notes:
+  - Payments (payment_create/refund/reconcile/confirm/mark_failed) are deferred: the payments/payment_attempts/payment_events/ledger_entries/refunds tables have no schema source yet.
+  - Plan is immutable and versioned; subscription_change_plan records the new planId + planVersion without mutating the plan.

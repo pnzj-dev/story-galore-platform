@@ -1,0 +1,3 @@
+schema: storygalore.agent-tool-input/v1
+tool: discovery-curator.profile.read
+additionalProperties: false

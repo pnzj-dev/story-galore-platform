@@ -1,0 +1,42 @@
+schema: storygalore.v19-5-3-change-manifest/v1
+version: 1
+release: V19.5.3
+base: V19.5.2
+status: RELEASE_CANDIDATE
+objective: Economic Governance and US-first Commercial Readiness
+launch:
+  operating_entity_country: US
+  market: US
+  currency: USD
+  international_expansion: DISABLED_UNTIL_APPROVED
+added_contracts:
+- contracts/business/governance/jurisdiction-policy.yaml
+- contracts/tax/us-launch-policy.yaml
+- contracts/accounting/economic-ledger-boundaries.yaml
+- contracts/business/governance/reserve-and-chargeback-policy.yaml
+- contracts/rights/revenue-participation-agreement.yaml
+- contracts/pricing/pricing-policy-lifecycle.yaml
+- contracts/pricing/promotion-policy.yaml
+- contracts/business/governance/economic-simulator.yaml
+- contracts/business/governance/economic-safety-thresholds.yaml
+- contracts/business/governance/commercial-products.yaml
+- contracts/admin/economic-governance.yaml
+- contracts/verification/economic-governance-contract-to-test.yaml
+added_tests:
+- tests/contracts/business-governance/us-first.scenarios.yaml
+- tests/contracts/business-governance/pricing-lifecycle.scenarios.yaml
+- tests/contracts/business-governance/revenue-participation.scenarios.yaml
+- tests/contracts/business-governance/economic-simulator.scenarios.yaml
+added_validation:
+- scripts/validate-economic-governance.mjs
+updated_validation:
+- scripts/validate-determinism.mjs
+updated_admin_registry:
+- contracts/ui/pages/page-registry.yaml
+updated_release_gate:
+- contracts/verification/determinism-gate.yaml
+commercial_change:
+- consumer_plans_launch_currency_EUR_to_USD
+- creator_plans_launch_currency_EUR_to_USD
+- storypass_launch_currency_EUR_to_USD
+human_gate: REQUIRED

@@ -1,0 +1,108 @@
+schema: storygalore.game-build/v1
+version: 1
+canonical: true
+purpose: >-
+  Controlled intake, review, hosting, launch and retirement of browser-playable game builds hosted by StoryGalore.
+entity: GameBuild
+storage:
+  canonical_origin: APPWRITE_STORAGE
+  delivery: STORYGALORE_ISOLATED_GAME_RUNTIME
+  cloudflare_role: DISTRIBUTION_AND_EDGE_CONTROLS_ONLY
+  game_files_are_media_assets: false
+  artifact_kind: WEB_GAME_BUILD
+accepted_targets:
+  - id: WEB_WASM
+    description: Browser build using WebAssembly and an approved web bootstrap/runtime.
+  - id: WEBGL
+    description: Browser graphics build using WebGL and a reviewed static web bundle.
+  - id: HTML5_WEB_BUNDLE
+    description: Reviewed static HTML/JavaScript/CSS browser game bundle.
+fields:
+  id: stable_string
+  gameId: game_catalog_id
+  version: immutable_semver_or_registered_version
+  target: WEB_WASM|WEBGL|HTML5_WEB_BUNDLE
+  entrypoint: relative_path_within_bundle
+  manifestFileId: appwrite_storage_file_id
+  bundlePrefix: server_owned_storage_prefix
+  checksumSha256: required_sha256
+  declaredSizeBytes: positive_integer
+  actualSizeBytes: positive_integer|null
+  rightsAttestationId: reviewed_rights_record
+  scanStatus: PENDING|SCANNING|PASSED|FAILED
+  reviewStatus: PENDING|APPROVED|REJECTED|REVOKED
+  releaseStatus: DRAFT|STAGED|RELEASED|SUSPENDED|RETIRED
+  runtimeProfileId: registered_runtime_profile_id
+  publishedAt: datetime|null
+  createdAt: datetime
+  updatedAt: datetime
+lifecycle:
+  - DRAFT
+  - UPLOADING
+  - QUARANTINED
+  - SCANNING
+  - REVIEW_PENDING
+  - STAGED
+  - RELEASED
+  - SUSPENDED
+  - RETIRED
+release_gates:
+  required: [ownership_and_distribution_rights_verified, upload_checksum_verified, archive_path_traversal_rejected, file_count_and_size_limits_passed, mime_and_magic_bytes_inspected, malware_and_policy_scan_passed, dependency_inventory_reviewed, entrypoint_and_manifest_validated, isolated_origin_configured, network_policy_registered, runtime_resource_limits_registered, accessibility_and_input_smoke_tests_passed, moderation_approved, explicit_release_approval]
+security:
+  isolation:
+    required: true
+    origin: dedicated_non_cookie_bearing_game_origin
+    iframe_sandbox: [allow-scripts]
+    parent_dom_access: forbidden
+    parent_cookie_access: forbidden
+    same_origin_with_main_app: forbidden
+    credentials_mode: omit
+    referrer_policy: no-referrer
+  content_security_policy:
+    default_src: none
+    script_src: self_and_build_hashes_only
+    connect_src: none_unless_explicitly_allowlisted
+    img_src: self_data_blob
+    media_src: self_blob
+    worker_src: self_blob
+    object_src: none
+    base_uri: none
+    form_action: none
+    frame_ancestors: storygalore_game_shell_only
+  runtime_limits:
+    cpu_and_wall_clock: enforced
+    memory: enforced_by_supported_runtime_where_available
+    bundle_size: configured_hard_limit
+    file_count: configured_hard_limit
+    concurrent_sessions: quota_and_rate_limited
+  network:
+    default: deny
+    allowlist: per_build_reviewed_domains_and_methods
+    private_network_and_metadata_endpoints: always_denied
+    arbitrary_server_side_execution: forbidden
+  upload:
+    archive_bomb_and_path_traversal_protection: required
+    build_files_never_executed_during_scan: true
+    immutable_versioned_builds: required
+  runtime:
+    launch_authorization: server_side_per_request
+    health_check: required
+    kill_switch: required
+    version_rollback: required
+    telemetry: privacy_minimized_and_documented
+invariants:
+  - Browser-playable games are hosted by StoryGalore; an external link or third-party iframe is not a hosted build.
+  - WebAssembly is a client runtime format, not a server trust boundary; all builds remain untrusted code.
+  - WebGL describes a browser graphics capability, not a sufficient package/security format by itself.
+  - GameBuild is not a MediaAsset and must not pass through image/video/audio/document processing pipelines.
+  - The uploaded bundle is quarantined and unavailable to users until every release gate passes.
+  - Build files are immutable after release; updates create a new version.
+  - A build cannot access application cookies, parent DOM, Appwrite credentials, secrets, or internal service credentials.
+  - Runtime network access is denied by default; only explicit per-build allowlists may be enabled after review.
+  - User identity, entitlements, age eligibility and game availability are evaluated by the platform, not trusted to the game bundle.
+  - Runtime failure, revocation or policy change immediately disables new launches and can terminate active sessions.
+  - Hosting, scan, delivery and runtime costs are metered to a registered owner/plan/quota policy.
+not_claimed:
+  - Production game runtime has been deployed.
+  - Any arbitrary uploaded build is currently safe to execute.
+  - Appwrite Storage alone provides isolated browser hosting; a dedicated isolated runtime/serving layer is required.

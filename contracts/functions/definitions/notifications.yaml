@@ -1,0 +1,59 @@
+schema: storygalore.appwrite-function/v1
+id: notifications
+runtime:
+  platform: APPWRITE_FUNCTIONS
+  language: GO_LATEST_STABLE_EXACT_PIN_REQUIRED
+  state: STATELESS
+class: REQUEST_HANDLER
+purpose: Authorize notification commands, persist canonical inbox records, and start registered durable delivery workflows
+authority:
+  job_state: NOT_APPLICABLE_FOR_REQUEST_HANDLER
+  domain_state: CANONICAL_DOMAIN_RESOURCE
+input:
+  transport: CONTRACT_DEFINED
+  schema: contracts/functions/schemas/notifications-input.yaml
+output:
+  schema: contracts/functions/schemas/notifications-output.yaml
+security:
+  authentication: CONTRACT_DEFINED
+  authorization: POLICY_ENGINE
+  capability: FUNCTION_CAPABILITY_NOTIFICATIONS
+  secret_policy: NONE
+idempotency:
+  required: true
+  duplicate_behavior: RETURN_EXISTING_RESULT_OR_SAFE_NOOP
+execution:
+  operation_id: REQUIRED_FOR_OPERATIONAL_SIDE_EFFECTS
+  retry_policy: CONTRACT_RETRY
+  schedule: NONE
+  timeout: CONTRACT_DEFINED
+  concurrency: CONTRACT_DEFINED
+side_effects:
+  policy: PERSIST_IN_APP_AND_START_REGISTERED_WORKFLOW
+  external_side_effects_require_idempotency: true
+resources:
+  access_mode: EXPLICIT_REGISTRY_ONLY
+  map: contracts/functions/resource-maps/notifications.yaml
+  undeclared_resource_access: BLOCK
+events:
+  emitted: REGISTRY_DEFINED
+  consumed: REGISTRY_DEFINED
+observability:
+  request_id: REQUIRED
+  correlation_id: REQUIRED
+  operation_id: REQUIRED_WHEN_APPLICABLE
+  secrets_redacted: true
+audit:
+  required: true
+errors:
+  catalog: contracts/functions/error-catalog.yaml
+  unknown_error_behavior: SAFE_FAILURE
+tests:
+  contract: contracts/functions/test-matrix/notifications.yaml
+  missing_test_behavior: BLOCK
+implementation:
+  source_owner: infrastructure-appwrite
+  source_path: backend/appwrite/functions/notifications
+  implementation_status: CONTRACT_ONLY
+  durable_delivery: CLOUDFLARE_WORKFLOWS_ONLY
+  direct_provider_access: REGISTERED_ADAPTERS_ONLY

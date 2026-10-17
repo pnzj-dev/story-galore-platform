@@ -1,0 +1,26 @@
+schema: storygalore.provider-registry/v1
+version: 1
+policy: deterministic
+rules:
+- Every external provider MUST have one adapter definition before implementation.
+- Provider SDKs MUST NOT cross adapter boundaries.
+- Unknown provider capabilities MUST fail closed.
+- Provider-specific errors MUST be normalized before entering domain logic.
+- Provider pricing MUST come from authoritative provider data.
+- Provider credentials MUST be declared in the secret registry.
+- BYOK and USER_HOSTED providers MUST remain separate from PLATFORM_CREDITS.
+- Conditional payment providers MUST NOT be routable until their activation requirements pass.
+- Payment provider selection MUST use contracts/business/payment-provider-policy.yaml.
+- Provider balances are never the StoryGalore creator ledger.
+categories:
+- ai
+- media-generation
+- payments
+- media-distribution
+- analytics
+- messaging
+- email
+- external-agent
+- import
+resolution_policy: UNKNOWN_EXTERNAL_CONTRACT -> BLOCK
+paymentProviderRegistry: contracts/providers/payment-providers.yaml

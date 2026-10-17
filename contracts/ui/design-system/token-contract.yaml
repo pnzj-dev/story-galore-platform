@@ -1,0 +1,18 @@
+schema: storygalore.ui-token-contract/v1
+version: 1
+source_of_truth: contracts/ui/theme/design-tokens.yaml
+requirements:
+  semantic_tokens_required: true
+  light_dark_parity_required: true
+  component_tokens_must_reference_semantic_tokens: true
+  raw_values_allowed_only_in_token_source: true
+  css_logical_properties_required_for_directional_layout: true
+  focus_visible_required: true
+  forced_colors_supported: true
+  reduced_motion_supported: true
+validation:
+  detect_raw_color_literals: BLOCK
+  detect_raw_spacing_literals_in_components: BLOCK
+  detect_missing_theme_token: BLOCK
+  detect_ltr_only_directional_css: BLOCK
+  detect_contrast_failure: BLOCK

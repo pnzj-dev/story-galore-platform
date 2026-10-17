@@ -1,0 +1,46 @@
+version: '1.0'
+area: messaging
+states:
+- ACTIVE
+- MUTED
+- ARCHIVED
+- BLOCKED
+- DELETED
+transitionRules:
+- Only listed transitions are legal.
+- Authorization MUST be evaluated separately from transition legality.
+- Retries MUST preserve idempotency.
+- State changes MUST emit the event declared by the command/event compatibility graph.
+transitions:
+- from: ACTIVE
+  event: MUTE
+  to: MUTED
+- from: MUTED
+  event: UNMUTE
+  to: ACTIVE
+- from: ACTIVE
+  event: ARCHIVE
+  to: ARCHIVED
+- from: ARCHIVED
+  event: UNARCHIVE
+  to: ACTIVE
+- from: ACTIVE
+  event: BLOCK
+  to: BLOCKED
+- from: MUTED
+  event: BLOCK
+  to: BLOCKED
+- from: ARCHIVED
+  event: BLOCK
+  to: BLOCKED
+- from: BLOCKED
+  event: UNBLOCK
+  to: ACTIVE
+- from: ACTIVE
+  event: DELETE
+  to: DELETED
+- from: ARCHIVED
+  event: DELETE
+  to: DELETED
+terminalStates:
+- DELETED

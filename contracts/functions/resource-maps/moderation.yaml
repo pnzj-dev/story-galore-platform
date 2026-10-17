@@ -1,0 +1,11 @@
+schema: storygalore.function-resource-map/v1
+version: 1
+function: moderation
+policy: explicit_only
+resources:
+  - publications
+  - publication_snapshots
+  - media_assets
+  - comments
+  - reports
+undeclared_resource_access: BLOCK

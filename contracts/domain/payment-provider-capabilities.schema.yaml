@@ -1,0 +1,48 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+title: StoryGalore Payment Provider Capabilities
+type: object
+required:
+- provider
+- oneTimePayments
+- nativeSubscriptions
+- recurringPayments
+- webhooks
+- refunds
+- chargebacks
+- creatorPayouts
+- stablecoinPayouts
+properties:
+  provider:
+    type: string
+    minLength: 1
+  oneTimePayments:
+    type: boolean
+  nativeSubscriptions:
+    type: boolean
+  recurringPayments:
+    type: boolean
+  refunds:
+    type: boolean
+  chargebacks:
+    type: boolean
+  webhooks:
+    type: boolean
+  customerVault:
+    type: boolean
+  paymentMethodTokenization:
+    type: boolean
+  partialRefunds:
+    type: boolean
+  delayedCapture:
+    type: boolean
+  creatorPayouts:
+    type: boolean
+  stablecoinPayouts:
+    type: boolean
+  cryptoPayments:
+    type: boolean
+  walletPayoutAddresses:
+    type: boolean
+  payoutReconciliation:
+    type: boolean
+additionalProperties: false

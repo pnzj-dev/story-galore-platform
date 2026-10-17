@@ -1,0 +1,14 @@
+schema: storygalore.appwrite-sites-runtime/v2
+version: 2
+site:
+  mode: SSR
+  default_rendering: ON_DEMAND
+  static_routes: PRERENDER_ALLOWED
+  server_runtime: NODE
+  server_adapter: "@astrojs/node"
+  server_adapter_mode: standalone
+request:
+  server_processing_must_be_bounded: true
+  no_long_running_workflow_inside_http_request: true
+  durable_work_must_delegate_to_workflow_executor: true
+  operation_id_returned_for_async_work: true

@@ -1,0 +1,26 @@
+version: 1
+domain: social
+machines:
+  follow:
+    initial: ACTIVE
+    states: [ACTIVE, REMOVED]
+    transitions:
+      - {from: ACTIVE, event: UNFOLLOW, to: REMOVED}
+      - {from: REMOVED, event: FOLLOW, to: ACTIVE}
+  post:
+    initial: DRAFT
+    states: [DRAFT, PUBLISHED, RESTRICTED, REMOVED]
+    transitions:
+      - {from: DRAFT, event: PUBLISH, to: PUBLISHED}
+      - {from: PUBLISHED, event: RESTRICT, to: RESTRICTED}
+      - {from: RESTRICTED, event: RESTORE, to: PUBLISHED}
+      - {from: PUBLISHED, event: DELETE, to: REMOVED}
+      - {from: RESTRICTED, event: DELETE, to: REMOVED}
+  report:
+    initial: OPEN
+    states: [OPEN, TRIAGED, ACTIONED, DISMISSED, APPEALED]
+    transitions:
+      - {from: OPEN, event: TRIAGE, to: TRIAGED}
+      - {from: TRIAGED, event: ACTION, to: ACTIONED}
+      - {from: TRIAGED, event: DISMISS, to: DISMISSED}
+      - {from: ACTIONED, event: APPEAL, to: APPEALED}

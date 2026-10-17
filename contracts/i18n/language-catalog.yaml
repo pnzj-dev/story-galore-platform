@@ -1,0 +1,22 @@
+version: "1.0"
+canonical: true
+standard: BCP_47
+supportedLanguageRecord:
+  required: [languageTag, languageCode, displayName, nativeName, direction]
+  properties:
+    languageTag: canonical BCP 47 language tag
+    languageCode: ISO 639 language code where applicable
+    displayName: localized administrative display name
+    nativeName: language self-name
+    direction: [LTR, RTL]
+    script: optional ISO 15924 script identifier
+    region: optional ISO 3166 region identifier
+    enabled: boolean
+    sortOrder: integer
+rules:
+  - Store canonical language tags, never UI labels, as identifiers.
+  - Do not infer publication language from creator locale, title text, or IP address.
+  - Multiple language tags may be assigned to a publication.
+  - One primary language is required for language-bearing publications.
+  - Non-language-bearing media may use contentLanguageMode: NOT_APPLICABLE.
+  - Mixed-language publications must declare every supported content language.

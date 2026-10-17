@@ -1,0 +1,41 @@
+schema: storygalore.keep2share-adapter-implementation/v1
+priority: API_FIRST
+authentication:
+- USER_ACCOUNT
+- PARTNER_ACCOUNT
+browser_fallback_only_for:
+- link_discovery
+- provider_api_gap
+- human_captcha_interaction
+- human_mfa_interaction
+secrets:
+- username
+- password
+- auth_token
+- access_token
+- cookies
+- authorization_headers
+secret_policy: NEVER_EXPOSE_TO_LLM_OR_LOGS
+human_challenges:
+- CAPTCHA_REQUIRED
+- MFA_REQUIRED
+download_policy: ONLY_EXPLICITLY_AUTHORIZED_CONTENT
+pipeline:
+- inspect
+- authenticate_if_needed
+- resolve
+- download
+- hash
+- metadata_normalize
+- archive_normalize
+- security_scan
+- storygalore_upload
+- media_register
+- moderation_submit
+stop_conditions:
+- authorization_missing
+- captcha_without_human
+- mfa_without_human
+- integrity_mismatch
+- archive_unsafe
+- policy_denied

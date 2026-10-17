@@ -1,0 +1,39 @@
+version: 1.0.0
+release: V1
+policy: deterministic
+checks:
+  - id: implementation-spec
+    required: true
+    command: pnpm validate:implementation-spec
+  - id: deterministic-contracts
+    required: true
+    command: node scripts/validate-deterministic-contracts.mjs
+  - id: architecture
+    required: true
+    command: pnpm validate:architecture
+  - id: cross-domain
+    required: true
+    command: pnpm validate:cross-domain
+  - id: typecheck
+    required: true
+    command: pnpm typecheck
+  - id: tests
+    required: true
+    command: pnpm test
+  - id: ui
+    required: true
+    command: pnpm validate:ui
+  - id: security
+    required: true
+    command: pnpm validate:consent-privacy
+  - id: v1
+    required: true
+    command: pnpm validate:v1-contract
+  - id: build
+    required: true
+    command: pnpm build
+rules:
+  - never mark passed without recorded command output
+  - never replace a failing check with a weaker check without an ADR
+  - never claim deployment readiness from unit tests alone
+  - production release remains separately authorized

@@ -1,0 +1,25 @@
+schema: storygalore.consumer-overage/v1
+version: 1
+canonical: true
+status: V19.5.2
+policy: fail_closed
+catalogId: consumer.overage.v1
+mode: OPT_IN_ONLY
+packs:
+- packId: VIDEO_10H
+  unit: VIDEO_MINUTE
+  quantity: 600
+  price:
+    currency: EUR
+    minor: 299
+- packId: VIDEO_50H
+  unit: VIDEO_MINUTE
+  quantity: 3000
+  price:
+    currency: EUR
+    minor: 799
+rules:
+- Exact pack must be selected before charge.
+- No automatic rollover unless explicitly declared.
+- Unused purchased capacity refund behavior MUST be declared before activation.
+- Unknown pack or price version MUST BLOCK checkout.

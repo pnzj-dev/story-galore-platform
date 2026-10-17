@@ -1,0 +1,16 @@
+schema: storygalore.contract-scenarios/v1
+version: 1
+policy: fail_closed
+scenarios:
+- id: unknown-provider-capability
+  given: capability_unknown
+  when: route
+  then: BLOCK
+- id: payout-capability-required
+  given: stablecoinPayouts=false
+  when: USDC_payout
+  then: BLOCK
+- id: wallet-address-capability
+  given: walletPayoutAddresses=false
+  when: wallet_payout
+  then: BLOCK

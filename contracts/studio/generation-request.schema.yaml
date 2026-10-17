@@ -1,0 +1,19 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://storygalore.dev/contracts/studio/generation-request.schema.yaml
+title: Studio Generation Request
+version: 1
+required: [requestId, projectId, targetType, billingMode, executionLocation, policyContext]
+properties:
+  requestId: {type: string}
+  projectId: {type: string}
+  draftId: {type: string}
+  targetType: {enum: [PAGE, PANEL, IMAGE, CHARACTER, BACKGROUND, DIALOGUE, STORY_TEXT]}
+  promptTemplateId: {type: string}
+  prompt: {type: string}
+  inputAssetIds: {type: array, items: {type: string}}
+  billingMode: {enum: [PLATFORM_CREDITS, BYOK, USER_HOSTED]}
+  creditEligible: {type: boolean}
+  creditEligibilityReason: {type: string}
+  executionLocation: {enum: [CLOUD, USER_HOSTED]}
+  policyContext: {type: object}
+additionalProperties: false

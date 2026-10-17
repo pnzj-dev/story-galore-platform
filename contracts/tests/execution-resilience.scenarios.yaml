@@ -1,0 +1,34 @@
+version: 1
+scenarios:
+  - id: execution-001
+    name: immediate command never creates durable execution
+    given: {executionClass: IMMEDIATE}
+    then: {executor: application, durableExecution: false}
+  - id: execution-002
+    name: durable job uses Cloudflare Workflows
+    given: {executionClass: DURABLE_JOB, cloudflareWorkflows: HEALTHY}
+    then: {executor: cloudflare_workflows}
+  - id: execution-003
+    name: workflow outage fails closed without starting an alternate executor
+    given: {executionClass: DURABLE_JOB, cloudflareWorkflows: UNAVAILABLE}
+    then: {executor: none, operationState: DEGRADED, no_duplicate_external_side_effect: true}
+  - id: execution-004
+    name: operation state remains authoritative in Appwrite
+    given: {cloudflareWorkflows: HEALTHY, appwriteTablesDb: HEALTHY}
+    then: {operationState: appwrite_tablesdb, executionWorker: cloudflare_workflows}
+  - id: execution-005
+    name: duplicate delivery does not duplicate external side effect
+    given: {sameOperationId: true, sameIdempotencyKey: true}
+    then: {singleLogicalEffect: true}
+  - id: execution-006
+    name: complex workflow remains Cloudflare Workflows
+    given: {executionClass: DURABLE_WORKFLOW}
+    then: {executor: cloudflare_workflows}
+  - id: execution-007
+    name: Cloudflare recovery restores execution
+    given: {primaryWasUnavailable: true, cloudflareWorkflows: HEALTHY, recoveryProbesPassed: true}
+    then: {executor: cloudflare_workflows}
+  - id: execution-008
+    name: unavailable durable executor preserves operation state
+    given: {cloudflareWorkflows: UNAVAILABLE}
+    then: {status: DEGRADED, noDataLoss: true}

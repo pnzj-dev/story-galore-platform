@@ -1,0 +1,38 @@
+version: "1.0"
+area: discovery
+commands:
+  - name: discovery_reindex
+    requiresAuthorization: true
+    requiresIdempotency: true
+    expectedRevision: optional
+    emitsVersionedEvent: true
+    sourceOfTruthWrite: true
+  - name: recommendation_feedback_record
+    requiresAuthorization: true
+    requiresIdempotency: true
+    expectedRevision: optional
+    emitsVersionedEvent: true
+    sourceOfTruthWrite: true
+  - name: search_index_delete
+    requiresAuthorization: true
+    requiresIdempotency: true
+    expectedRevision: optional
+    emitsVersionedEvent: true
+    sourceOfTruthWrite: true
+queries:
+  - name: search
+    authorizationFiltered: true
+    secretsExcluded: true
+    pagination: cursor_when_collection
+  - name: autocomplete
+    authorizationFiltered: true
+    secretsExcluded: true
+    pagination: cursor_when_collection
+  - name: recommendations
+    authorizationFiltered: true
+    secretsExcluded: true
+    pagination: cursor_when_collection
+  - name: trending
+    authorizationFiltered: true
+    secretsExcluded: true
+    pagination: cursor_when_collection

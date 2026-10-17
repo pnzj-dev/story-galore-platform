@@ -1,0 +1,12 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+title: StoryGalore Report
+type: object
+required: [reporterId, targetType, targetId, reason, status, createdAt]
+properties:
+  reporterId: {type: string, minLength: 1}
+  targetType: {type: string, enum: [COMMENT, PUBLICATION]}
+  targetId: {type: string, minLength: 1}
+  reason: {type: string, minLength: 1}
+  status: {type: string, enum: [OPEN, REVIEWED, RESOLVED, DISMISSED]}
+  createdAt: {type: string, format: date-time}
+additionalProperties: false

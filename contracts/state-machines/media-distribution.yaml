@@ -1,0 +1,60 @@
+version: 1
+name: media-distribution
+purpose: deterministic delivery-path selection and circuit state; not business authorization
+states:
+  - PRIMARY_HEALTHY
+  - PRIMARY_DEGRADED
+  - FAILOVER_PENDING
+  - SECONDARY_ACTIVE
+  - RECOVERY_PROBING
+  - PRIMARY_ONLY
+  - DEGRADED_NO_DISTRIBUTOR
+transitions:
+  - from: PRIMARY_HEALTHY
+    event: PRIMARY_HEALTH_CHECK_FAILED_THRESHOLD
+    to: FAILOVER_PENDING
+    guard: secondary_enabled_and_healthy
+  - from: PRIMARY_HEALTHY
+    event: PRIMARY_HEALTH_CHECK_FAILED_THRESHOLD
+    to: PRIMARY_ONLY
+    guard: secondary_disabled_or_unavailable
+  - from: FAILOVER_PENDING
+    event: SECONDARY_SELECTION_CONFIRMED
+    to: SECONDARY_ACTIVE
+    guard: protected_authorization_already_passed
+  - from: FAILOVER_PENDING
+    event: SECONDARY_SELECTION_REJECTED
+    to: DEGRADED_NO_DISTRIBUTOR
+    guard: no_authorized_delivery_path
+  - from: SECONDARY_ACTIVE
+    event: PRIMARY_HEALTH_RECOVERED
+    to: RECOVERY_PROBING
+    guard: primary_probe_required
+  - from: RECOVERY_PROBING
+    event: PRIMARY_PROBE_SUCCEEDED
+    to: PRIMARY_HEALTHY
+    guard: recovery_probe_success
+  - from: RECOVERY_PROBING
+    event: PRIMARY_PROBE_FAILED
+    to: SECONDARY_ACTIVE
+    guard: secondary_still_enabled_and_healthy
+  - from: PRIMARY_ONLY
+    event: SECONDARY_ENABLED
+    to: PRIMARY_HEALTHY
+    guard: primary_healthy
+  - from: PRIMARY_ONLY
+    event: PRIMARY_UNAVAILABLE
+    to: DEGRADED_NO_DISTRIBUTOR
+    guard: secondary_disabled
+  - from: DEGRADED_NO_DISTRIBUTOR
+    event: PRIMARY_HEALTH_RECOVERED
+    to: PRIMARY_HEALTHY
+    guard: primary_probe_success
+terminalStates: []
+invariants:
+  - Business authorization is evaluated before every protected delivery attempt.
+  - SECONDARY_ACTIVE is illegal when secondaryEnabled=false.
+  - PRIMARY_ONLY is the effective state whenever secondaryEnabled=false.
+  - Appwrite public URLs are never a delivery fallback.
+  - A deleted or revoked MediaAsset remains unavailable on every distributor.
+  - Adult policy, entitlement, jurisdiction, moderation, and creator permissions remain outside this state machine.

@@ -1,0 +1,25 @@
+version: '1.0.0'
+required_sequence:
+- support_or_issue
+- agent_task
+- branch
+- commits
+- draft_pull_request
+- validation
+- qa_review
+- deployment_candidate
+mapping:
+  branch: agent/{taskType}/{taskId}/{short-slug}
+  commit: '{taskId}: {imperative-summary}'
+  pull_request_title: '[{taskId}] {imperative-summary}'
+required_pr_links:
+- canonical_issue
+- taskId
+- acceptanceCriteria
+- validationEvidence
+- riskAssessment
+- deploymentNotes
+forbidden:
+- direct_main_branch_mutation
+- self_approval
+- production_deploy_without_policy_decision

@@ -1,0 +1,11 @@
+schema: storygalore.function-resource-map/v1
+version: 1
+function: cleanup
+policy: explicit_only
+resources:
+  - media_upload_sessions
+  - media_assets
+  - notifications
+  - notification_delivery_attempts
+  - reader_session
+undeclared_resource_access: BLOCK

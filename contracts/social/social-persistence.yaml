@@ -1,0 +1,31 @@
+version: 1
+domain: social
+authoritative_resources:
+  creator_profiles: {storage: appwrite_tablesdb, rebuildable: false}
+  social_follows: {storage: appwrite_tablesdb, rebuildable: false}
+  social_posts: {storage: appwrite_tablesdb, rebuildable: false}
+  social_post_revisions: {storage: appwrite_tablesdb, rebuildable: false}
+  social_reactions: {storage: appwrite_tablesdb, rebuildable: false}
+  social_comments: {storage: appwrite_tablesdb, rebuildable: false}
+  social_mentions: {storage: appwrite_tablesdb, rebuildable: false}
+  social_collections: {storage: appwrite_tablesdb, rebuildable: false}
+  social_collection_items: {storage: appwrite_tablesdb, rebuildable: false}
+  social_shares: {storage: appwrite_tablesdb, rebuildable: false}
+  social_polls: {storage: appwrite_tablesdb, rebuildable: false}
+  social_poll_options: {storage: appwrite_tablesdb, rebuildable: false}
+  social_poll_votes: {storage: appwrite_tablesdb, rebuildable: false}
+  social_blocks: {storage: appwrite_tablesdb, rebuildable: false}
+  social_mutes: {storage: appwrite_tablesdb, rebuildable: false}
+  social_reports: {storage: appwrite_tablesdb, rebuildable: false}
+  social_moderation_actions: {storage: appwrite_tablesdb, rebuildable: false}
+projections:
+  - following_feed
+  - reaction_counts
+  - comment_counts
+  - follower_counts
+  - collection_counts
+  - creator_activity
+  - social_notification_projection
+rules:
+  - Projections MUST NOT be treated as authorization or entitlement sources.
+  - Projection rebuild MUST be possible from authoritative resources/events.

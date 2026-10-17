@@ -1,0 +1,54 @@
+version: '1.0'
+area: support
+states:
+- OPEN
+- ASSIGNED
+- WAITING_USER
+- WAITING_INTERNAL
+- ESCALATED
+- RESOLVED
+- CLOSED
+transitionRules:
+- Only listed transitions are legal.
+- Authorization MUST be evaluated separately from transition legality.
+- Retries MUST preserve idempotency.
+- State changes MUST emit the event declared by the command/event compatibility graph.
+transitions:
+- from: OPEN
+  event: ASSIGN
+  to: ASSIGNED
+- from: OPEN
+  event: ESCALATE
+  to: ESCALATED
+- from: ASSIGNED
+  event: WAIT_USER
+  to: WAITING_USER
+- from: ASSIGNED
+  event: WAIT_INTERNAL
+  to: WAITING_INTERNAL
+- from: WAITING_USER
+  event: RESPOND
+  to: ASSIGNED
+- from: WAITING_INTERNAL
+  event: RESPOND
+  to: ASSIGNED
+- from: ASSIGNED
+  event: ESCALATE
+  to: ESCALATED
+- from: ESCALATED
+  event: ASSIGN
+  to: ASSIGNED
+- from: ASSIGNED
+  event: RESOLVE
+  to: RESOLVED
+- from: ESCALATED
+  event: RESOLVE
+  to: RESOLVED
+- from: RESOLVED
+  event: CLOSE
+  to: CLOSED
+- from: CLOSED
+  event: REOPEN
+  to: OPEN
+terminalStates:
+- CLOSED

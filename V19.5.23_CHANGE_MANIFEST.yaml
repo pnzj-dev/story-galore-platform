@@ -1,0 +1,14 @@
+version: 19.5.23
+title: Media catalog taxonomy contract
+status: planning-contract-update
+changes:
+  - Add the canonical media catalog taxonomy separating format, orientation, duration, and processing properties from top-level publication types.
+  - Ensure media is treated as a first-class domain with a taxonomy that supports comics, images, short video, long video, audio, and mixed media without a comic-only abstraction.
+  - Add taxonomy validation to scripts/validate-media-catalog-taxonomy.mjs.
+not_claimed:
+  - Video/audio transcoding or playback is implemented.
+  - Storage, transcoding, and egress economics are validated.
+validation:
+  - pnpm validate:media-taxonomy
+  - pnpm validate:repository-coherence
+  - pnpm validate:docs

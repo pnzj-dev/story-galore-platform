@@ -1,0 +1,59 @@
+version: 1.0.0
+release: V1
+policy: deterministic
+rules:
+- id: domain-pure
+  path_prefix: packages/domain
+  may_import:
+  - packages/domain
+  may_not_import:
+  - sites
+  - services
+  - backend
+- id: ui-shared
+  path_prefix: packages/ui
+  may_import:
+  - packages/ui
+  - packages/config
+  may_not_import:
+  - apps/web
+- id: web-application
+  path_prefix: apps/web
+  may_import:
+  - packages/domain
+  - packages/appwrite-client
+  - packages/ui
+  - packages/config
+  surfaces:
+  - public
+  - creator-studio
+  - non-destructive-admin
+- id: admin-application
+  path_prefix: apps/admin
+  may_import:
+  - packages/domain
+  - packages/appwrite-client
+  - packages/ui
+  - packages/config
+  may_not_import:
+  - apps/web
+  must_use: contracts/permissions/admin-rbac-admin-app.json
+  no_browser_api_key: true
+- id: appwrite-integration
+  path_prefix: packages/appwrite-client
+  may_import:
+  - packages/appwrite-client
+  - packages/domain
+  - packages/config
+- id: agent-runtime
+  path_prefix: agents
+  may_import:
+  - packages/domain
+  - packages/config
+  must_use: contracts/agents/capability-registry.yaml
+- id: cloudflare-workflows-runtime
+  path_prefix: backend/cloudflare/workflows
+  may_import:
+  - packages/domain
+  - packages/config
+  must_use: contracts/runtime/profiles.yaml

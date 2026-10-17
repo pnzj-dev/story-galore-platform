@@ -1,0 +1,76 @@
+version: 1
+kind: creator-studio-persistence-mapping
+rules:
+  - canonical_domain_ids_are_not_storage_ids
+  - media_references_use_media_asset_id
+  - all_mutations_are_tenant_scoped
+  - published_snapshots_are_immutable
+entities:
+  project:
+    table: studio_projects
+    id_strategy: uuid
+    partition_key: workspaceId
+    indexes: [workspaceId_status, workspaceId_updatedAt]
+    soft_delete: archivedAt
+  story_bible:
+    table: studio_story_bibles
+    id_strategy: uuid
+    partition_key: projectId
+    indexes: [projectId]
+  character:
+    table: studio_characters
+    id_strategy: uuid
+    partition_key: projectId
+    indexes: [projectId_name]
+  world:
+    table: studio_worlds
+    id_strategy: uuid
+    partition_key: projectId
+  prompt_template:
+    table: studio_prompt_templates
+    id_strategy: uuid
+    partition_key: projectId
+  studio_asset:
+    table: studio_assets
+    id_strategy: uuid
+    partition_key: projectId
+    media_reference: mediaAssetId
+    indexes: [projectId_mediaAssetId]
+  document:
+    table: studio_documents
+    id_strategy: uuid
+    partition_key: projectId
+    indexes: [projectId_status]
+  comic_page:
+    table: studio_pages
+    id_strategy: uuid
+    partition_key: documentId
+    indexes: [documentId_position]
+  comic_panel:
+    table: studio_panels
+    id_strategy: uuid
+    partition_key: pageId
+    indexes: [pageId_position]
+  editor_operation:
+    table: studio_editor_operations
+    id_strategy: uuid
+    partition_key: documentId
+    append_only: true
+    indexes: [documentId_revision, mutationId]
+  editor_revision:
+    table: studio_editor_revisions
+    id_strategy: uuid
+    partition_key: documentId
+    immutable: true
+    indexes: [documentId_revision]
+  published_snapshot:
+    table: studio_publication_snapshots
+    id_strategy: uuid
+    partition_key: publicationId
+    immutable: true
+    indexes: [publicationId, sourceRevisionId]
+permissions:
+  default: server_enforced
+  public_records: never_directly_exposed
+  published_snapshots: policy_filtered
+  creator_records: tenant_and_resource_scoped

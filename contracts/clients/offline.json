@@ -1,0 +1,1 @@
+{"name":"OfflineClientContract","version":"1.0","states":["ONLINE","OFFLINE","SYNCING","CONFLICT","SYNC_FAILED"],"requirements":["client-local outbox/cache","idempotent mutations","server reconciliation","no client-side entitlement authority"]}

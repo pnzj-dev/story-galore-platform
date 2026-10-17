@@ -1,0 +1,41 @@
+{
+  "policies": [
+    {
+      "name": "rate-limit-auth",
+      "resource": "api",
+      "action": "rate-limit",
+      "intent": "protect sign-in/signup/reset endpoints"
+    },
+    {
+      "name": "challenge-signup",
+      "resource": "public-site",
+      "action": "challenge",
+      "intent": "challenge suspicious automated signup traffic"
+    },
+    {
+      "name": "rate-limit-payment-webhooks",
+      "resource": "payment-webhook-function",
+      "action": "rate-limit",
+      "intent": "limit abusive public webhook traffic while allowing legitimate provider traffic"
+    },
+    {
+      "name": "protect-admin-site",
+      "resource": "admin-site",
+      "action": "challenge",
+      "intent": "protect sensitive admin surface when incident conditions warrant"
+    },
+    {
+      "name": "maintenance-redirect",
+      "resource": "site",
+      "action": "redirect",
+      "intent": "emergency maintenance without redeploy"
+    },
+    {
+      "name": "attack-mode-runbook",
+      "resource": "public-site",
+      "action": "challenge",
+      "intent": "incident response"
+    }
+  ],
+  "note": "Exact rule syntax/limits must be created using current Appwrite Firewall Console/API after project resources have IDs."
+}

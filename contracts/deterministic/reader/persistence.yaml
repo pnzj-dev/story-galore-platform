@@ -1,0 +1,21 @@
+version: "1.0"
+area: reader
+canonical: true
+description: "Deterministic implementation contract for {area}."
+persistence:
+  - resource: reading_progress
+    partitionKey: "userId,publicationId,episodeId"
+    authority: "server canonical; one current row per user+publication(+episode)"
+    requiredIndexes: "userId,updatedAt"
+  - resource: reader_preferences
+    partitionKey: "userId"
+    authority: "server canonical preferences"
+    requiredIndexes: "userId"
+  - resource: reader_session
+    partitionKey: "userId,comicId,episodeId"
+    authority: "short-lived resumable session; not source of truth"
+    requiredIndexes: "userId,updatedAt"
+  - resource: user_language_preferences
+    partitionKey: "userId"
+    authority: "server canonical locale and content-language preferences"
+    requiredIndexes: "userId,updatedAt"

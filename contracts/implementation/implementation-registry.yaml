@@ -1,0 +1,102 @@
+version: 1.0.0
+release: V1
+policy: deterministic
+rule: Every implementation target MUST resolve to exactly one canonical owner, source
+  path, contract set, persistence/API mapping, and verification set.
+missing_mapping_behavior: BLOCKED
+ambiguity_behavior: BLOCKED
+entries:
+- id: web-application
+  kind: application
+  owner: web
+  path: apps/web
+  surfaces:
+  - public
+  - creator-studio
+  - non-destructive-admin
+  contracts:
+  - contracts/ui/component-contract.yaml
+  - contracts/ui/ui-command-map.yaml
+  - contracts/permissions/admin-rbac.json
+  - contracts/admin/admin-app-split.yaml
+  - contracts/clients/pwa.json
+  tests:
+  - tests/contracts
+- id: admin-application
+  kind: application
+  owner: web
+  path: apps/admin
+  surfaces:
+  - destructive-admin
+  contracts:
+  - contracts/permissions/admin-rbac-admin-app.json
+  - contracts/admin/admin-app-split.yaml
+  - contracts/admin/destructive-operations.yaml
+  - contracts/admin/apps-admin-runtime.yaml
+  - contracts/deterministic/admin/app-split.yaml
+  tests:
+  - tests/contracts
+- id: domain
+  kind: package
+  owner: domain
+  path: packages/domain
+  contracts:
+  - contracts/compatibility/command-event-map.yaml
+  - contracts/compatibility/persistence-registry.yaml
+  - contracts/state-machines
+  tests:
+  - tests/contracts
+- id: appwrite-client
+  kind: package
+  owner: infrastructure-appwrite
+  path: packages/appwrite-client
+  contracts:
+  - contracts/compatibility/appwrite-resource-registry.yaml
+  tests:
+  - tests/contracts
+- id: ui
+  kind: package
+  owner: web-platform
+  path: packages/ui
+  contracts:
+  - contracts/ui/component-contract.yaml
+  tests:
+  - packages/ui/tests
+- id: config
+  kind: package
+  owner: platform-config
+  path: packages/config
+  contracts:
+  - contracts/runtime/profiles.yaml
+  - contracts/i18n/locale-resolution.yaml
+  tests:
+  - tests/contracts
+- id: appwrite-functions
+  kind: backend
+  owner: infrastructure-appwrite
+  path: backend/appwrite/functions
+  contracts:
+  - contracts/compatibility/appwrite-resource-registry.yaml
+  - contracts/execution
+  tests:
+  - tests/contracts
+- id: cloudflare-workflow-workers
+  kind: backend
+  owner: workflow-infrastructure
+  path: backend/cloudflare/workflows
+  contracts:
+  - contracts/runtime/profiles.yaml
+  - contracts/execution
+  tests:
+  - tests/contracts
+- id: cloudflare-agents
+  kind: agent-runtime
+  owner: agent-platform
+  path: agents
+  contracts:
+  - contracts/agents/registry.yaml
+  - contracts/agents/task.yaml
+  - contracts/agents/delegation.yaml
+  - contracts/agents/capability-registry.yaml
+  tests:
+  - tests/contracts

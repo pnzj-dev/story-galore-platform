@@ -1,0 +1,65 @@
+version: 1
+kind: creator-studio-command-contract
+command_rules:
+  actor_required: true
+  tenant_required: true
+  policy_check_required: true
+  idempotency_required_for_mutations: true
+  optimistic_concurrency_required_for_editor_mutations: true
+  ui_must_not_call_storage_directly: true
+commands:
+  - name: CreateProject
+    operation: studio_project_create
+    preconditions: [workspace_access]
+    effects: [project_created]
+  - name: UpdateProject
+    operation: studio_project_update
+    preconditions: [project_exists, project_write_permission]
+    effects: [project_updated]
+  - name: CreatePage
+    operation: page_create
+    preconditions: [document_write_permission]
+    effects: [page_created]
+  - name: MovePage
+    operation: page_reorder
+    preconditions: [document_write_permission, expected_revision]
+    effects: [document_revised]
+  - name: CreatePanel
+    operation: panel_create
+    preconditions: [page_write_permission, expected_revision]
+    effects: [document_revised]
+  - name: ApplyEditorOperation
+    operation: editor_apply_operation
+    preconditions: [document_write_permission, expected_revision, operation_schema_valid]
+    effects: [operation_appended, revision_created]
+  - name: RestoreRevision
+    operation: draft_revision_restore
+    preconditions: [document_write_permission, revision_exists]
+    effects: [revision_created]
+  - name: RequestGeneration
+    operation: generation_create
+    preconditions: [generation_policy_allowed, credits_or_byok_available]
+    effects: [generation_requested]
+  - name: ApplyGeneration
+    operation: generation_apply_to_draft
+    preconditions: [generation_completed, document_write_permission, expected_revision]
+    effects: [generation_applied, revision_created]
+  - name: ValidatePublication
+    operation: publication_validate
+    preconditions: [document_read_permission]
+    effects: [validation_result_created]
+  - name: Publish
+    operation: publication_publish
+    preconditions: [validation_passed, publish_permission, approved_revision]
+    effects: [published_snapshot_created, publication_published]
+failure_codes:
+  - FORBIDDEN
+  - POLICY_DENIED
+  - NOT_FOUND
+  - INVALID_STATE
+  - REVISION_CONFLICT
+  - IDEMPOTENCY_REPLAY
+  - VALIDATION_FAILED
+  - ENTITLEMENT_REQUIRED
+  - GENERATION_NOT_READY
+  - MEDIA_NOT_READY

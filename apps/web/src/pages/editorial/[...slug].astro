@@ -1,0 +1,43 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCollection, render } from 'astro:content';
+
+const slug = Astro.params.slug;
+const published = await getCollection('posts', ({ data }) => data.status === 'published');
+const entry = published.find((p) => p.id === slug || p.data.slug === slug);
+
+if (!entry) {
+  Astro.response.status = 404;
+}
+
+const { Content } = entry ? await render(entry) : { Content: undefined };
+
+const articleSchema = entry
+  ? {
+      '@context': 'https://schema.org',
+      '@type': 'Article',
+      headline: entry.data.title,
+      description: entry.data.description,
+      datePublished: entry.data.publishedAt?.toISOString(),
+      author: entry.data.author ? { '@type': 'Person', name: entry.data.author } : undefined,
+    }
+  : undefined;
+---
+
+<Layout title={entry?.data.title ?? 'Not found'} description={entry?.data.description}>
+  {articleSchema && <script slot="head" type="application/ld+json" set:html={JSON.stringify(articleSchema)} />}
+  {entry && (
+    <article class="mx-auto max-w-3xl px-6 py-12">
+      <h1 class="text-3xl font-bold">{entry.data.title}</h1>
+      {entry.data.description && <p class="mt-2 text-lg text-foreground-muted">{entry.data.description}</p>}
+      <div class="mt-8 space-y-4 leading-relaxed"><Content /></div>
+    </article>
+  )}
+  {!entry && (
+    <main class="mx-auto max-w-3xl px-6 py-24 text-center">
+      <h1 class="text-3xl font-bold">Not found</h1>
+      <p class="mt-2 text-foreground-muted">This page could not be found.</p>
+      <a href="/" class="mt-6 inline-block text-link">Back home</a>
+    </main>
+  )}
+</Layout>

@@ -1,0 +1,51 @@
+version: '1.0'
+area: publication
+states:
+- DRAFT
+- PROCESSING
+- PENDING_REVIEW
+- APPROVED
+- PUBLISHING
+- PUBLISHED
+- REJECTED
+- UNPUBLISHED
+transitionRules:
+- Only listed transitions are legal.
+- Authorization MUST be evaluated separately from transition legality.
+- Retries MUST preserve idempotency.
+- State changes MUST emit the event declared by the command/event compatibility graph.
+transitions:
+- from: DRAFT
+  event: PROCESS
+  to: PROCESSING
+- from: PROCESSING
+  event: REVIEW
+  to: PENDING_REVIEW
+- from: PROCESSING
+  event: REJECT
+  to: REJECTED
+- from: PENDING_REVIEW
+  event: APPROVE
+  to: APPROVED
+- from: PENDING_REVIEW
+  event: REJECT
+  to: REJECTED
+- from: APPROVED
+  event: PUBLISH
+  to: PUBLISHING
+- from: PUBLISHING
+  event: SUCCESS
+  to: PUBLISHED
+- from: PUBLISHING
+  event: FAIL
+  to: APPROVED
+- from: PUBLISHED
+  event: UNPUBLISH
+  to: UNPUBLISHED
+- from: UNPUBLISHED
+  event: REPUBLISH
+  to: PUBLISHING
+- from: REJECTED
+  event: REPROCESS
+  to: PROCESSING
+terminalStates: []

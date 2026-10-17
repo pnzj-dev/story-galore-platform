@@ -1,0 +1,23 @@
+schema: storygalore.function-output/v1
+function: central-agent-gateway
+status: normative
+success_fields:
+  - request_id
+  - trace_id
+  - policy_decision_id
+  - storygalore_tool_id
+  - result_schema_version
+  - result
+failure_fields:
+  - request_id
+  - trace_id
+  - error_code
+  - retryable
+  - policy_decision_id
+rules:
+  secret_or_credential_fields: NEVER_RETURN
+  raw_provider_error_details: NEVER_RETURN
+  result: project_to_registered_output_schema_only
+  policy_denial: SAFE_NON_DISCLOSING_ERROR
+  provider_schema_mismatch: FAIL_CLOSED_AND_AUDIT
+  unknown_error: SAFE_FAILURE

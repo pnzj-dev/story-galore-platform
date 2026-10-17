@@ -1,0 +1,17 @@
+schema: storygalore.promotion-policy/v1
+version: 1
+canonical: true
+status: V19.5.3
+policy: fail_closed
+funding_sources:
+- STORYGALORE
+- CREATOR
+- SPONSOR
+- SHARED
+rules:
+- Every discount MUST declare who funds the discount.
+- Discounted creator earnings MUST be computed from the declared funding policy.
+- Promotions MUST have start and end timestamps.
+- Promotions MUST declare eligibility, stacking and maximum liability.
+- A promotion that can create negative contribution margin MUST be blocked unless explicitly approved as an acquisition investment.
+- Coupon redemption MUST be idempotent.

@@ -1,0 +1,37 @@
+version: 1.0.0
+release: V1
+policy: deterministic
+required_fields:
+  - taskId
+  - type
+  - source
+  - requirements
+  - constraints
+  - contractRefs
+  - implementationTargets
+  - acceptance
+  - verification
+  - authorization
+terminal_states: [COMPLETED, DEPLOYMENT_CANDIDATE, BLOCKED, REJECTED]
+block_reasons:
+  - MISSING_CONTRACT
+  - AMBIGUOUS_REQUIREMENT
+  - MISSING_IMPLEMENTATION_MAP
+  - MISSING_PROVIDER_CONTRACT
+  - MISSING_AUTHORIZATION
+  - MISSING_TEST_MAPPING
+  - CONTRACT_CONFLICT
+  - UNSAFE_SIDE_EFFECT
+  - EXTERNAL_DEPENDENCY_UNVERIFIED
+completion:
+  deployment_candidate_requires:
+    - all_acceptance_passed
+    - all_required_tests_passed
+    - contract_validation_passed
+    - security_validation_passed
+    - build_passed
+    - provenance_complete
+    - no_open_blocker
+  production_requires:
+    - deployment_candidate
+    - explicit_authorization

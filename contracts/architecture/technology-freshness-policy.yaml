@@ -1,0 +1,94 @@
+contract_id: technology-freshness-policy
+version: 2
+status: normative
+purpose: Require every selected language, runtime, framework, SDK, CLI, build tool, and direct dependency to use the latest stable release that is compatible with the approved architecture at implementation lock time.
+principles:
+  stable_only: true
+  prereleases_allowed: false
+  unpinned_latest_tags_allowed_in_committed_manifests: false
+  floating_major_or_minor_ranges_allowed: false
+  exact_versions_required_for_implementation: true
+  lockfiles_required: true
+  official_sources_required: true
+  compatibility_must_be_tested: true
+  silent_downgrade_allowed: false
+  unsupported_latest_release_behavior: BLOCK
+resolution:
+  timing: immediately_before_implementation_bootstrap_and_again_before_release
+  evidence_required:
+    - technology_id
+    - selected_version
+    - latest_stable_version_at_resolution
+    - official_release_or_version_source_url
+    - checked_at_utc
+    - support_status
+    - compatibility_test_result
+    - exception_id_or_null
+  source_precedence:
+    - official_project_release_page_or_changelog
+    - official package registry or vendor documentation
+    - official language/runtime download page
+  compatibility:
+    - choose the latest stable release only after validating support for the target platform and required integrations
+    - if the latest stable release is incompatible, BLOCK and document the exact incompatibility; do not silently pin an older version
+    - an exception requires a reviewed ADR, owner, reason, expiration/recheck date, and explicit approval
+    - beta, alpha, rc, preview, nightly, canary, and experimental releases are not stable
+  reproducibility:
+    - resolve versions before scaffolding
+    - record exact versions and integrity hashes where supported
+    - commit package manager lockfiles and Go dependency checksums
+    - pin CLI/toolchain versions in repository configuration or bootstrap scripts
+    - generated platform scaffolds must record the CLI version and exact command used
+  upgrades:
+    - recheck official stable releases on every implementation bootstrap, every release candidate, and whenever a build plan or dependency graph changes
+    - never reuse a prior resolution as proof of current latest-stable status for a later bootstrap or release; historical evidence remains audit-only
+    - each resolution run must compare the selected exact version with the latest stable version published by the official source at that run
+    - an unchanged version is acceptable only when the current run confirms it is still latest stable and compatible
+    - update lockfiles and run all contract, type, unit, integration, security, build, and e2e gates
+    - do not upgrade production dependencies automatically without validation
+scope:
+  - programming_languages
+  - language_toolchains
+  - runtimes
+  - frameworks
+  - framework_adapters
+  - SDKs
+  - CLIs
+  - build_tools
+  - package_managers
+  - test_tools
+  - linters_and_formatters
+  - code_generators
+  - direct_dependencies
+  - transitive_dependencies_with_security_or_runtime_impact
+  - container_base_images
+  - CI_actions_and_build_images
+required_technology_families:
+  - Astro and Astro integrations, including @astrojs/node and @astrojs/svelte
+  - Svelte and TypeScript
+  - Node.js and pnpm
+  - Turborepo if retained in the implementation workspace
+  - Go toolchain and Go modules
+  - Appwrite CLI, server SDKs, and platform APIs
+  - Wrangler, Cloudflare Workers runtime APIs, Agents SDK, Workflows, and MCP libraries
+  - test, lint, format, security scan, and contract-validation tools
+implementation_gate:
+  block_if:
+    - any selected technology has no version resolution record
+    - resolution evidence was not freshly revalidated for the current bootstrap or release candidate
+    - package manager or CLI versions are floating, major-only, or sourced from a mutable latest tag in committed build configuration
+    - selected version differs from latest stable without approved exception
+    - exact version or lockfile is missing
+    - official source evidence is missing or stale
+    - compatibility tests have not passed
+    - prerelease or floating version is present in a production manifest
+    - a scaffolder's version or exact command is unregistered
+  block_message: TECHNOLOGY_VERSION_UNRESOLVED_OR_NOT_LATEST_STABLE
+
+resolution_freshness:
+  evidence_is_valid_only_for_current_run: true
+  require_new_timestamp_each_run: true
+  historical_evidence_can_satisfy_current_gate: false
+  selected_version_must_equal_latest_stable_at_check_time: true
+  compatibility_failure_action: BLOCK
+  stale_or_missing_official_source_action: BLOCK

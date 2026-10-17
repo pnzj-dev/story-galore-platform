@@ -1,0 +1,45 @@
+version: 1
+domain: social
+authority: social-domain
+principles:
+  - Following is a social relationship and MUST NOT grant entitlement.
+  - Subscription is an entitlement concern and MUST remain owned by Entitlements.
+  - Engagement MUST NOT bypass Policy, Age, Moderation, Jurisdiction, or Publication rules.
+  - Social content MUST reference canonical content IDs; raw storage IDs are forbidden.
+  - Deleted, blocked, restricted, or unpublished content MUST be filtered before social exposure.
+  - Realtime delivery is not source of truth; persisted social state is authoritative.
+  - Counters are projections and MUST be rebuildable from authoritative records/events.
+  - All mutations MUST be idempotent where repeated delivery is possible.
+features:
+  V1:
+    - creator_profiles
+    - creator_following
+    - following_feed
+    - creator_posts
+    - reactions
+    - comments_and_replies
+    - mentions
+    - notifications
+    - collections
+    - sharing
+    - block_mute_report
+    - social_moderation
+    - direct_messages
+    - subscriber_only_social_content
+    - polls
+  V1_5:
+    - public_reading_lists
+    - creator_recommendations
+    - creator_ama
+    - creator_milestones
+    - collaborative_collections
+  deferred:
+    - friends
+    - stories
+    - short_form_video_feed
+    - groups
+    - livestreaming
+    - voice_rooms
+    - discord_like_communities
+    - social_reputation
+    - large_scale_gamification

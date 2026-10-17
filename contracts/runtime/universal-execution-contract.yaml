@@ -1,0 +1,16 @@
+schema: storygalore.universal-execution-contract/v1
+version: 1
+policy: deterministic
+runtimes:
+- astro-sites
+- appwrite-functions
+- cloudflare-agents
+- cloudflare-workflows
+- cloudflare-workflow-workers
+rules:
+- Every executable MUST have one runtime owner.
+- Every executable MUST have an input/output contract.
+- Every executable MUST declare secrets, resources, capabilities and tests.
+- Durable executables MUST declare idempotency, retry, timeout, cancellation and recovery.
+- Fire-and-forget business work is forbidden.
+- Undeclared executables are BLOCKED.

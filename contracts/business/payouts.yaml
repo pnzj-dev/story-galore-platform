@@ -1,0 +1,35 @@
+schema: storygalore.payout-policy/v1
+version: 1
+canonical: true
+policy: fail_closed
+supportedRails:
+- railId: BANK
+  status: TARGET
+  settlementAsset: FIAT
+  providerSelection: REGISTERED_PROVIDER_POLICY
+- railId: USDC_BASE
+  status: TARGET
+  asset: USDC
+  network: BASE
+  default: true
+  providerSelection: REGISTERED_PROVIDER_POLICY
+- railId: USDC_POLYGON
+  status: TARGET
+  asset: USDC
+  network: POLYGON
+  default: false
+  providerSelection: REGISTERED_PROVIDER_POLICY
+rules:
+- Only registered rail/asset/network combinations may be requested.
+- Stablecoin payout is not a percentage-revenue source; provider/network cost and declared fixed service cost are separate
+  ledger items.
+- Creator must pass payout eligibility and required KYC/KYB/jurisdiction checks before execution.
+- Wallet address must be verified for the exact asset/network combination before payout.
+- Unsupported chain, token, address type, or provider capability is BLOCKED.
+- Payout provider confirmation and reconciliation are authoritative for external settlement.
+- Payouts never mutate creator earnings ledger entries; they settle available balance.
+- A payout cannot exceed available creator balance minus required reserves.
+feePolicy:
+  storygalorePercentageFeeBps: 0
+  serviceFee: REGISTERED_FIXED_FEE_POLICY
+  providerNetworkCost: PASSTHROUGH_OR_REGISTERED_CAP

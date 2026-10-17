@@ -1,0 +1,17 @@
+version: "1.0"
+area: notifications
+canonical: true
+description: "Deterministic implementation contract for {area}."
+persistence:
+  - resource: notifications
+    partitionKey: "notificationId"
+    authority: "authoritative notification record"
+    requiredIndexes: "userId,createdAt"
+  - resource: notification_preferences
+    partitionKey: "userId"
+    authority: "preference source of truth"
+    requiredIndexes: "userId"
+  - resource: notification_delivery_attempts
+    partitionKey: "notificationId"
+    authority: "delivery history"
+    requiredIndexes: "notificationId,createdAt"

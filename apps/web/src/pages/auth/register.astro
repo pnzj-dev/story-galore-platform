@@ -1,0 +1,80 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { ThemeToggle } from "@storygalore/ui";
+import { actions } from "astro:actions";
+
+const result = Astro.getActionResult(actions.register);
+
+if (result?.data?.ok) {
+  return Astro.redirect("/");
+}
+
+const error = result?.error?.message;
+---
+
+<Layout title="Create account — StoryGalore">
+  <div class="fixed end-4 top-4">
+    <ThemeToggle client:load />
+  </div>
+  <div class="flex min-h-screen items-center justify-center px-4">
+    <main class="w-full max-w-sm rounded-2xl border border-border bg-surface/60 p-8 shadow-xl">
+      <a href="/" class="mb-6 inline-block text-lg font-bold tracking-tight">
+        <span class="text-link">Story</span>Galore
+      </a>
+      <h1 class="text-2xl font-bold">Create your account</h1>
+      <p class="mt-1 text-sm text-foreground-muted">Start reading, watching and listening.</p>
+
+      <form method="POST" action={actions.register} class="mt-6 space-y-4">
+        <div>
+          <label for="name" class="mb-1 block text-sm text-foreground-muted">Name</label>
+          <input
+            id="name"
+            name="name"
+            type="text"
+            autocomplete="name"
+            required
+            maxlength="128"
+            class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
+          />
+        </div>
+        <div>
+          <label for="email" class="mb-1 block text-sm text-foreground-muted">Email</label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            autocomplete="email"
+            required
+            class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
+          />
+        </div>
+        <div>
+          <label for="password" class="mb-1 block text-sm text-foreground-muted">Password</label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            autocomplete="new-password"
+            required
+            minlength="8"
+            maxlength="256"
+            class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
+          />
+        </div>
+
+        {error && <p class="rounded-lg border border-danger bg-danger/15 px-3 py-2 text-sm text-danger" role="alert">{error}</p>}
+
+        <button
+          type="submit"
+          class="w-full rounded-lg bg-primary px-4 py-2 font-semibold text-primary-foreground transition hover:opacity-90"
+        >
+          Create account
+        </button>
+      </form>
+
+      <p class="mt-6 text-center text-sm text-foreground-muted">
+        Already have an account? <a href="/auth/login" class="text-link hover:text-link">Sign in</a>
+      </p>
+    </main>
+  </div>
+</Layout>

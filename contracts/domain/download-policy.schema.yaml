@@ -1,0 +1,22 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+title: StoryGalore Download Policy
+type: object
+properties:
+  modes:
+    type: array
+    items:
+      enum: [WEB_CACHE, APP_OFFLINE, EXPORT]
+  formats:
+    type: array
+    items:
+      enum: [PDF, CBZ, EPUB]
+  entitlementClasses:
+    type: array
+    items:
+      enum: [ANONYMOUS, FREE_USER, SUBSCRIBER, PURCHASER, CREATOR_OWNER, STAFF]
+  watermarkMode:
+    enum: [NONE, ACCOUNT_MARKER, PURCHASE_MARKER]
+  status:
+    enum: [ENABLED, DISABLED]
+required: [modes, formats, entitlementClasses, watermarkMode, status]
+additionalProperties: false

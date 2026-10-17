@@ -1,0 +1,48 @@
+schema: storygalore.v19-5-4-change-manifest/v1
+version: 1
+release: V19.5.4
+base: V19.5.3
+status: RELEASE_CANDIDATE
+objective: Durable Execution Simplification and Provider Registry Cleanup
+changes:
+  durable_execution:
+    previous_v1_engine: LEGACY_EXTERNAL_WORKFLOW_ENGINE
+    v1_engine: CLOUDFLARE_WORKFLOWS
+    temporal_dependency: REMOVED
+    provider_neutral_boundary: REQUIRED
+    domain_source_of_truth: DOMAIN_PERSISTENCE
+  payment_registry_cleanup:
+    removed_providers:
+      - LEGACY_PROVIDER_CANDIDATE_A
+      - LEGACY_PROVIDER_CANDIDATE_B
+      - LEGACY_PROVIDER_CANDIDATE_C
+    canonical_registered_candidates:
+      - STRIPE_CONNECT
+      - NOWPAYMENTS
+      - ZEN_PAYMENTS
+      - SECUREGLOBALPAY
+  operational_simplification:
+    - remove_temporal_cloud_and_worker_runtime
+    - remove_temporal_specific_local_development_path
+    - remove_temporal_specific_operations_and_e2e_dependencies
+    - keep_workflow_runner_provider_neutral
+    - preserve_appwrite_job_store_secondary_path_where_contractually_required
+added_contracts:
+  - contracts/execution/durable-execution-provider.yaml
+updated_contracts:
+  - contracts/execution/execution-dispatch.yaml
+  - contracts/execution/job-persistence.yaml
+  - contracts/implementation/source-ownership.yaml
+  - contracts/implementation/implementation-registry.yaml
+  - contracts/implementation/test-map.yaml
+  - contracts/implementation/infrastructure-resource-map.yaml
+  - contracts/runtime/profiles.yaml
+  - contracts/runtime/universal-execution-contract.yaml
+  - contracts/deployment/release-contract.yaml
+  - contracts/disaster-recovery/restore-contract.yaml
+removed_document:
+  - docs/TEMPORAL.md
+added_document:
+  - docs/CLOUDFLARE_WORKFLOWS.md
+human_gate: REQUIRED
+production_deployment: BLOCKED

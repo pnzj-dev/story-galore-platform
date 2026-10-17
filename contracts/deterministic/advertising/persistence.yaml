@@ -1,0 +1,36 @@
+version: '1.0'
+area: advertising
+canonical: true
+persistence:
+  - resource: ad_inventory
+    partitionKey: id
+    authority: canonical
+    requiredIndexes: status,placementId
+  - resource: ad_campaigns
+    partitionKey: id
+    authority: canonical
+    requiredIndexes: status,startAt,endAt
+  - resource: ad_creatives
+    partitionKey: id
+    authority: canonical
+    requiredIndexes: campaignId,status
+  - resource: ad_placements
+    partitionKey: id
+    authority: canonical
+    requiredIndexes: placementKey,status
+  - resource: ad_frequency_caps
+    partitionKey: id
+    authority: canonical
+    requiredIndexes: campaignId,viewerScope
+  - resource: ad_events
+    partitionKey: eventId
+    authority: append-only
+    requiredIndexes: occurredAt,campaignId
+  - resource: ad_metrics_daily
+    partitionKey: metricDate,campaignId,placementId
+    authority: rebuildable projection
+    requiredIndexes: metricDate,campaignId
+  - resource: sponsored_consumption_reservations
+    partitionKey: reservationId
+    authority: canonical
+    requiredIndexes: campaignId,status,expiresAt

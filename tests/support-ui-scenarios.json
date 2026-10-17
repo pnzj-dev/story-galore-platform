@@ -1,0 +1,28 @@
+{
+  "version": "1.0",
+  "scenarios": [
+    "user searches help and opens article",
+    "user creates support ticket",
+    "user creates ticket from failed payment context",
+    "user creates ticket from download failure context",
+    "user uploads attachment and sees processing/failure",
+    "user replies while offline and syncs later",
+    "user receives support reply in realtime",
+    "user reopens resolved ticket",
+    "support agent sees unassigned queue",
+    "support agent assigns ticket",
+    "support agent replies with macro",
+    "support agent adds internal note",
+    "support agent views scoped user context",
+    "support agent is denied forbidden secret data",
+    "support agent escalates billing issue",
+    "support agent escalates security issue",
+    "approval required for exceptional refund",
+    "approval required for exceptional private-data access",
+    "sla breach appears in admin queue",
+    "admin manages knowledge article",
+    "admin manages macro",
+    "admin changes support policy with audit",
+    "support audit shows actor capability target and correlation ids"
+  ]
+}

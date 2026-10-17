@@ -1,0 +1,22 @@
+version: 1
+name: media-upload
+canonical: true
+states: [CREATED, UPLOADING, PAUSED, RESUMING, COMPLETING, COMPLETED, FAILED, CANCELLED, EXPIRED]
+transitions:
+  - {from: CREATED, event: UPLOAD_START, to: UPLOADING}
+  - {from: UPLOADING, event: UPLOAD_PAUSE, to: PAUSED}
+  - {from: PAUSED, event: UPLOAD_RESUME, to: RESUMING}
+  - {from: RESUMING, event: SERVER_STATE_CONFIRMED, to: UPLOADING}
+  - {from: UPLOADING, event: ALL_CHUNKS_CONFIRMED, to: COMPLETING}
+  - {from: COMPLETING, event: UPLOAD_COMPLETED, to: COMPLETED}
+  - {from: [UPLOADING, RESUMING, COMPLETING], event: UPLOAD_FAILED, to: FAILED}
+  - {from: [CREATED, UPLOADING, PAUSED, RESUMING], event: UPLOAD_CANCELLED, to: CANCELLED}
+  - {from: [CREATED, UPLOADING, PAUSED, RESUMING], event: UPLOAD_EXPIRED, to: EXPIRED}
+  - {from: FAILED, event: UPLOAD_RETRY, to: RESUMING}
+invariants:
+  - Appwrite is the canonical byte store; UploadSession is the canonical orchestration record.
+  - Client progress is advisory; server/Appwrite-confirmed progress is authoritative.
+  - Chunk retries are idempotent and must not duplicate bytes.
+  - COMPLETED means the upload is complete, not that the MediaAsset is READY.
+  - CANCELLED and EXPIRED are terminal.
+  - Upload authorization is evaluated before session creation and before resume/complete operations.

@@ -1,0 +1,23 @@
+version: 1.0.0
+required_fields:
+- taskId
+- status
+- agentId
+- operationId
+- summary
+- artifacts
+- evidence
+- provenance
+- cost
+- nextAction
+statuses:
+- SUCCEEDED
+- FAILED
+- BLOCKED
+- WAITING_APPROVAL
+- DEPLOYMENT_CANDIDATE
+rules:
+- Evidence is machine-readable where possible.
+- A result cannot claim deployment success without deployment evidence from the deployment
+  system.
+- External agent text is not authoritative evidence.

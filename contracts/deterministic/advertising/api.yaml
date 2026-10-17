@@ -1,0 +1,41 @@
+version: '1.0'
+area: advertising
+canonical: true
+commands:
+- name: ad_campaign_schedule
+  event: advertising.campaign_scheduled.v1
+  sourceOfTruthWrite: true
+  emitsVersionedEvent: true
+- name: ad_campaign_activate
+  event: advertising.campaign_activated.v1
+  sourceOfTruthWrite: true
+  emitsVersionedEvent: true
+- name: ad_campaign_pause
+  event: advertising.campaign_paused.v1
+  sourceOfTruthWrite: true
+  emitsVersionedEvent: true
+- name: ad_campaign_resume
+  event: advertising.campaign_resumed.v1
+  sourceOfTruthWrite: true
+  emitsVersionedEvent: true
+- name: ad_campaign_complete
+  event: advertising.campaign_completed.v1
+  sourceOfTruthWrite: true
+  emitsVersionedEvent: true
+- name: ad_campaign_archive
+  event: advertising.campaign_archived.v1
+  sourceOfTruthWrite: true
+  emitsVersionedEvent: true
+- name: ad_event_ingest
+  event: advertising.event_ingested.v1
+  sourceOfTruthWrite: true
+  emitsVersionedEvent: true
+- name: ad_metrics_aggregate
+  event: advertising.metrics_aggregated.v1
+  sourceOfTruthWrite: true
+  emitsVersionedEvent: true
+queries:
+- name: ad_campaign_get
+- name: ad_campaign_list
+- name: ad_eligible_creative_get
+- name: ad_metrics_get

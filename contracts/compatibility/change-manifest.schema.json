@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "StoryGalore Contract Change Manifest",
+  "type": "object",
+  "required": ["contractName", "contractVersion", "breakingChange", "affectedConsumers", "migrationRequired", "owner"],
+  "properties": {
+    "contractName": {"type": "string", "minLength": 1},
+    "contractVersion": {"type": "string", "minLength": 1},
+    "breakingChange": {"type": "boolean"},
+    "affectedConsumers": {"type": "array", "items": {"type": "string"}},
+    "migrationRequired": {"type": "boolean"},
+    "compatibilityWindow": {"type": ["string", "null"]},
+    "owner": {"type": "string", "minLength": 1},
+    "validationEvidence": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": false
+}

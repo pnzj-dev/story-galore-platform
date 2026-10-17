@@ -1,0 +1,51 @@
+version: 1
+id: ui.design_tokens
+status: authoritative
+source_of_truth: packages/ui/src/tokens
+structure:
+  semantic_tokens_required: true
+  component_tokens_may_reference_only_semantic_tokens: true
+theme_sets:
+  LIGHT: packages/ui/src/tokens/light.css
+  DARK: packages/ui/src/tokens/dark.css
+shared: packages/ui/src/tokens/shared.css
+required_token_groups:
+  - background
+  - surface
+  - surface_elevated
+  - foreground
+  - foreground_muted
+  - border
+  - focus_ring
+  - primary
+  - primary_foreground
+  - success
+  - warning
+  - danger
+  - info
+  - link
+  - disabled
+  - overlay
+  - reader_background
+  - reader_foreground
+  - editor_canvas
+  - chart_1
+  - chart_2
+  - chart_3
+  - chart_4
+  - chart_5
+  - selection
+  - code_background
+  - code_foreground
+requirements:
+  each_token_group_must_exist_in: [LIGHT, DARK]
+  token_names_must_match: true
+  values_must_be_valid_css_colors_or_css_values: true
+  semantic_token_reference_required: true
+  components_must_not_define_theme_values: true
+  arbitrary_tailwind_colors_forbidden_in_components: true
+  inline_style_color_literals_forbidden: true
+exceptions:
+  - third_party_svg_or_embedded_provider_asset
+  - user_authored_artwork
+  - syntax_highlighter_generated_output_if_converted_to_semantic_tokens

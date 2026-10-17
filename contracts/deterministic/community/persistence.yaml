@@ -1,0 +1,17 @@
+version: "1.0"
+area: community
+canonical: true
+description: "Deterministic implementation contract for {area}."
+persistence:
+  - resource: comments
+    partitionKey: "commentId"
+    authority: "authoritative content/comments"
+    requiredIndexes: "resourceId,createdAt"
+  - resource: comment_reactions
+    partitionKey: "commentId,userId"
+    authority: "current reaction projection"
+    requiredIndexes: "commentId,userId"
+  - resource: reports
+    partitionKey: "reportId"
+    authority: "authoritative moderation reports"
+    requiredIndexes: "status,createdAt"

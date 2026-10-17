@@ -1,0 +1,1 @@
+{"name":"ReaderClientContract","version":"1.0","requirements":["publication/episode/page contract","reading modes","reading progress sync","entitlement-aware preloading","session recovery"]}

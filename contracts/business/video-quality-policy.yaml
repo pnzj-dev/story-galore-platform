@@ -1,0 +1,20 @@
+schema: storygalore.video-quality-policy/v1
+version: 1
+canonical: true
+status: V19.5.2
+policy: fail_closed
+profiles:
+- qualityId: STANDARD
+  maxResolution: REGISTERED
+  consumptionMultiplierRef: cost.video.standard.v1
+- qualityId: HD
+  maxResolution: REGISTERED
+  consumptionMultiplierRef: cost.video.hd.v1
+- qualityId: HIGHEST_REGISTERED
+  maxResolution: REGISTERED
+  consumptionMultiplierRef: cost.video.highest.v1
+selectionRules:
+- Only qualities permitted by content encoding and consumer entitlement may be selected.
+- Unknown multiplier MUST BLOCK metering.
+- Quality changes MUST be reflected in verified playback telemetry.
+policyId: consumer.video_quality.v1

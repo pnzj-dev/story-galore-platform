@@ -1,0 +1,9 @@
+schema: storygalore.migration-contract/v1
+version: 1
+policy: deterministic
+rules:
+  - Production schema changes MUST have a versioned migration.
+  - Destructive changes require expand-migrate-contract sequencing.
+  - Every migration MUST declare preconditions, transformation, verification and rollback/forward-fix.
+  - Migration ownership MUST be explicit.
+  - Unversioned production schema mutation is BLOCKED.

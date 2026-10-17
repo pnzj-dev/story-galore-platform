@@ -1,0 +1,70 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { ThemeToggle } from "@storygalore/ui";
+import { actions } from "astro:actions";
+import { safeReturnTo } from "../../lib/returnTo";
+
+const returnTo = safeReturnTo(Astro.url.searchParams.get("returnTo"));
+const result = Astro.getActionResult(actions.login);
+
+if (result?.data?.ok) {
+  return Astro.redirect(safeReturnTo(result.data.returnTo));
+}
+
+const error = result?.error?.message;
+---
+
+<Layout title="Sign in — StoryGalore">
+  <div class="fixed end-4 top-4">
+    <ThemeToggle client:load />
+  </div>
+  <div class="flex min-h-screen items-center justify-center px-4">
+    <main class="w-full max-w-sm rounded-2xl border border-border bg-surface/60 p-8 shadow-xl">
+      <a href="/" class="mb-6 inline-block text-lg font-bold tracking-tight">
+        <span class="text-link">Story</span>Galore
+      </a>
+      <h1 class="text-2xl font-bold">Welcome back</h1>
+      <p class="mt-1 text-sm text-foreground-muted">Sign in to pick up where you left off.</p>
+
+      <form method="POST" action={actions.login} class="mt-6 space-y-4">
+        <input type="hidden" name="returnTo" value={returnTo} />
+        <div>
+          <label for="email" class="mb-1 block text-sm text-foreground-muted">Email</label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            autocomplete="email"
+            required
+            class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
+          />
+        </div>
+        <div>
+          <label for="password" class="mb-1 block text-sm text-foreground-muted">Password</label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            autocomplete="current-password"
+            required
+            minlength="8"
+            class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
+          />
+        </div>
+
+        {error && <p class="rounded-lg border border-danger bg-danger/15 px-3 py-2 text-sm text-danger" role="alert">{error}</p>}
+
+        <button
+          type="submit"
+          class="w-full rounded-lg bg-primary px-4 py-2 font-semibold text-primary-foreground transition hover:opacity-90"
+        >
+          Sign in
+        </button>
+      </form>
+
+      <p class="mt-6 text-center text-sm text-foreground-muted">
+        New here? <a href="/auth/register" class="text-link hover:text-link">Create an account</a>
+      </p>
+    </main>
+  </div>
+</Layout>

@@ -1,0 +1,41 @@
+version: '1.0.0'
+canonical: true
+storage:
+  provider: APPWRITE_TABLESDB
+  rule: Use official Appwrite tooling and generated types; never invent resource IDs.
+resources:
+- name: agent_identities
+  partitionKey: agentId
+  authority: agent registry
+- name: agent_sessions
+  partitionKey: sessionId
+  authority: session lifecycle
+- name: agent_tasks
+  partitionKey: taskId
+  authority: task state
+- name: agent_delegations
+  partitionKey: delegationId
+  authority: delegation state
+- name: agent_conversations
+  partitionKey: conversationId
+  authority: agent conversation metadata
+- name: agent_consents
+  partitionKey: consentId
+  authority: user/admin consent
+- name: agent_audit_records
+  partitionKey: auditId
+  authority: append-only audit
+- name: agent_result_provenance
+  partitionKey: resultId
+  authority: result provenance
+- name: agent_cost_attributions
+  partitionKey: attributionId
+  authority: agent cost attribution
+- name: engineering_task_links
+  partitionKey: taskLinkId
+  authority: Support/GitHub linkage
+rules:
+- These are platform control-plane resources and are not domain business resources.
+- Their logical names must be mapped to real Appwrite resources only through the environment's generated configuration.
+- Agent payloads must not contain secrets, raw credentials, payment credentials or unrestricted private-message content.
+- Projections are rebuildable; task/session state remains authoritative in these records.

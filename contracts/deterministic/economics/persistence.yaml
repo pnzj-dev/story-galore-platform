@@ -1,0 +1,9 @@
+schema: storygalore.deterministic-domain-persistence/v1
+version: 1
+domain: economics
+persistence:
+- resource: consumer_consumption_events
+- resource: consumer_entitlement_usage
+- resource: consumer_cost_attribution
+- resource: consumer_unit_economics_daily
+- resource: consumer_plan_profitability_daily

@@ -1,0 +1,42 @@
+version: 1.0.0
+provider: github
+role: ENGINEERING_SYSTEM_OF_RECORD
+objects:
+  issue:
+    source: GitHub Issue
+    maps_to: engineering ticket
+    required_labels:
+    - agent:task
+    - status:*
+    - type:*
+    - priority:*
+  branch:
+    naming: agent/{taskType}/{taskId}/{short-slug}
+    must_start_from: approved_base_ref
+  pull_request:
+    required: draft_until_validation_passes
+    required_sections:
+    - summary
+    - acceptance
+    - tests
+    - risk
+    - evidence
+    - deployment_notes
+    must_link_issue: true
+  check_run:
+    required_for_merge: true
+    source: CI
+  release:
+    production_gate: human_or_explicit_policy_approval
+mapping:
+  SUPPORT_ESCALATION: create_issue
+  BUG_FIX: create_issue
+  FEATURE: create_issue
+  SECURITY: create_issue
+rules:
+- GitHub is engineering truth; StoryGalore Support remains customer-facing truth.
+- A support ticket may create exactly one canonical engineering issue unless explicitly
+  split.
+- Every coding task maps to a branch and pull request.
+- No agent may merge or deploy solely because its own checks passed.
+- PR readiness requires deterministic evidence.

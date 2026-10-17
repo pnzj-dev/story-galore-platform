@@ -1,0 +1,24 @@
+version: 19.5.19
+title: Per-run latest-stable technology resolution gate
+status: planning-contract-update
+changes:
+  - Require fresh official-source latest-stable resolution on every implementation bootstrap, release candidate, and dependency/build-plan change.
+  - Add a fail-closed technology-resolution gate for unresolved versions, non-exact package-manager pins, missing lockfiles, stale evidence, and incomplete compatibility results.
+  - Clarify that previous version-resolution evidence is historical only and cannot satisfy a later run.
+  - Archive prior release manifests and historical release notes outside the active documentation surface.
+  - Fix the documentation index to reflect the complete Admin RBAC registry and current Appwrite MCP architecture.
+  - Remove stale root-level manifest requirements from repository validation.
+  - Normalize the current release manifest and repository VERSION.
+  - Remove raw web citation markers from repository documentation and replace them with readable source links.
+  - Add a repository-layout and coherence audit documenting before/after structure and remaining bootstrap gates.
+not_claimed:
+  - Latest stable versions have been resolved for the full technology inventory.
+  - A pnpm lockfile or exact package-manager pin has been generated.
+  - Latest-stable dependency resolution is complete.
+  - pnpm lockfile is generated.
+  - Platform scaffolds or runtime authorization/MCP components are implemented.
+validation:
+  - pnpm validate:repository-coherence
+  - pnpm validate:docs
+  - pnpm validate:contract-syntax
+  - pnpm validate:appwrite-mcp-agent-access

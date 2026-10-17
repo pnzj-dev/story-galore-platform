@@ -1,0 +1,21 @@
+schema: storygalore.business-governance-us-first-tests/v1
+version: 1
+cases:
+- id: usd-is-launch-currency
+  given: launch_market_is_us
+  expect: settlement_currency_is_usd
+- id: non-us-blocked
+  given: customer_country_is_non_us_and_no_jurisdiction_pack
+  expect: BLOCK
+- id: unknown-tax-blocks-finalization
+  given: taxability_is_unknown
+  expect: BLOCK
+- id: cash-is-not-revenue
+  given: annual_subscription_cash_received
+  expect: deferred_revenue_recorded
+- id: reserve-blocks-withdrawal
+  given: creator_balance_is_reserved
+  expect: payout_is_blocked
+- id: unknown-rights-block-allocation
+  given: bundle_has_unresolved_rights
+  expect: BLOCK

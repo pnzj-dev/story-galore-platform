@@ -1,0 +1,34 @@
+version: 1
+namespace: admin
+purpose: V1 operational administration for authorized humans and agents
+rules:
+  - every_mutation_requires_capability_authorization
+  - tenant_and_target_scope_are_checked
+  - high_risk_operations_require_approval_when_policy_requires
+  - sensitive_mutations_require_reason_and_audit
+  - idempotency_required_for_externally_visible_mutations
+  - no_unrestricted_super_admin_agent
+  - private_content_access_is_explicit_capability_only
+  - admin_ui_unavailability_must_not_break_runtime_user_traffic
+capability_families:
+  - users
+  - creators
+  - content
+  - community
+  - moderation
+  - messaging
+  - adult_policy
+  - ai
+  - finance
+  - payments
+  - subscriptions
+  - advertising
+  - analytics
+  - discovery
+  - operations
+  - media_distribution
+  - security
+  - configuration
+  - agents
+  - recovery
+  - data_lifecycle

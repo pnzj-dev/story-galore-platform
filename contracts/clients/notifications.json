@@ -1,0 +1,20 @@
+{
+  "name": "NotificationClientContract",
+  "version": "2.0",
+  "requirements": [
+    "in-app notification inbox with cursor pagination",
+    "unread count derived from canonical notification records",
+    "server-authorized read and mark-all-read commands",
+    "per-user notification category and channel preferences",
+    "provider-neutral delivery adapter registry",
+    "channel-specific delivery status separate from notification read state",
+    "deduplicated idempotent event-to-notification mapping",
+    "validated internal deep-link targets only; no arbitrary external URLs",
+    "Appwrite Realtime subscription scoped to the authenticated user and authorized notification records",
+    "quiet hours and locale-aware delivery where the selected provider contract supports them",
+    "device registration only when an approved push provider and device-token lifecycle contract exist",
+    "retry and failure state visibility for authorized operations staff",
+    "reduced payload and no secrets or protected content in push previews",
+    "accessibility labels, keyboard operation, reduced-motion support, and responsive layouts"
+  ]
+}

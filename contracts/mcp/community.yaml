@@ -1,0 +1,25 @@
+version: 1
+namespace: community
+operations:
+  - comment_create
+  - comment_reply
+  - comment_list
+  - comment_report
+  - conversation_list
+  - conversation_create
+  - message_send
+  - message_list
+  - message_mark_read
+  - message_request_accept
+  - message_request_decline
+  - messaging_settings_get
+  - messaging_settings_update
+  - user_block
+  - user_unblock
+  - message_report
+rules:
+  - all_mutations_require_idempotency_key
+  - agent_scope_and_target_tenant_are_checked
+  - private_message_content_is_never_returned_to_an_agent_without_explicit_capability
+  - protected_content_comments_require_content_access
+  - high_risk_moderation_actions_require_approval_when_policy_requires

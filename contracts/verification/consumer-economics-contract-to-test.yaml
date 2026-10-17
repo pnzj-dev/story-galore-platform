@@ -1,0 +1,58 @@
+schema: storygalore.consumer-economics-contract-to-test/v1
+version: 1
+policy: fail_closed
+contractRoots:
+- contracts/business/consumer-plans.yaml
+- contracts/business/consumption-units.yaml
+- contracts/business/consumption-metering.yaml
+- contracts/business/consumer-media-policy.yaml
+- contracts/business/video-quality-policy.yaml
+- contracts/business/consumer-fair-use.yaml
+- contracts/business/consumer-overage.yaml
+- contracts/business/family-plan.yaml
+- contracts/business/consumer-sponsored-consumption.yaml
+- contracts/business/unit-economics.yaml
+- contracts/analytics/consumer-economics-metrics.yaml
+- contracts/analytics/consumer-economics-dashboards.yaml
+- contracts/state-machines/consumer-consumption.yaml
+- contracts/state-machines/consumer-sponsored-consumption.yaml
+requiredTestClasses:
+- pricing
+- entitlement
+- metering
+- duplicate-event
+- quality-multiplier
+- fair-use
+- overage-opt-in
+- family-pooling
+- sponsored-consumption
+- cost-attribution
+- contribution-margin
+- admin-authorization
+- agent-authorization
+- privacy
+- audit
+requiredMappings:
+- contract: contracts/business/consumer-plans.yaml
+  tests: tests/contracts/consumer-plans.scenarios.yaml
+- contract: contracts/business/consumption-metering.yaml
+  tests: tests/contracts/consumer-metering.scenarios.yaml
+- contract: contracts/business/consumer-media-policy.yaml
+  tests: tests/contracts/consumer-media-policy.scenarios.yaml
+- contract: contracts/business/consumer-fair-use.yaml
+  tests: tests/contracts/consumer-fair-use.scenarios.yaml
+- contract: contracts/business/consumer-overage.yaml
+  tests: tests/contracts/consumer-overage.scenarios.yaml
+- contract: contracts/business/unit-economics.yaml
+  tests: tests/contracts/consumer-unit-economics.scenarios.yaml
+- contract: contracts/analytics/consumer-economics-metrics.yaml
+  tests: tests/contracts/consumer-economics-metrics.scenarios.yaml
+- contract: contracts/analytics/consumer-economics-dashboards.yaml
+  tests: tests/contracts/admin-consumer-economics.scenarios.yaml
+- contract: contracts/state-machines/consumer-consumption.yaml
+  tests: tests/contracts/consumer-consumption-state.scenarios.yaml
+- contract: contracts/state-machines/consumer-sponsored-consumption.yaml
+  tests: tests/contracts/consumer-sponsored-state.scenarios.yaml
+- contract: contracts/ui/admin/consumer-economics.yaml
+  tests: tests/contracts/admin-consumer-economics-ui.scenarios.yaml
+missingMapping: BLOCK

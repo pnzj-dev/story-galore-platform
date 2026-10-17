@@ -1,0 +1,27 @@
+schema: storygalore.appwrite-function-classes/v1
+version: 1
+classes:
+  REQUEST_HANDLER:
+    state: STATELESS
+    durable_job_state: FORBIDDEN
+    fire_and_forget: FORBIDDEN
+  EVENT_HANDLER:
+    state: STATELESS
+    deduplication: REQUIRED
+    replay_safe: REQUIRED
+  WEBHOOK_HANDLER:
+    state: STATELESS
+    signature_verification: REQUIRED
+    deduplication: REQUIRED
+  SCHEDULED_HANDLER:
+    state: STATELESS
+    schedule_source: CONTRACT_REGISTRY
+    overlapping_runs: EXPLICITLY_CONTROLLED
+  DURABLE_JOB_WORKER:
+    state: STATELESS
+    job_store: APPWRITE_TABLESDB_EXECUTION_JOBS
+    lease: REQUIRED
+    heartbeat: REQUIRED
+  INTERNAL_COMMAND_HANDLER:
+    state: STATELESS
+    caller: REGISTERED_INTERNAL_EXECUTOR_ONLY

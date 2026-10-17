@@ -1,0 +1,9 @@
+schema: storygalore.function-resource-map/v1
+version: 1
+function: ai-comic-generation
+policy: explicit_only
+resources:
+  - ai_providers
+  - ai_generations
+  - ai_generation_outputs
+undeclared_resource_access: BLOCK

@@ -1,0 +1,6 @@
+version: 1
+events:
+  - execution.operation_created.v1
+  - execution.operation_completed.v1
+  - execution.operation_retry_scheduled.v1
+  - execution.operation_cancelled.v1

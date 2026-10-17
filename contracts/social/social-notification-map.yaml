@@ -1,0 +1,14 @@
+version: 1
+domain: notifications
+triggers:
+  creator_followed: FOLLOWER_CREATED
+  new_creator_publication: CREATOR_PUBLICATION
+  reaction_received: REACTION_RECEIVED
+  comment_received: COMMENT_RECEIVED
+  comment_reply: COMMENT_REPLY
+  mention_received: MENTION_RECEIVED
+  poll_closed: POLL_CLOSED
+rules:
+  - Notification creation MUST re-check actor block/mute state and target visibility.
+  - Notifications MUST NOT reveal protected content to an unauthorized recipient.
+  - Notification delivery is asynchronous and MUST use the unified Operation model where durable execution is required.

@@ -1,0 +1,26 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+title: StoryGalore Plan
+type: object
+required: [id, code, name, status, scope, currency, amount, billingInterval, billingIntervalCount, version]
+properties:
+  id: {type: string}
+  code: {type: string, minLength: 1}
+  name: {type: string, minLength: 1}
+  description: {type: string}
+  status: {type: string, enum: [DRAFT, ACTIVE, RETIRED]}
+  scope: {type: string, enum: [PLATFORM, CREATOR, WORKSPACE]}
+  currency: {type: string, pattern: '^[A-Z]{3}$'}
+  amount: {type: integer, minimum: 0, description: Minor currency units; never floating point.}
+  billingInterval: {type: string, enum: [DAY, WEEK, MONTH, YEAR]}
+  billingIntervalCount: {type: integer, minimum: 1}
+  trialDays: {type: integer, minimum: 0}
+  entitlementClassIds: {type: array, items: {type: string}}
+  features: {type: array, items: {type: string}}
+  adultEligible: {type: boolean}
+  adFree: {type: boolean}
+  effectiveAt: {type: string, format: date-time}
+  retiredAt: {type: [string, 'null'], format: date-time}
+  version: {type: integer, minimum: 1}
+  createdAt: {type: string, format: date-time}
+  updatedAt: {type: string, format: date-time}
+additionalProperties: false

@@ -1,0 +1,18 @@
+schema: storygalore.agent-approval-matrix/v1
+rules:
+- action: production.deploy
+  approval: HUMAN_REQUIRED
+- action: financial.mutation
+  approval: HUMAN_REQUIRED
+- action: content.publish
+  approval: HUMAN_REQUIRED
+- action: account.suspend
+  approval: HUMAN_REQUIRED
+- action: delete.content
+  approval: HUMAN_REQUIRED
+- action: external.agent.delegate
+  approval: POLICY_CHECK_AND_SCOPE
+- action: keep2share.captcha
+  approval: HUMAN_INTERACTION
+- action: keep2share.mfa
+  approval: HUMAN_INTERACTION

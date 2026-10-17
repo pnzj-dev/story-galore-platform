@@ -1,0 +1,20 @@
+schema: storygalore.ui-component-registry/v1
+version: 1
+owner: packages/ui
+library: SVELTE_5_BITS_UI_TAILWIND_LUCIDE
+rules:
+  search_before_create: true
+  duplicate_component: BLOCK
+  site_local_component_allowed_only_if_page_specific: true
+  public_admin_shared_primitives: true
+components:
+  primitives: [Button, IconButton, Link, Input, Textarea, Select, Combobox, Checkbox, Radio, Switch, Slider, Tabs, Dialog, Drawer, Dropdown, Tooltip, Toast, Alert, Badge, Avatar, Card, Progress, Skeleton]
+  navigation: [Header, Sidebar, Breadcrumbs, Pagination, CommandPalette, MobileNavigation]
+  media: [MediaCard, StoryCard, SeriesCard, CreatorCard, Gallery, ComicPage, Cover, MediaUploader, MediaPreview]
+  studio: [StudioShell, InspectorPanel, PropertiesPanel, CanvasToolbar, Timeline, LayerList, AssetBrowser, GenerationPanel, DraftStatus]
+  admin: [DataTable, FilterBar, KPIGrid, KPI, ChartCard, AuditLog, OperationStatus, HealthStatus, EmptyState, ErrorState]
+  reader: [ReaderShell, ReaderControls, PageProgress, ChapterNavigation, ReaderComments, ReaderSettings]
+required_states: [default, hover, focus, active, disabled, loading, error, success]
+required_responsive_states: [mobile, tablet, desktop]
+required_direction_states: [ltr, rtl]
+required_theme_states: [light, dark]

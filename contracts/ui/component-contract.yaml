@@ -1,0 +1,12 @@
+version: 1
+name: storygalore-ui-component-contract
+rules:
+  shared_package: packages/ui
+  framework: svelte-5
+  styling: tailwind
+  primitives: bits-ui
+  icons: lucide
+  no_duplicate_primitive_libraries: true
+  required_async_states: [loading, success, error]
+  required_protected_states: [permission-denied, restricted]
+  required_editor_states: [saving, saved, offline, syncing, conflict, save-failed]

@@ -1,0 +1,11 @@
+schema: storygalore.function-resource-map/v1
+version: 1
+function: payment-reconciliation
+policy: explicit_only
+resources:
+  - payments
+  - payment_attempts
+  - payment_events
+  - refunds
+  - payment_idempotency
+undeclared_resource_access: BLOCK

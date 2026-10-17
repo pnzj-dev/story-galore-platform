@@ -1,0 +1,17 @@
+version: "1.0"
+area: discovery
+canonical: true
+description: "Deterministic implementation contract for {area}."
+persistence:
+  - resource: search_documents
+    partitionKey: "resourceId"
+    authority: "rebuildable search projection; never source of truth"
+    requiredIndexes: "tenantId,resourceType"
+  - resource: recommendation_candidates
+    partitionKey: "subjectId"
+    authority: "rebuildable candidate projection"
+    requiredIndexes: "subjectId,updatedAt"
+  - resource: discovery_events
+    partitionKey: "eventId"
+    authority: "append-only discovery signals"
+    requiredIndexes: "occurredAt"

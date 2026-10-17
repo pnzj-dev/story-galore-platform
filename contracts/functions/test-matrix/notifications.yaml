@@ -1,0 +1,24 @@
+schema: storygalore.function-test-matrix/v1
+function: notifications
+required:
+  - authentication
+  - authorization
+  - input-schema
+  - output-schema
+  - happy-path
+  - validation-failure
+  - policy-denied
+  - dependency-failure
+  - idempotency-or-safe-retry
+  - secret-redaction
+  - audit
+  - observability
+  - inbox-delivery-state-separation
+  - cross-user-isolation
+  - deep-link-route-allowlist
+  - block-mute-and-visibility-policy
+  - unregistered-provider-blocked
+  - workflow-start-idempotency
+  - provider-secret-redaction
+  - bounded-retry-exhaustion
+  - realtime-user-scope

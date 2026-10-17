@@ -1,0 +1,15 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://storygalore.dev/contracts/studio/story-bible.schema.yaml
+title: Story Bible
+version: 1
+required: [projectId, revisionId, premise, canonVersion, updatedAt]
+properties:
+  projectId: {type: string}
+  revisionId: {type: string}
+  premise: {type: string}
+  themes: {type: array, items: {type: string}}
+  tone: {type: string}
+  canonVersion: {type: integer, minimum: 1}
+  continuityRules: {type: array, items: {type: string}}
+  updatedAt: {type: string, format: date-time}
+additionalProperties: false

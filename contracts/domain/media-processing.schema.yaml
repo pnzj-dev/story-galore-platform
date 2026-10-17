@@ -1,0 +1,18 @@
+version: 1
+name: media-processing
+fields:
+  operationId: string
+  mediaId: string
+  inputFileId: string
+  processingProfile: string
+  status: QUEUED|PROCESSING|COMPLETED|FAILED|CANCELLED
+  processorVersion: string
+  outputMediaIds: string[]
+  errorCode: string|null
+  startedAt: datetime|null
+  completedAt: datetime|null
+rules:
+  - Durable processing uses Cloudflare Workflows.
+  - Activities own Appwrite reads/writes and external processing side effects.
+  - Processing is idempotent by operationId and input checksum/profile/version.
+  - Originals are immutable; derivatives are new media assets.

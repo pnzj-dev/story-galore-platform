@@ -1,0 +1,159 @@
+schema: storygalore.community-command-handlers/v1
+version: 1
+canonical: true
+purpose: "Deterministic command/query handler contracts for the community comment domain, so the api gateway and Go handlers can be implemented without guessing."
+source_of_truth:
+  comment_contract: contracts/community/comments.yaml
+  command_event_map: contracts/compatibility/command-event-map.yaml
+  domain_model: docs/DOMAIN_MODEL.md
+  errors: contracts/functions/error-catalog.yaml
+capabilities:
+  - {id: community.comment.read, grant: publication_access}
+  - {id: community.comment.create, grant: authenticated}
+  - {id: community.comment.edit, grant: author}
+  - {id: community.comment.delete, grant: author}
+  - {id: community.comment.moderate, grant: staff}
+  - {id: community.reaction.toggle, grant: authenticated}
+  - {id: community.report.create, grant: authenticated}
+shared_rules:
+  actor_required: true
+  publication_access_required: true
+  idempotency_required_for_mutations: true
+  moderation_state_is_server_authoritative: true
+  realtime_is_not_source_of_truth: true
+  unknown_fields: REJECT
+commands:
+  - name: comment_create
+    operation: comment_create
+    capability: community.comment.create
+    input:
+      targetType: {type: enum, elements: [PAGE, PUBLICATION, POST], required: true}
+      targetId: {type: string, required: true}
+      body: {type: string, required: true, minLength: 1}
+      parentCommentId: {type: string, required: false}
+    state: {initial: PENDING_REVIEW, note: "moderation may auto-approve to VISIBLE per policy"}
+    effects:
+      events: [community.comment_create.v1]
+      writes: [{table: comments, kind: INSERT}]
+    result: {commentId: string}
+    errors: [FORBIDDEN, POLICY_DENIED, INVALID_INPUT]
+    idempotency: {key: idempotencyKey, behavior: RETURN_EXISTING_RESULT}
+  - name: comment_edit
+    operation: comment_edit
+    capability: community.comment.edit
+    input:
+      commentId: {type: string, required: true}
+      body: {type: string, required: true, minLength: 1}
+    effects:
+      events: [community.comment_edit.v1]
+      writes: [{table: comments, kind: UPDATE}]
+    result: {commentId: string}
+    errors: [FORBIDDEN, POLICY_DENIED, NOT_FOUND, INVALID_INPUT]
+    idempotency: {key: idempotencyKey, behavior: RETURN_EXISTING_RESULT}
+  - name: comment_delete
+    operation: comment_delete
+    capability: community.comment.delete
+    input:
+      commentId: {type: string, required: true}
+    state: {to: REMOVED}
+    effects:
+      events: [community.comment_delete.v1]
+      writes: [{table: comments, kind: UPDATE}]
+    result: {commentId: string}
+    errors: [FORBIDDEN, POLICY_DENIED, NOT_FOUND, INVALID_INPUT]
+    idempotency: {key: idempotencyKey, behavior: RETURN_EXISTING_RESULT}
+  - name: comment_reply
+    operation: comment_reply
+    capability: community.comment.create
+    input:
+      parentCommentId: {type: string, required: true}
+      body: {type: string, required: true, minLength: 1}
+    state: {initial: PENDING_REVIEW}
+    effects:
+      events: [community.comment_reply.v1]
+      writes: [{table: comments, kind: INSERT}]
+    result: {commentId: string}
+    errors: [FORBIDDEN, POLICY_DENIED, NOT_FOUND, INVALID_INPUT]
+    idempotency: {key: idempotencyKey, behavior: RETURN_EXISTING_RESULT}
+  - name: comment_react
+    operation: comment_react
+    capability: community.reaction.toggle
+    input:
+      commentId: {type: string, required: true}
+      reactionType: {type: string, required: true}
+    effects:
+      events: [community.comment_react.v1]
+      writes: [{table: reactions, kind: UPSERT}]
+    result: {reactionId: string, toggled: boolean}
+    errors: [FORBIDDEN, NOT_FOUND, INVALID_INPUT]
+    idempotency: {key: idempotencyKey, behavior: TOGGLE_SAFE}
+  - name: comment_report
+    operation: comment_report
+    capability: community.report.create
+    input:
+      commentId: {type: string, required: true}
+      reason: {type: string, required: true}
+    effects:
+      events: [community.comment_report.v1]
+      writes: [{table: reports, kind: INSERT}]
+    result: {reportId: string}
+    errors: [FORBIDDEN, NOT_FOUND, INVALID_INPUT]
+    idempotency: {key: idempotencyKey, behavior: RETURN_EXISTING_RESULT}
+  - name: comment_moderate
+    operation: comment_moderate
+    capability: community.comment.moderate
+    input:
+      commentId: {type: string, required: true}
+      status: {type: enum, elements: [VISIBLE, HIDDEN, REMOVED], required: true}
+    effects:
+      events: [community.comment_moderate.v1]
+      writes: [{table: comments, kind: UPDATE}]
+    result: {commentId: string}
+    errors: [FORBIDDEN, POLICY_DENIED, NOT_FOUND, INVALID_STATE, INVALID_INPUT]
+    idempotency: {key: idempotencyKey, behavior: RETURN_EXISTING_RESULT}
+queries:
+  - name: comment_list
+    capability: community.comment.read
+    input: {targetId: {type: string, required: true}, cursor: {type: string, required: false}, limit: {type: integer, required: false}}
+    returns: comment_list
+    table: comments
+    pagination: cursor
+    errors: [FORBIDDEN]
+  - name: comment_get
+    capability: community.comment.read
+    input: {commentId: {type: string, required: true}}
+    returns: comment
+    table: comments
+    errors: [FORBIDDEN, NOT_FOUND]
+tables:
+  comments:
+    source: docs/DOMAIN_MODEL.md
+    columns:
+      - {key: targetType, type: enum, elements: [PAGE, PUBLICATION, POST], required: true}
+      - {key: targetId, type: varchar, size: 255, required: true}
+      - {key: userId, type: varchar, size: 255, required: true}
+      - {key: parentCommentId, type: varchar, size: 255, required: false}
+      - {key: body, type: text, required: true}
+      - {key: status, type: enum, elements: [VISIBLE, PENDING_REVIEW, HIDDEN, REMOVED], required: true}
+      - {key: createdAt, type: datetime, required: true}
+      - {key: updatedAt, type: datetime, required: true}
+  reactions:
+    source: backend/appwrite/tables/desired-schema.json
+    columns:
+      - {key: userId, type: varchar, size: 255, required: true}
+      - {key: targetType, type: enum, elements: [COMMENT, PUBLICATION, POST], required: true}
+      - {key: targetId, type: varchar, size: 255, required: true}
+      - {key: reactionType, type: varchar, size: 64, required: true}
+      - {key: createdAt, type: datetime, required: true}
+  reports:
+    source: backend/appwrite/tables/desired-schema.json
+    columns:
+      - {key: reporterId, type: varchar, size: 255, required: true}
+      - {key: targetType, type: enum, elements: [COMMENT, PUBLICATION, POST, CREATOR], required: true}
+      - {key: targetId, type: varchar, size: 255, required: true}
+      - {key: reason, type: text, required: true}
+      - {key: status, type: enum, elements: [OPEN, RESOLVED, DISMISSED], required: true}
+      - {key: createdAt, type: datetime, required: true}
+implementation_notes:
+  - The api gateway validates the command/query name against this registry, then forwards to the Go handler; the handler enforces capability, preconditions, state-machine legality, idempotency, and emits the declared events via the outbox.
+  - Moderation state is server-authoritative; Realtime is never the source of truth.

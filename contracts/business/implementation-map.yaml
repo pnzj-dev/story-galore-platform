@@ -1,0 +1,147 @@
+schema: storygalore.business-implementation-map/v1
+version: 1
+policy: fail_closed
+rules:
+- Business policy is data; domain services consume canonical policy versions.
+- No UI component may calculate commissions or creator balances independently.
+- No provider adapter may write creator earnings directly.
+commands:
+  creator_earnings_post:
+    domain: payments
+    executor: PaymentService
+    stateMachine: payments.earnings
+    authorization: contracts/security/authorization-completeness.yaml
+    idempotency: REQUIRED
+  creator_earnings_reverse:
+    domain: payments
+    executor: PaymentService
+    stateMachine: payments.earnings
+    authorization: contracts/security/authorization-completeness.yaml
+    idempotency: REQUIRED
+  payout_create:
+    domain: payments
+    executor: PaymentService
+    stateMachine: payments.payout
+    authorization: contracts/security/authorization-completeness.yaml
+    idempotency: REQUIRED
+  payout_confirm:
+    domain: payments
+    executor: PaymentService
+    stateMachine: payments.payout
+    authorization: contracts/security/authorization-completeness.yaml
+    idempotency: REQUIRED
+  payout_fail:
+    domain: payments
+    executor: PaymentService
+    stateMachine: payments.payout
+    authorization: contracts/security/authorization-completeness.yaml
+    idempotency: REQUIRED
+  payout_reconcile:
+    domain: payments
+    executor: PaymentService
+    stateMachine: payments.payout
+    authorization: contracts/security/authorization-completeness.yaml
+    idempotency: REQUIRED
+  payout_wallet_connect:
+    domain: payments
+    executor: PaymentService
+    stateMachine: payments.wallet
+    authorization: contracts/security/authorization-completeness.yaml
+    idempotency: REQUIRED
+  payout_wallet_verify:
+    domain: payments
+    executor: PaymentService
+    stateMachine: payments.wallet
+    authorization: contracts/security/authorization-completeness.yaml
+    idempotency: REQUIRED
+  payout_wallet_disconnect:
+    domain: payments
+    executor: PaymentService
+    stateMachine: payments.wallet
+    authorization: contracts/security/authorization-completeness.yaml
+    idempotency: REQUIRED
+queries:
+  creator_earnings_get:
+    domain: payments
+    executor: PaymentQueryService
+    authorization: REQUIRED
+    secrets: EXCLUDED
+  creator_balance_get:
+    domain: payments
+    executor: PaymentQueryService
+    authorization: REQUIRED
+    secrets: EXCLUDED
+  payout_get:
+    domain: payments
+    executor: PaymentQueryService
+    authorization: REQUIRED
+    secrets: EXCLUDED
+  payout_list:
+    domain: payments
+    executor: PaymentQueryService
+    authorization: REQUIRED
+    secrets: EXCLUDED
+  payout_wallet_list:
+    domain: payments
+    executor: PaymentQueryService
+    authorization: REQUIRED
+    secrets: EXCLUDED
+  payout_policy_get:
+    domain: payments
+    executor: PaymentQueryService
+    authorization: REQUIRED
+    secrets: EXCLUDED
+  payment_provider_capabilities_get:
+    domain: payments
+    executor: PaymentQueryService
+    authorization: REQUIRED
+    secrets: EXCLUDED
+  consumption_record:
+    domain: economics
+    executor: ConsumptionService
+    stateMachine: consumer.consumption
+    authorization: contracts/security/authorization-completeness.yaml
+    idempotency: REQUIRED
+  consumption_reconcile:
+    domain: economics
+    executor: ConsumptionService
+    stateMachine: consumer.consumption
+    authorization: contracts/security/authorization-completeness.yaml
+    idempotency: REQUIRED
+  overage_purchase_create:
+    domain: payments
+    executor: PaymentService
+    stateMachine: payments.payment
+    authorization: contracts/security/authorization-completeness.yaml
+    idempotency: REQUIRED
+  sponsored_consumption_reserve:
+    domain: advertising
+    executor: CampaignService
+    stateMachine: consumer.sponsored_consumption
+    authorization: contracts/security/authorization-completeness.yaml
+    idempotency: REQUIRED
+  consumer_entitlement_get:
+    domain: entitlements
+    executor: EntitlementQueryService
+    authorization: REQUIRED
+    secrets: EXCLUDED
+  consumer_consumption_get:
+    domain: economics
+    executor: ConsumptionQueryService
+    authorization: REQUIRED
+    secrets: EXCLUDED
+  consumer_consumption_summary_get:
+    domain: economics
+    executor: ConsumptionQueryService
+    authorization: REQUIRED
+    secrets: EXCLUDED
+  unit_economics_get:
+    domain: economics
+    executor: EconomicsQueryService
+    authorization: REQUIRED
+    secrets: EXCLUDED
+  plan_profitability_get:
+    domain: economics
+    executor: EconomicsQueryService
+    authorization: REQUIRED
+    secrets: EXCLUDED

@@ -1,0 +1,22 @@
+schema: storygalore.appwrite-sites-agent-dod/v1
+version: 1
+required:
+  - official_appwrite_sites_framework_support_verified
+  - site_root_directory_verified
+  - install_command_verified
+  - build_command_verified
+  - output_directory_verified
+  - rendering_mode_verified
+  - astro_adapter_verified
+  - environment_variables_verified
+  - secrets_not_in_browser_bundle
+  - preview_deployment_verified
+  - production_deployment_gate_verified
+  - rollback_path_verified
+  - deployment_logs_accessible
+  - smoke_test_passed
+blockers:
+  - undocumented_hosting_platform
+  - invented_appwrite_setting
+  - unknown_runtime_behavior
+  - production_without_release_authorization

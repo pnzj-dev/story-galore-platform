@@ -1,0 +1,16 @@
+version: '1.0.0'
+required_fields:
+- auditId
+- occurredAt
+- actorAgentId
+- action
+- targetType
+- targetId
+- policyDecisionId
+- taskId
+- result
+rules:
+- Audit records are append-only.
+- Secrets and raw credentials are prohibited.
+- Record references and hashes rather than duplicating sensitive payloads.
+- High-risk actions must include approval evidence when required.

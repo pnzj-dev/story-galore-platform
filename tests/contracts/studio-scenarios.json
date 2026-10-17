@@ -1,0 +1,255 @@
+{
+  "version": 1,
+  "scenarios": [
+    {
+      "id": "studio-project-create",
+      "goal": "creator creates a project",
+      "steps": [
+        "authenticate",
+        "create project",
+        "verify ACTIVE/DRAFT state",
+        "verify tenant scope"
+      ]
+    },
+    {
+      "id": "studio-project-open",
+      "goal": "creator opens project",
+      "steps": [
+        "authenticate",
+        "load project projection",
+        "load creative context",
+        "load latest draft"
+      ]
+    },
+    {
+      "id": "studio-story-bible-edit",
+      "goal": "creator edits story bible",
+      "steps": [
+        "load",
+        "mutate",
+        "authorize",
+        "persist revision",
+        "verify server acknowledgement"
+      ]
+    },
+    {
+      "id": "studio-character-edit",
+      "goal": "creator edits character",
+      "steps": [
+        "load",
+        "update traits/reference",
+        "verify revision"
+      ]
+    },
+    {
+      "id": "studio-asset-attach",
+      "goal": "creator attaches media asset",
+      "steps": [
+        "authorize",
+        "verify media asset",
+        "attach stable ID",
+        "resolve authorized delivery"
+      ]
+    },
+    {
+      "id": "studio-page-create",
+      "goal": "creator creates comic page",
+      "steps": [
+        "create page",
+        "assign position",
+        "verify document revision"
+      ]
+    },
+    {
+      "id": "studio-panel-edit",
+      "goal": "creator edits panel layout",
+      "steps": [
+        "update bounds",
+        "persist operation",
+        "verify revision"
+      ]
+    },
+    {
+      "id": "studio-layer-reorder",
+      "goal": "creator reorders layers",
+      "steps": [
+        "reorder",
+        "verify deterministic order",
+        "verify locked layer protection"
+      ]
+    },
+    {
+      "id": "studio-dialogue-edit",
+      "goal": "creator edits dialogue",
+      "steps": [
+        "select character",
+        "edit text",
+        "persist",
+        "verify bubble type"
+      ]
+    },
+    {
+      "id": "studio-autosave",
+      "goal": "editor autosaves",
+      "steps": [
+        "edit",
+        "wait debounce",
+        "save",
+        "verify Saved only after acknowledgement"
+      ]
+    },
+    {
+      "id": "studio-offline-recovery",
+      "goal": "editor survives offline mode",
+      "steps": [
+        "edit",
+        "lose network",
+        "queue IndexedDB mutation",
+        "restore network",
+        "replay",
+        "verify acknowledgement"
+      ]
+    },
+    {
+      "id": "studio-conflict-resolution",
+      "goal": "editor resolves concurrent revision",
+      "steps": [
+        "edit against stale revision",
+        "receive conflict",
+        "show server/local revisions",
+        "resolve",
+        "persist new revision"
+      ]
+    },
+    {
+      "id": "studio-ai-generation",
+      "goal": "creator generates asset",
+      "steps": [
+        "authorize",
+        "policy check",
+        "reserve credits or BYOK",
+        "start workflow",
+        "receive result"
+      ]
+    },
+    {
+      "id": "studio-ai-apply",
+      "goal": "creator applies generation",
+      "steps": [
+        "select generation",
+        "create APPLY_GENERATION operation",
+        "verify non-destructive revision"
+      ]
+    },
+    {
+      "id": "studio-publication-validation",
+      "goal": "creator validates publication",
+      "steps": [
+        "check metadata",
+        "media readiness",
+        "moderation",
+        "policy",
+        "entitlement",
+        "permissions"
+      ]
+    },
+    {
+      "id": "studio-publication-submit",
+      "goal": "creator submits approved revision",
+      "steps": [
+        "submit",
+        "verify moderation state",
+        "verify immutable revision reference"
+      ]
+    },
+    {
+      "id": "studio-scheduled-publication",
+      "goal": "creator schedules publication",
+      "steps": [
+        "validate",
+        "approve",
+        "schedule",
+        "verify referenced revision"
+      ]
+    },
+    {
+      "id": "studio-permission-denied",
+      "goal": "unauthorized actor cannot mutate",
+      "steps": [
+        "authenticate actor",
+        "attempt mutation",
+        "policy denies",
+        "verify no write"
+      ]
+    },
+    {
+      "id": "studio-adult-generation-denied",
+      "goal": "adult generation fails closed",
+      "steps": [
+        "request adult generation",
+        "verify age/entitlement/opt-in/provider policy",
+        "deny when any requirement unknown or false"
+      ]
+    },
+    {
+      "id": "studio-refresh-recovery",
+      "goal": "browser refresh preserves work",
+      "steps": [
+        "edit",
+        "refresh before/after save",
+        "restore local/server revision",
+        "verify no silent loss"
+      ]
+    },
+    {
+      "id": "studio-stale-revision-conflict",
+      "description": "Two clients edit the same field; second stale mutation returns REVISION_CONFLICT without overwriting the accepted revision.",
+      "status": "required"
+    },
+    {
+      "id": "studio-compatible-operation-rebase",
+      "description": "Independent edits on separate entities are rebased deterministically and produce one new accepted revision.",
+      "status": "required"
+    },
+    {
+      "id": "studio-delete-update-conflict",
+      "description": "Update against an entity deleted by a newer revision produces a structured conflict.",
+      "status": "required"
+    },
+    {
+      "id": "studio-undo-creates-revision",
+      "description": "Undo reverses an accepted operation by creating a new revision; historical revisions remain immutable.",
+      "status": "required"
+    },
+    {
+      "id": "studio-ai-apply-is-atomic",
+      "description": "Applying a completed AI generation creates one grouped editor transaction and preserves provenance.",
+      "status": "required"
+    },
+    {
+      "id": "studio-publication-snapshot-isolation",
+      "description": "Publishing revision N creates an immutable snapshot; later draft edits cannot change the published content.",
+      "status": "required"
+    },
+    {
+      "id": "studio-media-asset-reference",
+      "description": "Studio references mediaAssetId and blocks publication when the required media asset is not READY.",
+      "status": "required"
+    },
+    {
+      "id": "studio-import-validation",
+      "description": "Malformed or unsupported project bundles are rejected before any persistent write.",
+      "status": "required"
+    },
+    {
+      "id": "studio-export-no-secrets",
+      "description": "Project export excludes credentials, payment data, session tokens and other secrets.",
+      "status": "required"
+    },
+    {
+      "id": "studio-permission-matrix",
+      "description": "Viewer/editor/contributor/owner capabilities are enforced server-side regardless of UI visibility.",
+      "status": "required"
+    }
+  ]
+}

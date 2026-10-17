@@ -1,0 +1,11 @@
+schema: storygalore.agent-tool-input/v1
+tool: media-operations.delivery-economics.read
+additionalProperties: false
+required:
+- correlationId
+properties:
+  correlationId: string
+  periodStart: datetime
+  periodEnd: datetime
+  dimensions: object
+  metricIds: array

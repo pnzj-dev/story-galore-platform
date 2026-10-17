@@ -1,0 +1,28 @@
+schema: storygalore.consumer-fair-use/v1
+version: 1
+canonical: true
+status: V19.5.2
+policy: fail_closed
+policyId: consumer.fair_use.v1
+purpose: protect infrastructure from automation, abuse and pathological consumption
+  without punishing ordinary high usage
+signals:
+- verifiedHumanSession
+- playbackConcurrency
+- requestVelocity
+- downloadVelocity
+- repeatedAssetLoops
+- automationIndicators
+- accountRiskState
+actions:
+- ALLOW
+- WARN
+- THROTTLE
+- REQUIRE_REAUTHENTICATION
+- BLOCK
+rules:
+- Actions MUST be selected by registered policy thresholds.
+- High legitimate consumption alone MUST NOT trigger punitive action.
+- Unknown risk decision MUST BLOCK only the affected high-risk operation, not the
+  account globally.
+- Any enforcement mutation MUST be audited.

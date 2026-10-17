@@ -1,0 +1,56 @@
+schema: storygalore.payment-provider-registry/v1
+version: 1
+category: payments
+policy: fail_closed
+providers:
+- providerId: STRIPE_CONNECT
+  status: CONDITIONAL
+  adapterRef: services/payments/adapters/stripe-connect
+  capabilities:
+  - oneTimePayments
+  - nativeSubscriptions
+  - recurringPayments
+  - refunds
+  - webhooks
+  - creatorPayouts
+  - stablecoinPayouts
+  activationRequires:
+  - currentProviderContractVerification
+  - StoryGaloreBusinessModelApproval
+  - jurisdictionApproval
+  - adultAiUgcApprovalIfApplicable
+- providerId: NOWPAYMENTS
+  status: CONDITIONAL
+  adapterRef: services/payments/adapters/nowpayments
+  capabilities:
+  - oneTimeCryptoPayments
+  - cryptoPayouts
+  - webhooks
+  activationRequires:
+  - currentProviderContractVerification
+  - jurisdictionApproval
+  - businessModelApproval
+- providerId: ZEN_PAYMENTS
+  status: CONDITIONAL
+  adapterRef: services/payments/adapters/zen-payments
+  capabilities:
+  - cardPayments
+  - walletPayments
+  - webhooks
+  activationRequires:
+  - currentProviderContractVerification
+  - merchantApproval
+  - businessModelApproval
+- providerId: SECUREGLOBALPAY
+  status: CONDITIONAL
+  adapterRef: services/payments/adapters/secureglobalpay
+  capabilities:
+  - declared_after_contract_verification
+  activationRequires:
+  - currentProviderContractVerification
+  - merchantApproval
+  - businessModelApproval
+statusSemantics:
+  CONDITIONAL: Adapter may be implemented/tested but MUST NOT be production-routable until activation requirements pass.
+  ACTIVE: Production-routable after human approval.
+  SUSPENDED: Not routable; existing transactions reconcile only.

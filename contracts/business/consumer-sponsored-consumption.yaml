@@ -1,0 +1,16 @@
+schema: storygalore.sponsored-consumption/v1
+version: 1
+canonical: true
+status: V19.5.2
+policy: fail_closed
+purpose: allow registered campaigns to subsidize verified consumer consumption without
+  hidden charges
+campaignTypes:
+- SPONSORED_VIDEO_MINUTES
+- SPONSORED_AUDIO_MINUTES
+- SPONSORED_PREMIUM_ACCESS
+rules:
+- Sponsor-funded consumption MUST be separately attributed from subscription entitlements.
+- Campaign budget must be reserved before granting consumption.
+- Campaign exhaustion MUST stop sponsored entitlement issuance.
+- Sponsorship must be clearly disclosed in user UI.

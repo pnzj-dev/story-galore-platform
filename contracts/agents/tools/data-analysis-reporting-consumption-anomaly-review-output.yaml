@@ -1,0 +1,13 @@
+schema: storygalore.agent-tool-output/v1
+tool: data-analysis-reporting.consumption-anomaly.review
+required:
+- status
+- correlationId
+- metrics
+additionalProperties: false
+properties:
+  status: string
+  correlationId: string
+  metrics: array
+  costState: string
+  policyDecisionId: string

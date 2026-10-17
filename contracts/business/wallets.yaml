@@ -1,0 +1,31 @@
+schema: storygalore.payout-wallet-policy/v1
+version: 1
+canonical: true
+policy: fail_closed
+supportedWallets:
+- walletId: COINBASE_WALLET
+  type: EXTERNAL_EVM
+  status: TARGET
+- walletId: METAMASK
+  type: EXTERNAL_EVM
+  status: TARGET
+- walletId: WALLETCONNECT
+  type: EXTERNAL_EVM_CONNECTOR
+  status: TARGET
+optionalFutureWallets:
+- walletId: PHANTOM
+  status: CANDIDATE
+- walletId: EMBEDDED_WALLET
+  status: CANDIDATE
+rules:
+- Wallet connection is a payout-address verification mechanism, not a custody promise.
+- The user selects a registered payout rail; the UI must not accept arbitrary token/network combinations.
+- Network switching must be explicit and verified before address registration.
+- A verified wallet is bound to one asset/network pair; reuse across pairs is forbidden unless separately verified.
+- Destination risk screening is required when supported by the registered payout provider/risk service.
+- Wallet credentials/private keys must never enter StoryGalore logs, agent context, database, or browser telemetry.
+- Address mismatch or chain mismatch is BLOCKED before payout submission.
+displayPolicy:
+  preferredLabel: USDC · Base
+  technicalChainNames: secondary_detail
+  rawAddressConfirmation: required

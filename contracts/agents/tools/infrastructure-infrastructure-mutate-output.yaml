@@ -1,0 +1,6 @@
+schema: storygalore.agent-tool-output/v1
+tool: infrastructure.infrastructure.mutate
+required:
+- status
+- correlationId
+additionalProperties: false

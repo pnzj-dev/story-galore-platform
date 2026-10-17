@@ -1,0 +1,18 @@
+version: 1
+kind: creator-studio-import-export
+bundle:
+  format: ZIP
+  manifest: studio-manifest.json
+  manifestVersion: 1
+  includes: [project, storyBible, characters, worlds, promptTemplates, documents, revisions, assetManifest]
+  excludes: [secrets, providerCredentials, paymentData, sessionTokens]
+imports:
+  modes: [CREATE_NEW_PROJECT, MERGE_INTO_EXISTING_PROJECT]
+  validation_before_write: true
+  unsupported_schema_version: REJECT
+  asset_integrity_check: REQUIRED
+exports:
+  project_bundle: true
+  comic_formats: [CBZ, PDF, EPUB]
+  source_json: true
+  published_snapshot_only_for_published_exports: true

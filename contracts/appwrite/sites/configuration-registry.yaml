@@ -1,0 +1,17 @@
+schema: storygalore.appwrite-sites-config/v2
+version: 2
+source: appwrite.config.json
+sites:
+  - id: storygalore-web
+    path: apps/web
+    framework: astro
+    adapter: ssr
+    output_directory: ./dist
+    build_runtime: node-22
+rules:
+  canonical_site_count: 1
+  no_real_project_ids_in_repository: true
+  environment_specific_site_ids_externalized: true
+  config_and_site_settings_must_agree: true
+  drift_detection_required: true
+  public_and_admin_are_routes_not_separate_sites: true

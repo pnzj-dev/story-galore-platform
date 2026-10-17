@@ -1,0 +1,13 @@
+version: "1.0"
+area: entitlements
+canonical: true
+description: "Deterministic implementation contract for {area}."
+persistence:
+  - resource: entitlements
+    partitionKey: "subjectId,resourceId"
+    authority: "authoritative access grant; append history"
+    requiredIndexes: "subjectId,resourceId,status"
+  - resource: entitlement_events
+    partitionKey: "entitlementId"
+    authority: "append-only normalized lifecycle"
+    requiredIndexes: "entitlementId,occurredAt"

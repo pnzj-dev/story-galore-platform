@@ -1,0 +1,17 @@
+version: "1.0"
+area: admin
+canonical: true
+description: "Deterministic implementation contract for {area}."
+persistence:
+  - resource: admin_actions
+    partitionKey: "actionId"
+    authority: "append-only privileged action audit"
+    requiredIndexes: "actorId,createdAt"
+  - resource: admin_approvals
+    partitionKey: "approvalId"
+    authority: "authoritative approval workflow"
+    requiredIndexes: "actionId,status"
+  - resource: admin_leases
+    partitionKey: "leaseId"
+    authority: "exclusive high-risk action lease"
+    requiredIndexes: "resourceId,expiresAt"

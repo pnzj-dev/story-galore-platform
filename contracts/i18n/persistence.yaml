@@ -1,0 +1,23 @@
+version: "1.0"
+area: internationalization
+canonical: true
+storage:
+  provider: APPWRITE_TABLESDB
+  rule: Use official Appwrite tooling and generated types; never invent resource IDs.
+resources:
+  - name: language_catalog
+    partitionKey: languageTag
+    authority: enabled supported language/locale metadata
+    requiredIndexes: languageTag,enabled,sortOrder
+  - name: user_language_preferences
+    partitionKey: userId
+    authority: user language and locale preferences
+    requiredIndexes: userId,updatedAt
+  - name: publication_language_metadata
+    partitionKey: publicationId
+    authority: publication language metadata and approved localization references
+    requiredIndexes: publicationId,primaryLanguage,status
+rules:
+  - User preferences are not authorization or entitlement state.
+  - Publication language metadata is authoritative for content filtering.
+  - Search/recommendation projections may cache language fields but are rebuildable.

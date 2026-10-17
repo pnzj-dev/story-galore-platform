@@ -1,0 +1,25 @@
+version: 1
+purpose: operational events emitted by distribution runtime; these do not become alternate source-of-truth mutations
+events:
+  - media.distribution.failover_pending.v1
+  - media.distribution.secondary_selected.v1
+  - media.distribution.secondary_disabled.v1
+  - media.distribution.secondary_enabled.v1
+  - media.distribution.primary_recovered.v1
+  - media.distribution.recovery_probe_failed.v1
+  - media.distribution.recovery_probe_succeeded.v1
+  - media.distribution.degraded_no_distributor.v1
+requiredContext:
+  - requestId
+  - traceId
+  - region
+  - selectedProvider
+  - policyDecisionId
+  - mediaAssetId
+  - variantId
+forbiddenContext:
+  - authorizationToken
+  - signedUrl
+  - paymentData
+  - rawAiPrompt
+  - byokSecret
