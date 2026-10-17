@@ -2,7 +2,7 @@
 # apps/admin — SvelteKit + @sveltejs/adapter-node, deployed to Fly.io (intranet-bound).
 FROM node:22-slim
 
-RUN npm install -g pnpm@9
+RUN npm install -g pnpm@12.11.2
 
 WORKDIR /repo
 COPY . .
