@@ -8,10 +8,12 @@ on:
       - 'packages/ui/**'
       - 'packages/domain/**'
       - 'packages/config/**'
+  workflow_dispatch:
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: ${{ github.ref_name }}
     steps:
       - uses: actions/checkout@v4
 
