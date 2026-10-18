@@ -493,3 +493,54 @@ export async function fetchReadingPosition(actorId: string, publicationId: strin
   if (out.status !== "SUCCESS" || !out.result) return 0;
   return out.result.position ?? 0;
 }
+
+export interface PlanSummary {
+  $id?: string;
+  code?: string;
+  name?: string;
+  description?: string;
+  status?: string;
+  scope?: string;
+  currency?: string;
+  amount?: number;
+  billingInterval?: string;
+  billingIntervalCount?: number;
+}
+
+export interface SubscriptionSummary {
+  $id?: string;
+  userId?: string;
+  creatorId?: string;
+  planId?: string;
+  planVersion?: number;
+  provider?: string;
+  providerSubscriptionId?: string;
+  providerPlanId?: string;
+  status?: string;
+  billingMode?: string;
+  billingStrategy?: string;
+  currency?: string;
+  amount?: number;
+  billingInterval?: string;
+  billingIntervalCount?: number;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+/** Fetch the available subscription plans (read-only catalog). */
+export async function fetchPlans(actorId: string): Promise<PlanSummary[]> {
+  const out = await invokeApi<{ rows?: Array<{ $id?: string; data?: PlanSummary }> }>("plan_list", {}, actorId);
+  if (out.status !== "SUCCESS" || !out.result?.rows) return [];
+  return out.result.rows.map((r) => ({ $id: r.$id, ...(r.data ?? {}) }));
+}
+
+/** Fetch the authenticated user's subscriptions (scoped server-side). */
+export async function fetchSubscriptions(actorId: string): Promise<SubscriptionSummary[]> {
+  const out = await invokeApi<{ items?: Array<{ $id?: string; data?: SubscriptionSummary }> }>(
+    "subscription_list",
+    {},
+    actorId,
+  );
+  if (out.status !== "SUCCESS" || !out.result?.items) return [];
+  return out.result.items.map((r) => ({ $id: r.$id, ...(r.data ?? {}) }));
+}

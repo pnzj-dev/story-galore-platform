@@ -1,0 +1,138 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { actions } from "astro:actions";
+import { fetchPlans, fetchSubscriptions } from "../../lib/gateway";
+
+const user = Astro.locals.user;
+if (!user) {
+  return Astro.redirect("/auth/login");
+}
+
+const plans = await fetchPlans(user.$id);
+const subscriptions = await fetchSubscriptions(user.$id);
+---
+
+<Layout title="Billing & Subscription">
+  <main class="mx-auto max-w-4xl px-6 py-12">
+    <h1 class="text-3xl font-bold">Billing & Subscription</h1>
+
+    <section class="mt-8">
+      <h2 class="text-xl font-semibold">Plans</h2>
+      {
+        plans.length === 0 ? (
+          <p class="mt-2 text-sm text-foreground-muted">No plans are available yet.</p>
+        ) : (
+          <div class="mt-4 grid gap-4 sm:grid-cols-2">
+            {plans.map((plan) => (
+              <div class="rounded-lg border border-border bg-surface p-4">
+                <h3 class="font-semibold">{plan.name}</h3>
+                {plan.description && <p class="mt-1 text-sm text-foreground-muted">{plan.description}</p>}
+                <p class="mt-2 text-lg font-bold">
+                  {((plan.amount ?? 0) / 100).toFixed(2)} {plan.currency}
+                  <span class="text-sm font-normal text-foreground-muted">
+                    {" "}
+                    / {(plan.billingInterval ?? "month").toLowerCase()}
+                  </span>
+                </p>
+
+                <form method="POST" action={actions.subscribe} class="mt-4 space-y-3">
+                  <input type="hidden" name="planId" value={plan.$id} />
+                  <div>
+                    <label for={`provider-${plan.$id}`} class="mb-1 block text-sm text-foreground-muted">
+                      Pay with
+                    </label>
+                    <select
+                      name="provider"
+                      id={`provider-${plan.$id}`}
+                      class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
+                    >
+                      <option value="STRIPE">Card (Stripe)</option>
+                      <option value="NOWPAYMENTS">Crypto (NOWPayments)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label for={`email-${plan.$id}`} class="mb-1 block text-sm text-foreground-muted">
+                      Email (crypto subscriptions)
+                    </label>
+                    <input
+                      type="email"
+                      name="email"
+                      id={`email-${plan.$id}`}
+                      class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    class="rounded-lg bg-primary px-4 py-2 font-semibold text-primary-foreground transition hover:opacity-90"
+                  >
+                    Subscribe
+                  </button>
+                </form>
+              </div>
+            ))}
+          </div>
+        )
+      }
+    </section>
+
+    <section class="mt-10">
+      <h2 class="text-xl font-semibold">Your subscriptions</h2>
+      {
+        subscriptions.length === 0 ? (
+          <p class="mt-2 text-sm text-foreground-muted">You have no subscriptions yet.</p>
+        ) : (
+          <ul class="mt-4 space-y-3">
+            {subscriptions.map((sub) => (
+              <li class="rounded-lg border border-border bg-surface p-4">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <p class="font-semibold">{sub.planId}</p>
+                    <p class="text-sm text-foreground-muted">
+                      {sub.provider} · {sub.billingStrategy} ·{" "}
+                      <span class="font-medium">{sub.status}</span>
+                    </p>
+                  </div>
+                  <div class="flex gap-2">
+                    {sub.status === "ACTIVE" && (
+                      <form method="POST" action={actions.pauseSubscription}>
+                        <input type="hidden" name="subscriptionId" value={sub.$id} />
+                        <button
+                          type="submit"
+                          class="rounded-lg border border-border px-3 py-1.5 text-sm transition hover:opacity-90"
+                        >
+                          Pause
+                        </button>
+                      </form>
+                    )}
+                    {sub.status === "PAUSED" && (
+                      <form method="POST" action={actions.resumeSubscription}>
+                        <input type="hidden" name="subscriptionId" value={sub.$id} />
+                        <button
+                          type="submit"
+                          class="rounded-lg border border-border px-3 py-1.5 text-sm transition hover:opacity-90"
+                        >
+                          Resume
+                        </button>
+                      </form>
+                    )}
+                    {sub.status !== "CANCELLED" && sub.status !== "EXPIRED" && (
+                      <form method="POST" action={actions.cancelSubscription}>
+                        <input type="hidden" name="subscriptionId" value={sub.$id} />
+                        <button
+                          type="submit"
+                          class="rounded-lg border border-danger px-3 py-1.5 text-sm text-danger transition hover:opacity-90"
+                        >
+                          Cancel
+                        </button>
+                      </form>
+                    )}
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )
+      }
+    </section>
+  </main>
+</Layout>

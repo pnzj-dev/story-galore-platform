@@ -58,7 +58,7 @@ var knownOperations = map[string]bool{
 	"comment_moderate": true, "comment_list": true, "comment_get": true,
 	"subscription_create": true, "subscription_cancel": true, "subscription_pause": true,
 	"subscription_resume": true, "subscription_change_plan": true, "subscription_renew": true,
-	"subscription_reconcile": true, "plan_get": true, "plan_list": true, "subscription_get": true,
+	"subscription_reconcile": true, "plan_get": true, "plan_list": true, "subscription_get": true, "subscription_list": true,
 	"payment_create": true, "payment_confirm_from_webhook": true, "payment_refund": true,
 	"payment_reconcile": true, "payment_mark_failed": true, "payment_get": true, "payment_list": true,
 	"reading_progress_upsert": true, "reading_progress_complete": true,
@@ -211,6 +211,8 @@ func Main(ctx openruntimes.Context) openruntimes.Response {
 		return listRows(ctx, &in, cl, "plans")
 	case "subscription_get":
 		return getRow(ctx, &in, cl, "subscriptions")
+	case "subscription_list":
+		return subscriptionList(ctx, &in, cl)
 	case "payment_create":
 		return paymentCreate(ctx, &in, cl)
 	case "payment_confirm_from_webhook":
@@ -335,6 +337,30 @@ func projectList(ctx openruntimes.Context, in *GatewayInput, cl client.Client) o
 	list, err := service.ListRows(databaseID, "studio_projects", service.WithListRowsQueries([]string{
 		qEqual("creatorId", creatorId),
 		`{"method":"orderDesc","attribute":"updatedAt"}`,
+		`{"method":"limit","values":[50]}`,
+	}))
+	if err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	var raw map[string]interface{}
+	if err := list.Decode(&raw); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	rows, _ := raw["rows"].([]interface{})
+	return success(ctx, in, map[string]interface{}{"items": rows})
+}
+
+// subscriptionList returns the authenticated user's subscriptions (scoped to
+// the actor's userId).
+func subscriptionList(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	userId := actorOrEmpty(in.ActorId)
+	if userId == "" {
+		return respond(ctx, in.OperationId, "UNAUTHORIZED", false)
+	}
+	service := tablesdb.New(cl)
+	list, err := service.ListRows(databaseID, "subscriptions", service.WithListRowsQueries([]string{
+		qEqual("userId", userId),
+		`{"method":"orderDesc","attribute":"createdAt"}`,
 		`{"method":"limit","values":[50]}`,
 	}))
 	if err != nil {

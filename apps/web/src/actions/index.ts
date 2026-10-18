@@ -508,4 +508,77 @@ export const server = {
       return { ok: true };
     },
   }),
+
+  subscribe: defineAction({
+    accept: "form",
+    input: z.object({
+      planId: z.string().min(1),
+      provider: z.enum(["STRIPE", "NOWPAYMENTS"]),
+      email: z.string().email().optional(),
+    }),
+    handler: async (input, context) => {
+      const user = context.locals.user;
+      if (!user) throw new ActionError({ code: "UNAUTHORIZED", message: "Sign in to subscribe." });
+      const billingMode = input.provider === "STRIPE" ? "FIAT" : "CRYPTO";
+      const out = await invokeApi<{ subscriptionId?: string }>(
+        "subscription_create",
+        {
+          userId: user.$id,
+          planId: input.planId,
+          planVersion: 1,
+          billingMode,
+          billingStrategy: "NATIVE_RECURRING",
+          provider: input.provider,
+          email: input.email ?? undefined,
+        },
+        user.$id,
+      );
+      if (out.status !== "SUCCESS" || !out.result?.subscriptionId) {
+        throw new ActionError({ code: "BAD_REQUEST", message: "Could not create the subscription." });
+      }
+      return { ok: true };
+    },
+  }),
+
+  cancelSubscription: defineAction({
+    accept: "form",
+    input: z.object({ subscriptionId: z.string().min(1) }),
+    handler: async (input, context) => {
+      const user = context.locals.user;
+      if (!user) throw new ActionError({ code: "UNAUTHORIZED", message: "Sign in." });
+      const out = await invokeApi("subscription_cancel", { subscriptionId: input.subscriptionId }, user.$id);
+      if (out.status !== "SUCCESS") {
+        throw new ActionError({ code: "BAD_REQUEST", message: "Could not cancel the subscription." });
+      }
+      return { ok: true };
+    },
+  }),
+
+  pauseSubscription: defineAction({
+    accept: "form",
+    input: z.object({ subscriptionId: z.string().min(1) }),
+    handler: async (input, context) => {
+      const user = context.locals.user;
+      if (!user) throw new ActionError({ code: "UNAUTHORIZED", message: "Sign in." });
+      const out = await invokeApi("subscription_pause", { subscriptionId: input.subscriptionId }, user.$id);
+      if (out.status !== "SUCCESS") {
+        throw new ActionError({ code: "BAD_REQUEST", message: "Could not pause the subscription." });
+      }
+      return { ok: true };
+    },
+  }),
+
+  resumeSubscription: defineAction({
+    accept: "form",
+    input: z.object({ subscriptionId: z.string().min(1) }),
+    handler: async (input, context) => {
+      const user = context.locals.user;
+      if (!user) throw new ActionError({ code: "UNAUTHORIZED", message: "Sign in." });
+      const out = await invokeApi("subscription_resume", { subscriptionId: input.subscriptionId }, user.$id);
+      if (out.status !== "SUCCESS") {
+        throw new ActionError({ code: "BAD_REQUEST", message: "Could not resume the subscription." });
+      }
+      return { ok: true };
+    },
+  }),
 };
