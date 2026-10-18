@@ -183,6 +183,7 @@ tables_with_columns:
       - {key: provider, type: varchar, size: 64, required: false}
       - {key: providerCustomerId, type: varchar, size: 255, required: false}
       - {key: providerSubscriptionId, type: varchar, size: 255, required: false}
+      - {key: providerPlanId, type: varchar, size: 255, required: false}
       - {key: status, type: enum, elements: [CREATED, CHECKOUT_STARTED, AWAITING_PROVIDER, ACTIVE, PAST_DUE, GRACE_PERIOD, CANCEL_AT_PERIOD_END, PAUSED, CANCELLED, EXPIRED], required: true}
       - {key: billingMode, type: enum, elements: [FIAT, CRYPTO, OTHER], required: true}
       - {key: billingStrategy, type: enum, elements: [NATIVE_RECURRING, MERCHANT_MANAGED, MANUAL], required: true}
@@ -611,6 +612,7 @@ pending_columns:
   - table: notifications
   - table: notification_preferences
   - table: notification_delivery_attempts
+  - table: provider_auth_tokens
 reconciliation_notes:
   - desired_schema_manifest_lists_43_coarse_tables_without_columns
   - domain_schema_files_cover_media_assets_plans_subscriptions_language_metadata_reading_progress_creators_book_pages_comments_reactions_reports_payments_and_refunds_only

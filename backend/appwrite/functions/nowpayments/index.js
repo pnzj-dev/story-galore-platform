@@ -16,6 +16,13 @@ const APPWRITE_ENDPOINT =
   process.env.APPWRITE_FUNCTION_API_ENDPOINT ||
   'http://187.126.0.227/v1';
 const NP_API_BASE = process.env.NOWPAYMENTS_API_BASE || 'https://api.nowpayments.io/v1';
+const AUTH_TABLE = 'provider_auth_tokens';
+// Conservative TTL for the NOWPayments Bearer JWT (short-lived).
+const JWT_TTL_MS = 15 * 60 * 1000;
+
+// In-memory JWT cache (per-execution). The cross-execution cache lives in the
+// provider_auth_tokens table so fresh executions don't re-hit /v1/auth.
+let jwtCache = { token: null, expiresAt: 0 };
 
 function nowpaymentsSDK() {
   return new NowPaymentsSDK({
@@ -45,15 +52,19 @@ async function appwriteRequest(req, method, path, body) {
   return resp.json();
 }
 
-// Raw NOWPayments REST call (x-api-key). Used for the Recurring Payments
-// (subscriptions) endpoints, which the SDK does not wrap.
-async function npRequest(method, path, body) {
+// Raw NOWPayments REST call (x-api-key, optional Bearer JWT). Used for the
+// Recurring Payments (subscriptions) endpoints, which the SDK does not wrap.
+async function npRequest(method, path, body, jwt) {
+  const headers = {
+    'content-type': 'application/json',
+    'x-api-key': process.env.NOWPAYMENTS_API_KEY,
+  };
+  if (jwt) {
+    headers['authorization'] = `Bearer ${jwt}`;
+  }
   const resp = await fetch(`${NP_API_BASE}${path}`, {
     method,
-    headers: {
-      'content-type': 'application/json',
-      'x-api-key': process.env.NOWPAYMENTS_API_KEY,
-    },
+    headers,
     body: body ? JSON.stringify(body) : undefined,
   });
   if (!resp.ok) {
@@ -61,6 +72,54 @@ async function npRequest(method, path, body) {
     throw new Error(`NOWPayments ${method} ${path}: ${resp.status} ${text}`);
   }
   return resp.json();
+}
+
+// Obtain the NOWPayments Bearer JWT: in-memory cache -> provider_auth_tokens
+// table -> POST /v1/auth. Avoids hitting the auth endpoint on every execution.
+async function getJwt(req) {
+  const now = Date.now();
+  if (jwtCache.token && jwtCache.expiresAt > now) {
+    return jwtCache.token;
+  }
+  try {
+    const q = encodeURIComponent(
+      JSON.stringify([{ method: 'equal', attribute: 'providerId', values: ['NOWPAYMENTS'] }])
+    );
+    const list = await appwriteRequest(req, 'GET', `/tablesdb/${DATABASE_ID}/tables/${AUTH_TABLE}/rows?queries=${q}`);
+    const row = list && list.rows && list.rows[0];
+    if (row && row.data && row.data.token && row.data.expiresAt) {
+      const exp = new Date(row.data.expiresAt).getTime();
+      if (exp > now) {
+        jwtCache = { token: row.data.token, expiresAt: exp };
+        return row.data.token;
+      }
+    }
+  } catch (e) {
+    // table/read may be unavailable; fall through to re-auth.
+  }
+  const auth = await npRequest(
+    'POST',
+    '/auth',
+    { email: process.env.NOWPAYMENTS_EMAIL, password: process.env.NOWPAYMENTS_PASSWORD },
+    null
+  );
+  const token = auth && auth.token;
+  if (!token) {
+    throw new Error('NOWPayments auth returned no token');
+  }
+  const expiresAt = now + JWT_TTL_MS;
+  jwtCache = { token, expiresAt };
+  try {
+    await appwriteRequest(req, 'POST', `/tablesdb/${DATABASE_ID}/tables/${AUTH_TABLE}/rows`, {
+      databaseId: DATABASE_ID,
+      tableId: AUTH_TABLE,
+      rowId: 'NOWPAYMENTS',
+      data: { providerId: 'NOWPAYMENTS', token, expiresAt: new Date(expiresAt).toISOString() },
+    });
+  } catch (e) {
+    // best-effort; the in-memory cache still holds the token.
+  }
+  return token;
 }
 
 // Map raw NOWPayments payment_status -> StoryGalore payments.status enum.
@@ -207,19 +266,25 @@ async function handleCreateSubscription(req, res, log) {
     return res.json({ error: 'INVALID_INPUT' }, 400);
   }
 
+  const jwt = await getJwt(req);
+
   // 1. Create the NOWPayments subscription plan (prerequisite).
   const plan = await npRequest('POST', '/subscriptions/plans', {
     title: `StoryGalore ${input.planId || 'subscription'}`,
     interval_day: intervalToDays(input.interval),
     amount: input.amount,
     currency: String(input.currency).toLowerCase(),
-  });
+  }, jwt);
+  const planId = plan.result ? plan.result.id : plan.id;
 
   // 2. Create the email subscription against the plan.
   const sub = await npRequest('POST', '/subscriptions', {
-    subscription_plan_id: plan.id,
+    subscription_plan_id: planId,
     email: input.email,
-  });
+  }, jwt);
+  // NOWPayments returns { result: [ { id, ... } ] } (an array of subscriptions).
+  const subObj = (Array.isArray(sub.result) ? sub.result[0] : sub.result) || sub;
+  const subId = subObj.id;
 
   // 3. Update the subscriptions row (created by the Go gateway).
   await appwriteRequest(
@@ -231,8 +296,8 @@ async function handleCreateSubscription(req, res, log) {
       tableId: SUBSCRIPTIONS_TABLE,
       rowId: input.subscriptionId,
       data: {
-        providerSubscriptionId: String(sub.id),
-        providerPlanId: String(plan.id),
+        providerSubscriptionId: String(subId),
+        providerPlanId: String(planId),
         status: 'AWAITING_PROVIDER',
         updatedAt: new Date().toISOString(),
       },
@@ -242,15 +307,15 @@ async function handleCreateSubscription(req, res, log) {
   log(
     'nowpayments create_subscription',
     `subscriptionId=${input.subscriptionId}`,
-    `providerSubscriptionId=${sub.id}`
+    `providerSubscriptionId=${subId}`
   );
 
   return res.json({
     status: 'SUCCESS',
     result: {
       subscriptionId: input.subscriptionId,
-      providerSubscriptionId: String(sub.id),
-      providerPlanId: String(plan.id),
+      providerSubscriptionId: String(subId),
+      providerPlanId: String(planId),
     },
   });
 }
@@ -260,7 +325,8 @@ async function handleCancelSubscription(req, res, log) {
   if (!input.providerSubscriptionId) {
     return res.json({ error: 'INVALID_INPUT' }, 400);
   }
-  await npRequest('DELETE', `/subscriptions/${input.providerSubscriptionId}`);
+  const jwt = await getJwt(req);
+  await npRequest('DELETE', `/subscriptions/${input.providerSubscriptionId}`, null, jwt);
   log('nowpayments cancel_subscription', `providerSubscriptionId=${input.providerSubscriptionId}`);
   return res.json({ status: 'SUCCESS', result: { cancelled: true } });
 }

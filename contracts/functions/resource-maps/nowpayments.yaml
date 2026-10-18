@@ -4,4 +4,6 @@ function: nowpayments
 policy: explicit_only
 resources:
   - payments
+  - subscriptions
+  - provider_auth_tokens
 undeclared_resource_access: BLOCK
