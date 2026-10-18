@@ -83,7 +83,7 @@ export const server = {
         }
       }
       context.cookies.delete(SESSION_COOKIE, { path: "/" });
-      return { ok: true };
+      return context.redirect("/");
     },
   }),
 

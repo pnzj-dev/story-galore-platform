@@ -1,6 +1,8 @@
 ---
 import "../styles/global.css";
 import { ClientRouter } from "astro:transitions";
+import SiteHeader from "../components/SiteHeader.astro";
+import SiteFooter from "../components/SiteFooter.astro";
 
 interface Props {
   title: string;
@@ -38,6 +40,8 @@ const canonicalUrl = Astro.site ? new URL(Astro.url.pathname, Astro.site).toStri
        images must use astro:assets; creator media uses the Appwrite media
        distribution contract. -->
   <body class="min-h-screen bg-background text-foreground antialiased" data-density="public">
+    <SiteHeader />
     <slot />
+    <SiteFooter />
   </body>
 </html>

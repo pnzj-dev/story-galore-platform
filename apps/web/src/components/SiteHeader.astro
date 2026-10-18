@@ -1,0 +1,109 @@
+---
+import { ThemeToggle } from "@storygalore/ui";
+import { actions } from "astro:actions";
+
+const user = Astro.locals.user;
+const pathname = Astro.url.pathname;
+const forYouActive = pathname === "/";
+---
+
+<header class="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur">
+  <nav class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-4">
+    <a href="/" class="text-lg font-bold tracking-tight">
+      <span class="text-link">Story</span>Galore
+    </a>
+    <div class="hidden items-center gap-6 text-sm text-foreground-muted lg:flex">
+      <a
+        href="/"
+        class={forYouActive ? "font-medium text-foreground" : "transition hover:text-foreground"}
+        aria-current={forYouActive ? "page" : undefined}
+      >
+        For You
+      </a>
+
+      <details class="group relative">
+        <summary class="cursor-pointer list-none transition hover:text-foreground">Books</summary>
+        <div
+          class="absolute start-0 top-full z-50 mt-2 w-48 rounded-lg border border-border bg-surface p-2 shadow-xl"
+        >
+          <a href="/books?format=comic" class="block rounded px-2 py-1.5 hover:bg-surface-elevated hover:text-foreground"
+            >Comics</a
+          >
+          <a href="/books?format=manga" class="block rounded px-2 py-1.5 hover:bg-surface-elevated hover:text-foreground"
+            >Manga</a
+          >
+          <a href="/books?format=manhwa" class="block rounded px-2 py-1.5 hover:bg-surface-elevated hover:text-foreground"
+            >Manhwa</a
+          >
+          <a
+            href="/books?format=bande-dessinee"
+            class="block rounded px-2 py-1.5 hover:bg-surface-elevated hover:text-foreground">Bande Dessinée</a
+          >
+          <a href="/books?format=novel" class="block rounded px-2 py-1.5 hover:bg-surface-elevated hover:text-foreground"
+            >Novels</a
+          >
+          <a
+            href="/books"
+            class="block rounded px-2 py-1.5 text-foreground-muted hover:bg-surface-elevated hover:text-foreground"
+            >All books</a
+          >
+        </div>
+      </details>
+
+      <details class="group relative">
+        <summary class="cursor-pointer list-none transition hover:text-foreground">Videos</summary>
+        <div
+          class="absolute start-0 top-full z-50 mt-2 w-48 rounded-lg border border-border bg-surface p-2 shadow-xl"
+        >
+          <a href="/videos?format=TV_SHOW" class="block rounded px-2 py-1.5 hover:bg-surface-elevated hover:text-foreground"
+            >Series</a
+          >
+          <a href="/videos?format=MOVIE" class="block rounded px-2 py-1.5 hover:bg-surface-elevated hover:text-foreground"
+            >Movies</a
+          >
+          <a href="/shorts" class="block rounded px-2 py-1.5 hover:bg-surface-elevated hover:text-foreground">Shorts</a>
+          <a
+            href="/videos?format=DOCUMENTARY"
+            class="block rounded px-2 py-1.5 hover:bg-surface-elevated hover:text-foreground">Documentaries</a
+          >
+          <a
+            href="/videos"
+            class="block rounded px-2 py-1.5 text-foreground-muted hover:bg-surface-elevated hover:text-foreground"
+            >All videos</a
+          >
+        </div>
+      </details>
+
+      <a href="/images" class="transition hover:text-foreground">Art</a>
+      <a href="/audio" class="transition hover:text-foreground">Audio</a>
+      <a href="/creators" class="transition hover:text-foreground">Creators</a>
+    </div>
+    <div class="flex items-center gap-3">
+      <ThemeToggle client:load />
+      {
+        user ? (
+          <>
+            <a href="/account/billing" class="text-sm text-foreground-muted transition hover:text-foreground">
+              Account
+            </a>
+            <form method="POST" action={actions.logout}>
+              <button type="submit" class="text-sm text-foreground-muted transition hover:text-foreground">
+                Sign out
+              </button>
+            </form>
+          </>
+        ) : (
+          <>
+            <a href="/auth/login" class="text-sm text-foreground-muted transition hover:text-foreground">Sign in</a>
+            <a
+              href="/auth/register"
+              class="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
+            >
+              Get started
+            </a>
+          </>
+        )
+      }
+    </div>
+  </nav>
+</header>
