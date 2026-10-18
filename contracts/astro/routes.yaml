@@ -30,7 +30,7 @@ route_density:
   admin: ADMIN
 route_protection:
   public:
-    patterns: ['/','/stories/**','/discover/**','/creators/:creatorId','/editorial/**']
+    patterns: ['/','/stories/**','/discover/**','/books','/videos','/shorts','/images','/audio','/creators/:creatorId','/editorial/**']
     authentication: OPTIONAL
     authorization: PUBLIC_POLICY
   authenticated:

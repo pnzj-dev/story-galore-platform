@@ -3770,6 +3770,8 @@ func publicationList(ctx openruntimes.Context, in *GatewayInput, cl client.Clien
 	var input struct {
 		Sort      string `json:"sort"`
 		CreatorId string `json:"creatorId"`
+		Type      string `json:"type"`
+		Format    string `json:"format"`
 	}
 	_ = json.Unmarshal(in.Payload.Input, &input)
 	sortAttr := "publishedAt"
@@ -3782,6 +3784,12 @@ func publicationList(ctx openruntimes.Context, in *GatewayInput, cl client.Clien
 	}
 	if input.CreatorId != "" {
 		queries = append(queries, qEqual("creatorId", input.CreatorId))
+	}
+	if input.Type != "" {
+		queries = append(queries, qEqual("type", input.Type))
+	}
+	if input.Format != "" {
+		queries = append(queries, qEqual("format", input.Format))
 	}
 	queries = append(queries,
 		`{"method":"orderDesc","attribute":"`+sortAttr+`"}`,

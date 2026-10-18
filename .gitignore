@@ -19,3 +19,6 @@ build/
 
 # OS / editor
 .DS_Store
+
+# Playwright MCP artifacts
+.playwright-mcp/

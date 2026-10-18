@@ -64,15 +64,15 @@ const homeAd = await fetchAd("HOME_FEED_BETWEEN_RAILS", user?.$id ?? "");
             <div
               class="absolute start-0 top-full z-50 mt-2 w-48 rounded-lg border border-border bg-surface p-2 shadow-xl"
             >
-              <a href="/videos?type=series" class="block rounded px-2 py-1.5 hover:bg-surface-elevated hover:text-foreground"
+              <a href="/videos?format=TV_SHOW" class="block rounded px-2 py-1.5 hover:bg-surface-elevated hover:text-foreground"
                 >Series</a
               >
-              <a href="/videos?type=movie" class="block rounded px-2 py-1.5 hover:bg-surface-elevated hover:text-foreground"
+              <a href="/videos?format=MOVIE" class="block rounded px-2 py-1.5 hover:bg-surface-elevated hover:text-foreground"
                 >Movies</a
               >
               <a href="/shorts" class="block rounded px-2 py-1.5 hover:bg-surface-elevated hover:text-foreground">Shorts</a>
               <a
-                href="/videos?type=documentary"
+                href="/videos?format=DOCUMENTARY"
                 class="block rounded px-2 py-1.5 hover:bg-surface-elevated hover:text-foreground">Documentaries</a
               >
               <a

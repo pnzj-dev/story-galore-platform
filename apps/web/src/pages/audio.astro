@@ -1,0 +1,12 @@
+---
+import BrowsePage from "../components/BrowsePage.astro";
+
+const format = Astro.url.searchParams.get("format")?.toUpperCase().replace(/-/g, "_") ?? undefined;
+---
+
+<BrowsePage
+  title="Audio"
+  description="Podcasts, audiobooks, and more."
+  type="AUDIO"
+  format={format}
+/>

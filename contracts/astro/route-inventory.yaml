@@ -6,7 +6,7 @@ scope: planned V1 routes; not a claim that route files are implemented
 dynamic_path_syntax: Colon-prefixed segments are Astro dynamic route parameters and
   must match actual [param] route files. Catch-all segments require explicit entries
   and are forbidden by default.
-route_count: 96
+route_count: 101
 rules:
   every_route_must_have_exactly_one_policy: true
   unknown_route: BLOCK
@@ -48,6 +48,36 @@ routes:
   capability: discovery.read
   kind: page
   notes: ''
+- path: /books
+  group: public
+  authentication: OPTIONAL
+  capability: discovery.read
+  kind: page
+  notes: media-type browse; format filter via ?format=
+- path: /videos
+  group: public
+  authentication: OPTIONAL
+  capability: discovery.read
+  kind: page
+  notes: media-type browse; format filter via ?format=
+- path: /shorts
+  group: public
+  authentication: OPTIONAL
+  capability: discovery.read
+  kind: page
+  notes: short-form video browse
+- path: /images
+  group: public
+  authentication: OPTIONAL
+  capability: discovery.read
+  kind: page
+  notes: image/gallery browse (Art)
+- path: /audio
+  group: public
+  authentication: OPTIONAL
+  capability: discovery.read
+  kind: page
+  notes: audio browse
 - path: /creators/:creatorId
   group: public
   authentication: OPTIONAL

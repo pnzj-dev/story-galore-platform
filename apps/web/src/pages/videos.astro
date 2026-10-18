@@ -1,0 +1,12 @@
+---
+import BrowsePage from "../components/BrowsePage.astro";
+
+const format = Astro.url.searchParams.get("format")?.toUpperCase().replace(/-/g, "_") ?? undefined;
+---
+
+<BrowsePage
+  title="Videos"
+  description="Series, movies, shorts, and documentaries."
+  type="VIDEO"
+  format={format}
+/>

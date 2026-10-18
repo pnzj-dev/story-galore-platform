@@ -160,6 +160,35 @@ export async function fetchPublications(
     });
 }
 
+/** Fetch published publications filtered by media type and/or format (browse). */
+export async function fetchMediaByType(
+  type: string,
+  format?: string,
+  sort: "trending" | "new" = "trending",
+): Promise<MediaCardData[]> {
+  const out = await invokeApi<{ items?: PublicationItem[] }>(
+    "publication_list",
+    { sort, type, format },
+    "",
+  );
+  if (out.status !== "SUCCESS" || !out.result?.items) return [];
+  return out.result.items
+    .filter((item) => Boolean(item.publication?.$id))
+    .map((item) => {
+      const pub = item.publication!;
+      const t = VALID_TYPES.includes(pub.type as MediaType) ? (pub.type as MediaType) : "BOOK";
+      return {
+        id: pub.$id!,
+        title: pub.title ?? "Untitled",
+        type: t,
+        format: pub.format,
+        contentRating: pub.contentRating as ContentRating | undefined,
+        coverUrl: item.coverUrl,
+        creatorName: item.creatorName,
+      } satisfies MediaCardData;
+    });
+}
+
 interface CreatorItem {
   actorId?: string;
   handle?: string;

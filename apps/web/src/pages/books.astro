@@ -1,0 +1,12 @@
+---
+import BrowsePage from "../components/BrowsePage.astro";
+
+const format = Astro.url.searchParams.get("format")?.toUpperCase().replace(/-/g, "_") ?? undefined;
+---
+
+<BrowsePage
+  title="Books"
+  description="Serialized novels, comics, manga, and every book format."
+  type="BOOK"
+  format={format}
+/>
