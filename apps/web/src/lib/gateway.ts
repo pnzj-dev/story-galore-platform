@@ -529,18 +529,14 @@ export interface SubscriptionSummary {
 
 /** Fetch the available subscription plans (read-only catalog). */
 export async function fetchPlans(actorId: string): Promise<PlanSummary[]> {
-  const out = await invokeApi<{ rows?: Array<{ $id?: string; data?: PlanSummary }> }>("plan_list", {}, actorId);
+  const out = await invokeApi<{ rows?: PlanSummary[] }>("plan_list", {}, actorId);
   if (out.status !== "SUCCESS" || !out.result?.rows) return [];
-  return out.result.rows.map((r) => ({ $id: r.$id, ...(r.data ?? {}) }));
+  return out.result.rows;
 }
 
 /** Fetch the authenticated user's subscriptions (scoped server-side). */
 export async function fetchSubscriptions(actorId: string): Promise<SubscriptionSummary[]> {
-  const out = await invokeApi<{ items?: Array<{ $id?: string; data?: SubscriptionSummary }> }>(
-    "subscription_list",
-    {},
-    actorId,
-  );
+  const out = await invokeApi<{ items?: SubscriptionSummary[] }>("subscription_list", {}, actorId);
   if (out.status !== "SUCCESS" || !out.result?.items) return [];
-  return out.result.items.map((r) => ({ $id: r.$id, ...(r.data ?? {}) }));
+  return out.result.items;
 }
