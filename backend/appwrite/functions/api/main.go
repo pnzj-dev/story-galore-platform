@@ -2900,8 +2900,61 @@ func subscriptionCancel(ctx openruntimes.Context, in *GatewayInput, cl client.Cl
 	if err := updateRow(cl, "subscriptions", input.SubscriptionId, data); err != nil {
 		return internalFailure(ctx, in, err)
 	}
+
+	// Cancel the native provider subscription (best-effort: the domain state is
+	// already CANCELLED, so a provider-cancel failure only leaves the provider
+	// subscription for later reconciliation).
+	cancelNativeSubscription(ctx, cl, input.SubscriptionId)
+
 	emit(ctx, cl, "subscriptions.subscription_cancel.v1", input.SubscriptionId, actorOrEmpty(in.ActorId), map[string]interface{}{"subscriptionId": input.SubscriptionId}, in.CorrelationId)
 	return success(ctx, in, map[string]interface{}{"subscriptionId": input.SubscriptionId})
+}
+
+// cancelNativeSubscription cancels the provider-side subscription for a
+// NATIVE_RECURRING subscription (Stripe or NOWPayments). Best-effort.
+func cancelNativeSubscription(ctx openruntimes.Context, cl client.Client, subscriptionId string) {
+	service := tablesdb.New(cl)
+	s, err := service.GetRow(databaseID, "subscriptions", subscriptionId)
+	if err != nil {
+		return
+	}
+	var sm map[string]interface{}
+	if s.Decode(&sm) != nil {
+		return
+	}
+	strategy, _ := sm["billingStrategy"].(string)
+	if strategy != "NATIVE_RECURRING" {
+		return
+	}
+	provider, _ := sm["provider"].(string)
+	providerSubscriptionId, _ := sm["providerSubscriptionId"].(string)
+	if providerSubscriptionId == "" {
+		return
+	}
+	if provider == "NOWPAYMENTS" {
+		cancelNowpaymentsSubscription(ctx, cl, providerSubscriptionId)
+		return
+	}
+	adapter := newProviderAdapter(provider, os.Getenv("STRIPE_SECRET_KEY"))
+	if err := adapter.CancelSubscription(providerSubscriptionId); err != nil {
+		ctx.Error("native subscription cancel failed", "provider="+provider, err)
+	}
+}
+
+// cancelNowpaymentsSubscription delegates a NOWPayments subscription cancel to
+// the nowpayments function.
+func cancelNowpaymentsSubscription(ctx openruntimes.Context, cl client.Client, providerSubscriptionId string) {
+	npInput := map[string]interface{}{
+		"operation": "cancel_subscription",
+		"input":     map[string]interface{}{"providerSubscriptionId": providerSubscriptionId},
+	}
+	service := functions.New(cl)
+	if _, err := service.CreateExecution("nowpayments",
+		service.WithCreateExecutionBody(mustJSON(npInput)),
+		service.WithCreateExecutionMethod("POST"),
+	); err != nil {
+		ctx.Error("nowpayments subscription cancel delegation failed", err)
+	}
 }
 
 func subscriptionPause(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
@@ -3226,7 +3279,71 @@ func handleStripeWebhook(ctx openruntimes.Context, cl client.Client) openruntime
 		}
 		activateSubscriptionForPayment(cl, paymentId)
 	}
+
+	// Native subscription events (customer.subscription.*) drive the
+	// subscriptions.status for NATIVE_RECURRING.
+	if subscriptionId, stripeStatus := extractStripeSubscription(payload); subscriptionId != "" {
+		transitionSubscriptionStatus(cl, subscriptionId, mapStripeSubscriptionStatus(stripeStatus))
+	}
+
 	return ctx.Res.Json(map[string]interface{}{"received": true, "eventId": eventID})
+}
+
+// transitionSubscriptionStatus updates a subscription's status, guarding against
+// regression from a terminal state (CANCELLED/EXPIRED) back to ACTIVE. It is
+// the shared idempotent transition used by the Stripe subscription webhook.
+func transitionSubscriptionStatus(cl client.Client, subscriptionId, newStatus string) {
+	service := tablesdb.New(cl)
+	s, err := service.GetRow(databaseID, "subscriptions", subscriptionId)
+	if err != nil {
+		return
+	}
+	var sm map[string]interface{}
+	if s.Decode(&sm) != nil {
+		return
+	}
+	current, _ := sm["status"].(string)
+	if current == newStatus {
+		return
+	}
+	if (current == "CANCELLED" || current == "EXPIRED") && newStatus == "ACTIVE" {
+		return
+	}
+	if err := updateRow(cl, "subscriptions", subscriptionId, map[string]interface{}{"status": newStatus, "updatedAt": now()}); err != nil {
+		// best-effort; retried on the next (idempotent) webhook.
+	}
+}
+
+// extractStripeSubscription extracts the StoryGalore subscriptionId and the
+// Stripe subscription status from a customer.subscription.* event.
+func extractStripeSubscription(payload string) (subscriptionId, stripeStatus string) {
+	var raw map[string]interface{}
+	if err := json.Unmarshal([]byte(payload), &raw); err != nil {
+		return "", ""
+	}
+	data, _ := raw["data"].(map[string]interface{})
+	object, _ := data["object"].(map[string]interface{})
+	metadata, _ := object["metadata"].(map[string]interface{})
+	subscriptionId, _ = metadata["subscriptionId"].(string)
+	stripeStatus, _ = object["status"].(string)
+	return subscriptionId, stripeStatus
+}
+
+// mapStripeSubscriptionStatus maps a Stripe subscription status to the
+// StoryGalore subscriptions.status enum.
+func mapStripeSubscriptionStatus(stripeStatus string) string {
+	switch stripeStatus {
+	case "active", "trialing":
+		return "ACTIVE"
+	case "past_due", "unpaid":
+		return "PAST_DUE"
+	case "canceled":
+		return "CANCELLED"
+	case "incomplete_expired":
+		return "EXPIRED"
+	default:
+		return "AWAITING_PROVIDER"
+	}
 }
 
 // activateSubscriptionForPayment transitions a subscription to ACTIVE when its
