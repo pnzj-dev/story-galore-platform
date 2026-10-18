@@ -1,5 +1,6 @@
 <script lang="ts">
   import MediaCard from '../domain/MediaCard.svelte';
+  import RailScroller from './RailScroller.svelte';
   import type { MediaCardData } from '../types';
 
   let {
@@ -28,7 +29,7 @@
         return `/read/${item.id}`;
     }
   };
-  const hrefFor = getHref ?? defaultHref;
+  const hrefFor = (item: MediaCardData) => (getHref ?? defaultHref)(item);
 </script>
 
 <section class="space-y-3">
@@ -40,11 +41,11 @@
   </div>
 
   {#if items.length > 0}
-    <div class="flex snap-x gap-4 overflow-x-auto pb-2">
+    <RailScroller>
       {#each items as item (item.id)}
         <MediaCard publication={item} href={hrefFor(item)} />
       {/each}
-    </div>
+    </RailScroller>
   {:else if emptyHint}
     <p class="rounded-xl border border-dashed border-border px-6 py-8 text-sm text-foreground-muted">
       {emptyHint}

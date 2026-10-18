@@ -1,5 +1,6 @@
 <script lang="ts">
   import CreatorCard from '../domain/CreatorCard.svelte';
+  import RailScroller from './RailScroller.svelte';
   import type { CreatorCardData } from '../types';
 
   let {
@@ -15,11 +16,11 @@
   </div>
 
   {#if items.length > 0}
-    <div class="flex snap-x gap-4 overflow-x-auto pb-2">
+    <RailScroller>
       {#each items as item (item.id)}
         <CreatorCard creator={item} href={`/creators/${item.id}`} />
       {/each}
-    </div>
+    </RailScroller>
   {:else if emptyHint}
     <p class="rounded-xl border border-dashed border-border px-6 py-8 text-sm text-foreground-muted">
       {emptyHint}
