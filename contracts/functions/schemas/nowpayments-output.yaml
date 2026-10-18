@@ -1,0 +1,13 @@
+schema: storygalore.function-output/v1
+function: nowpayments
+fields:
+  status: SUCCESS|FAILED
+  result:
+    paymentId: string
+    providerPaymentId: string
+    payAddress: string
+    payAmount: number
+    payCurrency: string
+    invoiceUrl: string|null
+  errorCode: string|null
+unknown_fields: REJECT

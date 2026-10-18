@@ -57,7 +57,7 @@ for (const retired of ['cost-guardian.','creator-growth.','character.project.','
 }
 // All paths named by Appwrite Function definitions must point at the canonical Appwrite target.
 const functionCatalog = JSON.parse(read('backend/appwrite/functions/function-catalog.json'));
-if (!Array.isArray(functionCatalog.functions) || functionCatalog.functions.length !== 28) errors.push('Expected exactly 28 registered Appwrite Function contracts');
+if (!Array.isArray(functionCatalog.functions) || functionCatalog.functions.length !== 29) errors.push('Expected exactly 29 registered Appwrite Function contracts');
 if (!functionCatalog.functions?.some(f => f.id === 'central-agent-gateway')) errors.push('Central Agent Gateway is missing from the Appwrite Function catalog');
 for (const f of functionCatalog.functions ?? []) {
   if (!f.id) errors.push('Appwrite Function catalog entry missing id');

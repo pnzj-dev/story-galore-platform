@@ -1,0 +1,12 @@
+schema: storygalore.function-input/v1
+function: nowpayments
+fields:
+  operation: create_payment
+  input:
+    userId: string
+    amount: number
+    currency: string
+    payCurrency: string|null
+    paymentId: string|null
+    amountMinor: number|null
+unknown_fields: REJECT

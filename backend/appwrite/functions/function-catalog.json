@@ -50,6 +50,11 @@
       "purpose": "scheduled provider reconciliation"
     },
     {
+      "id": "nowpayments",
+      "purpose": "NOWPayments crypto payment creation and IPN ingestion (TypeScript/Node; SDK has no Go equivalent)",
+      "runtime": "node-22"
+    },
+    {
       "id": "subscription-lifecycle",
       "purpose": "renewal/cancellation/entitlement lifecycle"
     },

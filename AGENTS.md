@@ -9,7 +9,7 @@ Build the creator media platform described by this repository. Books are the fla
 1. Use **Astro + Svelte** for the web application.
 2. Keep the web application in this monorepo and maximize reuse through `packages/*`.
 3. Use **Appwrite as the application platform** unless a requirement in this repository explicitly calls for an external service.
-4. Use **Go for Appwrite Functions**.
+4. Use **Go for Appwrite Functions**. Exception: the NOWPayments integration (`backend/appwrite/functions/nowpayments`) uses TypeScript/Node, because the NOWPayments SDK (`@nowpaymentsio/nowpayments-sdk-nodejs`) has no Go equivalent. No other Appwrite Function may use TypeScript/Node without an accepted ADR.
 5. Use official Appwrite CLI/Console/Terraform capabilities. Do not invent an Appwrite deployment format.
 6. Use Appwrite TablesDB, DocumentsDB and VectorsDB deliberately; do not put everything in one storage mechanism.
 7. Treat media as a first-class domain; do not create a comic-only storage/publication abstraction that blocks future image/video/audio formats.

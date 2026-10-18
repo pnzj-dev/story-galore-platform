@@ -1,0 +1,50 @@
+version: '1.0'
+area: payments
+kind: test-boundary
+canonical: true
+summary: >
+  Payment and Stripe flows are exercised end-to-end through the Appwrite
+  gateway function (api), never through the standalone admin application.
+boundary:
+  primaryRuntime: appwrite_gateway_function
+  functionId: api
+  host: appwrite_vps
+  adminAppInvolved: false
+  reasons:
+    - "The gateway function owns the authoritative payment commands and queries (payment_create, payment_confirm_from_webhook, payment_refund, payment_reconcile, payment_get, payment_list)."
+    - "The standalone admin application (apps/admin) is intranet-bound (ADR-0018) and is not part of the payment execution or test path."
+  forbidden:
+    - "Do not use apps/admin (or its Fly.io deployments) to test or exercise Stripe/payment flows."
+    - "Do not treat the admin application as a prerequisite for payment webhook verification."
+stripeConfig:
+  runtime: appwrite_function_variables
+  functionId: api
+  requiredVariables:
+    - STRIPE_SECRET_KEY
+    - STRIPE_WEBHOOK_SECRET
+  note: >
+    Stripe credentials are Appwrite function variables on the api function.
+    They are not required by, and must not be assumed present in, apps/admin.
+e2ePath:
+  steps:
+    - step: payment_create
+      via: gateway_command
+      effect: "creates a local payments row (status CREATED), creates a provider PaymentIntent, then records providerPaymentId and transitions status to AWAITING_PROVIDER"
+    - step: provider_confirm
+      via: stripe_test_card
+      effect: "confirms the PaymentIntent with a Stripe test card so Stripe emits payment_intent.succeeded"
+    - step: webhook_delivery
+      via: public_webhook_endpoint
+      effect: "Stripe POSTs the signed event to /webhooks/stripe on the gateway function"
+    - step: webhook_handler
+      via: gateway_function
+      effect: "verifies the signature, records a payment_events row, and transitions the payment to status CAPTURED"
+verification:
+  authoritativeState: payments.status == CAPTURED
+  webhookSignatureVerified: true
+  providerEventRecorded: true
+  adminAppInvolved: false
+references:
+  - docs/PAYMENTS.md
+  - docs/adr/0018-admin-app-split.md
+  - contracts/domain/payment.schema.yaml

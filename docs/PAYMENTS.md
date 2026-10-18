@@ -129,3 +129,35 @@ StoryGalore supports three subscription billing strategies:
 A provider that does not support native subscriptions must not be given a synthetic `createSubscription` implementation. The subscription engine owns the lifecycle and uses ordinary one-time payments for merchant-managed renewal.
 
 Do not store wallet credentials or implement automatic crypto wallet debits to simulate recurring payments.
+
+## Testing boundary
+
+Payment/Stripe flows are tested end-to-end through the Appwrite gateway function (`api`), never through the standalone admin application.
+
+- **Primary runtime**: the Appwrite `api` gateway function (on the Appwrite VPS), which owns the authoritative payment commands (`payment_create`, `payment_confirm_from_webhook`, `payment_refund`, `payment_reconcile`) and queries (`payment_get`, `payment_list`).
+- **Stripe credentials** (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`) are Appwrite function variables on the `api` function — they are not required by, and must not be assumed present in, `apps/admin`.
+- **The admin app (`apps/admin`) is intranet-bound** (ADR-0018) and is excluded from the payment test path. Do not use its Fly.io deployments to exercise Stripe flows.
+
+### End-to-end path
+
+```text
+payment_create (gateway)
+  → local payments row (status CREATED) + Stripe PaymentIntent
+  → status AWAITING_PROVIDER + providerPaymentId
+Stripe confirm (test card 4242 4242 4242 4242)
+  → payment_intent.succeeded
+webhook → https://<domain>/webhooks/stripe (gateway)
+  → signature verified, payment_events recorded
+  → payments.status = CAPTURED
+```
+
+The deterministic contract is `contracts/deterministic/payments/testing.yaml`.
+
+## NOWPayments integration
+
+NOWPayments (crypto) is implemented in its own TypeScript/Node Appwrite function (`backend/appwrite/functions/nowpayments`), the sole TypeScript Appwrite function — allowed because the NOWPayments SDK has no Go equivalent (AGENTS.md rule 4 exception).
+
+- **`create_payment`** (command) — `sdk.createDirectPayment()` creates a NOWPayments payment, writes a `payments` row (`provider: NOWPAYMENTS`, `status: AWAITING_PROVIDER`, `providerPaymentId` = NOWPayments `payment_id`), and returns the deposit address (`pay_address`) and crypto amount.
+- **IPN** (`/webhooks/nowpayments`) — `sdk.parseWebhook()` verifies the HMAC-SHA512 `x-nowpayments-sig` signature and transitions the payment by `order_id`: `paid`→`CAPTURED`, `failed`→`FAILED`, `expired`→`EXPIRED`, `refunded`→`REFUNDED`, else `AWAITING_PROVIDER`.
+
+Credentials are Appwrite function variables on the `nowpayments` function: `NOWPAYMENTS_API_KEY`, `NOWPAYMENTS_IPN_KEY`, `NOWPAYMENTS_IPN_CALLBACK_URL`. The public IPN domain is `nowpayments.story-galore.online`, locked by a Cloudflare WAF rule to `/webhooks/nowpayments` only.

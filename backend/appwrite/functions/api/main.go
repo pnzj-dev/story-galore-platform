@@ -12,6 +12,7 @@ import (
 
 	"github.com/appwrite/sdk-for-go/appwrite"
 	"github.com/appwrite/sdk-for-go/client"
+	"github.com/appwrite/sdk-for-go/functions"
 	"github.com/appwrite/sdk-for-go/tablesdb"
 	"github.com/appwrite/sdk-for-go/tokens"
 	"github.com/appwrite/sdk-for-go/users"
@@ -2965,11 +2966,20 @@ func paymentCreate(ctx openruntimes.Context, in *GatewayInput, cl client.Client)
 		Amount         int     `json:"amount"`
 		Currency       string  `json:"currency"`
 		Provider       string  `json:"provider"`
+		PayCurrency    string  `json:"payCurrency"`
 		SubscriptionId *string `json:"subscriptionId"`
 	}
 	if !decode(ctx, in, &input) || input.UserId == "" || input.Amount <= 0 || input.Currency == "" || input.Provider == "" {
 		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
 	}
+
+	// NOWPAYMENTS is implemented in the TypeScript nowpayments function (the SDK
+	// has no Go equivalent). Delegate the whole flow — the nowpayments function
+	// writes the payments row itself, so we must not create a duplicate row here.
+	if input.Provider == "NOWPAYMENTS" {
+		return delegateToNowpayments(ctx, in, cl, input.UserId, input.Amount, input.Currency, input.PayCurrency)
+	}
+
 	paymentId := idOrUUID(in.IdempotencyKey)
 	now := now()
 	row := map[string]interface{}{
@@ -3001,6 +3011,47 @@ func paymentCreate(ctx openruntimes.Context, in *GatewayInput, cl client.Client)
 
 	emit(ctx, cl, "payments.payment_create.v1", paymentId, actorOrEmpty(in.ActorId), map[string]interface{}{"paymentId": paymentId}, in.CorrelationId)
 	return success(ctx, in, map[string]interface{}{"paymentId": paymentId})
+}
+
+// delegateToNowpayments forwards a NOWPAYMENTS payment creation to the
+// TypeScript nowpayments function (the NOWPayments SDK has no Go equivalent).
+// The nowpayments function writes the payments row and returns the deposit
+// details; we surface its result directly.
+func delegateToNowpayments(ctx openruntimes.Context, in *GatewayInput, cl client.Client, userId string, amountMinor int, currency, payCurrency string) openruntimes.Response {
+	paymentId := idOrUUID(in.IdempotencyKey)
+	npInput := map[string]interface{}{
+		"operation": "create_payment",
+		"input": map[string]interface{}{
+			"userId":      userId,
+			"amount":      float64(amountMinor) / 100.0,
+			"currency":    strings.ToLower(currency),
+			"payCurrency": payCurrency,
+			"paymentId":   paymentId,
+		},
+	}
+	service := functions.New(cl)
+	exec, err := service.CreateExecution("nowpayments",
+		service.WithCreateExecutionBody(mustJSON(npInput)),
+		service.WithCreateExecutionMethod("POST"),
+	)
+	if err != nil {
+		ctx.Error("nowpayments delegation failed", err)
+		return respond(ctx, in.OperationId, "PROVIDER_ERROR", true)
+	}
+	if exec.Status == "failed" || exec.ResponseStatusCode >= 400 {
+		ctx.Error("nowpayments execution failed", "errors="+exec.Errors, "body="+exec.ResponseBody)
+		return respond(ctx, in.OperationId, "PROVIDER_ERROR", true)
+	}
+	var npResp struct {
+		Status string                 `json:"status"`
+		Result map[string]interface{} `json:"result"`
+	}
+	if err := json.Unmarshal([]byte(exec.ResponseBody), &npResp); err != nil || npResp.Status != "SUCCESS" {
+		ctx.Error("nowpayments bad response", "body="+exec.ResponseBody)
+		return respond(ctx, in.OperationId, "PROVIDER_ERROR", true)
+	}
+	emit(ctx, cl, "payments.payment_create.v1", paymentId, actorOrEmpty(in.ActorId), map[string]interface{}{"paymentId": paymentId, "provider": "NOWPAYMENTS"}, in.CorrelationId)
+	return success(ctx, in, npResp.Result)
 }
 
 func paymentConfirmFromWebhook(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
@@ -3069,6 +3120,7 @@ func paymentConfirmFromWebhook(ctx openruntimes.Context, in *GatewayInput, cl cl
 func handleStripeWebhook(ctx openruntimes.Context, cl client.Client) openruntimes.Response {
 	payload := ctx.Req.BodyText()
 	sigHeader := ctx.Req.Headers["stripe-signature"]
+	ctx.Log("stripe webhook", "hasSignatureHeader="+fmtBool(sigHeader != ""))
 	if payload == "" || sigHeader == "" {
 		return ctx.Res.Json(map[string]interface{}{"error": "MISSING_PAYLOAD_OR_SIGNATURE"}, ctx.Res.WithStatusCode(400))
 	}
@@ -3078,6 +3130,7 @@ func handleStripeWebhook(ctx openruntimes.Context, cl client.Client) openruntime
 	}
 	eventType, eventID, err := verifyStripeWebhook([]byte(payload), sigHeader, secret)
 	if err != nil {
+		ctx.Log("stripe webhook verify failed", "err="+err.Error())
 		return ctx.Res.Json(map[string]interface{}{"error": "SIGNATURE_VERIFICATION_FAILED"}, ctx.Res.WithStatusCode(400))
 	}
 
@@ -3787,8 +3840,9 @@ func updateRow(cl client.Client, table, id string, data map[string]interface{}) 
 func emit(ctx openruntimes.Context, cl client.Client, eventType, aggregateId, actorId string, payload map[string]interface{}, correlationId string) {
 	service := tablesdb.New(cl)
 	ts := now()
-	_, err := service.CreateRow(databaseID, "domain_events", idOrUUID(nil), map[string]interface{}{
-		"eventType": eventType, "aggregateId": aggregateId, "payload": mustJSON(payload),
+	eventId := idOrUUID(nil)
+	_, err := service.CreateRow(databaseID, "domain_events", eventId, map[string]interface{}{
+		"eventId": eventId, "eventType": eventType, "aggregateId": aggregateId, "payload": mustJSON(payload),
 		"correlationId": correlationId, "occurredAt": ts, "deliveryAttempts": 0,
 	})
 	if err != nil {

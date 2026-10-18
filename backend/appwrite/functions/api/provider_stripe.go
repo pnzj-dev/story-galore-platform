@@ -14,7 +14,13 @@ import (
 // verified event type and event ID. The webhook signing secret (whsec_...) is
 // distinct from the API secret key (sk_...).
 func verifyStripeWebhook(payload []byte, sigHeader, webhookSecret string) (eventType, eventID string, err error) {
-	event, err := webhook.ConstructEvent(payload, sigHeader, webhookSecret)
+	// Ignore API-version mismatch: the account's default API version can drift
+	// ahead of the stripe-go SDK's pinned version. We only read event.Type,
+	// event.ID and the raw JSON metadata (never the typed object), so the
+	// deserialization risk flagged by Stripe does not apply here.
+	event, err := webhook.ConstructEventWithOptions(payload, sigHeader, webhookSecret, webhook.ConstructEventOptions{
+		IgnoreAPIVersionMismatch: true,
+	})
 	if err != nil {
 		return "", "", err
 	}
