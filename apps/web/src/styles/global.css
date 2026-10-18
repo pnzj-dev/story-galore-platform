@@ -3,6 +3,12 @@
 
 @source "../../../../packages/ui/src";
 
+html {
+  /* Reserve gutter space so content doesn't shift when the vertical
+     scrollbar appears/disappears across pages. */
+  scrollbar-gutter: stable;
+}
+
 html,
 body {
   @apply bg-background text-foreground;
