@@ -519,6 +519,7 @@ export interface ReaderManifestPage {
   $id?: string;
   position?: number;
   mediaAssetId?: string;
+  text?: string;
   width?: number;
   height?: number;
   url?: string;

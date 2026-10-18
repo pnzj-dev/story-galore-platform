@@ -141,5 +141,47 @@ while IFS='|' read -r pid title ptype format creator accessClass rating desc; do
   create_row "publications" "$pid" '{"creatorId":"'"$creator"'","projectId":"seed-project-1","type":"'"$ptype"'","status":"PUBLISHED","accessClass":"'"$accessClass"'","title":"'"$title"'","description":"'"$desc"'","format":"'"$format"'","contentRating":"'"$rating"'","contentOrigin":"HUMAN","readingFormat":"PAGINATED","publishedAt":"'"$NOW"'","createdAt":"'"$NOW"'","updatedAt":"'"$NOW"'"}'
 done <<< "$PUBS"
 
+# --- Prose pages (novels) -------------------------------------------------
+
+echo "Seeding prose..."
+python3 - <<'PY'
+import json, subprocess
+
+NOW = "2026-10-18T00:00:00.000Z"
+prose = {
+    "seed-book-1": [
+        "The workshop smelled of brass and cold oil. Mara had been told never to touch the clocks after midnight, but the largest one, the one with no face, had begun to tick on its own.",
+        "She held the lantern higher. Every pendulum in the room swung in perfect time except one. It hung still, and beneath it, a small door stood ajar.",
+        "Her master had said the workshop ran on borrowed time. She had thought it a joke. Now, watching the hands spin backward, she understood he had meant it literally.",
+    ],
+    "seed-book-3": [
+        "In the walled garden of glass, every fruit held a stolen memory. The caretaker walked the rows at dawn, naming the seasons by their weight.",
+        "She plucked a pear the color of an autumn afternoon and pressed it to her lips. Somewhere behind her eyes, a stranger's childhood bloomed.",
+        "The garden had been her mother's, and her grandmother's before that. They had all learned, eventually, that you cannot keep what was never yours to grow.",
+    ],
+    "seed-book-5": [
+        "The machines stopped working on a Tuesday, and the city learned to listen again. At first there was only the sound of wind and the soft tick of cooling metal.",
+        "In the silence, the old engineer heard something he had missed for forty years: the city breathing. It had been there all along, under the hum.",
+        "He did not try to restart the machines. Instead, he opened the windows and let the quiet in, and for the first time in decades, the city slept.",
+    ],
+    "seed-book-6": [
+        "The first letter arrived on a morning thick with fog. It was dated a month ahead, and it was addressed to a woman who had not yet left.",
+        "She wrote back anyway, pressing the ink hard into the page. The sea took the letter, and a week later, one returned, dated the day before she had written it.",
+        "They wrote across the months, out of order, until the letters became a conversation neither of them remembered starting but both refused to end.",
+    ],
+}
+
+for pid, paras in prose.items():
+    for i, text in enumerate(paras):
+        row_id = f"{pid}-page-{i}"
+        data = json.dumps({"publicationId": pid, "position": i, "text": text, "createdAt": NOW, "updatedAt": NOW})
+        check = subprocess.run(["appwrite", "tablesdb", "get-row", "--database-id", "main", "--table-id", "book_pages", "--row-id", row_id, "--json"], capture_output=True, text=True)
+        if check.returncode == 0:
+            print(f"  skip (exists): book_pages/{row_id}")
+            continue
+        subprocess.run(["appwrite", "tablesdb", "create-row", "--database-id", "main", "--table-id", "book_pages", "--row-id", row_id, "--data", data], capture_output=True, text=True)
+        print(f"  created: book_pages/{row_id}")
+PY
+
 echo ""
 echo "Seed complete. Sample data is live on the public surface."

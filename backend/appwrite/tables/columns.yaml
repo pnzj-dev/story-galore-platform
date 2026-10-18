@@ -310,6 +310,7 @@ tables_with_columns:
       - {key: publicationId, type: varchar, size: 255, required: true}
       - {key: position, type: integer, required: true}
       - {key: mediaAssetId, type: varchar, size: 255, required: false}
+      - {key: text, type: text, required: false}
       - {key: width, type: integer, required: false}
       - {key: height, type: integer, required: false}
       - {key: createdAt, type: datetime, required: true}

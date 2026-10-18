@@ -3,6 +3,7 @@
 
   interface ReaderPage {
     url?: string;
+    text?: string;
     position: number;
   }
 
@@ -71,22 +72,35 @@
 <div class="relative mx-auto max-w-2xl">
   <div bind:this={container} class="max-h-[70vh] space-y-6 overflow-y-auto py-4 pb-24">
     {#each pages as page (page.position)}
-      <div data-position={page.position} class="flex justify-center">
-        {#if page.url}
-          <img
-            src={page.url}
-            alt={`Page ${page.position + 1}`}
-            class="max-h-[60vh] w-auto rounded-lg border border-border"
-            loading="lazy"
-          />
-        {:else}
-          <div
-            class="flex aspect-[3/4] w-full items-center justify-center rounded-lg border border-border bg-surface text-foreground-muted"
-          >
-            Page {page.position + 1}
-          </div>
-        {/if}
-      </div>
+      {#if page.text}
+        <div data-position={page.position} class="px-1">
+          <p class="font-serif text-lg leading-loose text-foreground">
+            <span
+              class="float-left mr-2 mt-1 font-serif text-[44px] font-bold leading-[0.9] text-brand-400"
+            >
+              {page.text.charAt(0)}
+            </span>
+            {page.text.slice(1)}
+          </p>
+        </div>
+      {:else}
+        <div data-position={page.position} class="flex justify-center">
+          {#if page.url}
+            <img
+              src={page.url}
+              alt={`Page ${page.position + 1}`}
+              class="max-h-[60vh] w-auto rounded-lg border border-border"
+              loading="lazy"
+            />
+          {:else}
+            <div
+              class="flex aspect-[3/4] w-full items-center justify-center rounded-lg border border-border bg-surface text-foreground-muted"
+            >
+              Page {page.position + 1}
+            </div>
+          {/if}
+        </div>
+      {/if}
     {/each}
   </div>
 
