@@ -1,7 +1,6 @@
 {
   "name": "storygalore",
   "private": true,
-  "packageManager": "pnpm@12.11.2",
   "scripts": {
     "build": "pnpm --filter @storygalore/web build",
     "typecheck": "pnpm --filter @storygalore/web typecheck",
