@@ -38,38 +38,27 @@ create_row() {
   echo "  created: $table/$id"
 }
 
-# --- Generate placeholder cover PNGs (solid color) -----------------------
+# --- Download cover images (real photos from picsum.photos) ---------------
 
 TMPDIR="$(mktemp -d)"
 trap 'rm -rf "$TMPDIR"' EXIT
 
-python3 - "$TMPDIR" <<'PY'
-import struct, zlib, sys, os
-out = sys.argv[1]
+# Deterministic real-photo covers: publication id -> picsum seed.
+COVER_SEEDS="
+seed-book-1:storygalore-clockmaker
+seed-book-2:storygalore-neon
+seed-video-1:storygalore-lighthouse
+seed-video-2:storygalore-static
+seed-art-1:storygalore-gardens
+seed-audio-1:storygalore-worldbuilding
+"
 
-def solid_png(path, w, h, rgb):
-    def chunk(typ, data):
-        c = struct.pack(">I", len(data)) + typ + data
-        c += struct.pack(">I", zlib.crc32(typ + data) & 0xFFFFFFFF)
-        return c
-    ihdr = struct.pack(">IIBBBBB", w, h, 8, 2, 0, 0, 0)  # 8-bit truecolor RGB
-    raw = b"".join(b"\x00" + bytes(rgb) * w for _ in range(h))
-    png = b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", ihdr) + chunk(b"IDAT", zlib.compress(raw)) + chunk(b"IEND", b"")
-    with open(path, "wb") as f:
-        f.write(png)
-
-covers = {
-    "seed-book-1":   (139, 94, 60),    # warm brown
-    "seed-book-2":   (255, 95, 162),   # neon pink
-    "seed-video-1":  (30, 58, 95),     # deep blue
-    "seed-video-2":  (90, 90, 110),    # slate
-    "seed-art-1":    (42, 157, 143),   # teal
-    "seed-audio-1":  (109, 74, 158),   # purple
-}
-for pid, rgb in covers.items():
-    solid_png(os.path.join(out, pid + ".png"), 400, 600, rgb)
-print("generated", len(covers), "covers")
-PY
+for entry in $COVER_SEEDS; do
+  pid="${entry%%:*}"
+  seed="${entry##*:}"
+  curl -sL -o "$TMPDIR/$pid.jpg" "https://picsum.photos/seed/$seed/400/600" \
+    || echo "warning: could not download cover for $pid" >&2
+done
 
 # --- Creators ------------------------------------------------------------
 
@@ -87,14 +76,14 @@ for pid in seed-book-1 seed-book-2 seed-video-1 seed-video-2 seed-art-1 seed-aud
     seed-book-2|seed-audio-1) creator="seed-creator-2" ;;
     seed-video-2|seed-art-1)  creator="seed-creator-3" ;;
   esac
-  file="$TMPDIR/$pid.png"
+  file="$TMPDIR/$pid.jpg"
   file_id="$pid-cover"
   if ! row_exists "media_assets" "$file_id"; then
     appwrite storage create-file --bucket-id "$BUCKET" --file "$file" --file-id "$file_id" --folder "seed" >/dev/null
   fi
   size=$(wc -c < "$file" | tr -d ' ')
   asset_id="$file_id"
-  create_row "media_assets" "$asset_id" '{"id":"'"$asset_id"'","creatorId":"'"$creator"'","publicationId":"'"$pid"'","type":"IMAGE","status":"READY","originProvider":"seed","originBucketKey":"'"$BUCKET"'","originFileId":"'"$file_id"'","mimeType":"image/png","sizeBytes":'"$size"',"moderationStatus":"APPROVED","contentRating":"ALL_AGES","orientation":"PORTRAIT","variant":"ORIGINAL","createdAt":"'"$NOW"'","updatedAt":"'"$NOW"'"}'
+  create_row "media_assets" "$asset_id" '{"id":"'"$asset_id"'","creatorId":"'"$creator"'","publicationId":"'"$pid"'","type":"IMAGE","status":"READY","originProvider":"seed","originBucketKey":"'"$BUCKET"'","originFileId":"'"$file_id"'","mimeType":"image/jpeg","sizeBytes":'"$size"',"moderationStatus":"APPROVED","contentRating":"ALL_AGES","orientation":"PORTRAIT","variant":"ORIGINAL","createdAt":"'"$NOW"'","updatedAt":"'"$NOW"'"}'
 done
 
 # --- Publications ---------------------------------------------------------
