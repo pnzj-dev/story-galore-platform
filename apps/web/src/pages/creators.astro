@@ -1,0 +1,26 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { CreatorCard } from "@storygalore/ui";
+import { fetchCreators } from "../lib/gateway";
+
+const creators = await fetchCreators();
+---
+
+<Layout title="Creators">
+  <main class="mx-auto max-w-7xl px-6 py-12">
+    <h1 class="text-3xl font-bold">Creators</h1>
+    <p class="mt-2 text-foreground-muted">Discover independent creators across every medium.</p>
+
+    {
+      creators.length > 0 ? (
+        <div class="mt-8 flex flex-wrap gap-4">
+          {creators.map((c) => <CreatorCard creator={c} href={`/creators/${c.id}`} />)}
+        </div>
+      ) : (
+        <p class="mt-8 rounded-xl border border-dashed border-border px-6 py-8 text-sm text-foreground-muted">
+          No creators yet. Check back soon.
+        </p>
+      )
+    }
+  </main>
+</Layout>

@@ -1,0 +1,46 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="Help Center">
+  <main class="mx-auto max-w-3xl px-6 py-12">
+    <h1 class="text-3xl font-bold">Help Center</h1>
+    <p class="mt-2 text-foreground-muted">Answers to common questions.</p>
+
+    <div class="mt-8 space-y-8">
+      <section>
+        <h2 class="text-xl font-semibold">Reading &amp; watching</h2>
+        <p class="mt-2 text-foreground-muted">
+          Find books, videos, art, and audio from the navigation menu. Books open in the reader,
+          video and audio play inline, and art opens as a gallery. Pick up where you left off from
+          the home page.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="text-xl font-semibold">Subscriptions &amp; billing</h2>
+        <p class="mt-2 text-foreground-muted">
+          Manage your plan, payment method, and billing history from
+          <a href="/account/billing" class="text-link">Account → Billing</a>. Premium content
+          unlocks automatically once your subscription is active.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="text-xl font-semibold">Creating</h2>
+        <p class="mt-2 text-foreground-muted">
+          Sign in and open the <a href="/studio" class="text-link">Creator Studio</a> to start a
+          project, draft a book, and manage your media. Studio tools are available to registered
+          creators.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="text-xl font-semibold">Still stuck?</h2>
+        <p class="mt-2 text-foreground-muted">
+          <a href="/support" class="text-link">Contact support</a> and we&rsquo;ll help.
+        </p>
+      </section>
+    </div>
+  </main>
+</Layout>

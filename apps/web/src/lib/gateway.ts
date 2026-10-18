@@ -189,15 +189,45 @@ export async function fetchMediaByType(
     });
 }
 
+export interface PublicationDetail {
+  publication: {
+    $id: string;
+    title?: string;
+    description?: string;
+    type?: string;
+    format?: string;
+    contentRating?: string;
+    accessClass?: string;
+    creatorId?: string;
+  };
+  media: Array<{ mediaId: string; allowed: boolean; url?: string }>;
+  entitled: boolean;
+  accessClass?: string;
+  coverUrl?: string;
+  creatorName?: string;
+}
+
+/** Fetch a single published publication with its authorized media URLs. */
+export async function fetchPublication(
+  publicationId: string,
+  actorId = "",
+): Promise<PublicationDetail | null> {
+  const out = await invokeApi<PublicationDetail>(
+    "publication_get",
+    { publicationId },
+    actorId,
+  );
+  if (out.status !== "SUCCESS" || !out.result?.publication) return null;
+  return out.result;
+}
+
 interface CreatorItem {
   actorId?: string;
   handle?: string;
   displayName?: string;
   avatarMediaAssetId?: string;
   followerCountProjection?: number;
-}
-
-/** Fetch active creators for the Discover creators rail. */
+}/** Fetch active creators for the Discover creators rail. */
 export async function fetchCreators(): Promise<CreatorCardData[]> {
   const out = await invokeApi<{ items?: CreatorItem[] }>("creator_list", {}, "");
   if (out.status !== "SUCCESS" || !out.result?.items) return [];

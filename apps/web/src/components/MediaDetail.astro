@@ -1,0 +1,74 @@
+---
+import Layout from "../layouts/Layout.astro";
+import type { PublicationDetail } from "../lib/gateway";
+
+interface Props {
+  detail: PublicationDetail | null;
+  kind: "video" | "audio" | "post";
+  title: string;
+}
+
+const { detail, kind, title } = Astro.props;
+const pub = detail?.publication;
+const allowed = (detail?.media ?? []).filter((m) => m.allowed && m.url);
+const locked = Boolean(detail && !detail.entitled);
+---
+
+<Layout title={pub?.title ?? title}>
+  {
+    detail ? (
+      <main class="mx-auto max-w-4xl px-6 py-12">
+        <h1 class="text-3xl font-bold">{pub.title}</h1>
+        <p class="mt-2 text-foreground-muted">
+          {detail.creatorName ? `${detail.creatorName} · ` : ""}
+          {pub.format ?? kind}
+        </p>
+        {pub.description && <p class="mt-4 text-foreground-muted">{pub.description}</p>}
+
+        {
+          locked ? (
+            <div class="mt-8 rounded-xl border border-dashed border-border px-6 py-10 text-center">
+              <p class="text-lg font-semibold">This {kind} requires a subscription or purchase.</p>
+              <a
+                href="/account/billing"
+                class="mt-4 inline-block rounded-lg bg-primary px-4 py-2 text-primary-foreground"
+              >
+                View plans
+              </a>
+            </div>
+          ) : allowed.length > 0 ? (
+            <div class="mt-8">
+              {
+                kind === "video" ? (
+                  <video
+                    controls
+                    preload="metadata"
+                    src={allowed[0].url}
+                    class="aspect-video w-full rounded-lg bg-black"
+                  />
+                ) : kind === "audio" ? (
+                  <audio controls preload="metadata" src={allowed[0].url} class="w-full" />
+                ) : (
+                  <div class="grid gap-4">
+                    {allowed.map((m) => (
+                      <img src={m.url} alt={pub.title ?? ""} class="w-full rounded-lg" loading="lazy" />
+                    ))}
+                  </div>
+                )
+              }
+            </div>
+          ) : (
+            <p class="mt-8 rounded-xl border border-dashed border-border px-6 py-8 text-sm text-foreground-muted">
+              Media unavailable.
+            </p>
+          )
+        }
+      </main>
+    ) : (
+      <main class="mx-auto max-w-3xl px-6 py-24 text-center">
+        <h1 class="text-3xl font-bold">Not found</h1>
+        <a href="/" class="mt-6 inline-block text-link">Back home</a>
+      </main>
+    )
+  }
+</Layout>

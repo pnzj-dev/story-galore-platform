@@ -237,6 +237,8 @@ func Main(ctx openruntimes.Context) openruntimes.Response {
 		return continueList(ctx, &in, cl)
 	case "publication_list":
 		return publicationList(ctx, &in, cl)
+	case "publication_get":
+		return publicationGet(ctx, &in, cl)
 	case "creator_list":
 		return creatorList(ctx, &in, cl)
 	case "creator_get":
@@ -3817,6 +3819,60 @@ func publicationList(ctx openruntimes.Context, in *GatewayInput, cl client.Clien
 		items = append(items, item)
 	}
 	return success(ctx, in, map[string]interface{}{"items": items})
+}
+
+func publicationGet(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	var input struct {
+		PublicationId string `json:"publicationId"`
+	}
+	_ = json.Unmarshal(in.Payload.Input, &input)
+	if input.PublicationId == "" {
+		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
+	}
+	service := tablesdb.New(cl)
+	pub, err := service.GetRow(databaseID, "publications", input.PublicationId)
+	if err != nil {
+		return respond(ctx, in.OperationId, "RESOURCE_NOT_FOUND", false)
+	}
+	var pm map[string]interface{}
+	if err := pub.Decode(&pm); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	if status, _ := pm["status"].(string); status != "PUBLISHED" && status != "APPROVED" {
+		return respond(ctx, in.OperationId, "RESOURCE_NOT_FOUND", false)
+	}
+	actorId := actorOrEmpty(in.ActorId)
+	accessClass, _ := pm["accessClass"].(string)
+	entitled := true
+	if accessClass == "SUBSCRIPTION" || accessClass == "PURCHASE" {
+		var pd deliveryDecision
+		entitled = entitlementSatisfied(cl, actorId, pm, &pd)
+	}
+	pubType, _ := pm["type"].(string)
+	action := "VIEW"
+	if pubType == "VIDEO" || pubType == "AUDIO" {
+		action = "STREAM"
+	}
+	media := make([]map[string]interface{}, 0)
+	for _, assetId := range stringSlice(pm["mediaAssetIds"]) {
+		decision := authorizeMediaDelivery(cl, assetId, action, actorId)
+		entry := map[string]interface{}{"mediaId": assetId, "allowed": decision.Allowed}
+		if decision.Allowed {
+			entry["url"] = decision.URL
+		}
+		media = append(media, entry)
+	}
+	out := map[string]interface{}{
+		"publication": pm,
+		"media":       media,
+		"entitled":    entitled,
+		"accessClass": accessClass,
+		"coverUrl":    resolveCoverURL(cl, input.PublicationId),
+	}
+	if creatorId, ok := pm["creatorId"].(string); ok && creatorId != "" {
+		out["creatorName"] = resolveCreatorName(cl, creatorId)
+	}
+	return success(ctx, in, out)
 }
 
 func creatorList(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {

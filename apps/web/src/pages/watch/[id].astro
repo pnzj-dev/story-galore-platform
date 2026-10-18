@@ -1,0 +1,10 @@
+---
+import MediaDetail from "../../components/MediaDetail.astro";
+import { fetchPublication } from "../../lib/gateway";
+
+const id = Astro.params.id ?? "";
+const detail = id ? await fetchPublication(id, Astro.locals.user?.$id ?? "") : null;
+if (!detail) Astro.response.status = 404;
+---
+
+<MediaDetail detail={detail} kind="video" title="Watch" />
