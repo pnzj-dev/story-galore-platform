@@ -4,87 +4,96 @@ import { actions } from "astro:actions";
 
 const user = Astro.locals.user;
 const pathname = Astro.url.pathname;
-const forYouActive = pathname === "/";
+
+const navItems = [
+  { label: "Home", href: "/", active: pathname === "/" },
+  { label: "Videos", href: "/videos", active: pathname.startsWith("/videos") },
+  { label: "Shorts", href: "/shorts", active: pathname.startsWith("/shorts") },
+  { label: "Books", href: "/books", active: pathname.startsWith("/books") },
+  { label: "Images", href: "/images", active: pathname.startsWith("/images") },
+  { label: "Audio", href: "/audio", active: pathname.startsWith("/audio") },
+];
+
+const initial = (user?.name ?? user?.email ?? "A").trim().charAt(0).toUpperCase();
 ---
 
-<header class="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur">
-  <nav class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-4">
-    <a href="/" class="text-lg font-bold tracking-tight">
-      <span class="text-link">Story</span>Galore
-    </a>
-    <div class="hidden items-center gap-6 text-sm text-foreground-muted lg:flex">
-      <a
-        href="/"
-        class={forYouActive ? "font-medium text-foreground" : "transition hover:text-foreground"}
-        aria-current={forYouActive ? "page" : undefined}
+<header class="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur">
+  <nav class="mx-auto flex max-w-[1400px] items-center gap-6 px-6 py-3">
+    <a href="/" class="flex shrink-0 items-center gap-2 text-lg font-extrabold tracking-tight">
+      <span
+        class="grid h-[26px] w-[26px] place-items-center rounded-md bg-gradient-to-br from-brand-500 to-accent text-[13px] font-black text-white"
       >
-        For You
+        SG
+      </span>
+      StoryGalore
+    </a>
+
+    <div class="hidden items-center gap-1 lg:flex">
+      {
+        navItems.map((item) => (
+          <a
+            href={item.href}
+            aria-current={item.active ? "page" : undefined}
+            class={`rounded-md px-3 py-2 text-[13px] font-medium transition ${
+              item.active
+                ? "bg-surface text-foreground"
+                : "text-foreground-muted hover:bg-surface hover:text-foreground"
+            }`}
+          >
+            {item.label}
+          </a>
+        ))
+      }
+    </div>
+
+    <div class="ml-auto flex items-center gap-3">
+      <a
+        href="/discover"
+        class="hidden w-60 items-center gap-2 rounded-full border border-border bg-surface px-4 py-2 text-[13px] text-foreground-tertiary transition hover:border-border-strong lg:flex"
+      >
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.2"
+        >
+          <circle cx="11" cy="11" r="7"></circle>
+          <path d="m20 20-3.5-3.5"></path>
+        </svg>
+        Search stories, books, audio…
       </a>
 
-      <details class="group relative">
-        <summary class="cursor-pointer list-none transition hover:text-foreground">Books</summary>
-        <div
-          class="absolute start-0 top-full z-50 mt-2 w-48 rounded-lg border border-border bg-surface p-2 shadow-xl"
+      <a
+        href="/account"
+        aria-label="Notifications"
+        class="relative grid h-[38px] w-[38px] place-items-center rounded-full border border-border bg-surface text-foreground transition hover:bg-surface-elevated"
+      >
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
         >
-          <a href="/books?format=comic" class="block rounded px-2 py-1.5 hover:bg-surface-elevated hover:text-foreground"
-            >Comics</a
-          >
-          <a href="/books?format=manga" class="block rounded px-2 py-1.5 hover:bg-surface-elevated hover:text-foreground"
-            >Manga</a
-          >
-          <a href="/books?format=manhwa" class="block rounded px-2 py-1.5 hover:bg-surface-elevated hover:text-foreground"
-            >Manhwa</a
-          >
-          <a
-            href="/books?format=bande-dessinee"
-            class="block rounded px-2 py-1.5 hover:bg-surface-elevated hover:text-foreground">Bande Dessinée</a
-          >
-          <a href="/books?format=novel" class="block rounded px-2 py-1.5 hover:bg-surface-elevated hover:text-foreground"
-            >Novels</a
-          >
-          <a
-            href="/books"
-            class="block rounded px-2 py-1.5 text-foreground-muted hover:bg-surface-elevated hover:text-foreground"
-            >All books</a
-          >
-        </div>
-      </details>
+          <path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path>
+          <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path>
+        </svg>
+      </a>
 
-      <details class="group relative">
-        <summary class="cursor-pointer list-none transition hover:text-foreground">Videos</summary>
-        <div
-          class="absolute start-0 top-full z-50 mt-2 w-48 rounded-lg border border-border bg-surface p-2 shadow-xl"
-        >
-          <a href="/videos?format=TV_SHOW" class="block rounded px-2 py-1.5 hover:bg-surface-elevated hover:text-foreground"
-            >Series</a
-          >
-          <a href="/videos?format=MOVIE" class="block rounded px-2 py-1.5 hover:bg-surface-elevated hover:text-foreground"
-            >Movies</a
-          >
-          <a href="/shorts" class="block rounded px-2 py-1.5 hover:bg-surface-elevated hover:text-foreground">Shorts</a>
-          <a
-            href="/videos?format=DOCUMENTARY"
-            class="block rounded px-2 py-1.5 hover:bg-surface-elevated hover:text-foreground">Documentaries</a
-          >
-          <a
-            href="/videos"
-            class="block rounded px-2 py-1.5 text-foreground-muted hover:bg-surface-elevated hover:text-foreground"
-            >All videos</a
-          >
-        </div>
-      </details>
-
-      <a href="/images" class="transition hover:text-foreground">Art</a>
-      <a href="/audio" class="transition hover:text-foreground">Audio</a>
-      <a href="/creators" class="transition hover:text-foreground">Creators</a>
-    </div>
-    <div class="flex items-center gap-3">
       <ThemeToggle client:load />
+
       {
         user ? (
           <>
-            <a href="/account/billing" class="text-sm text-foreground-muted transition hover:text-foreground">
-              Account
+            <a
+              href="/account/billing"
+              class="grid h-[38px] w-[38px] place-items-center rounded-full border border-border bg-gradient-to-br from-brand-500 to-accent text-sm font-bold text-white"
+              aria-label="Account"
+            >
+              {initial}
             </a>
             <form method="POST" action={actions.logout}>
               <button type="submit" class="text-sm text-foreground-muted transition hover:text-foreground">

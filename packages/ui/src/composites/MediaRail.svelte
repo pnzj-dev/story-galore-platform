@@ -1,6 +1,5 @@
 <script lang="ts">
   import MediaCard from '../domain/MediaCard.svelte';
-  import RailScroller from './RailScroller.svelte';
   import type { MediaCardData } from '../types';
 
   let {
@@ -32,20 +31,25 @@
   const hrefFor = (item: MediaCardData) => (getHref ?? defaultHref)(item);
 </script>
 
-<section class="space-y-3">
-  <div class="flex items-baseline justify-between px-1">
-    <h2 class="text-lg font-semibold text-foreground sm:text-xl">{title}</h2>
+<section class="space-y-4">
+  <div class="flex items-baseline justify-between">
+    <h3 class="text-lg font-bold tracking-tight">{title}</h3>
     {#if seeAllHref}
-      <a href={seeAllHref} class="text-sm text-foreground-muted transition hover:text-foreground">See all</a>
+      <a
+        href={seeAllHref}
+        class="flex items-center gap-1 text-[12px] font-semibold text-foreground-muted transition hover:text-brand-400"
+      >
+        See all →
+      </a>
     {/if}
   </div>
 
   {#if items.length > 0}
-    <RailScroller>
+    <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
       {#each items as item (item.id)}
         <MediaCard publication={item} href={hrefFor(item)} />
       {/each}
-    </RailScroller>
+    </div>
   {:else if emptyHint}
     <p class="rounded-xl border border-dashed border-border px-6 py-8 text-sm text-foreground-muted">
       {emptyHint}

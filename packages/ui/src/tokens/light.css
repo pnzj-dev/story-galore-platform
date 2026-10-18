@@ -1,34 +1,42 @@
 /*
  * Light theme color tokens (accessibility/admin preference).
  * Same semantic token names as dark.css with light values.
+ * Palette aligned with the StoryGalore UI mock.
  */
 [data-theme='light'] {
   color-scheme: light;
-  --color-background: #ffffff;
-  --color-surface: #f4f4f5;
-  --color-surface-elevated: #e4e4e7;
-  --color-foreground: #09090b;
-  --color-foreground-muted: #71717a;
-  --color-border: #d4d4d8;
-  --color-focus-ring: #6d28d9;
-  --color-primary: #7c3aed;
+  --color-background: #fafafc;
+  --color-surface: #ffffff;
+  --color-surface-elevated: #ffffff;
+  --color-surface-overlay: rgb(255 255 255 / 0.9);
+  --color-foreground: #0a0a0f;
+  --color-foreground-muted: #55556a;
+  --color-foreground-tertiary: #8a8a9c;
+  --color-border: rgb(10 10 15 / 0.08);
+  --color-border-strong: rgb(10 10 15 / 0.16);
+  --color-focus-ring: #5b3fe0;
+  --color-primary: #5b3fe0;
   --color-primary-foreground: #ffffff;
-  --color-success: #16a34a;
-  --color-warning: #d97706;
-  --color-danger: #dc2626;
-  --color-info: #2563eb;
-  --color-link: #6d28d9;
+  --color-brand-400: #9a80ff;
+  --color-brand-500: #7c5cff;
+  --color-brand-600: #5b3fe0;
+  --color-accent: #ff5c8a;
+  --color-success: #16a06b;
+  --color-warning: #d97900;
+  --color-danger: #d63a3a;
+  --color-info: #0a7fd4;
+  --color-link: #5b3fe0;
   --color-disabled: #d4d4d8;
   --color-overlay: rgb(0 0 0 / 0.4);
-  --color-reader-background: #ffffff;
-  --color-reader-foreground: #09090b;
+  --color-reader-background: #fafafc;
+  --color-reader-foreground: #0a0a0f;
   --color-editor-canvas: #ffffff;
-  --color-chart-1: #7c3aed;
-  --color-chart-2: #16a34a;
-  --color-chart-3: #d97706;
-  --color-chart-4: #2563eb;
-  --color-chart-5: #dc2626;
-  --color-selection: #a78bfa;
-  --color-code-background: #f4f4f5;
-  --color-code-foreground: #09090b;
+  --color-chart-1: #7c5cff;
+  --color-chart-2: #16a06b;
+  --color-chart-3: #d97900;
+  --color-chart-4: #0a7fd4;
+  --color-chart-5: #d63a3a;
+  --color-selection: #9a80ff;
+  --color-code-background: #f2f2f6;
+  --color-code-foreground: #0a0a0f;
 }

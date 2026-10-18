@@ -38,25 +38,29 @@ create_row() {
   echo "  created: $table/$id"
 }
 
-# --- Download cover images (real photos from picsum.photos) ---------------
+# --- Download cover images (real photos from Unsplash) --------------------
 
 TMPDIR="$(mktemp -d)"
 trap 'rm -rf "$TMPDIR"' EXIT
 
-# Deterministic real-photo covers: publication id -> picsum seed.
+# Deterministic real-photo covers: publication id -> Unsplash photo + crop size.
 COVER_SEEDS="
-seed-book-1:storygalore-clockmaker
-seed-book-2:storygalore-neon
-seed-video-1:storygalore-lighthouse
-seed-video-2:storygalore-static
-seed-art-1:storygalore-gardens
-seed-audio-1:storygalore-worldbuilding
+seed-book-1:photo-1544947950-fa07a98d237f:600x900
+seed-book-2:photo-1532012197267-da84d127e765:600x900
+seed-video-1:photo-1478720568477-152d9b164e26:800x450
+seed-video-2:photo-1489599849927-2ee91cede3ba:800x450
+seed-art-1:photo-1512820790803-83ca734da794:800x450
+seed-audio-1:photo-1495446815901-a7297e633e8d:600x600
 "
 
 for entry in $COVER_SEEDS; do
   pid="${entry%%:*}"
-  seed="${entry##*:}"
-  curl -sL -o "$TMPDIR/$pid.jpg" "https://picsum.photos/seed/$seed/400/600" \
+  rest="${entry#*:}"
+  photoid="${rest%%:*}"
+  size="${rest##*:}"
+  w="${size%x*}"
+  h="${size#*x}"
+  curl -sL -o "$TMPDIR/$pid.jpg" "https://images.unsplash.com/${photoid}?w=${w}&h=${h}&fit=crop&q=80" \
     || echo "warning: could not download cover for $pid" >&2
 done
 

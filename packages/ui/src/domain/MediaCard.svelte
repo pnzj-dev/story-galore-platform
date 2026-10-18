@@ -65,10 +65,13 @@
     SQUARE: 'aspect-square',
   };
 
-  const widthClass: Record<CardOrientation, string> = {
-    PORTRAIT: 'w-36 sm:w-44',
-    LANDSCAPE: 'w-48 sm:w-64',
-    SQUARE: 'w-36 sm:w-44',
+  // Color-coded media badge per type (matches the UI mock).
+  const badgeClass: Record<MediaCardData['type'], string> = {
+    BOOK: 'bg-accent/90 text-white',
+    POST: 'bg-warning/90 text-[#2b1a00]',
+    VIDEO: 'bg-brand-500/90 text-white',
+    AUDIO: 'bg-success/90 text-[#052015]',
+    MIXED: 'bg-background/75 text-white',
   };
 
   function formatDuration(ms: number): string {
@@ -87,10 +90,12 @@
 
 <a
   href={href}
-  class="group block shrink-0 snap-start rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring {widthClass[orientation]}"
+  class="group block w-full transition duration-200 hover:-translate-y-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
   aria-label={`${publication.title} — ${badge}`}
 >
-  <div class="relative overflow-hidden rounded-lg border border-border bg-surface {aspectClass[orientation]}">
+  <div
+    class="relative overflow-hidden rounded-xl border border-border bg-surface shadow-card {aspectClass[orientation]}"
+  >
     {#if publication.coverUrl && !imgFailed}
       <img
         src={publication.coverUrl}
@@ -108,7 +113,7 @@
     {/if}
 
     <span
-      class="absolute start-2 top-2 rounded bg-background/60 px-1.5 py-0.5 text-[10px] font-medium text-foreground backdrop-blur"
+      class="absolute start-2 top-2 rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide backdrop-blur {badgeClass[publication.type]}"
     >
       {badge}
     </span>
@@ -120,23 +125,22 @@
         {formatDuration(publication.durationMs)}
       </span>
     {/if}
+
+    {#if publication.progress}
+      <div class="absolute bottom-0 left-0 right-0 h-[3px] bg-white/20">
+        <div
+          class="h-full bg-accent"
+          style={`width:${Math.max(0, Math.min(100, publication.progress.percentComplete))}%`}
+        ></div>
+      </div>
+    {/if}
   </div>
 
-  {#if publication.progress}
-    <div class="mt-2 h-1 w-full overflow-hidden rounded-full bg-surface-elevated">
-      <div
-        class="h-full rounded-full bg-primary"
-        style={`width:${Math.max(0, Math.min(100, publication.progress.percentComplete))}%`}
-      ></div>
-    </div>
-    {#if publication.progress.label}
-      <p class="mt-1 text-[11px] text-foreground-muted">{publication.progress.label}</p>
-    {/if}
-  {/if}
-
-  <h3 class="mt-2 truncate text-sm font-medium text-foreground">{publication.title}</h3>
+  <h3 class="mt-3 line-clamp-2 text-[13px] font-semibold leading-snug text-foreground">
+    {publication.title}
+  </h3>
   {#if publication.creatorName}
-    <p class="truncate text-xs text-foreground-muted">{publication.creatorName}</p>
+    <p class="mt-0.5 truncate text-[12px] text-foreground-tertiary">{publication.creatorName}</p>
   {/if}
 
   {#if publication.contentRating && publication.contentRating !== 'ALL_AGES'}

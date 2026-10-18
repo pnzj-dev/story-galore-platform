@@ -18,75 +18,117 @@ const trendingItems = await fetchPublications("trending");
 const newItems = await fetchPublications("new");
 const creatorItems = await fetchCreators();
 const homeAd = await fetchAd("HOME_FEED_BETWEEN_RAILS", user?.$id ?? "");
+
+function hrefFor(item: { id: string; type: string }): string {
+  switch (item.type) {
+    case "VIDEO":
+      return `/watch/${item.id}`;
+    case "AUDIO":
+      return `/listen/${item.id}`;
+    case "POST":
+      return `/posts/${item.id}`;
+    default:
+      return `/read/${item.id}`;
+  }
+}
+
+const featured = trendingItems.find((i) => i.type === "VIDEO") ?? trendingItems[0];
+const featuredHref = featured ? hrefFor(featured) : "/discover";
+const featuredRating =
+  featured && featured.contentRating && featured.contentRating !== "ALL_AGES"
+    ? featured.contentRating
+    : null;
 ---
 
 <Layout title={`${title} — Read. Create. Discover.`} description={description}>
   <main>
-    <!-- Cinematic featured hero -->
-    <section class="relative overflow-hidden">
-      <div class="mx-auto grid max-w-7xl items-center gap-12 px-6 py-20 md:grid-cols-2">
-        <div class="space-y-6">
-          <p class="text-sm font-medium uppercase tracking-widest text-link">Premium stories</p>
-          <h1 class="text-4xl font-bold leading-tight tracking-tight md:text-6xl">
-            Stories that pull you in.
-          </h1>
-          <p class="max-w-lg text-lg text-foreground-muted">{description}</p>
-          <div class="flex flex-wrap gap-4">
-            <a
-              href="/auth/register"
-              class="rounded-lg bg-primary px-6 py-3 font-semibold text-primary-foreground transition hover:opacity-90"
-            >
-              Start reading
-            </a>
-            <a
-              href="/discover"
-              class="rounded-lg border border-border px-6 py-3 font-semibold text-foreground transition hover:border-foreground-muted"
-            >
-              Explore
-            </a>
+    <!-- Cinematic hero billboard -->
+    {
+      featured ? (
+        <section class="relative h-[420px] overflow-hidden">
+          <div
+            class="absolute inset-0 bg-cover bg-[center_30%]"
+            style={`background-image:url('${featured.coverUrl}')`}
+          ></div>
+          <div class="absolute inset-0 bg-gradient-to-r from-background via-background/75 to-background/10"></div>
+          <div class="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent"></div>
+
+          <div class="relative z-10 flex h-full max-w-[1400px] items-end px-7 pb-12">
+            <div class="max-w-[620px]">
+              <span
+                class="mb-4 inline-flex items-center gap-2 rounded-full bg-brand-500/15 px-2.5 py-1 text-[11px] font-bold uppercase tracking-widest text-brand-400"
+              >
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M8 5v14l11-7z"></path>
+                </svg>
+                Featured {featured.type === "VIDEO" ? "Film" : "Story"}
+              </span>
+
+              <h1 class="font-serif text-5xl font-bold leading-[1.05] tracking-tight">{featured.title}</h1>
+
+              <div class="mt-4 flex flex-wrap items-center gap-3 text-[13px] text-foreground-muted">
+                {featuredRating && (
+                  <span class="rounded border border-border-strong px-1.5 py-0.5 text-[11px] font-semibold">
+                    {featuredRating === "ADULT_18_PLUS" ? "18+" : featuredRating === "TEEN" ? "Teen" : featuredRating}
+                  </span>
+                )}
+                {featured.format && <span>{featured.format.replace(/_/g, " ")}</span>}
+                {featured.creatorName && (
+                  <>
+                    <span class="h-0.5 w-0.5 rounded-full bg-foreground-tertiary"></span>
+                    <span>{featured.creatorName}</span>
+                  </>
+                )}
+              </div>
+
+              <p class="mt-4 max-w-[520px] text-sm leading-6 text-foreground-muted">{description}</p>
+
+              <div class="mt-5 flex gap-3">
+                <a
+                  href={featuredHref}
+                  class="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-3 text-[13px] font-semibold text-primary-foreground transition hover:opacity-90"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M8 5v14l11-7z"></path>
+                  </svg>
+                  Play
+                </a>
+                <a
+                  href="/library"
+                  class="inline-flex items-center gap-2 rounded-lg border border-border-strong bg-surface-raised px-5 py-3 text-[13px] font-semibold text-foreground transition hover:bg-surface"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 5v14M5 12h14"></path>
+                  </svg>
+                  My List
+                </a>
+              </div>
+            </div>
           </div>
-        </div>
-        <div class="relative aspect-[4/5] overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-primary/20 via-surface to-background">
-          <div class="flex h-full items-center justify-center text-sm text-foreground-muted">Featured artwork</div>
-        </div>
-      </div>
-    </section>
+        </section>
+      ) : (
+        <section class="border-b border-border">
+          <div class="mx-auto max-w-[1400px] px-7 py-16">
+            <h1 class="font-serif text-4xl font-bold tracking-tight">Stories that pull you in.</h1>
+            <p class="mt-3 text-foreground-muted">{description}</p>
+          </div>
+        </section>
+      )
+    }
 
     <!-- Continue (resume) rail -->
-    <section class="mx-auto max-w-7xl px-6 py-10">
+    <section class="mx-auto max-w-[1400px] px-7 py-10">
       <MediaRail
         client:load
-        title="Continue where you left off"
+        title="Continue Watching"
         items={continueItems}
         emptyHint={continueEmptyHint}
       />
     </section>
 
-    <!-- Value signals -->
-    <section class="border-y border-border/60 bg-surface/40">
-      <div class="mx-auto grid max-w-7xl gap-8 px-6 py-14 sm:grid-cols-2 md:grid-cols-4">
-        <div>
-          <h3 class="font-semibold text-foreground">Every medium</h3>
-          <p class="mt-1 text-sm text-foreground-muted">Comics, art, video, and audio in one feed.</p>
-        </div>
-        <div>
-          <h3 class="font-semibold text-foreground">Independent creators</h3>
-          <p class="mt-1 text-sm text-foreground-muted">Support original worlds and voices.</p>
-        </div>
-        <div>
-          <h3 class="font-semibold text-foreground">Read anywhere</h3>
-          <p class="mt-1 text-sm text-foreground-muted">Web and offline, across devices.</p>
-        </div>
-        <div>
-          <h3 class="font-semibold text-foreground">New worlds weekly</h3>
-          <p class="mt-1 text-sm text-foreground-muted">Fresh series every week.</p>
-        </div>
-      </div>
-    </section>
-
     <!-- Discovery rails -->
-    <section class="mx-auto max-w-7xl space-y-12 px-6 py-12">
-      <MediaRail client:load title="Trending now" items={trendingItems} emptyHint="Trending stories will appear here." />
+    <section class="mx-auto max-w-[1400px] space-y-12 px-7 py-12">
+      <MediaRail client:load title="Trending Now" items={trendingItems} emptyHint="Trending stories will appear here." />
       {homeAd?.url && (
         <div class="rounded-xl border border-border bg-surface/40 p-4">
           <span class="block pb-2 text-xs uppercase tracking-widest text-foreground-muted">Sponsored</span>
@@ -95,9 +137,9 @@ const homeAd = await fetchAd("HOME_FEED_BETWEEN_RAILS", user?.$id ?? "");
           </a>
         </div>
       )}
-      <MediaRail client:load title="New series" items={newItems} emptyHint="New series will appear here." />
-      <CreatorRail client:load title="Discover creators" items={creatorItems} emptyHint="Creators will appear here." />
-      <GenreRail title="Browse genres" items={GENRES} />
+      <MediaRail client:load title="New Series" items={newItems} emptyHint="New series will appear here." />
+      <CreatorRail client:load title="Discover Creators" items={creatorItems} emptyHint="Creators will appear here." />
+      <GenreRail title="Browse Genres" items={GENRES} />
     </section>
   </main>
 </Layout>

@@ -29,13 +29,13 @@ function hrefFor(item: MediaCardData): string {
 ---
 
 <Layout title={title}>
-  <main class="mx-auto max-w-7xl px-6 py-12">
+  <main class="mx-auto max-w-[1400px] px-7 py-12">
     <h1 class="text-3xl font-bold">{title}</h1>
     <p class="mt-2 text-foreground-muted">{description}</p>
 
     {
       items.length > 0 ? (
-        <div class="mt-8 flex flex-wrap gap-4">
+        <div class="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
           {items.map((item) => (
             <MediaCard publication={item} href={hrefFor(item)} />
           ))}

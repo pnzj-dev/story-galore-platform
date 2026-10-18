@@ -12,57 +12,96 @@ const { detail, kind, title } = Astro.props;
 const pub = detail?.publication;
 const allowed = (detail?.media ?? []).filter((m) => m.allowed && m.url);
 const locked = Boolean(detail && !detail.entitled);
+const cover = detail?.coverUrl;
+const rating =
+  pub?.contentRating && pub.contentRating !== "ALL_AGES"
+    ? pub.contentRating === "ADULT_18_PLUS"
+      ? "18+"
+      : "Teen"
+    : null;
 ---
 
 <Layout title={pub?.title ?? title}>
   {
     detail ? (
-      <main class="mx-auto max-w-4xl px-6 py-12">
-        <h1 class="text-3xl font-bold">{pub.title}</h1>
-        <p class="mt-2 text-foreground-muted">
-          {detail.creatorName ? `${detail.creatorName} · ` : ""}
-          {pub.format ?? kind}
-        </p>
-        {pub.description && <p class="mt-4 text-foreground-muted">{pub.description}</p>}
+      <main>
+        <div class="relative h-[340px] overflow-hidden">
+          {cover && <img src={cover} alt="" class="h-full w-full object-cover" />}
+          <div class="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent"></div>
+        </div>
 
-        {
-          locked ? (
-            <div class="mt-8 rounded-xl border border-dashed border-border px-6 py-10 text-center">
-              <p class="text-lg font-semibold">This {kind} requires a subscription or purchase.</p>
-              <a
-                href="/account/billing"
-                class="mt-4 inline-block rounded-lg bg-primary px-4 py-2 text-primary-foreground"
-              >
-                View plans
-              </a>
+        <div class="mx-auto max-w-[1400px] px-7">
+          <div class="-mt-24 grid gap-6 md:grid-cols-[200px_1fr]">
+            <div class="hidden aspect-[2/3] overflow-hidden rounded-xl border border-border shadow-lg md:block">
+              {cover ? (
+                <img src={cover} alt={pub.title ?? ""} class="h-full w-full object-cover" />
+              ) : (
+                <div class="flex h-full items-center justify-center bg-surface text-3xl font-bold text-foreground-muted">
+                  {(pub.title ?? "?").charAt(0)}
+                </div>
+              )}
             </div>
-          ) : allowed.length > 0 ? (
-            <div class="mt-8">
-              {
-                kind === "video" ? (
-                  <video
-                    controls
-                    preload="metadata"
-                    src={allowed[0].url}
-                    class="aspect-video w-full rounded-lg bg-black"
-                  />
-                ) : kind === "audio" ? (
-                  <audio controls preload="metadata" src={allowed[0].url} class="w-full" />
-                ) : (
-                  <div class="grid gap-4">
-                    {allowed.map((m) => (
-                      <img src={m.url} alt={pub.title ?? ""} class="w-full rounded-lg" loading="lazy" />
-                    ))}
-                  </div>
-                )
-              }
+
+            <div class="pt-28">
+              <h1 class="font-serif text-4xl font-bold leading-tight tracking-tight">{pub.title}</h1>
+
+              <div class="mt-3 flex flex-wrap items-center gap-2 text-[13px] text-foreground-muted">
+                {rating && (
+                  <span class="rounded-full border border-success px-2.5 py-0.5 text-[11px] font-semibold text-success">
+                    {rating}
+                  </span>
+                )}
+                {pub.format && (
+                  <span class="rounded-full border border-border bg-surface px-2.5 py-0.5 text-[11px] font-semibold">
+                    {pub.format.replace(/_/g, " ")}
+                  </span>
+                )}
+                {detail.creatorName && <span>{detail.creatorName}</span>}
+              </div>
+
+              {pub.description && (
+                <p class="mt-4 max-w-2xl text-sm leading-7 text-foreground-muted">{pub.description}</p>
+              )}
+
+              <div class="mt-6">
+                {
+                  locked ? (
+                    <div class="rounded-xl border border-dashed border-border px-6 py-10 text-center">
+                      <p class="text-lg font-semibold">This {kind} requires a subscription or purchase.</p>
+                      <a
+                        href="/account/billing"
+                        class="mt-4 inline-block rounded-lg bg-primary px-4 py-2 text-primary-foreground"
+                      >
+                        View plans
+                      </a>
+                    </div>
+                  ) : allowed.length > 0 ? (
+                    kind === "video" ? (
+                      <video
+                        controls
+                        preload="metadata"
+                        src={allowed[0].url}
+                        class="aspect-video w-full rounded-xl bg-black"
+                      />
+                    ) : kind === "audio" ? (
+                      <audio controls preload="metadata" src={allowed[0].url} class="w-full" />
+                    ) : (
+                      <div class="grid gap-4 sm:grid-cols-2">
+                        {allowed.map((m) => (
+                          <img src={m.url} alt={pub.title ?? ""} class="w-full rounded-xl" loading="lazy" />
+                        ))}
+                      </div>
+                    )
+                  ) : (
+                    <p class="rounded-xl border border-dashed border-border px-6 py-8 text-sm text-foreground-muted">
+                      Media unavailable.
+                    </p>
+                  )
+                }
+              </div>
             </div>
-          ) : (
-            <p class="mt-8 rounded-xl border border-dashed border-border px-6 py-8 text-sm text-foreground-muted">
-              Media unavailable.
-            </p>
-          )
-        }
+          </div>
+        </div>
       </main>
     ) : (
       <main class="mx-auto max-w-3xl px-6 py-24 text-center">
