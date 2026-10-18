@@ -63,7 +63,7 @@ var knownOperations = map[string]bool{
 	"payment_reconcile": true, "payment_mark_failed": true, "payment_get": true, "payment_list": true,
 	"reading_progress_upsert": true, "reading_progress_complete": true,
 	"reading_progress_get": true, "continue_list": true,
-	"publication_list": true, "creator_list": true, "creator_get": true,
+	"publication_list": true, "publication_get": true, "creator_list": true, "creator_get": true,
 	"creator_create": true, "creator_update": true,
 	"reader_manifest_get": true,
 	"document_create":     true, "document_list": true,
