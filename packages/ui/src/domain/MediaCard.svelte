@@ -82,6 +82,7 @@
 
   let orientation = $derived(publication.orientation ?? defaultOrientation[publication.type]);
   let badge = $derived(formatLabels[publication.format ?? ''] ?? typeLabels[publication.type]);
+  let imgFailed = $state(false);
 </script>
 
 <a
@@ -90,11 +91,12 @@
   aria-label={`${publication.title} — ${badge}`}
 >
   <div class="relative overflow-hidden rounded-lg border border-border bg-surface {aspectClass[orientation]}">
-    {#if publication.coverUrl}
+    {#if publication.coverUrl && !imgFailed}
       <img
         src={publication.coverUrl}
         alt=""
         loading="lazy"
+        onerror={() => (imgFailed = true)}
         class="h-full w-full object-cover transition duration-300 group-hover:scale-105"
       />
     {:else}

@@ -3663,11 +3663,21 @@ func resolveCoverURL(cl client.Client, publicationId string) string {
 	return buildPreviewURL(bucket, fileId, 400)
 }
 
-func buildPreviewURL(bucket, fileId string, dims ...int) string {
-	endpoint := os.Getenv("APPWRITE_ENDPOINT")
-	if endpoint == "" {
-		endpoint = os.Getenv("APPWRITE_FUNCTION_API_ENDPOINT")
+// publicMediaEndpoint resolves the browser-facing origin for media URLs. It
+// prefers an explicit public media endpoint (HTTPS, CDN-fronted) so the browser
+// never receives the function's internal origin (e.g. a raw IP over HTTP).
+func publicMediaEndpoint() string {
+	if e := os.Getenv("PUBLIC_MEDIA_ENDPOINT"); e != "" {
+		return e
 	}
+	if e := os.Getenv("APPWRITE_ENDPOINT"); e != "" {
+		return e
+	}
+	return os.Getenv("APPWRITE_FUNCTION_API_ENDPOINT")
+}
+
+func buildPreviewURL(bucket, fileId string, dims ...int) string {
+	endpoint := publicMediaEndpoint()
 	u := endpoint + "/storage/buckets/" + bucket + "/files/" + fileId + "/preview?project=" + os.Getenv("APPWRITE_FUNCTION_PROJECT_ID")
 	if len(dims) >= 1 && dims[0] > 0 {
 		u += fmt.Sprintf("&width=%d", dims[0])
@@ -3689,10 +3699,7 @@ func resolveDeliveryURL(cl client.Client, bucket, fileId string, ttl time.Durati
 	if err != nil || token.Secret == "" {
 		return ""
 	}
-	endpoint := os.Getenv("APPWRITE_ENDPOINT")
-	if endpoint == "" {
-		endpoint = os.Getenv("APPWRITE_FUNCTION_API_ENDPOINT")
-	}
+	endpoint := publicMediaEndpoint()
 	project := os.Getenv("APPWRITE_FUNCTION_PROJECT_ID")
 	u := endpoint + "/storage/buckets/" + bucket + "/files/" + fileId + "/preview?token=" + token.Secret + "&project=" + project
 	if len(dims) >= 1 && dims[0] > 0 {
