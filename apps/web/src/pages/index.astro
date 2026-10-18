@@ -55,6 +55,7 @@ const homeAd = await fetchAd("HOME_FEED_BETWEEN_RAILS", user?.$id ?? "");
     <!-- Continue (resume) rail -->
     <section class="mx-auto max-w-7xl px-6 py-10">
       <MediaRail
+        client:load
         title="Continue where you left off"
         items={continueItems}
         emptyHint={continueEmptyHint}
@@ -85,7 +86,7 @@ const homeAd = await fetchAd("HOME_FEED_BETWEEN_RAILS", user?.$id ?? "");
 
     <!-- Discovery rails -->
     <section class="mx-auto max-w-7xl space-y-12 px-6 py-12">
-      <MediaRail title="Trending now" items={trendingItems} emptyHint="Trending stories will appear here." />
+      <MediaRail client:load title="Trending now" items={trendingItems} emptyHint="Trending stories will appear here." />
       {homeAd?.url && (
         <div class="rounded-xl border border-border bg-surface/40 p-4">
           <span class="block pb-2 text-xs uppercase tracking-widest text-foreground-muted">Sponsored</span>
@@ -94,8 +95,8 @@ const homeAd = await fetchAd("HOME_FEED_BETWEEN_RAILS", user?.$id ?? "");
           </a>
         </div>
       )}
-      <MediaRail title="New series" items={newItems} emptyHint="New series will appear here." />
-      <CreatorRail title="Discover creators" items={creatorItems} emptyHint="Creators will appear here." />
+      <MediaRail client:load title="New series" items={newItems} emptyHint="New series will appear here." />
+      <CreatorRail client:load title="Discover creators" items={creatorItems} emptyHint="Creators will appear here." />
       <GenreRail title="Browse genres" items={GENRES} />
     </section>
   </main>
