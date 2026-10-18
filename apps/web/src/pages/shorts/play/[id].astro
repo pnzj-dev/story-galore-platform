@@ -1,0 +1,81 @@
+---
+import Layout from "../../../layouts/Layout.astro";
+import { fetchMediaByType } from "../../../lib/gateway";
+
+const shorts = await fetchMediaByType("VIDEO", "SHORT_FILM");
+const id = Astro.params.id ?? "";
+const current = shorts.find((s) => s.id === id) ?? shorts[0];
+const index = shorts.findIndex((s) => s.id === current?.id);
+const next = index >= 0 && index < shorts.length - 1 ? shorts[index + 1] : shorts[0];
+---
+
+<Layout title={current?.title ?? "Shorts"}>
+  <main class="flex min-h-[80vh] items-center justify-center">
+    {
+      current ? (
+        <div class="relative w-full max-w-sm overflow-hidden">
+          <div class="aspect-[9/16] w-full overflow-hidden">
+            {current.coverUrl ? (
+              <img src={current.coverUrl} alt={current.title} class="h-full w-full object-cover" />
+            ) : (
+              <div class="flex h-full w-full items-center justify-center bg-surface text-3xl font-bold text-foreground-muted">
+                {current.title.charAt(0)}
+              </div>
+            )}
+          </div>
+
+          <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30"></div>
+
+          <div class="absolute bottom-16 left-4 right-16 text-white">
+            <div class="flex items-center gap-2">
+              <span class="grid h-8 w-8 place-items-center rounded-full bg-gradient-to-br from-brand-500 to-accent text-xs font-bold">
+                {(current.creatorName ?? "?").charAt(0)}
+              </span>
+              <span class="text-[13px] font-bold">{current.creatorName ?? "@creator"}</span>
+              <a
+                href="/auth/login"
+                class="ml-1 rounded-full border border-white/60 px-3 py-1 text-[11px] font-bold text-white"
+              >
+                Follow
+              </a>
+            </div>
+            <p class="mt-2 text-[12px] leading-5">{current.title}</p>
+          </div>
+
+          <div class="absolute bottom-16 right-3 flex flex-col items-center gap-4 text-white">
+            <button type="button" aria-label="Like" class="flex flex-col items-center gap-0.5">
+              <span class="grid h-10 w-10 place-items-center rounded-full border border-white/20 bg-white/10 backdrop-blur">♥</span>
+              <span class="text-[10px] font-bold">1.2k</span>
+            </button>
+            <button type="button" aria-label="Comment" class="flex flex-col items-center gap-0.5">
+              <span class="grid h-10 w-10 place-items-center rounded-full border border-white/20 bg-white/10 backdrop-blur">💬</span>
+              <span class="text-[10px] font-bold">86</span>
+            </button>
+            <button type="button" aria-label="Share" class="flex flex-col items-center gap-0.5">
+              <span class="grid h-10 w-10 place-items-center rounded-full border border-white/20 bg-white/10 backdrop-blur">↗</span>
+              <span class="text-[10px] font-bold">Share</span>
+            </button>
+          </div>
+
+          <div class="absolute bottom-0 left-0 right-0 h-[2px] bg-white/25">
+            <div class="h-full w-1/3 bg-white"></div>
+          </div>
+
+          {next && (
+            <a
+              href={`/shorts/play/${next.id}`}
+              class="absolute right-3 top-3 rounded-full border border-white/30 bg-black/40 px-3 py-1 text-[11px] font-semibold text-white backdrop-blur"
+            >
+              Next →
+            </a>
+          )}
+        </div>
+      ) : (
+        <div class="px-6 py-24 text-center">
+          <h1 class="text-2xl font-bold">No shorts yet</h1>
+          <a href="/" class="mt-4 inline-block text-link">Back home</a>
+        </div>
+      )
+    }
+  </main>
+</Layout>

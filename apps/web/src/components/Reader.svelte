@@ -50,30 +50,82 @@
     }
   }
 
+  function jump(delta: number) {
+    if (!container) return;
+    const next = Math.max(0, Math.min(pages.length - 1, currentPosition + delta));
+    const target = container.querySelector<HTMLElement>(`[data-position="${next}"]`);
+    target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
   $effect(() => {
     if (!container) return;
     container.addEventListener('scroll', handleScroll, { passive: true });
     return () => container.removeEventListener('scroll', handleScroll);
   });
+
+  let percent = $derived(
+    pages.length ? Math.round(((currentPosition + 1) / pages.length) * 100) : 0,
+  );
 </script>
 
-<div bind:this={container} class="relative mx-auto max-h-[80vh] max-w-2xl space-y-6 overflow-y-auto py-4">
-  {#each pages as page (page.position)}
-    <div data-position={page.position} class="flex justify-center">
-      {#if page.url}
-        <img
-          src={page.url}
-          alt={`Page ${page.position + 1}`}
-          class="max-h-[70vh] w-auto rounded-lg border border-border"
-          loading="lazy"
-        />
-      {:else}
-        <div
-          class="flex aspect-[3/4] w-full items-center justify-center rounded-lg border border-border bg-surface text-foreground-muted"
-        >
-          Page {page.position + 1}
+<div class="relative mx-auto max-w-2xl">
+  <div bind:this={container} class="max-h-[70vh] space-y-6 overflow-y-auto py-4 pb-24">
+    {#each pages as page (page.position)}
+      <div data-position={page.position} class="flex justify-center">
+        {#if page.url}
+          <img
+            src={page.url}
+            alt={`Page ${page.position + 1}`}
+            class="max-h-[60vh] w-auto rounded-lg border border-border"
+            loading="lazy"
+          />
+        {:else}
+          <div
+            class="flex aspect-[3/4] w-full items-center justify-center rounded-lg border border-border bg-surface text-foreground-muted"
+          >
+            Page {page.position + 1}
+          </div>
+        {/if}
+      </div>
+    {/each}
+  </div>
+
+  {#if pages.length > 0}
+    <div
+      class="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-background/90 backdrop-blur lg:left-1/2 lg:max-w-2xl lg:-translate-x-1/2 lg:rounded-t-xl lg:border lg:border-b-0"
+    >
+      <div class="flex items-center justify-between gap-3 px-5 py-3">
+        <span class="text-[11px] text-foreground-muted">
+          Page {currentPosition + 1} of {pages.length}
+        </span>
+        <div class="flex items-center gap-3">
+          <button
+            type="button"
+            aria-label="Previous page"
+            onclick={() => jump(-1)}
+            disabled={currentPosition === 0}
+            class="grid h-9 w-9 place-items-center rounded-full border border-border bg-surface text-foreground transition hover:bg-surface-elevated disabled:opacity-40"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="m15 18-6-6 6-6"></path>
+            </svg>
+          </button>
+          <button
+            type="button"
+            aria-label="Next page"
+            onclick={() => jump(1)}
+            disabled={currentPosition === pages.length - 1}
+            class="grid h-9 w-9 place-items-center rounded-full border border-border bg-surface text-foreground transition hover:bg-surface-elevated disabled:opacity-40"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="m9 18 6-6-6-6"></path>
+            </svg>
+          </button>
         </div>
-      {/if}
+      </div>
+      <div class="h-[3px] w-full bg-surface-elevated">
+        <div class="h-full bg-brand-500 transition-all" style={`width:${percent}%`}></div>
+      </div>
     </div>
-  {/each}
+  {/if}
 </div>

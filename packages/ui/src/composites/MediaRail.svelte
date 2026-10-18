@@ -45,9 +45,11 @@
   </div>
 
   {#if items.length > 0}
-    <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+    <div class="flex snap-x gap-4 overflow-x-auto pb-2 lg:grid lg:grid-cols-6 lg:overflow-visible lg:pb-0">
       {#each items as item (item.id)}
-        <MediaCard publication={item} href={hrefFor(item)} />
+        <div class="w-28 shrink-0 snap-start sm:w-40 lg:w-auto">
+          <MediaCard publication={item} href={hrefFor(item)} />
+        </div>
       {/each}
     </div>
   {:else if emptyHint}

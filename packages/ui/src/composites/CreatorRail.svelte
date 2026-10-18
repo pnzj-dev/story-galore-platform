@@ -15,9 +15,11 @@
   </div>
 
   {#if items.length > 0}
-    <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+    <div class="flex snap-x gap-4 overflow-x-auto pb-2 lg:grid lg:grid-cols-6 lg:overflow-visible lg:pb-0">
       {#each items as item (item.id)}
-        <CreatorCard creator={item} href={`/creators/${item.id}`} />
+        <div class="w-40 shrink-0 snap-start lg:w-auto">
+          <CreatorCard creator={item} href={`/creators/${item.id}`} />
+        </div>
       {/each}
     </div>
   {:else if emptyHint}

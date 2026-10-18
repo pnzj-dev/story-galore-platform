@@ -1,8 +1,7 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import { MediaRail, CreatorRail, GenreRail } from "@storygalore/ui";
-import { fetchContinueItems, fetchPublications, fetchCreators, fetchAd } from "../lib/gateway";
-import { GENRES } from "../lib/genres";
+import { MediaRail, ShortCard } from "@storygalore/ui";
+import { fetchContinueItems, fetchMediaByType, fetchAd } from "../lib/gateway";
 
 const title = "StoryGalore";
 const description =
@@ -10,13 +9,10 @@ const description =
 
 const user = Astro.locals.user;
 const continueItems = user ? await fetchContinueItems(user.$id) : [];
-const continueEmptyHint = user
-  ? "You have nothing in progress yet."
-  : "Sign in to pick up right where you left off across all your devices.";
 
-const trendingItems = await fetchPublications("trending");
-const newItems = await fetchPublications("new");
-const creatorItems = await fetchCreators();
+const videoItems = (await fetchMediaByType("VIDEO")).filter((i) => i.format !== "SHORT_FILM");
+const bookItems = await fetchMediaByType("BOOK");
+const shortItems = await fetchMediaByType("VIDEO", "SHORT_FILM");
 const homeAd = await fetchAd("HOME_FEED_BETWEEN_RAILS", user?.$id ?? "");
 
 function hrefFor(item: { id: string; type: string }): string {
@@ -32,12 +28,14 @@ function hrefFor(item: { id: string; type: string }): string {
   }
 }
 
-const featured = trendingItems.find((i) => i.type === "VIDEO") ?? trendingItems[0];
+const featured = videoItems[0] ?? bookItems[0];
 const featuredHref = featured ? hrefFor(featured) : "/discover";
 const featuredRating =
   featured && featured.contentRating && featured.contentRating !== "ALL_AGES"
     ? featured.contentRating
     : null;
+
+const watchItems = continueItems.length > 0 ? continueItems : videoItems;
 ---
 
 <Layout title={`${title} — Read. Create. Discover.`} description={description}>
@@ -45,7 +43,7 @@ const featuredRating =
     <!-- Cinematic hero billboard -->
     {
       featured ? (
-        <section class="relative h-[420px] overflow-hidden">
+        <section class="relative h-[62vh] min-h-[320px] overflow-hidden md:h-[420px]">
           <div
             class="absolute inset-0 bg-cover bg-[center_30%]"
             style={`background-image:url('${featured.coverUrl}')`}
@@ -53,7 +51,7 @@ const featuredRating =
           <div class="absolute inset-0 bg-gradient-to-r from-background via-background/75 to-background/10"></div>
           <div class="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent"></div>
 
-          <div class="relative z-10 flex h-full max-w-[1400px] items-end px-7 pb-12">
+          <div class="relative z-10 mx-auto flex h-full max-w-[1400px] items-end px-7 pb-12">
             <div class="max-w-[620px]">
               <span
                 class="mb-4 inline-flex items-center gap-2 rounded-full bg-brand-500/15 px-2.5 py-1 text-[11px] font-bold uppercase tracking-widest text-brand-400"
@@ -116,19 +114,10 @@ const featuredRating =
       )
     }
 
-    <!-- Continue (resume) rail -->
-    <section class="mx-auto max-w-[1400px] px-7 py-10">
-      <MediaRail
-        client:load
-        title="Continue Watching"
-        items={continueItems}
-        emptyHint={continueEmptyHint}
-      />
-    </section>
-
-    <!-- Discovery rails -->
     <section class="mx-auto max-w-[1400px] space-y-12 px-7 py-12">
-      <MediaRail client:load title="Trending Now" items={trendingItems} emptyHint="Trending stories will appear here." />
+      <MediaRail client:load title="Continue Watching" items={watchItems} />
+      <MediaRail client:load title="Continue Reading" items={bookItems} />
+
       {homeAd?.url && (
         <div class="rounded-xl border border-border bg-surface/40 p-4">
           <span class="block pb-2 text-xs uppercase tracking-widest text-foreground-muted">Sponsored</span>
@@ -137,9 +126,25 @@ const featuredRating =
           </a>
         </div>
       )}
-      <MediaRail client:load title="New Series" items={newItems} emptyHint="New series will appear here." />
-      <CreatorRail client:load title="Discover Creators" items={creatorItems} emptyHint="Creators will appear here." />
-      <GenreRail title="Browse Genres" items={GENRES} />
+
+      <MediaRail client:load title="Trending in Movies" items={videoItems} />
+      <MediaRail client:load title="Trending in Books" items={bookItems} />
+
+      {shortItems.length > 0 && (
+        <section class="space-y-4">
+          <div class="flex items-baseline justify-between">
+            <h3 class="text-lg font-bold tracking-tight">Shorts — Fresh Today</h3>
+            <a href="/shorts" class="text-[12px] font-semibold text-foreground-muted transition hover:text-brand-400">
+              See all →
+            </a>
+          </div>
+          <div class="grid grid-cols-3 gap-4 sm:grid-cols-4 lg:grid-cols-6">
+            {shortItems.map((item) => (
+              <ShortCard publication={item} href={`/shorts/play/${item.id}`} />
+            ))}
+          </div>
+        </section>
+      )}
     </section>
   </main>
 </Layout>

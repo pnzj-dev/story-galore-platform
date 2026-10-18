@@ -3,6 +3,7 @@ import "../styles/global.css";
 import { ClientRouter } from "astro:transitions";
 import SiteHeader from "../components/SiteHeader.astro";
 import SiteFooter from "../components/SiteFooter.astro";
+import MobileNav from "../components/MobileNav.astro";
 
 interface Props {
   title: string;
@@ -47,9 +48,10 @@ const canonicalUrl = Astro.site ? new URL(Astro.url.pathname, Astro.site).toStri
        distribution contract. -->
   <body class="flex min-h-screen flex-col bg-background text-foreground antialiased" data-density="public">
     <SiteHeader />
-    <div class="flex-1">
+    <div class="flex-1 pb-16 lg:pb-0">
       <slot />
     </div>
     <SiteFooter />
+    <MobileNav />
   </body>
 </html>
