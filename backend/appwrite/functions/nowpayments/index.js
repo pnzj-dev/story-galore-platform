@@ -63,21 +63,39 @@ async function npRequest(method, path, body) {
   return resp.json();
 }
 
-// Map NOWPayments SDK status -> StoryGalore payments.status enum.
-function mapStatus(sdkStatus) {
-  switch (sdkStatus) {
-    case 'paid':
+// Map raw NOWPayments payment_status -> StoryGalore payments.status enum.
+function mapPaymentStatus(rawStatus) {
+  switch (String(rawStatus).toLowerCase()) {
+    case 'finished':
       return 'CAPTURED';
     case 'failed':
       return 'FAILED';
-    case 'expired':
-      return 'EXPIRED';
     case 'refunded':
       return 'REFUNDED';
+    case 'expired':
+      return 'EXPIRED';
     case 'cancelled':
+    case 'canceled':
       return 'FAILED';
     default:
-      // pending, processing, partially_paid, unknown
+      // waiting, confirming, confirmed, sending, partially_paid
+      return 'AWAITING_PROVIDER';
+  }
+}
+
+// Map raw NOWPayments recurring-payment status -> StoryGalore subscriptions.status.
+function mapSubscriptionStatus(rawStatus) {
+  switch (String(rawStatus).toUpperCase()) {
+    case 'FINISHED':
+      return 'ACTIVE';
+    case 'FAILED':
+      return 'FAILED';
+    case 'CANCELLED':
+    case 'CANCELED':
+      return 'CANCELLED';
+    case 'EXPIRED':
+      return 'EXPIRED';
+    default:
       return 'AWAITING_PROVIDER';
   }
 }
@@ -254,26 +272,63 @@ async function handleIpn(req, res, log) {
     return res.json({ error: 'MISSING_SIGNATURE' }, 400);
   }
 
-  // parseWebhook verifies the HMAC-SHA512 signature and returns a normalized event.
-  const event = sdk.parseWebhook(req.bodyJson, sig);
+  const payload = req.bodyJson;
+  let isValid = false;
+  try {
+    isValid = sdk.verifyWebhookSignature(payload, sig);
+  } catch (e) {
+    return res.json({ error: 'SIGNATURE_VERIFICATION_FAILED' }, 400);
+  }
+  if (!isValid) {
+    return res.json({ error: 'SIGNATURE_VERIFICATION_FAILED' }, 400);
+  }
 
-  if (event.type === 'payment.status_changed') {
-    const p = event.payment;
-    const paymentId = p.order_id || p.purchase_id || p.payment_id;
-    const status = mapStatus(p.status);
-    await appwriteRequest(
-      req,
-      'PATCH',
-      `/tablesdb/${DATABASE_ID}/tables/${PAYMENTS_TABLE}/rows/${paymentId}`,
-      {
-        databaseId: DATABASE_ID,
-        tableId: PAYMENTS_TABLE,
-        rowId: paymentId,
-        data: { status, updatedAt: new Date().toISOString() },
-      }
-    );
-    log('nowpayments ipn', `paymentId=${paymentId}`, `status=${status}`, `rawStatus=${p.payment_status}`);
+  // One-time payment status change.
+  if (payload.payment_id) {
+    const paymentId = payload.order_id || payload.purchase_id || payload.payment_id;
+    const status = mapPaymentStatus(payload.payment_status);
+    await appwriteRequest(req, 'PATCH', `/tablesdb/${DATABASE_ID}/tables/${PAYMENTS_TABLE}/rows/${paymentId}`, {
+      databaseId: DATABASE_ID,
+      tableId: PAYMENTS_TABLE,
+      rowId: paymentId,
+      data: { status, updatedAt: new Date().toISOString() },
+    });
+    log('nowpayments ipn payment', `paymentId=${paymentId}`, `status=${status}`, `rawStatus=${payload.payment_status}`);
+    return res.json({ ok: true });
+  }
+
+  // Recurring payment (subscription) status change: has id/status but no
+  // payment_id/address.
+  if (payload.id && payload.currency && payload.amount && !payload.address) {
+    const status = mapSubscriptionStatus(payload.status);
+    await updateSubscriptionByProviderId(req, String(payload.id), status);
+    log('nowpayments ipn subscription', `providerSubscriptionId=${payload.id}`, `status=${status}`, `rawStatus=${payload.status}`);
   }
 
   return res.json({ ok: true });
+}
+
+// Find the subscriptions row whose providerSubscriptionId matches the NOWPayments
+// recurring payment id, and transition it to the given status (idempotent: no
+// regression from terminal states).
+async function updateSubscriptionByProviderId(req, providerSubscriptionId, status) {
+  const q = JSON.stringify([
+    { method: 'equal', attribute: 'providerSubscriptionId', values: [providerSubscriptionId] },
+  ]);
+  const list = await appwriteRequest(
+    req,
+    'GET',
+    `/tablesdb/${DATABASE_ID}/tables/${SUBSCRIPTIONS_TABLE}/rows?queries=${encodeURIComponent(q)}`
+  );
+  const rows = (list && list.rows) || [];
+  for (const row of rows) {
+    const current = row.data && row.data.status;
+    if (['ACTIVE', 'CANCELLED', 'EXPIRED'].includes(current)) continue;
+    await appwriteRequest(req, 'PATCH', `/tablesdb/${DATABASE_ID}/tables/${SUBSCRIPTIONS_TABLE}/rows/${row.$id}`, {
+      databaseId: DATABASE_ID,
+      tableId: SUBSCRIPTIONS_TABLE,
+      rowId: row.$id,
+      data: { status, updatedAt: new Date().toISOString() },
+    });
+  }
 }
