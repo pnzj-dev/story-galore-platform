@@ -4,16 +4,18 @@ import { NowPaymentsSDK } from '@nowpaymentsio/nowpayments-sdk-nodejs';
 // This is the ONLY Appwrite function allowed in TypeScript: the NOWPayments
 // SDK has no Go equivalent (see AGENTS.md rule 4 exception).
 //
-// Two paths:
-//   POST /                         -> command: create_payment
+// Paths:
+//   POST /                         -> command: create_payment | create_subscription | cancel_subscription
 //   POST /webhooks/nowpayments     -> IPN (Instant Payment Notification)
 
 const DATABASE_ID = 'main';
 const PAYMENTS_TABLE = 'payments';
+const SUBSCRIPTIONS_TABLE = 'subscriptions';
 const APPWRITE_ENDPOINT =
   process.env.APPWRITE_ENDPOINT ||
   process.env.APPWRITE_FUNCTION_API_ENDPOINT ||
   'http://187.126.0.227/v1';
+const NP_API_BASE = process.env.NOWPAYMENTS_API_BASE || 'https://api.nowpayments.io/v1';
 
 function nowpaymentsSDK() {
   return new NowPaymentsSDK({
@@ -43,6 +45,24 @@ async function appwriteRequest(req, method, path, body) {
   return resp.json();
 }
 
+// Raw NOWPayments REST call (x-api-key). Used for the Recurring Payments
+// (subscriptions) endpoints, which the SDK does not wrap.
+async function npRequest(method, path, body) {
+  const resp = await fetch(`${NP_API_BASE}${path}`, {
+    method,
+    headers: {
+      'content-type': 'application/json',
+      'x-api-key': process.env.NOWPAYMENTS_API_KEY,
+    },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  if (!resp.ok) {
+    const text = await resp.text();
+    throw new Error(`NOWPayments ${method} ${path}: ${resp.status} ${text}`);
+  }
+  return resp.json();
+}
+
 // Map NOWPayments SDK status -> StoryGalore payments.status enum.
 function mapStatus(sdkStatus) {
   switch (sdkStatus) {
@@ -62,6 +82,22 @@ function mapStatus(sdkStatus) {
   }
 }
 
+// Map a StoryGalore billing interval to NOWPayments plan interval_day.
+function intervalToDays(interval) {
+  switch (String(interval).toLowerCase()) {
+    case 'day':
+      return 1;
+    case 'week':
+      return 7;
+    case 'month':
+      return 30;
+    case 'year':
+      return 365;
+    default:
+      return 30;
+  }
+}
+
 export default async ({ req, res, log, error }) => {
   try {
     if (req.path === '/webhooks/nowpayments') {
@@ -77,10 +113,23 @@ export default async ({ req, res, log, error }) => {
 
 async function handleCommand(req, res, log) {
   const body = req.bodyJson;
-  if (!body || body.operation !== 'create_payment') {
+  if (!body || !body.operation) {
     return res.json({ error: 'INVALID_OPERATION' }, 400);
   }
-  const input = body.input || {};
+  switch (body.operation) {
+    case 'create_payment':
+      return handleCreatePayment(req, res, log);
+    case 'create_subscription':
+      return handleCreateSubscription(req, res, log);
+    case 'cancel_subscription':
+      return handleCancelSubscription(req, res, log);
+    default:
+      return res.json({ error: 'INVALID_OPERATION' }, 400);
+  }
+}
+
+async function handleCreatePayment(req, res, log) {
+  const input = req.bodyJson.input || {};
   if (!input.userId || !input.amount || !input.currency) {
     return res.json({ error: 'INVALID_INPUT' }, 400);
   }
@@ -132,6 +181,70 @@ async function handleCommand(req, res, log) {
       invoiceUrl: np.invoice_url || null,
     },
   });
+}
+
+async function handleCreateSubscription(req, res, log) {
+  const input = req.bodyJson.input || {};
+  if (!input.subscriptionId || !input.email || !input.amount || !input.currency) {
+    return res.json({ error: 'INVALID_INPUT' }, 400);
+  }
+
+  // 1. Create the NOWPayments subscription plan (prerequisite).
+  const plan = await npRequest('POST', '/subscriptions/plans', {
+    title: `StoryGalore ${input.planId || 'subscription'}`,
+    interval_day: intervalToDays(input.interval),
+    amount: input.amount,
+    currency: String(input.currency).toLowerCase(),
+  });
+
+  // 2. Create the email subscription against the plan.
+  const sub = await npRequest('POST', '/subscriptions', {
+    subscription_plan_id: plan.id,
+    email: input.email,
+  });
+
+  // 3. Update the subscriptions row (created by the Go gateway).
+  await appwriteRequest(
+    req,
+    'PATCH',
+    `/tablesdb/${DATABASE_ID}/tables/${SUBSCRIPTIONS_TABLE}/rows/${input.subscriptionId}`,
+    {
+      databaseId: DATABASE_ID,
+      tableId: SUBSCRIPTIONS_TABLE,
+      rowId: input.subscriptionId,
+      data: {
+        providerSubscriptionId: String(sub.id),
+        providerPlanId: String(plan.id),
+        status: 'AWAITING_PROVIDER',
+        updatedAt: new Date().toISOString(),
+      },
+    }
+  );
+
+  log(
+    'nowpayments create_subscription',
+    `subscriptionId=${input.subscriptionId}`,
+    `providerSubscriptionId=${sub.id}`
+  );
+
+  return res.json({
+    status: 'SUCCESS',
+    result: {
+      subscriptionId: input.subscriptionId,
+      providerSubscriptionId: String(sub.id),
+      providerPlanId: String(plan.id),
+    },
+  });
+}
+
+async function handleCancelSubscription(req, res, log) {
+  const input = req.bodyJson.input || {};
+  if (!input.providerSubscriptionId) {
+    return res.json({ error: 'INVALID_INPUT' }, 400);
+  }
+  await npRequest('DELETE', `/subscriptions/${input.providerSubscriptionId}`);
+  log('nowpayments cancel_subscription', `providerSubscriptionId=${input.providerSubscriptionId}`);
+  return res.json({ status: 'SUCCESS', result: { cancelled: true } });
 }
 
 async function handleIpn(req, res, log) {

@@ -2814,6 +2814,8 @@ func subscriptionCreate(ctx openruntimes.Context, in *GatewayInput, cl client.Cl
 		PlanVersion     int    `json:"planVersion"`
 		BillingMode     string `json:"billingMode"`
 		BillingStrategy string `json:"billingStrategy"`
+		Provider        string `json:"provider"`
+		Email           string `json:"email"`
 	}
 	if !decode(ctx, in, &input) || input.UserId == "" || input.PlanId == "" || input.PlanVersion == 0 || input.BillingMode == "" || input.BillingStrategy == "" {
 		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
@@ -2840,20 +2842,45 @@ func subscriptionCreate(ctx openruntimes.Context, in *GatewayInput, cl client.Cl
 	}
 
 	subscriptionId := idOrUUID(in.IdempotencyKey)
-	now := now()
+	ts := now()
 	row := map[string]interface{}{
 		"userId": input.UserId, "planId": input.PlanId, "planVersion": input.PlanVersion,
 		"status": "CREATED", "billingMode": input.BillingMode, "billingStrategy": input.BillingStrategy,
 		"currency": currency, "amount": amount, "billingInterval": interval, "billingIntervalCount": intervalCount,
-		"currentPeriodStart": now, "currentPeriodEnd": now, "cancelAtPeriodEnd": false, "version": 1,
-		"createdAt": now, "updatedAt": now,
+		"currentPeriodStart": ts, "currentPeriodEnd": ts, "cancelAtPeriodEnd": false, "version": 1,
+		"createdAt": ts, "updatedAt": ts,
 	}
 	if input.CreatorId != "" {
 		row["creatorId"] = input.CreatorId
 	}
+	if input.Provider != "" {
+		row["provider"] = input.Provider
+	}
 	if err := createRow(cl, "subscriptions", subscriptionId, row); err != nil {
 		return internalFailure(ctx, in, err)
 	}
+
+	// NATIVE_RECURRING: dispatch to the provider's native subscription flow.
+	// MERCHANT_MANAGED / MANUAL stay CREATED and activate on the first captured
+	// renewal payment (activateSubscriptionForPayment).
+	if input.BillingStrategy == "NATIVE_RECURRING" {
+		if input.Provider == "NOWPAYMENTS" {
+			return delegateToNowpaymentsSubscription(ctx, in, cl, subscriptionId, input.UserId, input.Email, input.PlanId, amount, currency, interval)
+		}
+		adapter := newProviderAdapter(input.Provider, os.Getenv("STRIPE_SECRET_KEY"))
+		if !adapter.SupportsNativeSubscriptions() {
+			updateRow(cl, "subscriptions", subscriptionId, map[string]interface{}{"status": "FAILED", "updatedAt": now()})
+			return respond(ctx, in.OperationId, "NATIVE_SUBSCRIPTION_UNSUPPORTED", false)
+		}
+		providerSubscriptionId, err := adapter.CreateSubscription(context.Background(), input.UserId, subscriptionId, input.PlanId, amount, currency, interval)
+		if err != nil {
+			ctx.Error("native subscription create failed", "provider="+input.Provider, err)
+			updateRow(cl, "subscriptions", subscriptionId, map[string]interface{}{"status": "FAILED", "updatedAt": now()})
+			return respond(ctx, in.OperationId, "PROVIDER_ERROR", true)
+		}
+		updateRow(cl, "subscriptions", subscriptionId, map[string]interface{}{"providerSubscriptionId": providerSubscriptionId, "status": "AWAITING_PROVIDER", "updatedAt": now()})
+	}
+
 	emit(ctx, cl, "subscriptions.subscription_create.v1", subscriptionId, actorOrEmpty(in.ActorId), map[string]interface{}{"subscriptionId": subscriptionId}, in.CorrelationId)
 	return success(ctx, in, map[string]interface{}{"subscriptionId": subscriptionId})
 }
@@ -2994,9 +3021,9 @@ func paymentCreate(ctx openruntimes.Context, in *GatewayInput, cl client.Client)
 	}
 
 	// Provider dispatch (PaymentService abstraction — domain code never touches
-	// the provider SDK; adapters isolate it). STRIPE_CONNECT creates a PaymentIntent.
+	// the provider SDK; adapters isolate it). STRIPE creates a PaymentIntent.
 	// Unsupported providers fail safely rather than recording an uncharged payment.
-	if input.Provider == "STRIPE_CONNECT" && os.Getenv("STRIPE_SECRET_KEY") == "" {
+	if input.Provider == "STRIPE" && os.Getenv("STRIPE_SECRET_KEY") == "" {
 		updateRow(cl, "payments", paymentId, map[string]interface{}{"status": "FAILED", "updatedAt": now})
 		return respond(ctx, in.OperationId, "PROVIDER_UNCONFIGURED", false)
 	}
@@ -3054,6 +3081,51 @@ func delegateToNowpayments(ctx openruntimes.Context, in *GatewayInput, cl client
 	return success(ctx, in, npResp.Result)
 }
 
+// delegateToNowpaymentsSubscription forwards a NOWPAYMENTS native subscription
+// creation to the TypeScript nowpayments function. The gateway has already
+// created the subscriptions row; the nowpayments function creates the
+// NOWPayments plan/subscription and updates the row in place.
+func delegateToNowpaymentsSubscription(ctx openruntimes.Context, in *GatewayInput, cl client.Client, subscriptionId, userId, email, planId string, amount int, currency, interval string) openruntimes.Response {
+	npInput := map[string]interface{}{
+		"operation": "create_subscription",
+		"input": map[string]interface{}{
+			"userId":         userId,
+			"subscriptionId": subscriptionId,
+			"email":          email,
+			"planId":         planId,
+			"amount":         float64(amount) / 100.0,
+			"currency":       strings.ToLower(currency),
+			"interval":       strings.ToLower(interval),
+		},
+	}
+	service := functions.New(cl)
+	exec, err := service.CreateExecution("nowpayments",
+		service.WithCreateExecutionBody(mustJSON(npInput)),
+		service.WithCreateExecutionMethod("POST"),
+	)
+	if err != nil {
+		ctx.Error("nowpayments subscription delegation failed", err)
+		updateRow(cl, "subscriptions", subscriptionId, map[string]interface{}{"status": "FAILED", "updatedAt": now()})
+		return respond(ctx, in.OperationId, "PROVIDER_ERROR", true)
+	}
+	if exec.Status == "failed" || exec.ResponseStatusCode >= 400 {
+		ctx.Error("nowpayments subscription execution failed", "errors="+exec.Errors, "body="+exec.ResponseBody)
+		updateRow(cl, "subscriptions", subscriptionId, map[string]interface{}{"status": "FAILED", "updatedAt": now()})
+		return respond(ctx, in.OperationId, "PROVIDER_ERROR", true)
+	}
+	var npResp struct {
+		Status string                 `json:"status"`
+		Result map[string]interface{} `json:"result"`
+	}
+	if err := json.Unmarshal([]byte(exec.ResponseBody), &npResp); err != nil || npResp.Status != "SUCCESS" {
+		ctx.Error("nowpayments subscription bad response", "body="+exec.ResponseBody)
+		updateRow(cl, "subscriptions", subscriptionId, map[string]interface{}{"status": "FAILED", "updatedAt": now()})
+		return respond(ctx, in.OperationId, "PROVIDER_ERROR", true)
+	}
+	emit(ctx, cl, "subscriptions.subscription_create.v1", subscriptionId, actorOrEmpty(in.ActorId), map[string]interface{}{"subscriptionId": subscriptionId, "provider": "NOWPAYMENTS"}, in.CorrelationId)
+	return success(ctx, in, npResp.Result)
+}
+
 func paymentConfirmFromWebhook(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
 	var input struct {
 		Provider        string  `json:"provider"`
@@ -3071,9 +3143,9 @@ func paymentConfirmFromWebhook(ctx openruntimes.Context, in *GatewayInput, cl cl
 	providerEventId := input.ProviderEventId
 	signatureVerified := false
 
-	// STRIPE_CONNECT: verify the webhook signature server-side; the verified
+	// STRIPE: verify the webhook signature server-side; the verified
 	// event type + ID are authoritative (never trust client-supplied values).
-	if input.Provider == "STRIPE_CONNECT" {
+	if input.Provider == "STRIPE" {
 		secret := os.Getenv("STRIPE_WEBHOOK_SECRET")
 		if secret == "" {
 			return respond(ctx, in.OperationId, "PROVIDER_UNCONFIGURED", false)
@@ -3109,6 +3181,7 @@ func paymentConfirmFromWebhook(ctx openruntimes.Context, in *GatewayInput, cl cl
 		if err := updateRow(cl, "payments", *input.PaymentId, map[string]interface{}{"status": "CAPTURED", "updatedAt": now()}); err != nil {
 			ctx.Error("payment_confirm_from_webhook: payment update failed", err)
 		}
+		activateSubscriptionForPayment(cl, *input.PaymentId)
 	}
 	emit(ctx, cl, "payments.payment_confirm_from_webhook.v1", providerEventId, actorOrEmpty(in.ActorId), map[string]interface{}{"providerEventId": providerEventId}, in.CorrelationId)
 	return success(ctx, in, map[string]interface{}{"eventId": providerEventId})
@@ -3137,7 +3210,7 @@ func handleStripeWebhook(ctx openruntimes.Context, cl client.Client) openruntime
 	paymentId := extractStripePaymentId(payload)
 	ts := now()
 	eventRow := map[string]interface{}{
-		"provider": "STRIPE_CONNECT", "providerEventId": eventID, "eventType": eventType,
+		"provider": "STRIPE", "providerEventId": eventID, "eventType": eventType,
 		"receivedAt": ts, "signatureVerified": true, "processingState": "RECEIVED",
 		"processingAttempts": 0, "createdAt": ts,
 	}
@@ -3151,8 +3224,45 @@ func handleStripeWebhook(ctx openruntimes.Context, cl client.Client) openruntime
 		if err := updateRow(cl, "payments", paymentId, map[string]interface{}{"status": "CAPTURED", "updatedAt": now()}); err != nil {
 			ctx.Error("stripe webhook: payment update failed", err)
 		}
+		activateSubscriptionForPayment(cl, paymentId)
 	}
 	return ctx.Res.Json(map[string]interface{}{"received": true, "eventId": eventID})
+}
+
+// activateSubscriptionForPayment transitions a subscription to ACTIVE when its
+// linked payment is captured. This is the MERCHANT_MANAGED activation path;
+// NATIVE_RECURRING subscriptions are driven by the provider's own subscription
+// webhook. Idempotent: only non-terminal states are transitioned, so duplicate
+// or out-of-order webhooks never corrupt subscription state.
+func activateSubscriptionForPayment(cl client.Client, paymentId string) {
+	service := tablesdb.New(cl)
+	p, err := service.GetRow(databaseID, "payments", paymentId)
+	if err != nil {
+		return
+	}
+	var pm map[string]interface{}
+	if p.Decode(&pm) != nil {
+		return
+	}
+	subscriptionId, _ := pm["subscriptionId"].(string)
+	if subscriptionId == "" {
+		return
+	}
+	s, err := service.GetRow(databaseID, "subscriptions", subscriptionId)
+	if err != nil {
+		return
+	}
+	var sm map[string]interface{}
+	if s.Decode(&sm) != nil {
+		return
+	}
+	status, _ := sm["status"].(string)
+	switch status {
+	case "CREATED", "CHECKOUT_STARTED", "AWAITING_PROVIDER":
+		if err := updateRow(cl, "subscriptions", subscriptionId, map[string]interface{}{"status": "ACTIVE", "updatedAt": now()}); err != nil {
+			// Best-effort; the activation is retried on the next (idempotent) webhook.
+		}
+	}
 }
 
 // extractStripePaymentId extracts the StoryGalore paymentId from the event's

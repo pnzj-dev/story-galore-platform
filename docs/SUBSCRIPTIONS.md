@@ -232,6 +232,8 @@ recurring payment      initiated
 - `MERCHANT_MANAGED`: StoryGalore creates a new renewal payment request for every period. The user must authorize/pay it. This is the recommended strategy for one-time-only crypto processors.
 - `MANUAL`: the user explicitly starts each renewal.
 
+V1 native providers: **Stripe** (Stripe Billing — auto-charges a saved payment method) and **NOWPayments** (Recurring Payments API — plan + email subscription or custodial balance deduction; a plan must be created first). Any provider without native support routes to `MERCHANT_MANAGED`.
+
 A merchant-managed subscription is still a real StoryGalore subscription. The difference is how its next period is funded.
 
 Never emulate automatic wallet debits or store wallet credentials to manufacture recurring charges. Never claim that a provider supports native subscriptions when its capability contract says otherwise.

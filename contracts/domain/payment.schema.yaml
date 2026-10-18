@@ -7,7 +7,7 @@ properties:
   userId: {type: string, minLength: 1}
   amount: {type: integer, minimum: 0, description: Minor currency units; never floating point.}
   currency: {type: string, pattern: '^[A-Z]{3}$'}
-  provider: {type: string, enum: [STRIPE_CONNECT, NOWPAYMENTS, ZEN_PAYMENTS, SECUREGLOBALPAY]}
+  provider: {type: string, enum: [STRIPE, NOWPAYMENTS]}
   status: {type: string, enum: [CREATED, AWAITING_PROVIDER, CAPTURED, FAILED, REFUNDED, RECONCILED, EXPIRED]}
   idempotencyKey: {type: string}
   subscriptionId: {type: string}

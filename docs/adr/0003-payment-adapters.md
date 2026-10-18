@@ -8,10 +8,8 @@ The platform must be able to activate/deactivate providers without changing subs
 
 Initial registered provider candidates:
 
-- Stripe Connect
+- Stripe
 - NOWPayments
-- Zen Payments
-- SecureGlobalPay
 
 Production activation is subject to provider approval for the exact business model.
 

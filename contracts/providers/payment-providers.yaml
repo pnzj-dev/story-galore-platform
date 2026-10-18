@@ -3,9 +3,9 @@ version: 1
 category: payments
 policy: fail_closed
 providers:
-- providerId: STRIPE_CONNECT
+- providerId: STRIPE
   status: CONDITIONAL
-  adapterRef: services/payments/adapters/stripe-connect
+  adapterRef: services/payments/adapters/stripe
   capabilities:
   - oneTimePayments
   - nativeSubscriptions
@@ -14,6 +14,7 @@ providers:
   - webhooks
   - creatorPayouts
   - stablecoinPayouts
+  nativeSubscriptionModel: autoChargeSavedMethod
   activationRequires:
   - currentProviderContractVerification
   - StoryGaloreBusinessModelApproval
@@ -24,31 +25,13 @@ providers:
   adapterRef: services/payments/adapters/nowpayments
   capabilities:
   - oneTimeCryptoPayments
+  - nativeSubscriptions
   - cryptoPayouts
   - webhooks
+  nativeSubscriptionModel: emailOrCustodial
   activationRequires:
   - currentProviderContractVerification
   - jurisdictionApproval
-  - businessModelApproval
-- providerId: ZEN_PAYMENTS
-  status: CONDITIONAL
-  adapterRef: services/payments/adapters/zen-payments
-  capabilities:
-  - cardPayments
-  - walletPayments
-  - webhooks
-  activationRequires:
-  - currentProviderContractVerification
-  - merchantApproval
-  - businessModelApproval
-- providerId: SECUREGLOBALPAY
-  status: CONDITIONAL
-  adapterRef: services/payments/adapters/secureglobalpay
-  capabilities:
-  - declared_after_contract_verification
-  activationRequires:
-  - currentProviderContractVerification
-  - merchantApproval
   - businessModelApproval
 statusSemantics:
   CONDITIONAL: Adapter may be implemented/tested but MUST NOT be production-routable until activation requirements pass.

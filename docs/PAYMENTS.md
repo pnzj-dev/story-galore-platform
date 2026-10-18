@@ -12,10 +12,8 @@
 
 ```text
 PaymentService
-├── StripeConnectAdapter
-├── NOWPaymentsAdapter
-├── ZenPaymentsAdapter
-└── SecureGlobalPayAdapter
+├── StripeAdapter        (native subscriptions via Stripe Billing)
+└── NOWPaymentsAdapter   (native subscriptions via Recurring Payments API)
 ```
 
 Only providers present in the canonical payment-provider registry may be implemented. A provider is not production-routable merely because an adapter exists; activation requires the registered contract, business-model, jurisdiction, capability, webhook, reconciliation and human-approval gates.

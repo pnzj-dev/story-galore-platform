@@ -355,7 +355,7 @@ tables_with_columns:
       - {key: userId, type: varchar, size: 255, required: true}
       - {key: amount, type: integer, required: true}
       - {key: currency, type: varchar, size: 3, required: true}
-      - {key: provider, type: enum, elements: [STRIPE_CONNECT, NOWPAYMENTS, ZEN_PAYMENTS, SECUREGLOBALPAY], required: true}
+      - {key: provider, type: enum, elements: [STRIPE, NOWPAYMENTS], required: true}
       - {key: status, type: enum, elements: [CREATED, AWAITING_PROVIDER, CAPTURED, FAILED, REFUNDED, RECONCILED, EXPIRED], required: true}
       - {key: idempotencyKey, type: varchar, size: 255, required: false}
       - {key: subscriptionId, type: varchar, size: 255, required: false}

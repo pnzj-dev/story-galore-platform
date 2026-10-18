@@ -38,7 +38,7 @@ Target integrations are Coinbase Wallet, MetaMask and WalletConnect. Wallets are
 
 ## Payment providers
 
-The package registers Stripe Connect, NOWPayments, Zen Payments and SecureGlobalPay as **CONDITIONAL** candidates. None is silently declared production-safe. Each requires current provider-contract verification, business-model approval, jurisdiction approval, capability verification, webhook verification, reconciliation testing and human activation. This is particularly important for adult, AI-assisted and UGC models.
+The package registers Stripe and NOWPayments as **CONDITIONAL** candidates. None is silently declared production-safe. Each requires current provider-contract verification, business-model approval, jurisdiction approval, capability verification, webhook verification, reconciliation testing and human activation. This is particularly important for adult, AI-assisted and UGC models.
 
 The domain ledger remains authoritative. Provider balances never become creator balances. Provider adapters execute registered rails and normalize provider events/errors.
 

@@ -18,11 +18,21 @@ func (u *unimplementedAdapter) Refund(_ string, _ int) error {
 	return errors.New(u.provider + " adapter not yet implemented")
 }
 
+func (u *unimplementedAdapter) CreateSubscription(_ context.Context, _, _, _ string, _ int, _, _ string) (string, error) {
+	return "", errors.New(u.provider + " native subscriptions not implemented")
+}
+
+func (u *unimplementedAdapter) CancelSubscription(_ string) error {
+	return errors.New(u.provider + " native subscriptions not implemented")
+}
+
+func (u *unimplementedAdapter) SupportsNativeSubscriptions() bool { return false }
+
 // newProviderAdapter returns the PaymentService adapter for a provider.
-// STRIPE_CONNECT uses the real Stripe adapter; NOWPAYMENTS, ZEN_PAYMENTS and
-// SECUREGLOBALPAY are fail-safe stubs until their HTTP APIs are integrated.
+// STRIPE uses the real Stripe adapter. Unknown/future providers are fail-safe
+// stubs (they route to MERCHANT_MANAGED until a native adapter is added).
 func newProviderAdapter(provider, secretKey string) PaymentService {
-	if provider == "STRIPE_CONNECT" {
+	if provider == "STRIPE" {
 		return newStripeAdapter(secretKey)
 	}
 	return &unimplementedAdapter{provider: provider}

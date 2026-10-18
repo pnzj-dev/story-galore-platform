@@ -19,8 +19,8 @@ for(const token of ['USDC_BASE','USDC_POLYGON','storygalorePercentageFeeBps: 0',
 const wallets=read('contracts/business/wallets.yaml');
 for(const token of ['COINBASE_WALLET','METAMASK','WALLETCONNECT','Network switching','chain mismatch']) if(!wallets.includes(token)) fail(`wallet policy missing ${token}`);
 const providers=read('contracts/providers/payment-providers.yaml');
-for(const id of ['STRIPE_CONNECT','NOWPAYMENTS','ZEN_PAYMENTS','SECUREGLOBALPAY']) if(!providers.includes(id)) fail(`provider registry missing ${id}`);
-for(const id of ['STRIPE_CONNECT','NOWPAYMENTS','ZEN_PAYMENTS','SECUREGLOBALPAY']){
+for(const id of ['STRIPE','NOWPAYMENTS']) if(!providers.includes(id)) fail(`provider registry missing ${id}`);
+for(const id of ['STRIPE','NOWPAYMENTS']){
  const i=providers.indexOf(id), chunk=providers.slice(i, i+500);
  if(!chunk.includes('status: CONDITIONAL')) fail(`${id} is not fail-closed CONDITIONAL`);
 }

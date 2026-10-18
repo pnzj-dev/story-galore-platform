@@ -21,11 +21,12 @@ rules:
 - Provider webhooks require signature verification, durable storage, deduplication and reconciliation.
 - Provider pricing/cost claims must come from authoritative provider data; unknown pricing is BLOCKED.
 providerCandidates:
-- providerId: STRIPE_CONNECT
+- providerId: STRIPE
   category: payments
   activation: CONDITIONAL
   intendedRoles:
   - FIAT_CHECKOUT
+  - FIAT_NATIVE_SUBSCRIPTION
   - CREATOR_PAYOUT
   - USDC_PAYOUT
   productionApproval: REQUIRED
@@ -34,21 +35,8 @@ providerCandidates:
   activation: CONDITIONAL
   intendedRoles:
   - CRYPTO_CHECKOUT
+  - CRYPTO_NATIVE_SUBSCRIPTION
   - CRYPTO_PAYOUT
-  productionApproval: REQUIRED
-- providerId: ZEN_PAYMENTS
-  category: payments
-  activation: CONDITIONAL
-  intendedRoles:
-  - FIAT_CHECKOUT
-  - ACQUIRING_FALLBACK
-  productionApproval: REQUIRED
-- providerId: SECUREGLOBALPAY
-  category: payments
-  activation: CONDITIONAL
-  intendedRoles:
-  - FIAT_CHECKOUT
-  - ACQUIRING_FALLBACK
   productionApproval: REQUIRED
 productionActivationRequirements:
 - providerContractRegistered

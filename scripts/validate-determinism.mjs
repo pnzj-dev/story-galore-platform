@@ -48,7 +48,7 @@ console.log('Authorization, configuration, secrets, cache, providers, observabil
 // Business/payment economics closure
 for(const p of ['contracts/business/revenue-model.yaml','contracts/business/commission-policy.yaml','contracts/business/earnings-ledger.yaml','contracts/business/payouts.yaml','contracts/business/wallets.yaml','contracts/business/payment-provider-policy.yaml','contracts/providers/payment-providers.yaml','contracts/verification/business-contract-to-test.yaml','contracts/security/payment-capability-matrix.yaml','contracts/security/secret-registry.yaml']) if(!exists(p)) fail(`business/payment contract missing: ${p}`);
 const paymentProviders=read('contracts/providers/payment-providers.yaml');
-for(const provider of ['STRIPE_CONNECT','NOWPAYMENTS','ZEN_PAYMENTS','SECUREGLOBALPAY']){ const i=paymentProviders.indexOf(provider); if(i<0) fail(`payment provider missing: ${provider}`); if(!paymentProviders.slice(i,i+500).includes('status: CONDITIONAL')) fail(`payment provider ${provider} is not CONDITIONAL`); }
+for(const provider of ['STRIPE','NOWPAYMENTS']){ const i=paymentProviders.indexOf(provider); if(i<0) fail(`payment provider missing: ${provider}`); if(!paymentProviders.slice(i,i+500).includes('status: CONDITIONAL')) fail(`payment provider ${provider} is not CONDITIONAL`); }
 console.log('Business economics and payment provider fail-closed closure: PASS');
 console.log('Consumer economics, infrastructure cost and Admin observability contracts: PRESENT');
 console.log('No-guessing / fail-closed policy: PASS');

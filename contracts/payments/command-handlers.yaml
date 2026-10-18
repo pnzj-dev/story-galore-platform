@@ -31,7 +31,7 @@ commands:
       userId: {type: string, required: true}
       amount: {type: integer, required: true}
       currency: {type: string, required: true}
-      provider: {type: enum, elements: [STRIPE_CONNECT, NOWPAYMENTS, ZEN_PAYMENTS, SECUREGLOBALPAY], required: true}
+      provider: {type: enum, elements: [STRIPE, NOWPAYMENTS], required: true}
       subscriptionId: {type: string, required: false}
     state: {initial: CREATED}
     effects:
@@ -113,7 +113,7 @@ tables:
     columns:
       - {key: userId, type: varchar, size: 255, required: true}
       - {key: subscriptionId, type: varchar, size: 255, required: false}
-      - {key: provider, type: enum, elements: [STRIPE_CONNECT, NOWPAYMENTS, ZEN_PAYMENTS, SECUREGLOBALPAY], required: true}
+      - {key: provider, type: enum, elements: [STRIPE, NOWPAYMENTS], required: true}
       - {key: providerPaymentId, type: varchar, size: 255, required: false}
       - {key: currency, type: varchar, size: 3, required: true}
       - {key: amount, type: integer, required: true}
