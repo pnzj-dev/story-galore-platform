@@ -14,7 +14,10 @@ families:
   - studio.asset.attached.v1
   - studio.asset.detached.v1
   - studio.generation.requested.v1
+  - studio.generation.processing.v1
   - studio.generation.completed.v1
+  - studio.generation.failed.v1
+  - studio.generation.cancelled.v1
   - studio.generation.applied.v1
   - studio.revision.created.v1
   - studio.revision.restored.v1
