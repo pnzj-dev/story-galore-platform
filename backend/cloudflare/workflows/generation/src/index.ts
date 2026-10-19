@@ -46,6 +46,9 @@ interface GenerationRequest {
   billingMode: string;
   prompt: string;
   targetType: string;
+  duration?: number;
+  resolution?: string;
+  aspectRatio?: string;
 }
 
 const TARGET_CAPABILITY: Record<string, string> = {
@@ -90,6 +93,9 @@ export class GenerationWorkflow extends WorkflowEntrypoint<Env, Params> {
       billingMode: String(r.billingMode ?? ''),
       prompt: String(r.prompt ?? ''),
       targetType: String(r.targetType ?? ''),
+      duration: Number(r.duration ?? 0),
+      resolution: String(r.resolution ?? ''),
+      aspectRatio: String(r.aspectRatio ?? ''),
     }));
   }
 
@@ -137,9 +143,9 @@ export class GenerationWorkflow extends WorkflowEntrypoint<Env, Params> {
       if (capability === 'VIDEO_GENERATION') {
         const result = (await this.env.AI.run(model, {
           prompt: gen.prompt,
-          duration: 5,
-          resolution: '720p',
-          aspect_ratio: '16:9',
+          duration: gen.duration ?? 5,
+          resolution: gen.resolution || '720p',
+          aspect_ratio: gen.aspectRatio || '16:9',
         })) as { video?: string; result?: { video?: string } };
         return { output: result.video ?? result.result?.video ?? '' };
       }

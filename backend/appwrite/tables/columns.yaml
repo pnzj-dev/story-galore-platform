@@ -565,6 +565,9 @@ studio_tables:
       - {key: policyContext, type: text, required: true}
       - {key: status, type: enum, elements: [QUEUED, POLICY_CHECK, ALLOWED, RESERVED, PROCESSING, SETTLING, COMPLETED, FAILED, CANCELLED], required: false}
       - {key: completedAt, type: datetime, required: false}
+      - {key: duration, type: integer, required: false}
+      - {key: resolution, type: enum, elements: [480p, 720p], required: false}
+      - {key: aspectRatio, type: enum, elements: [1:1, 16:9, 9:16, 4:3, 3:4, 3:2, 2:3], required: false}
   - table: ai_credit_transactions
     source: contracts/deterministic/ai/persistence.yaml
     partition_key: creatorId

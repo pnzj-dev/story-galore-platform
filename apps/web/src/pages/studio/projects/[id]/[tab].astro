@@ -449,6 +449,52 @@ const generationError = generationResult?.error?.message;
                 ))}
               </select>
             </div>
+            <div>
+              <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-foreground-muted">Video options (for VIDEO)</p>
+              <div class="grid grid-cols-3 gap-3">
+                <div>
+                  <label for="gduration" class="mb-1 block text-sm text-foreground-muted">Duration (s)</label>
+                  <input
+                    id="gduration"
+                    name="duration"
+                    type="number"
+                    min="1"
+                    max="15"
+                    placeholder="5"
+                    class="w-full rounded-sm border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
+                  />
+                </div>
+                <div>
+                  <label for="gresolution" class="mb-1 block text-sm text-foreground-muted">Resolution</label>
+                  <select
+                    id="gresolution"
+                    name="resolution"
+                    class="w-full rounded-sm border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
+                  >
+                    <option value="">—</option>
+                    <option value="480p">480p</option>
+                    <option value="720p">720p</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="gaspect" class="mb-1 block text-sm text-foreground-muted">Aspect</label>
+                  <select
+                    id="gaspect"
+                    name="aspectRatio"
+                    class="w-full rounded-sm border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
+                  >
+                    <option value="">—</option>
+                    <option value="16:9">16:9</option>
+                    <option value="9:16">9:16</option>
+                    <option value="1:1">1:1</option>
+                    <option value="4:3">4:3</option>
+                    <option value="3:4">3:4</option>
+                    <option value="3:2">3:2</option>
+                    <option value="2:3">2:3</option>
+                  </select>
+                </div>
+              </div>
+            </div>
             {generationError && (
               <p class="rounded-sm border border-danger bg-danger/15 px-3 py-2 text-sm text-danger" role="alert">
                 {generationError}

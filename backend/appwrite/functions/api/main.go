@@ -2843,6 +2843,9 @@ func requestGeneration(ctx openruntimes.Context, in *GatewayInput, cl client.Cli
 		CreditEligible    *bool             `json:"creditEligible"`
 		CreditReason      *string           `json:"creditEligibilityReason"`
 		ExecutionLocation string            `json:"executionLocation"`
+		Duration          *int              `json:"duration"`
+		Resolution        string            `json:"resolution"`
+		AspectRatio       string            `json:"aspectRatio"`
 		PolicyContext     json.RawMessage   `json:"policyContext"`
 	}
 	if !decode(ctx, in, &input) || input.RequestId == "" || input.ProjectId == "" || input.TargetType == "" || input.BillingMode == "" || input.ExecutionLocation == "" {
@@ -2884,6 +2887,15 @@ func requestGeneration(ctx openruntimes.Context, in *GatewayInput, cl client.Cli
 	}
 	if len(input.InputAssetIds) > 0 {
 		row["inputAssetIds"] = input.InputAssetIds
+	}
+	if input.Duration != nil && *input.Duration > 0 {
+		row["duration"] = *input.Duration
+	}
+	if input.Resolution != "" {
+		row["resolution"] = input.Resolution
+	}
+	if input.AspectRatio != "" {
+		row["aspectRatio"] = input.AspectRatio
 	}
 	if err := createRow(cl, "studio_generation_requests", input.RequestId, row); err != nil {
 		return internalFailure(ctx, in, err)

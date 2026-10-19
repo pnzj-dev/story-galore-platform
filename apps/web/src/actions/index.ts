@@ -215,6 +215,9 @@ export const server = {
       promptTemplateId: z.string().max(255),
       billingMode: z.enum(["PLATFORM_CREDITS", "BYOK", "USER_HOSTED"]),
       executionLocation: z.enum(["CLOUD", "USER_HOSTED"]),
+      duration: z.string().max(3),
+      resolution: z.string().max(16),
+      aspectRatio: z.string().max(16),
     }),
     handler: async (input, context) => {
       const user = context.locals.user;
@@ -234,6 +237,12 @@ export const server = {
       };
       if (input.prompt) payload.prompt = input.prompt;
       if (input.promptTemplateId) payload.promptTemplateId = input.promptTemplateId;
+      if (input.duration) {
+        const d = Number(input.duration);
+        if (Number.isFinite(d) && d > 0) payload.duration = d;
+      }
+      if (input.resolution) payload.resolution = input.resolution;
+      if (input.aspectRatio) payload.aspectRatio = input.aspectRatio;
       const out = await invokeApi("generation_create", payload, user.$id);
       if (out.status !== "SUCCESS") {
         throw new ActionError({ code: "INTERNAL_SERVER_ERROR", message: "Could not submit the generation request." });
