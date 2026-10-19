@@ -21,7 +21,7 @@ const c = overview?.charts;
         <h1 class="text-3xl font-bold">Overview</h1>
         <p class="mt-1 text-sm text-foreground-muted">How is the platform doing?</p>
       </div>
-      <a href="/admin/ads" class="rounded-lg border border-border px-4 py-2 text-sm font-semibold text-foreground transition hover:border-foreground-muted">
+      <a href="/admin/ads" class="rounded-sm border border-border px-4 py-2 text-sm font-semibold text-foreground transition hover:border-foreground-muted">
         Ads &amp; Monetization
       </a>
     </header>
@@ -40,21 +40,21 @@ const c = overview?.charts;
         </section>
 
         <section class="mt-8 grid gap-4 md:grid-cols-3">
-          <div class="rounded-xl border border-border bg-surface p-4">
+          <div class="rounded-md border border-border bg-surface p-4">
             <h2 class="font-semibold text-foreground">Revenue trend (30d)</h2>
             <p class="mt-1 text-xs text-foreground-muted">Captured payment revenue per day.</p>
             <div class="mt-4">
               <TrendChart series={c?.revenueTrend ?? []} formatValue={fmtCents} color="var(--color-chart-1)" />
             </div>
           </div>
-          <div class="rounded-xl border border-border bg-surface p-4">
+          <div class="rounded-md border border-border bg-surface p-4">
             <h2 class="font-semibold text-foreground">New subscribers (30d)</h2>
             <p class="mt-1 text-xs text-foreground-muted">New subscriptions per day.</p>
             <div class="mt-4">
               <TrendChart series={c?.newSubscriberTrend ?? []} kind="bar" color="var(--color-chart-2)" />
             </div>
           </div>
-          <div class="rounded-xl border border-border bg-surface p-4">
+          <div class="rounded-md border border-border bg-surface p-4">
             <h2 class="font-semibold text-foreground">Churn (30d)</h2>
             <p class="mt-1 text-xs text-foreground-muted">Cancellations per day.</p>
             <div class="mt-4">
@@ -64,7 +64,7 @@ const c = overview?.charts;
         </section>
       </>
     ) : (
-      <p class="mt-8 rounded-xl border border-dashed border-border px-6 py-8 text-sm text-foreground-muted">
+      <p class="mt-8 rounded-md border border-dashed border-border px-6 py-8 text-sm text-foreground-muted">
         No analytics available.
       </p>
     )}

@@ -96,7 +96,7 @@ function parseBounds(bounds?: string): { x: number; y: number; width: number; he
     </section>
 
     {editError && (
-      <p class="mt-6 rounded-lg border border-danger bg-danger/15 px-3 py-2 text-sm text-danger" role="alert">
+      <p class="mt-6 rounded-sm border border-danger bg-danger/15 px-3 py-2 text-sm text-danger" role="alert">
         {editError}
       </p>
     )}
@@ -115,7 +115,7 @@ function parseBounds(bounds?: string): { x: number; y: number; width: number; he
               type="number"
               min="1"
               placeholder="800"
-              class="w-28 rounded-lg border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
+              class="w-28 rounded-sm border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
             />
           </div>
           <div>
@@ -126,12 +126,12 @@ function parseBounds(bounds?: string): { x: number; y: number; width: number; he
               type="number"
               min="1"
               placeholder="1200"
-              class="w-28 rounded-lg border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
+              class="w-28 rounded-sm border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
             />
           </div>
           <button
             type="submit"
-            class="rounded-lg bg-primary px-4 py-2 font-semibold text-primary-foreground transition hover:opacity-90"
+            class="rounded-sm bg-primary px-4 py-2 font-semibold text-primary-foreground transition hover:opacity-90"
           >
             Add page
           </button>
@@ -140,7 +140,7 @@ function parseBounds(bounds?: string): { x: number; y: number; width: number; he
         {doc.pages.length > 0 ? (
           <ul class="mt-6 space-y-4">
             {doc.pages.map((page, i) => (
-              <li class="rounded-xl border border-border bg-surface p-4">
+              <li class="rounded-md border border-border bg-surface p-4">
                 <div class="flex items-center justify-between">
                   <div>
                     <p class="font-medium text-foreground">Page {i + 1}</p>
@@ -152,7 +152,7 @@ function parseBounds(bounds?: string): { x: number; y: number; width: number; he
                     <input type="hidden" name="pageId" value={page.$id} />
                     <button
                       type="submit"
-                      class="rounded-lg border border-danger/40 px-3 py-1 text-xs text-danger transition hover:bg-danger/10"
+                      class="rounded-sm border border-danger/40 px-3 py-1 text-xs text-danger transition hover:bg-danger/10"
                     >
                       Delete page
                     </button>
@@ -164,7 +164,7 @@ function parseBounds(bounds?: string): { x: number; y: number; width: number; he
                     <input type="hidden" name="pageId" value={page.$id} />
                     <select
                       name="backgroundAssetId"
-                      class="rounded-lg border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
+                      class="rounded-sm border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
                     >
                       <option value="">Set background…</option>
                       {mediaAssets.map((a) => (
@@ -176,7 +176,7 @@ function parseBounds(bounds?: string): { x: number; y: number; width: number; he
                     </select>
                     <button
                       type="submit"
-                      class="rounded-lg bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground transition hover:opacity-90"
+                      class="rounded-sm bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground transition hover:opacity-90"
                     >
                       Set
                     </button>
@@ -190,7 +190,7 @@ function parseBounds(bounds?: string): { x: number; y: number; width: number; he
                       {page.panels!.map((panel, j) => {
                         const b = parseBounds(panel.bounds);
                         return (
-                          <li class="rounded-lg border border-border/60 px-3 py-2">
+                          <li class="rounded-sm border border-border/60 px-3 py-2">
                             <div class="flex items-center justify-between">
                               <span class="text-sm text-foreground">
                                 {panel.shape ?? "RECTANGLE"}
@@ -200,7 +200,7 @@ function parseBounds(bounds?: string): { x: number; y: number; width: number; he
                                 <input type="hidden" name="panelId" value={panel.$id} />
                                 <button
                                   type="submit"
-                                  class="rounded-lg border border-danger/40 px-2 py-0.5 text-xs text-danger transition hover:bg-danger/10"
+                                  class="rounded-sm border border-danger/40 px-2 py-0.5 text-xs text-danger transition hover:bg-danger/10"
                                 >
                                   Delete
                                 </button>
@@ -272,7 +272,7 @@ function parseBounds(bounds?: string): { x: number; y: number; width: number; he
                       <select
                         id={`shape-${page.$id}`}
                         name="shape"
-                        class="rounded-lg border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
+                        class="rounded-sm border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
                       >
                         <option value="RECTANGLE">Rectangle</option>
                         <option value="ROUNDED">Rounded</option>
@@ -282,7 +282,7 @@ function parseBounds(bounds?: string): { x: number; y: number; width: number; he
                     </div>
                     <button
                       type="submit"
-                      class="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
+                      class="rounded-sm bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
                     >
                       Add panel
                     </button>
@@ -292,13 +292,13 @@ function parseBounds(bounds?: string): { x: number; y: number; width: number; he
             ))}
           </ul>
         ) : (
-          <p class="mt-4 rounded-xl border border-dashed border-border px-6 py-8 text-sm text-foreground-muted">
+          <p class="mt-4 rounded-md border border-dashed border-border px-6 py-8 text-sm text-foreground-muted">
             No pages yet. Add your first page above.
           </p>
         )}
       </section>
     ) : (
-      <section class="mt-10 rounded-xl border border-dashed border-border px-6 py-10 text-sm text-foreground-muted">
+      <section class="mt-10 rounded-md border border-dashed border-border px-6 py-10 text-sm text-foreground-muted">
         Content editing for this media type is coming soon. You can set the title and format above.
       </section>
     )}
@@ -314,11 +314,11 @@ function parseBounds(bounds?: string): { x: number; y: number; width: number; he
           name="file"
           accept="image/*"
           required
-          class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
+          class="w-full rounded-sm border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
         />
         <button
           type="submit"
-          class="rounded-lg bg-primary px-4 py-2 font-semibold text-primary-foreground transition hover:opacity-90"
+          class="rounded-sm bg-primary px-4 py-2 font-semibold text-primary-foreground transition hover:opacity-90"
         >
           Upload image
         </button>
@@ -354,7 +354,7 @@ function parseBounds(bounds?: string): { x: number; y: number; width: number; he
             type="text"
             value={doc.document.title ?? ""}
             maxlength="200"
-            class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
+            class="w-full rounded-sm border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
           />
         </div>
         <div>
@@ -362,7 +362,7 @@ function parseBounds(bounds?: string): { x: number; y: number; width: number; he
           <textarea
             id="pub-description"
             name="description"
-            class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
+            class="w-full rounded-sm border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
           ></textarea>
         </div>
         <div>
@@ -370,7 +370,7 @@ function parseBounds(bounds?: string): { x: number; y: number; width: number; he
           <select
             id="pub-contentRating"
             name="contentRating"
-            class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
+            class="w-full rounded-sm border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
           >
             <option value="ALL_AGES">All ages</option>
             <option value="TEEN">Teen</option>
@@ -382,7 +382,7 @@ function parseBounds(bounds?: string): { x: number; y: number; width: number; he
           <select
             id="pub-contentOrigin"
             name="contentOrigin"
-            class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
+            class="w-full rounded-sm border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
           >
             <option value="HUMAN">Human</option>
             <option value="AI_ASSISTED">AI-assisted</option>
@@ -395,7 +395,7 @@ function parseBounds(bounds?: string): { x: number; y: number; width: number; he
           <select
             id="pub-accessClass"
             name="accessClass"
-            class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
+            class="w-full rounded-sm border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
           >
             <option value="FREE">Free</option>
             <option value="SUBSCRIPTION">Subscription</option>
@@ -408,7 +408,7 @@ function parseBounds(bounds?: string): { x: number; y: number; width: number; he
             <select
               id="pub-cover"
               name="coverMediaAssetId"
-              class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
+              class="w-full rounded-sm border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
             >
               <option value="">No cover</option>
               {mediaAssets.map((a) => (
@@ -422,14 +422,14 @@ function parseBounds(bounds?: string): { x: number; y: number; width: number; he
         )}
 
         {publishError && (
-          <p class="rounded-lg border border-danger bg-danger/15 px-3 py-2 text-sm text-danger" role="alert">
+          <p class="rounded-sm border border-danger bg-danger/15 px-3 py-2 text-sm text-danger" role="alert">
             {publishError}
           </p>
         )}
 
         <button
           type="submit"
-          class="w-full rounded-lg bg-primary px-4 py-2 font-semibold text-primary-foreground transition hover:opacity-90"
+          class="w-full rounded-sm bg-primary px-4 py-2 font-semibold text-primary-foreground transition hover:opacity-90"
         >
           Publish
         </button>

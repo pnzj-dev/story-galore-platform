@@ -63,17 +63,22 @@ const active = Astro.url.pathname;
   <!-- ADMIN density profile (compact, 1600px, dense ops console). -->
   <body class="min-h-screen bg-background text-foreground antialiased" data-density="admin">
     <div class="flex min-h-screen">
-      <aside class="w-56 shrink-0 border-r border-border bg-surface/50 px-3 py-4">
-        <a href="/admin" class="block px-2 text-sm font-bold tracking-tight">
-          <span class="text-link">Story</span>Galore
-          <span class="text-xs font-normal text-foreground-muted"> Admin</span>
+      <aside class="w-[220px] shrink-0 border-r border-border bg-secondary px-4 py-5">
+        <a href="/admin" class="flex items-center gap-2 px-2 text-sm font-extrabold tracking-tight">
+          <span
+            class="grid h-[22px] w-[22px] place-items-center rounded-md bg-gradient-to-br from-brand-500 to-accent text-[11px] font-black text-white"
+          >
+            SG
+          </span>
+          StoryGalore
+          <span class="text-xs font-normal text-foreground-muted">Admin</span>
         </a>
         <nav class="mt-6 space-y-0.5">
           {NAV.map((item) => (
             <a
               href={item.href}
               aria-current={active === item.href ? "page" : undefined}
-              class={`block rounded-md px-3 py-1.5 text-sm transition ${
+              class={`block rounded-sm px-3 py-1.5 text-sm transition ${
                 active === item.href
                   ? "bg-surface-elevated font-medium text-foreground"
                   : "text-foreground-muted hover:bg-surface-elevated hover:text-foreground"
@@ -86,7 +91,7 @@ const active = Astro.url.pathname;
         <p class="mt-6 px-3 text-xs uppercase tracking-widest text-foreground-muted/60">Coming soon</p>
         <nav class="mt-1 space-y-0.5">
           {COMING_SOON.map((label) => (
-            <span class="block rounded-md px-3 py-1.5 text-sm text-foreground-muted/40">{label}</span>
+            <span class="block rounded-sm px-3 py-1.5 text-sm text-foreground-muted/40">{label}</span>
           ))}
         </nav>
       </aside>

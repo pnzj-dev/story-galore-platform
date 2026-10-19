@@ -59,7 +59,7 @@ const MEDIA_TYPES = [
             type="text"
             required
             maxlength="200"
-            class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
+            class="w-full rounded-sm border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
           />
         </div>
         <div>
@@ -67,7 +67,7 @@ const MEDIA_TYPES = [
           <select
             id="type"
             name="type"
-            class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
+            class="w-full rounded-sm border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
           >
             {MEDIA_TYPES.map((m) => <option value={m.value}>{m.label}</option>)}
           </select>
@@ -77,7 +77,7 @@ const MEDIA_TYPES = [
           <select
             id="format"
             name="format"
-            class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
+            class="w-full rounded-sm border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
           >
             <option value="">—</option>
             <option value="COMIC">Comic</option>
@@ -95,14 +95,14 @@ const MEDIA_TYPES = [
         </div>
 
         {createError && (
-          <p class="rounded-lg border border-danger bg-danger/15 px-3 py-2 text-sm text-danger" role="alert">
+          <p class="rounded-sm border border-danger bg-danger/15 px-3 py-2 text-sm text-danger" role="alert">
             {createError}
           </p>
         )}
 
         <button
           type="submit"
-          class="w-full rounded-lg bg-primary px-4 py-2 font-semibold text-primary-foreground transition hover:opacity-90"
+          class="w-full rounded-sm bg-primary px-4 py-2 font-semibold text-primary-foreground transition hover:opacity-90"
         >
           Create document
         </button>
@@ -114,7 +114,7 @@ const MEDIA_TYPES = [
       {documents.length > 0 ? (
         <ul class="mt-4 space-y-2">
           {documents.map((d) => (
-            <li class="flex items-center justify-between rounded-lg border border-border bg-surface p-3">
+            <li class="flex items-center justify-between rounded-sm border border-border bg-surface p-3">
               <a href={`/studio/projects/${projectId}/documents/${d.$id}`} class="min-w-0 flex-1">
                 <p class="truncate font-medium text-foreground transition hover:text-primary">
                   {d.title || "Untitled"}
@@ -126,7 +126,7 @@ const MEDIA_TYPES = [
           ))}
         </ul>
       ) : (
-        <p class="mt-4 rounded-xl border border-dashed border-border px-6 py-8 text-sm text-foreground-muted">
+        <p class="mt-4 rounded-md border border-dashed border-border px-6 py-8 text-sm text-foreground-muted">
           No documents yet. Create your first document above.
         </p>
       )}

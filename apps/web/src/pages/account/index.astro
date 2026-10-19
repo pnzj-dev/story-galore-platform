@@ -1,0 +1,60 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { actions } from "astro:actions";
+
+const user = Astro.locals.user;
+if (!user) {
+  return Astro.redirect("/auth/login");
+}
+
+const initial = (user.name ?? user.email ?? "A").trim().charAt(0).toUpperCase();
+---
+
+<Layout title="Account">
+  <main class="mx-auto max-w-4xl px-12 py-12">
+    <div class="flex items-center gap-4">
+      <span
+        class="grid h-16 w-16 place-items-center rounded-full bg-gradient-to-br from-brand-500 to-accent text-2xl font-bold text-white"
+      >
+        {initial}
+      </span>
+      <div class="min-w-0">
+        <h1 class="font-serif text-3xl font-bold">{user.name ?? "Your account"}</h1>
+        {user.email && <p class="truncate text-sm text-foreground-muted">{user.email}</p>}
+      </div>
+    </div>
+
+    <div class="mt-8 grid gap-4 sm:grid-cols-2">
+      <a
+        href="/settings"
+        class="rounded-md border border-border bg-surface p-4 transition hover:border-foreground-muted"
+      >
+        <h2 class="font-semibold">Settings</h2>
+        <p class="mt-1 text-sm text-foreground-muted">Content preferences and age verification.</p>
+      </a>
+      <a
+        href="/account/billing"
+        class="rounded-md border border-border bg-surface p-4 transition hover:border-foreground-muted"
+      >
+        <h2 class="font-semibold">Billing</h2>
+        <p class="mt-1 text-sm text-foreground-muted">Manage your subscription and payment methods.</p>
+      </a>
+      <a
+        href="/studio"
+        class="rounded-md border border-border bg-surface p-4 transition hover:border-foreground-muted"
+      >
+        <h2 class="font-semibold">Creator Studio</h2>
+        <p class="mt-1 text-sm text-foreground-muted">Draft, publish, and manage your work.</p>
+      </a>
+    </div>
+
+    <form method="POST" action={actions.logout} class="mt-8">
+      <button
+        type="submit"
+        class="rounded-sm border border-border px-4 py-2 text-sm transition hover:opacity-90"
+      >
+        Sign out
+      </button>
+    </form>
+  </main>
+</Layout>
