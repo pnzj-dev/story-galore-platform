@@ -23,3 +23,37 @@ require github.com/open-runtimes/types-for-go/v4 v4.0.7
 The function's own `main.go` holds `package handler` + `func Main(...)`; there is no `func main()` (the runtime injects it). `package main` / a custom module path fails the build with `import "openruntimes/handler" is a program, not an importable package`.
 
 Verified working runtime on the self-hosted instance: `go-1.23` (matches the handler's `go 1.23.0`).
+
+## `api` gateway: schedule + scopes
+
+The `api` function is the gateway and also carries a cron `schedule`
+(`*/5 * * * *`) that runs the alert evaluation on the schedule trigger
+(`x-appwrite-trigger: schedule`).
+
+**Scope reset gotcha:** the ephemeral key (`APPWRITE_FUNCTION_API_KEY` /
+`x-appwrite-key`) is scoped by the function's `scopes` field. Any
+`appwrite functions update` that omits `--scopes` resets them to `[]`,
+silently revoking the gateway's data access (`FORBIDDEN` on admin ops).
+Always pass the full `--scopes` list when updating the `api` function, e.g.:
+
+```bash
+appwrite functions update --function-id api --name api \
+  --schedule '*/5 * * * *' \
+  --scopes 'databases.read' --scopes 'databases.write' \
+  --scopes 'tables.read' --scopes 'tables.write' \
+  --scopes 'columns.read' --scopes 'columns.write' \
+  --scopes 'rows.read' --scopes 'rows.write' \
+  --scopes 'indexes.read' --scopes 'indexes.write' \
+  --scopes 'users.read' --scopes 'users.write' \
+  --scopes 'sessions.read' --scopes 'sessions.write' \
+  --scopes 'teams.read' --scopes 'teams.write' \
+  --scopes 'functions.read' --scopes 'functions.write' \
+  --scopes 'executions.read' --scopes 'executions.write' \
+  --scopes 'buckets.read' --scopes 'buckets.write' \
+  --scopes 'files.read' --scopes 'files.write' \
+  --scopes 'providers.read' --scopes 'providers.write' \
+  --scopes 'topics.read' --scopes 'topics.write' \
+  --scopes 'messages.read' --scopes 'messages.write' \
+  --scopes 'subscribers.read' --scopes 'subscribers.write' \
+  --scopes 'targets.read' --scopes 'targets.write'
+```
