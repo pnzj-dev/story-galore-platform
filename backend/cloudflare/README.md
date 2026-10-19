@@ -9,6 +9,16 @@ Expected ownership areas (not a prescribed generated directory layout):
 - Cloudflare Agents SDK runtime
 - Cloudflare Workflows durable execution
 
+## Workflow deployment environments
+
+Each workflow deploys per environment by suffixing the Worker name with the
+environment (`-dev`, `-staging`, `-prod`). The `wrangler.jsonc` `name` stays the
+base name (`storygalore-generation`); `wrangler deploy --name <base>-<env>` (or
+the equivalent API `script_name`) selects the environment. The Appwrite secrets
+(`APPWRITE_ENDPOINT`, `APPWRITE_PROJECT_ID`, `APPWRITE_API_KEY`) point at the
+matching Appwrite instance — the current `-dev` deployments target the dev
+Appwrite project.
+
 No example implementation is retained in the production repository. Integration behavior is specified by canonical contracts; deployed Cloudflare components must be generated using pinned official tooling and registered before implementation.
 
 
