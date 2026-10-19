@@ -9,8 +9,7 @@
   "exports": {
     "GenerationWorkflow": {
       "type": "workflow",
-      "name": "generation",
-      "schedules": ["*/5 * * * *"]
+      "name": "generation"
     }
   }
 }

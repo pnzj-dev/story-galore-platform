@@ -1,12 +1,15 @@
 package handler
 
 import (
+	"bytes"
 	"context"
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 	"os"
 	"strings"
 	"time"
@@ -122,7 +125,8 @@ func Main(ctx openruntimes.Context) openruntimes.Response {
 		return handleStripeWebhook(ctx, newClient(ctx))
 	}
 
-	// Scheduled alert evaluation (cron trigger; trusted, no actor).
+	// Scheduled trigger (cron; trusted, no actor). Runs alert evaluation and
+	// triggers the durable Cloudflare Workflows that sweep for work.
 	if ctx.Req.Headers["x-appwrite-trigger"] == "schedule" {
 		cl := newClient(ctx)
 		results, err := evaluateAlertsCore(cl)
@@ -131,6 +135,7 @@ func Main(ctx openruntimes.Context) openruntimes.Response {
 			return respond(ctx, nil, "INTERNAL_FAILURE", true)
 		}
 		ctx.Log("api: scheduled alert evaluation", "alerts="+fmt.Sprint(len(results)))
+		triggerCloudflareWorkflows(ctx)
 		return ctx.Res.Json(GatewayOutput{Status: "SUCCESS", Result: map[string]interface{}{"items": results}})
 	}
 
@@ -2603,6 +2608,53 @@ func metricIngest(ctx openruntimes.Context, in *GatewayInput, cl client.Client) 
 		return internalFailure(ctx, in, err)
 	}
 	return success(ctx, in, map[string]interface{}{"ok": true})
+}
+
+// triggerCloudflareWorkflows triggers the durable Cloudflare Workflows that
+// sweep for work each schedule firing. This Appwrite Functions cron replaces
+// the plan-gated Cloudflare Workflows `schedules` (Workers Free plan rejects
+// cron). Requires the Cloudflare account id + API token (Workers Scripts
+// Write) as function secrets CF_ACCOUNT_ID / CF_API_TOKEN.
+func triggerCloudflareWorkflows(ctx openruntimes.Context) {
+	accountID := os.Getenv("CF_ACCOUNT_ID")
+	token := os.Getenv("CF_API_TOKEN")
+	if accountID == "" || token == "" {
+		ctx.Log("api: cloudflare workflow trigger skipped", "reason=CF_ACCOUNT_ID/CF_API_TOKEN unset")
+		return
+	}
+	for _, wf := range []string{"generation", "outbox-delivery"} {
+		triggerCloudflareWorkflow(ctx, accountID, token, wf)
+	}
+	// Prompt redaction is a daily sweep; run on the first firing of each UTC day.
+	nowUTC := time.Now().UTC()
+	if nowUTC.Hour() == 0 && nowUTC.Minute() < 5 {
+		triggerCloudflareWorkflow(ctx, accountID, token, "prompt-redaction")
+	}
+}
+
+func triggerCloudflareWorkflow(ctx openruntimes.Context, accountID, token, workflowName string) {
+	url := fmt.Sprintf("https://api.cloudflare.com/client/v4/accounts/%s/workflows/%s/instances", accountID, workflowName)
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader([]byte("{}")))
+	if err != nil {
+		ctx.Error("api: cloudflare trigger request build failed", err)
+		return
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+token)
+
+	client := &http.Client{Timeout: 10 * time.Second}
+	resp, err := client.Do(req)
+	if err != nil {
+		ctx.Error("api: cloudflare trigger request failed", err)
+		return
+	}
+	defer resp.Body.Close()
+	body, _ := io.ReadAll(resp.Body)
+	if resp.StatusCode >= 300 {
+		ctx.Error("api: cloudflare trigger rejected", fmt.Errorf("%s: HTTP %d: %s", workflowName, resp.StatusCode, string(body)))
+		return
+	}
+	ctx.Log("api: triggered cloudflare workflow", "workflow="+workflowName)
 }
 
 func evaluateOperator(op string, value, threshold int) bool {

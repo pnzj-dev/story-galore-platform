@@ -6,8 +6,7 @@
   "exports": {
     "PromptRedactionWorkflow": {
       "type": "workflow",
-      "name": "prompt-redaction",
-      "schedules": ["0 0 * * *"]
+      "name": "prompt-redaction"
     }
   }
 }

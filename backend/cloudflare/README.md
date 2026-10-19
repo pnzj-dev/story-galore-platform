@@ -21,6 +21,24 @@ Appwrite project.
 
 No example implementation is retained in the production repository. Integration behavior is specified by canonical contracts; deployed Cloudflare components must be generated using pinned official tooling and registered before implementation.
 
+## Workflow scheduling (cron)
+
+Cloudflare-native `schedules` cron is Workers-Paid-gated, so V1 drives periodic
+workflow triggers from the Appwrite `api` function's cron schedule. On the
+schedule trigger the gateway POSTs to
+`/accounts/{account_id}/workflows/{workflow_name}/instances` to create a
+workflow instance (`generation` + `outbox-delivery` every firing,
+`prompt-redaction` once daily).
+
+Required Appwrite function secrets on the `api` function:
+
+- `CF_ACCOUNT_ID` — the Cloudflare account id.
+- `CF_API_TOKEN` — a Cloudflare API token with the `Workers Scripts Write`
+  permission.
+
+Without both, the gateway logs a skip (the trigger degrades to a no-op). Do not
+re-add a `schedules` array to any workflow `wrangler.jsonc` unless the Workers
+plan is upgraded.
 
 ## MCP boundary
 

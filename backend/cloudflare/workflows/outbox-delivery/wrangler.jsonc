@@ -9,8 +9,5 @@
       "binding": "OUTBOX_DELIVERY",
       "class_name": "OutboxDeliveryWorkflow"
     }
-  ],
-  "triggers": {
-    "crons": ["*/5 * * * *"]
-  }
+  ]
 }
