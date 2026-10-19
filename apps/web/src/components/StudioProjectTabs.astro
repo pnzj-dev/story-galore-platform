@@ -1,0 +1,39 @@
+---
+interface Props {
+  projectId: string;
+  active?: string;
+}
+
+const { projectId, active = "" } = Astro.props;
+
+const TABS = [
+  { key: "", label: "Overview" },
+  { key: "story-bible", label: "Story Bible" },
+  { key: "characters", label: "Characters" },
+  { key: "world", label: "World" },
+  { key: "assets", label: "Assets" },
+  { key: "prompts", label: "Prompts" },
+  { key: "ai", label: "AI" },
+  { key: "drafts", label: "Drafts" },
+  { key: "editor", label: "Editor" },
+  { key: "publications", label: "Publications" },
+  { key: "analytics", label: "Analytics" },
+];
+---
+
+<nav class="flex flex-wrap gap-1 border-b border-border pb-2">
+  {
+    TABS.map((tab) => (
+      <a
+        href={tab.key ? `/studio/projects/${projectId}/${tab.key}` : `/studio/projects/${projectId}`}
+        class={`rounded-sm px-3 py-1.5 text-sm transition ${
+          active === tab.key
+            ? "bg-surface-elevated font-medium text-foreground"
+            : "text-foreground-muted hover:bg-surface-elevated hover:text-foreground"
+        }`}
+      >
+        {tab.label}
+      </a>
+    ))
+  }
+</nav>

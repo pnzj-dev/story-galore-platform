@@ -1,0 +1,53 @@
+---
+import StudioLayout from "../../../../layouts/StudioLayout.astro";
+import StudioProjectTabs from "../../../../components/StudioProjectTabs.astro";
+import { fetchProject } from "../../../../lib/gateway";
+
+const user = Astro.locals.user;
+if (!user) {
+  return Astro.redirect("/auth/login");
+}
+
+const projectId = Astro.params.id ?? "";
+const tab = Astro.params.tab ?? "";
+
+const project = await fetchProject(user.$id, projectId);
+if (!project) {
+  return Astro.redirect("/studio/projects");
+}
+
+const TITLES: Record<string, string> = {
+  "story-bible": "Story Bible",
+  characters: "Characters",
+  world: "World",
+  assets: "Assets",
+  prompts: "Prompts",
+  ai: "AI",
+  drafts: "Drafts",
+  editor: "Editor",
+  publications: "Publications",
+  analytics: "Analytics",
+};
+
+const title = TITLES[tab] ?? tab;
+---
+
+<StudioLayout title={`${project.name} — ${title}`} active="projects">
+  <main class="mx-auto max-w-5xl px-12 py-10">
+    <a href="/studio/projects" class="text-sm text-foreground-muted transition hover:text-foreground">
+      &larr; Projects
+    </a>
+    <h1 class="mt-4 text-3xl font-bold">{project.name}</h1>
+
+    <div class="mt-6">
+      <StudioProjectTabs projectId={projectId} active={tab} />
+    </div>
+
+    <section class="mt-8">
+      <h2 class="text-xl font-semibold">{title}</h2>
+      <p class="mt-4 rounded-md border border-dashed border-border px-6 py-10 text-sm text-foreground-muted">
+        This section is coming soon.
+      </p>
+    </section>
+  </main>
+</StudioLayout>
