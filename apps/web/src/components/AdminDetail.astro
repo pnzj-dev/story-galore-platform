@@ -1,0 +1,19 @@
+---
+interface Props {
+  data: Record<string, unknown>;
+}
+
+const { data } = Astro.props;
+const entries = Object.entries(data).filter(([, v]) => v !== null && v !== undefined);
+---
+
+<dl class="divide-y divide-border rounded-md border border-border bg-surface">
+  {
+    entries.map(([key, value]) => (
+      <div class="flex justify-between gap-4 px-4 py-2.5">
+        <dt class="text-sm text-foreground-muted">{key}</dt>
+        <dd class="break-all text-sm">{Array.isArray(value) ? value.join(", ") : String(value)}</dd>
+      </div>
+    ))
+  }
+</dl>

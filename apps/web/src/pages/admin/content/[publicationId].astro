@@ -1,0 +1,27 @@
+---
+import AdminLayout from "../../../layouts/AdminLayout.astro";
+import AdminDetail from "../../../components/AdminDetail.astro";
+import { fetchAdminPublication } from "../../../lib/gateway";
+
+const admin = Astro.locals.user;
+const publicationId = Astro.params.publicationId ?? "";
+const detail = admin ? await fetchAdminPublication(admin.$id, publicationId) : null;
+if (!detail) Astro.response.status = 404;
+const title = typeof detail?.title === "string" ? detail.title : "Publication";
+---
+
+<AdminLayout title="Admin — Content">
+  <main class="mx-auto max-w-[1600px] px-6 py-10">
+    <a href="/admin/content" class="text-sm text-foreground-muted transition hover:text-foreground">← Content</a>
+    {detail ? (
+      <>
+        <h1 class="mt-4 text-3xl font-bold">{title}</h1>
+        <div class="mt-6 max-w-2xl">
+          <AdminDetail data={detail} />
+        </div>
+      </>
+    ) : (
+      <p class="mt-8 text-foreground-muted">Publication not found.</p>
+    )}
+  </main>
+</AdminLayout>

@@ -1,0 +1,18 @@
+---
+import AdminLayout from "../../layouts/AdminLayout.astro";
+
+const slug = (Astro.params.slug ?? "").split("/").filter(Boolean);
+const title = slug
+  .map((s) => s.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()))
+  .join(" — ");
+---
+
+<AdminLayout title={`Admin — ${title || "Section"}`}>
+  <main class="mx-auto max-w-[1600px] px-6 py-10">
+    <a href="/admin" class="text-sm text-foreground-muted transition hover:text-foreground">← Admin</a>
+    <h1 class="mt-4 text-3xl font-bold">{title || "Section"}</h1>
+    <p class="mt-8 rounded-md border border-dashed border-border px-6 py-10 text-sm text-foreground-muted">
+      This section is coming soon.
+    </p>
+  </main>
+</AdminLayout>

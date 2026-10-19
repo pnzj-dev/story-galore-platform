@@ -624,3 +624,24 @@ export async function fetchSupportTicket(actorId: string, ticketId: string): Pro
   if (out.status !== "SUCCESS" || !out.result) return null;
   return out.result;
 }
+
+/** Fetch a single user (admin-only). */
+export async function fetchAdminUser(actorId: string, userId: string): Promise<AdminUser | null> {
+  const out = await invokeApi<AdminUser>("admin_user_get", { userId }, actorId);
+  if (out.status !== "SUCCESS" || !out.result) return null;
+  return out.result;
+}
+
+/** Fetch a single publication (admin-only). */
+export async function fetchAdminPublication(actorId: string, publicationId: string): Promise<Record<string, unknown> | null> {
+  const out = await invokeApi<Record<string, unknown>>("admin_publication_get", { publicationId }, actorId);
+  if (out.status !== "SUCCESS" || !out.result) return null;
+  return out.result;
+}
+
+/** Fetch a single creator (admin-only). */
+export async function fetchAdminCreator(actorId: string, creatorActorId: string): Promise<Record<string, unknown> | null> {
+  const out = await invokeApi<Record<string, unknown>>("admin_creator_get", { actorId: creatorActorId }, actorId);
+  if (out.status !== "SUCCESS" || !out.result) return null;
+  return out.result;
+}
