@@ -91,6 +91,8 @@ var knownOperations = map[string]bool{
 	"admin_analytics_aggregate":   true, "admin_analytics_daily_get": true,
 	"admin_analytics_retention_get": true, "admin_analytics_funnel_get": true,
 	"admin_analytics_acquisition_get": true, "admin_analytics_cohorts_get": true,
+	"prompt_template_list": true, "prompt_template_create": true,
+	"generation_list": true, "creator_analytics_get": true,
 }
 
 const databaseID = "main"
@@ -147,6 +149,14 @@ func Main(ctx openruntimes.Context) openruntimes.Response {
 		return requestGeneration(ctx, &in, cl)
 	case "generation_apply_to_draft":
 		return applyGeneration(ctx, &in, cl)
+	case "prompt_template_list":
+		return promptTemplateList(ctx, &in, cl)
+	case "prompt_template_create":
+		return promptTemplateCreate(ctx, &in, cl)
+	case "generation_list":
+		return generationList(ctx, &in, cl)
+	case "creator_analytics_get":
+		return creatorAnalyticsGet(ctx, &in, cl)
 	case "publication_validate":
 		return validatePublication(ctx, &in, cl)
 	case "publication_publish":
@@ -2779,6 +2789,10 @@ func restoreRevision(ctx openruntimes.Context, in *GatewayInput, cl client.Clien
 }
 
 func requestGeneration(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	actorId := actorOrEmpty(in.ActorId)
+	if actorId == "" {
+		return respond(ctx, in.OperationId, "UNAUTHORIZED", false)
+	}
 	var input struct {
 		RequestId         string   `json:"requestId"`
 		ProjectId         string   `json:"projectId"`
@@ -2796,7 +2810,17 @@ func requestGeneration(ctx openruntimes.Context, in *GatewayInput, cl client.Cli
 	if !decode(ctx, in, &input) || input.RequestId == "" || input.ProjectId == "" || input.TargetType == "" || input.BillingMode == "" || input.ExecutionLocation == "" {
 		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
 	}
-	row := map[string]interface{}{"requestId": input.RequestId, "projectId": input.ProjectId, "targetType": input.TargetType, "billingMode": input.BillingMode, "executionLocation": input.ExecutionLocation, "policyContext": input.PolicyContext}
+	if !projectOwnedByActor(cl, input.ProjectId, actorId) {
+		return respond(ctx, in.OperationId, "FORBIDDEN", false)
+	}
+	// Server-authoritative credit eligibility (never trust a client-provided flag).
+	creditEligible, creditReason := creditEligibilityFor(input.BillingMode, input.ExecutionLocation)
+	row := map[string]interface{}{
+		"requestId": input.RequestId, "projectId": input.ProjectId, "targetType": input.TargetType,
+		"billingMode": input.BillingMode, "executionLocation": input.ExecutionLocation,
+		"policyContext": input.PolicyContext, "creditEligible": creditEligible,
+		"creditEligibilityReason": creditReason,
+	}
 	if input.DraftId != nil {
 		row["draftId"] = *input.DraftId
 	}
@@ -2809,14 +2833,186 @@ func requestGeneration(ctx openruntimes.Context, in *GatewayInput, cl client.Cli
 	if len(input.InputAssetIds) > 0 {
 		row["inputAssetIds"] = input.InputAssetIds
 	}
-	if input.CreditEligible != nil {
-		row["creditEligible"] = *input.CreditEligible
-	}
 	if err := createRow(cl, "studio_generation_requests", input.RequestId, row); err != nil {
 		return internalFailure(ctx, in, err)
 	}
-	emit(ctx, cl, "studio.generation.requested.v1", input.RequestId, actorOrEmpty(in.ActorId), map[string]interface{}{"requestId": input.RequestId}, in.CorrelationId)
-	return success(ctx, in, map[string]interface{}{"requestId": input.RequestId})
+	emit(ctx, cl, "studio.generation.requested.v1", input.RequestId, actorId, map[string]interface{}{"requestId": input.RequestId, "billingMode": input.BillingMode, "executionLocation": input.ExecutionLocation}, in.CorrelationId)
+	return success(ctx, in, map[string]interface{}{"requestId": input.RequestId, "creditEligible": creditEligible, "creditEligibilityReason": creditReason})
+}
+
+// creditEligibilityFor returns the server-authoritative credit eligibility for a
+// generation request. Only PLATFORM_CREDITS + CLOUD (StoryGalore-managed) execution
+// is credit-eligible; BYOK and USER_HOSTED are always ineligible.
+func creditEligibilityFor(billingMode, executionLocation string) (bool, string) {
+	switch billingMode {
+	case "BYOK":
+		return false, "BYOK"
+	case "USER_HOSTED":
+		return false, "USER_HOSTED"
+	}
+	if executionLocation == "USER_HOSTED" {
+		return false, "USER_HOSTED"
+	}
+	if billingMode == "PLATFORM_CREDITS" && executionLocation == "CLOUD" {
+		return true, "STORYGALORE_MANAGED_MODEL"
+	}
+	return false, "PLATFORM_POLICY_DISABLED"
+}
+
+func promptTemplateList(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	actorId := actorOrEmpty(in.ActorId)
+	if actorId == "" {
+		return respond(ctx, in.OperationId, "UNAUTHORIZED", false)
+	}
+	var input struct {
+		ProjectId string `json:"projectId"`
+	}
+	if !decode(ctx, in, &input) || input.ProjectId == "" {
+		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
+	}
+	if !projectOwnedByActor(cl, input.ProjectId, actorId) {
+		return respond(ctx, in.OperationId, "FORBIDDEN", false)
+	}
+	service := tablesdb.New(cl)
+	list, err := service.ListRows(databaseID, "studio_prompt_templates", service.WithListRowsQueries([]string{
+		qEqual("projectId", input.ProjectId),
+		`{"method":"orderAsc","attribute":"name"}`,
+		`{"method":"limit","values":[200]}`,
+	}))
+	if err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	var raw map[string]interface{}
+	if err := list.Decode(&raw); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	rows, _ := raw["rows"].([]interface{})
+	return success(ctx, in, map[string]interface{}{"items": rows})
+}
+
+func promptTemplateCreate(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	actorId := actorOrEmpty(in.ActorId)
+	if actorId == "" {
+		return respond(ctx, in.OperationId, "UNAUTHORIZED", false)
+	}
+	var input struct {
+		ProjectId string   `json:"projectId"`
+		Name      string   `json:"name"`
+		Template  string   `json:"template"`
+		Variables []string `json:"variables"`
+	}
+	if !decode(ctx, in, &input) || input.ProjectId == "" || input.Name == "" || input.Template == "" {
+		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
+	}
+	if !projectOwnedByActor(cl, input.ProjectId, actorId) {
+		return respond(ctx, in.OperationId, "FORBIDDEN", false)
+	}
+	rowId := newUUID()
+	if err := createRow(cl, "studio_prompt_templates", rowId, map[string]interface{}{
+		"id":        rowId,
+		"projectId": input.ProjectId,
+		"name":      input.Name,
+		"template":  input.Template,
+		"variables": input.Variables,
+		"revision":  1,
+	}); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	return success(ctx, in, map[string]interface{}{"ok": true, "templateId": rowId})
+}
+
+func generationList(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	actorId := actorOrEmpty(in.ActorId)
+	if actorId == "" {
+		return respond(ctx, in.OperationId, "UNAUTHORIZED", false)
+	}
+	var input struct {
+		ProjectId string `json:"projectId"`
+	}
+	if !decode(ctx, in, &input) || input.ProjectId == "" {
+		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
+	}
+	if !projectOwnedByActor(cl, input.ProjectId, actorId) {
+		return respond(ctx, in.OperationId, "FORBIDDEN", false)
+	}
+	service := tablesdb.New(cl)
+	list, err := service.ListRows(databaseID, "studio_generation_requests", service.WithListRowsQueries([]string{
+		qEqual("projectId", input.ProjectId),
+		`{"method":"orderDesc","attribute":"$createdAt"}`,
+		`{"method":"limit","values":[200]}`,
+	}))
+	if err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	var raw map[string]interface{}
+	if err := list.Decode(&raw); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	rows, _ := raw["rows"].([]interface{})
+	return success(ctx, in, map[string]interface{}{"items": rows})
+}
+
+func listRowsByField(cl client.Client, table, field, value string) []map[string]interface{} {
+	service := tablesdb.New(cl)
+	list, err := service.ListRows(databaseID, table, service.WithListRowsQueries([]string{
+		qEqual(field, value),
+		`{"method":"limit","values":[1000]}`,
+	}))
+	if err != nil {
+		return nil
+	}
+	var raw map[string]interface{}
+	if list.Decode(&raw) != nil {
+		return nil
+	}
+	rows, _ := raw["rows"].([]interface{})
+	out := make([]map[string]interface{}, 0, len(rows))
+	for _, r := range rows {
+		if m, ok := r.(map[string]interface{}); ok {
+			out = append(out, m)
+		}
+	}
+	return out
+}
+
+// creatorAnalyticsGet returns the calling creator's own workspace-level metrics,
+// computed live from their projects (never from another creator's data).
+func creatorAnalyticsGet(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	actorId := actorOrEmpty(in.ActorId)
+	if actorId == "" {
+		return respond(ctx, in.OperationId, "UNAUTHORIZED", false)
+	}
+	projects := listRowsByField(cl, "studio_projects", "creatorId", actorId)
+	documentCount := 0
+	promptTemplateCount := 0
+	generationTotal := 0
+	generationCreditEligible := 0
+	generationsByBilling := map[string]int{}
+	for _, pm := range projects {
+		projectId, _ := pm["$id"].(string)
+		if projectId == "" {
+			continue
+		}
+		documentCount += len(listRowsByField(cl, "studio_documents", "projectId", projectId))
+		promptTemplateCount += len(listRowsByField(cl, "studio_prompt_templates", "projectId", projectId))
+		for _, gm := range listRowsByField(cl, "studio_generation_requests", "projectId", projectId) {
+			generationTotal++
+			if bm, _ := gm["billingMode"].(string); bm != "" {
+				generationsByBilling[bm]++
+			}
+			if ce, _ := gm["creditEligible"].(bool); ce {
+				generationCreditEligible++
+			}
+		}
+	}
+	return success(ctx, in, map[string]interface{}{
+		"projects":                 len(projects),
+		"documents":                documentCount,
+		"promptTemplates":          promptTemplateCount,
+		"generationTotal":          generationTotal,
+		"generationCreditEligible": generationCreditEligible,
+		"generationsByBilling":     generationsByBilling,
+	})
 }
 
 func applyGeneration(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {

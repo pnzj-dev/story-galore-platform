@@ -103,3 +103,43 @@ export interface AIPlatformSettings {
   videoGenerationEnabled: boolean;
   emergencyDisabledProviders: string[];
 }
+
+export interface PromptTemplate {
+  id: string;
+  projectId: string;
+  name: string;
+  template: string;
+  variables?: string[];
+  revision: number;
+}
+
+export interface CreditEligibilityInput {
+  billingMode: AIBillingMode;
+  executionLocation: AIExecutionLocation;
+  ownerType: "STORYGALORE" | "WORKSPACE";
+  /** Whether the model is registered as StoryGalore-managed and credit-eligible. */
+  creditEligible: boolean;
+}
+
+/**
+ * Deterministic credit-eligibility rule (contracts/deterministic/ai/credit-eligibility.yaml).
+ * Creator Studio credits apply only to StoryGalore-managed, credit-eligible models.
+ * BYOK and USER_HOSTED executions are always credit-ineligible.
+ */
+export function computeCreditEligibility(input: CreditEligibilityInput): AICreditEligibility {
+  if (input.billingMode === "BYOK") {
+    return { eligible: false, reason: "BYOK", fundingSource: "NONE" };
+  }
+  if (input.billingMode === "USER_HOSTED" || input.executionLocation === "USER_HOSTED") {
+    return { eligible: false, reason: "USER_HOSTED", fundingSource: "NONE" };
+  }
+  if (
+    input.billingMode === "PLATFORM_CREDITS" &&
+    input.executionLocation === "CLOUD" &&
+    input.ownerType === "STORYGALORE" &&
+    input.creditEligible
+  ) {
+    return { eligible: true, reason: "STORYGALORE_MANAGED_MODEL", fundingSource: "STORYGALORE_MANAGED" };
+  }
+  return { eligible: false, reason: "PLATFORM_POLICY_DISABLED", fundingSource: "NONE" };
+}

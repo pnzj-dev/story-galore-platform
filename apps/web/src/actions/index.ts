@@ -1,6 +1,6 @@
 import { defineAction, ActionError } from "astro:actions";
 import { z } from "astro:schema";
-import { createHash } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { createServerClient, createAdminClient, SESSION_COOKIE, ID } from "@storygalore/appwrite-client";
 import { invokeApi } from "@/lib/gateway";
 
@@ -178,6 +178,63 @@ export const server = {
         throw new ActionError({ code: "INTERNAL_SERVER_ERROR", message: "Could not save the world." });
       }
       return { ok: true };
+    },
+  }),
+
+  createPromptTemplate: defineAction({
+    accept: "form",
+    input: z.object({
+      projectId: z.string().min(1),
+      name: z.string().min(1).max(255),
+      template: z.string().min(1).max(20000),
+      variables: z.string().max(2000),
+    }),
+    handler: async (input, context) => {
+      const user = context.locals.user;
+      if (!user) throw new ActionError({ code: "UNAUTHORIZED", message: "Sign in to continue." });
+      const variables = input.variables.split(",").map((v) => v.trim()).filter(Boolean);
+      const out = await invokeApi("prompt_template_create", {
+        projectId: input.projectId,
+        name: input.name,
+        template: input.template,
+        variables,
+      }, user.$id);
+      if (out.status !== "SUCCESS") {
+        throw new ActionError({ code: "INTERNAL_SERVER_ERROR", message: "Could not create the prompt template." });
+      }
+      return { ok: true };
+    },
+  }),
+
+  requestGeneration: defineAction({
+    accept: "form",
+    input: z.object({
+      projectId: z.string().min(1),
+      targetType: z.enum(["PAGE", "PANEL", "IMAGE", "CHARACTER", "BACKGROUND", "DIALOGUE", "STORY_TEXT"]),
+      prompt: z.string().max(20000),
+      promptTemplateId: z.string().max(255),
+      billingMode: z.enum(["PLATFORM_CREDITS", "BYOK", "USER_HOSTED"]),
+      executionLocation: z.enum(["CLOUD", "USER_HOSTED"]),
+    }),
+    handler: async (input, context) => {
+      const user = context.locals.user;
+      if (!user) throw new ActionError({ code: "UNAUTHORIZED", message: "Sign in to continue." });
+      const requestId = randomUUID();
+      const payload: Record<string, unknown> = {
+        requestId,
+        projectId: input.projectId,
+        targetType: input.targetType,
+        billingMode: input.billingMode,
+        executionLocation: input.executionLocation,
+        policyContext: JSON.stringify({ source: "studio" }),
+      };
+      if (input.prompt) payload.prompt = input.prompt;
+      if (input.promptTemplateId) payload.promptTemplateId = input.promptTemplateId;
+      const out = await invokeApi("generation_create", payload, user.$id);
+      if (out.status !== "SUCCESS") {
+        throw new ActionError({ code: "INTERNAL_SERVER_ERROR", message: "Could not submit the generation request." });
+      }
+      return { ok: true, requestId };
     },
   }),
 

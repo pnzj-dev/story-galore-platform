@@ -728,3 +728,58 @@ export async function fetchStudioPublications(actorId: string, projectId: string
   if (out.status !== "SUCCESS" || !out.result?.items) return [];
   return out.result.items;
 }
+
+export interface PromptTemplate {
+  $id?: string;
+  id?: string;
+  projectId?: string;
+  name?: string;
+  template?: string;
+  variables?: string[];
+  revision?: number;
+}
+
+/** List a project's prompt templates (scoped to the actor server-side). */
+export async function fetchPromptTemplates(actorId: string, projectId: string): Promise<PromptTemplate[]> {
+  const out = await invokeApi<{ items?: PromptTemplate[] }>("prompt_template_list", { projectId }, actorId);
+  if (out.status !== "SUCCESS" || !out.result?.items) return [];
+  return out.result.items;
+}
+
+export interface GenerationRequest {
+  $id?: string;
+  requestId?: string;
+  projectId?: string;
+  targetType?: string;
+  billingMode?: string;
+  executionLocation?: string;
+  creditEligible?: boolean;
+  creditEligibilityReason?: string;
+  prompt?: string;
+  promptTemplateId?: string;
+  draftId?: string;
+  $createdAt?: string;
+}
+
+/** List a project's generation requests (scoped to the actor server-side). */
+export async function fetchGenerations(actorId: string, projectId: string): Promise<GenerationRequest[]> {
+  const out = await invokeApi<{ items?: GenerationRequest[] }>("generation_list", { projectId }, actorId);
+  if (out.status !== "SUCCESS" || !out.result?.items) return [];
+  return out.result.items;
+}
+
+export interface CreatorAnalytics {
+  projects?: number;
+  documents?: number;
+  promptTemplates?: number;
+  generationTotal?: number;
+  generationCreditEligible?: number;
+  generationsByBilling?: Record<string, number>;
+}
+
+/** Fetch the calling creator's own workspace metrics (scoped server-side). */
+export async function fetchCreatorAnalytics(actorId: string): Promise<CreatorAnalytics | null> {
+  const out = await invokeApi<CreatorAnalytics>("creator_analytics_get", {}, actorId);
+  if (out.status !== "SUCCESS") return null;
+  return out.result ?? {};
+}
