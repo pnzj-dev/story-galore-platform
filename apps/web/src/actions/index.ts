@@ -427,6 +427,43 @@ export const server = {
     },
   }),
 
+  createAlert: defineAction({
+    accept: "form",
+    input: z.object({
+      name: z.string().min(1).max(255),
+      metric: z.string().min(1).max(255),
+      operator: z.string().min(1).max(16),
+      threshold: z.coerce.number().int(),
+      severity: z.enum(["LOW", "MEDIUM", "HIGH", "CRITICAL"]),
+    }),
+    handler: async (input, context) => {
+      const user = context.locals.user;
+      if (!user) throw new ActionError({ code: "UNAUTHORIZED", message: "Sign in to continue." });
+      const out = await invokeApi("alert_create", input, user.$id);
+      if (out.status !== "SUCCESS") {
+        throw new ActionError({ code: "INTERNAL_SERVER_ERROR", message: "Could not create the alert." });
+      }
+      return { ok: true };
+    },
+  }),
+
+  updateAlert: defineAction({
+    accept: "form",
+    input: z.object({
+      alertId: z.string().min(1),
+      enabled: z.enum(["true", "false"]),
+    }),
+    handler: async (input, context) => {
+      const user = context.locals.user;
+      if (!user) throw new ActionError({ code: "UNAUTHORIZED", message: "Sign in to continue." });
+      const out = await invokeApi("alert_update", { alertId: input.alertId, enabled: input.enabled === "true" }, user.$id);
+      if (out.status !== "SUCCESS") {
+        throw new ActionError({ code: "INTERNAL_SERVER_ERROR", message: "Could not update the alert." });
+      }
+      return { ok: true };
+    },
+  }),
+
   updateDocument: defineAction({
     accept: "form",
     input: z.object({

@@ -553,6 +553,37 @@ export async function fetchPlanProfitability(actorId: string): Promise<PlanProfi
   return out.result.items;
 }
 
+export interface Alert {
+  $id?: string;
+  name?: string;
+  metric?: string;
+  operator?: string;
+  threshold?: number;
+  severity?: string;
+  enabled?: boolean;
+  lastTriggeredAt?: string;
+}
+
+/** List configured alerts (admin-only). */
+export async function fetchAlerts(actorId: string): Promise<Alert[]> {
+  const out = await invokeApi<{ items?: Alert[] }>("alert_list", {}, actorId);
+  if (out.status !== "SUCCESS" || !out.result?.items) return [];
+  return out.result.items;
+}
+
+export interface AiCost {
+  creditsReserved?: number;
+  creditsSettled?: number;
+  creditsRefunded?: number;
+}
+
+/** AI credit throughput (reserved/settled/refunded), admin-only. */
+export async function fetchAiCost(actorId: string): Promise<AiCost | null> {
+  const out = await invokeApi<AiCost>("admin_ai_cost", {}, actorId);
+  if (out.status !== "SUCCESS") return null;
+  return out.result ?? {};
+}
+
 export async function fetchAdminRetention(actorId: string): Promise<RetentionSummary | null> {
   const out = await invokeApi<RetentionSummary>("admin_analytics_retention_get", {}, actorId);
   if (out.status !== "SUCCESS") return null;

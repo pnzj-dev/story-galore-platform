@@ -1,18 +1,22 @@
 ---
 import AdminLayout from "@/layouts/AdminLayout.astro";
 import { actions } from "astro:actions";
-import { fetchAdminOperations, fetchIncidents } from "@/lib/gateway";
+import { fetchAdminOperations, fetchIncidents, fetchAlerts } from "@/lib/gateway";
 
 const user = Astro.locals.user;
 const ops = user ? await fetchAdminOperations(user.$id) : null;
 const incidents = user ? await fetchIncidents(user.$id) : [];
+const alerts = user ? await fetchAlerts(user.$id) : [];
 
 const createIncidentResult = Astro.getActionResult(actions.createIncident);
 const updateIncidentResult = Astro.getActionResult(actions.updateIncident);
-if (createIncidentResult?.data?.ok || updateIncidentResult?.data?.ok) {
+const createAlertResult = Astro.getActionResult(actions.createAlert);
+const updateAlertResult = Astro.getActionResult(actions.updateAlert);
+if (createIncidentResult?.data?.ok || updateIncidentResult?.data?.ok || createAlertResult?.data?.ok || updateAlertResult?.data?.ok) {
   return Astro.redirect("/admin/operations");
 }
 const incidentError = createIncidentResult?.error?.message ?? updateIncidentResult?.error?.message;
+const alertError = createAlertResult?.error?.message ?? updateAlertResult?.error?.message;
 ---
 
 <AdminLayout title="Admin — Operations">
@@ -132,6 +136,75 @@ const incidentError = createIncidentResult?.error?.message ?? updateIncidentResu
         </ul>
       ) : (
         <p class="mt-4 rounded-md border border-dashed border-border px-6 py-6 text-sm text-foreground-muted">No incidents.</p>
+      )}
+    </section>
+
+    <section class="mt-10">
+      <h2 class="text-2xl font-bold">Alerts</h2>
+      <p class="mt-1 text-sm text-foreground-muted">Configuration-driven thresholds (metric + operator + threshold).</p>
+
+      <form method="POST" action={actions.createAlert} class="mt-4 max-w-lg space-y-3 rounded-md border border-border bg-surface p-4">
+        <div>
+          <label for="alert-name" class="mb-1 block text-sm text-foreground-muted">Name</label>
+          <input id="alert-name" name="name" type="text" required placeholder="MCP error rate high" class="w-full rounded-sm border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary" />
+        </div>
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label for="alert-metric" class="mb-1 block text-sm text-foreground-muted">Metric</label>
+            <input id="alert-metric" name="metric" type="text" required placeholder="mcp.errorRate" class="w-full rounded-sm border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary" />
+          </div>
+          <div>
+            <label for="alert-op" class="mb-1 block text-sm text-foreground-muted">Operator</label>
+            <select id="alert-op" name="operator" required class="w-full rounded-sm border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary">
+              <option value="gt">&gt;</option>
+              <option value="gte">&gt;=</option>
+              <option value="lt">&lt;</option>
+              <option value="lte">&lt;=</option>
+            </select>
+          </div>
+          <div>
+            <label for="alert-threshold" class="mb-1 block text-sm text-foreground-muted">Threshold</label>
+            <input id="alert-threshold" name="threshold" type="number" required class="w-full rounded-sm border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary" />
+          </div>
+        </div>
+        <div>
+          <label for="alert-severity" class="mb-1 block text-sm text-foreground-muted">Severity</label>
+          <select id="alert-severity" name="severity" required class="w-full rounded-sm border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary">
+            <option value="LOW">Low</option>
+            <option value="MEDIUM">Medium</option>
+            <option value="HIGH">High</option>
+            <option value="CRITICAL">Critical</option>
+          </select>
+        </div>
+        {alertError && (
+          <p class="rounded-sm border border-danger bg-danger/15 px-3 py-2 text-sm text-danger" role="alert">{alertError}</p>
+        )}
+        <button type="submit" class="rounded-sm bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:opacity-90">
+          Add alert
+        </button>
+      </form>
+
+      {alerts.length > 0 ? (
+        <ul class="mt-4 space-y-2">
+          {alerts.map((a) => (
+            <li class="flex items-center justify-between rounded-md border border-border bg-surface p-4">
+              <div class="min-w-0 flex-1">
+                <p class="text-sm font-semibold">{a.name}</p>
+                <p class="text-xs text-foreground-muted">
+                  {a.metric} {a.operator} {a.threshold} · {a.severity}
+                </p>
+              </div>
+              <form method="POST" action={actions.updateAlert} class="ml-4 shrink-0">
+                <input type="hidden" name="alertId" value={a.$id} />
+                <button type="submit" name="enabled" value={a.enabled ? "false" : "true"} class="rounded-sm border border-border px-3 py-1 text-xs transition hover:bg-surface">
+                  {a.enabled ? "Disable" : "Enable"}
+                </button>
+              </form>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p class="mt-4 rounded-md border border-dashed border-border px-6 py-6 text-sm text-foreground-muted">No alerts configured.</p>
       )}
     </section>
   </main>

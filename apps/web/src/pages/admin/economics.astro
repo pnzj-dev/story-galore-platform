@@ -1,11 +1,12 @@
 ---
 import AdminLayout from "@/layouts/AdminLayout.astro";
-import { fetchAdminOverview, fetchAdminAnalytics, fetchPlanProfitability } from "@/lib/gateway";
+import { fetchAdminOverview, fetchAdminAnalytics, fetchPlanProfitability, fetchAiCost } from "@/lib/gateway";
 
 const user = Astro.locals.user;
 const overview = user ? await fetchAdminOverview(user.$id) : null;
 const analytics = user ? await fetchAdminAnalytics(user.$id) : null;
 const plans = user ? await fetchPlanProfitability(user.$id) : [];
+const aiCost = user ? await fetchAiCost(user.$id) : null;
 
 const kpis = overview?.kpis;
 const cents = (c?: number) => (c !== undefined ? `$${(c / 100).toFixed(2)}` : "â€”");
@@ -88,6 +89,27 @@ const cents = (c?: number) => (c !== undefined ? `$${(c / 100).toFixed(2)}` : "â
               ))}
             </tbody>
           </table>
+        </div>
+      </section>
+    ) : null}
+
+    {aiCost ? (
+      <section class="mt-10">
+        <h2 class="text-2xl font-bold">AI cost</h2>
+        <p class="mt-1 text-sm text-foreground-muted">Credit throughput (reserved / settled / refunded).</p>
+        <div class="mt-4 grid gap-4 sm:grid-cols-3">
+          <div class="rounded-md border border-border bg-surface p-4">
+            <p class="text-2xl font-bold tabular-nums">{aiCost.creditsReserved ?? 0}</p>
+            <p class="text-sm text-foreground-muted">Credits reserved</p>
+          </div>
+          <div class="rounded-md border border-border bg-surface p-4">
+            <p class="text-2xl font-bold tabular-nums">{aiCost.creditsSettled ?? 0}</p>
+            <p class="text-sm text-foreground-muted">Credits settled</p>
+          </div>
+          <div class="rounded-md border border-border bg-surface p-4">
+            <p class="text-2xl font-bold tabular-nums">{aiCost.creditsRefunded ?? 0}</p>
+            <p class="text-sm text-foreground-muted">Credits refunded</p>
+          </div>
         </div>
       </section>
     ) : null}

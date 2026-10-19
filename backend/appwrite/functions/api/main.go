@@ -106,6 +106,8 @@ var knownOperations = map[string]bool{
 	"admin_operations_get": true, "admin_security_get": true,
 	"incident_create": true, "incident_list": true, "incident_update": true,
 	"admin_plan_profitability": true,
+	"alert_create":             true, "alert_list": true, "alert_update": true,
+	"admin_ai_cost": true,
 }
 
 const databaseID = "main"
@@ -208,6 +210,14 @@ func Main(ctx openruntimes.Context) openruntimes.Response {
 		return incidentUpdate(ctx, &in, cl)
 	case "admin_plan_profitability":
 		return adminPlanProfitability(ctx, &in, cl)
+	case "alert_create":
+		return alertCreate(ctx, &in, cl)
+	case "alert_list":
+		return alertList(ctx, &in, cl)
+	case "alert_update":
+		return alertUpdate(ctx, &in, cl)
+	case "admin_ai_cost":
+		return adminAiCost(ctx, &in, cl)
 	case "creator_analytics_get":
 		return creatorAnalyticsGet(ctx, &in, cl)
 	case "publication_validate":
@@ -2467,6 +2477,91 @@ func adminPlanProfitability(ctx openruntimes.Context, in *GatewayInput, cl clien
 	return success(ctx, in, map[string]interface{}{"items": items})
 }
 
+func alertCreate(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	if !adminActor(ctx, in, cl) {
+		return respond(ctx, in.OperationId, "FORBIDDEN", false)
+	}
+	var input struct {
+		Name      string `json:"name"`
+		Metric    string `json:"metric"`
+		Operator  string `json:"operator"`
+		Threshold int    `json:"threshold"`
+		Severity  string `json:"severity"`
+	}
+	if !decode(ctx, in, &input) || input.Name == "" || input.Metric == "" || input.Operator == "" || input.Severity == "" {
+		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
+	}
+	rowId := newUUID()
+	if err := createRow(cl, "alerts", rowId, map[string]interface{}{
+		"id": rowId, "name": input.Name, "metric": input.Metric, "operator": input.Operator,
+		"threshold": input.Threshold, "severity": input.Severity, "enabled": true, "createdAt": now(),
+	}); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	return success(ctx, in, map[string]interface{}{"ok": true, "alertId": rowId})
+}
+
+func alertList(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	if !adminActor(ctx, in, cl) {
+		return respond(ctx, in.OperationId, "FORBIDDEN", false)
+	}
+	service := tablesdb.New(cl)
+	list, err := service.ListRows(databaseID, "alerts", service.WithListRowsQueries([]string{
+		`{"method":"orderAsc","attribute":"name"}`,
+		`{"method":"limit","values":[100]}`,
+	}))
+	if err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	var raw map[string]interface{}
+	if err := list.Decode(&raw); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	rows, _ := raw["rows"].([]interface{})
+	return success(ctx, in, map[string]interface{}{"items": rows})
+}
+
+func alertUpdate(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	if !adminActor(ctx, in, cl) {
+		return respond(ctx, in.OperationId, "FORBIDDEN", false)
+	}
+	var input struct {
+		AlertId string `json:"alertId"`
+		Enabled *bool  `json:"enabled"`
+	}
+	if !decode(ctx, in, &input) || input.AlertId == "" {
+		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
+	}
+	data := map[string]interface{}{}
+	if input.Enabled != nil {
+		data["enabled"] = *input.Enabled
+	}
+	if err := updateRow(cl, "alerts", input.AlertId, data); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	return success(ctx, in, map[string]interface{}{"ok": true})
+}
+
+// sumCreditAmount sums the ai_credit_transactions amount by status.
+func sumCreditAmount(cl client.Client, status string) int {
+	sum := 0
+	for _, m := range listRowsByField(cl, "ai_credit_transactions", "status", status) {
+		sum += toInt(m["amount"])
+	}
+	return sum
+}
+
+func adminAiCost(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	if !adminActor(ctx, in, cl) {
+		return respond(ctx, in.OperationId, "FORBIDDEN", false)
+	}
+	return success(ctx, in, map[string]interface{}{
+		"creditsReserved": sumCreditAmount(cl, "RESERVED"),
+		"creditsSettled":  sumCreditAmount(cl, "SETTLED"),
+		"creditsRefunded": sumCreditAmount(cl, "REFUNDED"),
+	})
+}
+
 func adminAnalyticsEventsList(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
 	if !adminActor(ctx, in, cl) {
 		return respond(ctx, in.OperationId, "FORBIDDEN", false)
@@ -2950,7 +3045,7 @@ func applyEditorOperation(ctx openruntimes.Context, in *GatewayInput, cl client.
 		return internalFailure(ctx, in, err)
 	}
 	revisionId := idOrUUID(nil)
-	if err := createRow(cl, "studio_editor_revisions", revisionId, map[string]interface{}{"documentId": input.DocumentId, "revision": 1, "immutable": true, "createdAt": now()}); err != nil {
+	if err := createRow(cl, "studio_editor_revisions", revisionId, map[string]interface{}{"documentId": input.DocumentId, "revision": 1, "immutable": true, "createdAt": now(), "snapshot": snapshotDocument(cl, input.DocumentId)}); err != nil {
 		return internalFailure(ctx, in, err)
 	}
 	emit(ctx, cl, "studio.document.revised.v1", input.DocumentId, actorOrEmpty(in.ActorId), map[string]interface{}{"documentId": input.DocumentId, "revisionId": revisionId}, in.CorrelationId)
@@ -2972,12 +3067,102 @@ func restoreRevision(ctx openruntimes.Context, in *GatewayInput, cl client.Clien
 	if !documentOwnedByActor(cl, input.DocumentId, actorId) {
 		return respond(ctx, in.OperationId, "FORBIDDEN", false)
 	}
+	service := tablesdb.New(cl)
+	target, err := service.GetRow(databaseID, "studio_editor_revisions", input.TargetRevisionId)
+	if err != nil {
+		return respond(ctx, in.OperationId, "RESOURCE_NOT_FOUND", false)
+	}
+	var tm map[string]interface{}
+	if err := target.Decode(&tm); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	snapshot, _ := tm["snapshot"].(string)
+	if err := restoreDocumentSnapshot(cl, input.DocumentId, snapshot); err != nil {
+		return internalFailure(ctx, in, err)
+	}
 	newRevisionId := idOrUUID(nil)
-	if err := createRow(cl, "studio_editor_revisions", newRevisionId, map[string]interface{}{"documentId": input.DocumentId, "revision": 1, "immutable": true, "createdAt": now()}); err != nil {
+	if err := createRow(cl, "studio_editor_revisions", newRevisionId, map[string]interface{}{"documentId": input.DocumentId, "revision": 1, "immutable": true, "createdAt": now(), "snapshot": snapshot}); err != nil {
 		return internalFailure(ctx, in, err)
 	}
 	emit(ctx, cl, "studio.revision.restored.v1", input.DocumentId, actorId, map[string]interface{}{"documentId": input.DocumentId, "newRevisionId": newRevisionId}, in.CorrelationId)
 	return success(ctx, in, map[string]interface{}{"newRevisionId": newRevisionId})
+}
+
+// snapshotDocument captures a document's pages (and their panels) as JSON.
+func snapshotDocument(cl client.Client, documentId string) string {
+	pages := listRowsByField(cl, "studio_pages", "documentId", documentId)
+	pageDocs := make([]map[string]interface{}, 0, len(pages))
+	for _, p := range pages {
+		pageId, _ := p["$id"].(string)
+		page := map[string]interface{}{
+			"templateId": p["templateId"], "width": p["width"], "height": p["height"],
+			"backgroundAssetId": p["backgroundAssetId"],
+		}
+		panels := listRowsByField(cl, "studio_panels", "pageId", pageId)
+		panelDocs := make([]map[string]interface{}, 0, len(panels))
+		for _, pn := range panels {
+			panelDocs = append(panelDocs, map[string]interface{}{
+				"shape": pn["shape"], "bounds": pn["bounds"], "layers": pn["layers"],
+			})
+		}
+		page["panels"] = panelDocs
+		pageDocs = append(pageDocs, page)
+	}
+	return mustJSON(map[string]interface{}{"pages": pageDocs})
+}
+
+// restoreDocumentSnapshot deletes a document's pages/panels and recreates them
+// from a snapshot captured by snapshotDocument.
+func restoreDocumentSnapshot(cl client.Client, documentId, snapshot string) error {
+	var snap struct {
+		Pages []struct {
+			TemplateId        interface{} `json:"templateId"`
+			Width             interface{} `json:"width"`
+			Height            interface{} `json:"height"`
+			BackgroundAssetId interface{} `json:"backgroundAssetId"`
+			Panels            []struct {
+				Shape  interface{} `json:"shape"`
+				Bounds interface{} `json:"bounds"`
+				Layers interface{} `json:"layers"`
+			} `json:"panels"`
+		} `json:"pages"`
+	}
+	if err := json.Unmarshal([]byte(snapshot), &snap); err != nil {
+		return err
+	}
+	service := tablesdb.New(cl)
+	for _, p := range listRowsByField(cl, "studio_pages", "documentId", documentId) {
+		pageId, _ := p["$id"].(string)
+		for _, pn := range listRowsByField(cl, "studio_panels", "pageId", pageId) {
+			if pid, _ := pn["$id"].(string); pid != "" {
+				_, _ = service.DeleteRow(databaseID, "studio_panels", pid)
+			}
+		}
+		if pageId != "" {
+			_, _ = service.DeleteRow(databaseID, "studio_pages", pageId)
+		}
+	}
+	for i, p := range snap.Pages {
+		pageId := newUUID()
+		panelIds := []string{}
+		for _, pn := range p.Panels {
+			panelId := newUUID()
+			if err := createRow(cl, "studio_panels", panelId, map[string]interface{}{
+				"pageId": pageId, "position": len(panelIds), "shape": pn.Shape, "bounds": pn.Bounds, "layers": pn.Layers, "revisionId": idOrUUID(nil),
+			}); err != nil {
+				return err
+			}
+			panelIds = append(panelIds, panelId)
+		}
+		if err := createRow(cl, "studio_pages", pageId, map[string]interface{}{
+			"documentId": documentId, "position": i, "templateId": p.TemplateId,
+			"width": p.Width, "height": p.Height, "backgroundAssetId": p.BackgroundAssetId,
+			"panels": panelIds, "revisionId": idOrUUID(nil),
+		}); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func documentRevisionList(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
