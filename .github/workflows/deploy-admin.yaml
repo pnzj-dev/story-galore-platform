@@ -32,6 +32,9 @@ jobs:
       - name: Typecheck
         run: pnpm validate:typecheck
 
+      - name: Test
+        run: pnpm test
+
       - uses: superfly/flyctl-actions/setup-flyctl@master
 
       - name: Deploy
