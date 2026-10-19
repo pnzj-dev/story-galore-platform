@@ -622,6 +622,7 @@ studio_tables:
       - {key: displayName, type: varchar, size: 255, required: false}
       - {key: capabilities, type: varchar, array: true, required: true}
       - {key: creditCost, type: integer, required: false}
+      - {key: isDefault, type: boolean, required: false}
       - {key: contextWindow, type: integer, required: false}
       - {key: adultPolicy, type: enum, elements: [ADULT_ALLOWED, ADULT_NOT_ALLOWED, ADULT_REQUIRES_VERIFICATION], required: false}
       - {key: status, type: enum, elements: [ACTIVE, DISABLED], required: true}

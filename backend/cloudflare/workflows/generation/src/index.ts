@@ -231,13 +231,14 @@ export class GenerationWorkflow extends WorkflowEntrypoint<Env, Params> {
     if (out.status !== 'SUCCESS') throw new Error(`ai_model_list failed: ${out.errorCode}`);
     const models = out.result?.items ?? [];
     const capability = TARGET_CAPABILITY[targetType] ?? 'TEXT_GENERATION';
-    const match = models.find(
+    const matches = models.filter(
       (m) =>
         String(m.providerId ?? '') === providerId &&
         String(m.status ?? '') === 'ACTIVE' &&
         Array.isArray(m.capabilities) &&
         m.capabilities.map(String).includes(capability),
     );
+    const match = matches.find((m) => m.isDefault === true) ?? matches[0];
     if (match) return String(match.modelId ?? '');
     const fallback = this.env.DEFAULT_MODEL_ID ?? '';
     if (!fallback) throw new Error('no model resolved and no DEFAULT_MODEL_ID configured');

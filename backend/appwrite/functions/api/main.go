@@ -3037,6 +3037,8 @@ func resolveModelCreditCost(cl client.Client, targetType string) int {
 		return resolveCreditCost(cl)
 	}
 	rows, _ := raw["rows"].([]interface{})
+	// Prefer the default model for the capability; fall back to the first match.
+	fallbackCost := 0
 	for _, r := range rows {
 		m, ok := r.(map[string]interface{})
 		if !ok {
@@ -3054,11 +3056,22 @@ func resolveModelCreditCost(cl client.Client, targetType string) int {
 				break
 			}
 		}
-		if hasCap {
-			if cost := toInt(m["creditCost"]); cost > 0 {
-				return cost
-			}
+		if !hasCap {
+			continue
 		}
+		cost := toInt(m["creditCost"])
+		if cost <= 0 {
+			cost = defaultGenerationCreditCost
+		}
+		if isDefault, _ := m["isDefault"].(bool); isDefault {
+			return cost
+		}
+		if fallbackCost == 0 {
+			fallbackCost = cost
+		}
+	}
+	if fallbackCost > 0 {
+		return fallbackCost
 	}
 	return resolveCreditCost(cl)
 }
@@ -3536,6 +3549,7 @@ func aiModelCreate(ctx openruntimes.Context, in *GatewayInput, cl client.Client)
 		DisplayName   string   `json:"displayName"`
 		Capabilities  []string `json:"capabilities"`
 		CreditCost    int      `json:"creditCost"`
+		IsDefault     bool     `json:"isDefault"`
 		ContextWindow int      `json:"contextWindow"`
 		AdultPolicy   string   `json:"adultPolicy"`
 	}
@@ -3549,7 +3563,8 @@ func aiModelCreate(ctx openruntimes.Context, in *GatewayInput, cl client.Client)
 	rowId := newUUID()
 	row := map[string]interface{}{
 		"id": rowId, "modelId": input.ModelId, "providerId": input.ProviderId,
-		"capabilities": input.Capabilities, "creditCost": creditCost, "status": "ACTIVE", "createdAt": now(),
+		"capabilities": input.Capabilities, "creditCost": creditCost, "isDefault": input.IsDefault,
+		"status": "ACTIVE", "createdAt": now(),
 	}
 	if input.DisplayName != "" {
 		row["displayName"] = input.DisplayName
@@ -3574,6 +3589,7 @@ func aiModelUpdate(ctx openruntimes.Context, in *GatewayInput, cl client.Client)
 		ModelId    string `json:"modelId"`
 		Status     string `json:"status"`
 		CreditCost *int   `json:"creditCost"`
+		IsDefault  *bool  `json:"isDefault"`
 	}
 	if !decode(ctx, in, &input) || input.ModelId == "" {
 		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
@@ -3602,6 +3618,9 @@ func aiModelUpdate(ctx openruntimes.Context, in *GatewayInput, cl client.Client)
 	}
 	if input.CreditCost != nil {
 		data["creditCost"] = *input.CreditCost
+	}
+	if input.IsDefault != nil {
+		data["isDefault"] = *input.IsDefault
 	}
 	if err := updateRow(cl, "ai_models", rowId, data); err != nil {
 		return internalFailure(ctx, in, err)
