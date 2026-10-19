@@ -16,7 +16,7 @@ const error = result?.error?.message;
 
 <Layout title="Settings">
   <main class="mx-auto max-w-4xl px-6 py-12">
-    <h1 class="text-3xl font-bold">Settings</h1>
+    <h1 class="font-serif text-3xl font-bold">Settings</h1>
 
     <section class="mt-8">
       <h2 class="text-xl font-semibold">Adult content</h2>
@@ -31,7 +31,7 @@ const error = result?.error?.message;
             name="dateOfBirth"
             type="date"
             required
-            class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
+            class="w-full rounded-sm border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
           />
         </div>
         <div>
@@ -39,7 +39,7 @@ const error = result?.error?.message;
           <select
             id="adultContentOptIn"
             name="adultContentOptIn"
-            class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
+            class="w-full rounded-sm border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
           >
             <option value="false">No</option>
             <option value="true">Yes</option>
@@ -47,14 +47,14 @@ const error = result?.error?.message;
         </div>
 
         {error && (
-          <p class="rounded-lg border border-danger bg-danger/15 px-3 py-2 text-sm text-danger" role="alert">
+          <p class="rounded-sm border border-danger bg-danger/15 px-3 py-2 text-sm text-danger" role="alert">
             {error}
           </p>
         )}
 
         <button
           type="submit"
-          class="rounded-lg bg-primary px-4 py-2 font-semibold text-primary-foreground transition hover:opacity-90"
+          class="rounded-sm bg-primary px-4 py-2 font-semibold text-primary-foreground transition hover:opacity-90"
         >
           Save
         </button>

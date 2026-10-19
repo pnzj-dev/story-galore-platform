@@ -51,10 +51,10 @@ const watchItems = continueItems.length > 0 ? continueItems : videoItems;
           <div class="absolute inset-0 bg-gradient-to-r from-background via-background/75 to-background/10"></div>
           <div class="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent"></div>
 
-          <div class="relative z-10 mx-auto flex h-full max-w-[1400px] items-end px-7 pb-12">
+          <div class="relative z-10 mx-auto flex h-full max-w-[1400px] items-end px-12 pb-12">
             <div class="max-w-[620px]">
               <span
-                class="mb-4 inline-flex items-center gap-2 rounded-full bg-brand-500/15 px-2.5 py-1 text-[11px] font-bold uppercase tracking-widest text-brand-400"
+                class="mb-4 inline-flex items-center gap-2 rounded-full bg-brand-500/15 px-2.5 py-[5px] text-[11px] font-bold uppercase tracking-widest text-brand-400"
               >
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M8 5v14l11-7z"></path>
@@ -84,7 +84,7 @@ const watchItems = continueItems.length > 0 ? continueItems : videoItems;
               <div class="mt-5 flex gap-3">
                 <a
                   href={featuredHref}
-                  class="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-3 text-[13px] font-semibold text-primary-foreground transition hover:opacity-90"
+                  class="inline-flex items-center gap-2 rounded-sm bg-primary px-5 py-3 text-[13px] font-semibold text-primary-foreground transition hover:opacity-90"
                 >
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M8 5v14l11-7z"></path>
@@ -93,7 +93,7 @@ const watchItems = continueItems.length > 0 ? continueItems : videoItems;
                 </a>
                 <a
                   href="/library"
-                  class="inline-flex items-center gap-2 rounded-lg border border-border-strong bg-surface-raised px-5 py-3 text-[13px] font-semibold text-foreground transition hover:bg-surface"
+                  class="inline-flex items-center gap-2 rounded-sm border border-border-strong bg-surface-raised px-5 py-3 text-[13px] font-semibold text-foreground transition hover:bg-surface"
                 >
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M12 5v14M5 12h14"></path>
@@ -106,7 +106,7 @@ const watchItems = continueItems.length > 0 ? continueItems : videoItems;
         </section>
       ) : (
         <section class="border-b border-border">
-          <div class="mx-auto max-w-[1400px] px-7 py-16">
+          <div class="mx-auto max-w-[1400px] px-12 py-16">
             <h1 class="font-serif text-4xl font-bold tracking-tight">Stories that pull you in.</h1>
             <p class="mt-3 text-foreground-muted">{description}</p>
           </div>
@@ -114,14 +114,14 @@ const watchItems = continueItems.length > 0 ? continueItems : videoItems;
       )
     }
 
-    <section class="mx-auto max-w-[1400px] space-y-12 px-7 py-12">
+    <section class="mx-auto max-w-[1400px] space-y-12 px-12 py-12">
       <MediaRail client:load title="Continue Watching" items={watchItems} />
       <MediaRail client:load title="Continue Reading" items={bookItems} />
 
       {homeAd?.url && (
-        <div class="rounded-xl border border-border bg-surface/40 p-4">
+        <div class="rounded-md border border-border bg-surface/40 p-4">
           <span class="block pb-2 text-xs uppercase tracking-widest text-foreground-muted">Sponsored</span>
-          <a href="#" class="block overflow-hidden rounded-lg border border-border">
+          <a href="#" class="block overflow-hidden rounded-sm border border-border">
             <img src={homeAd.url} alt={homeAd.name ?? "Sponsored"} class="h-32 w-full object-cover" />
           </a>
         </div>

@@ -12,4 +12,5 @@ html {
 html,
 body {
   @apply bg-background text-foreground;
+  font-size: 14px; /* matches the UI mock */
 }

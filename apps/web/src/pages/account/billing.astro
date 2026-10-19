@@ -14,7 +14,7 @@ const subscriptions = await fetchSubscriptions(user.$id);
 
 <Layout title="Billing & Subscription">
   <main class="mx-auto max-w-4xl px-6 py-12">
-    <h1 class="text-3xl font-bold">Billing & Subscription</h1>
+    <h1 class="font-serif text-3xl font-bold">Billing & Subscription</h1>
 
     <section class="mt-8">
       <h2 class="text-xl font-semibold">Plans</h2>
@@ -24,7 +24,7 @@ const subscriptions = await fetchSubscriptions(user.$id);
         ) : (
           <div class="mt-4 grid gap-4 sm:grid-cols-2">
             {plans.map((plan) => (
-              <div class="rounded-lg border border-border bg-surface p-4">
+              <div class="rounded-sm border border-border bg-surface p-4">
                 <h3 class="font-semibold">{plan.name}</h3>
                 {plan.description && <p class="mt-1 text-sm text-foreground-muted">{plan.description}</p>}
                 <p class="mt-2 text-lg font-bold">
@@ -44,7 +44,7 @@ const subscriptions = await fetchSubscriptions(user.$id);
                     <select
                       name="provider"
                       id={`provider-${plan.$id}`}
-                      class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
+                      class="w-full rounded-sm border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
                     >
                       <option value="STRIPE">Card (Stripe)</option>
                       <option value="NOWPAYMENTS">Crypto (NOWPayments)</option>
@@ -58,12 +58,12 @@ const subscriptions = await fetchSubscriptions(user.$id);
                       type="email"
                       name="email"
                       id={`email-${plan.$id}`}
-                      class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
+                      class="w-full rounded-sm border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
                     />
                   </div>
                   <button
                     type="submit"
-                    class="rounded-lg bg-primary px-4 py-2 font-semibold text-primary-foreground transition hover:opacity-90"
+                    class="rounded-sm bg-primary px-4 py-2 font-semibold text-primary-foreground transition hover:opacity-90"
                   >
                     Subscribe
                   </button>
@@ -83,7 +83,7 @@ const subscriptions = await fetchSubscriptions(user.$id);
         ) : (
           <ul class="mt-4 space-y-3">
             {subscriptions.map((sub) => (
-              <li class="rounded-lg border border-border bg-surface p-4">
+              <li class="rounded-sm border border-border bg-surface p-4">
                 <div class="flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <p class="font-semibold">{sub.planId}</p>
@@ -98,7 +98,7 @@ const subscriptions = await fetchSubscriptions(user.$id);
                         <input type="hidden" name="subscriptionId" value={sub.$id} />
                         <button
                           type="submit"
-                          class="rounded-lg border border-border px-3 py-1.5 text-sm transition hover:opacity-90"
+                          class="rounded-sm border border-border px-3 py-1.5 text-sm transition hover:opacity-90"
                         >
                           Pause
                         </button>
@@ -109,7 +109,7 @@ const subscriptions = await fetchSubscriptions(user.$id);
                         <input type="hidden" name="subscriptionId" value={sub.$id} />
                         <button
                           type="submit"
-                          class="rounded-lg border border-border px-3 py-1.5 text-sm transition hover:opacity-90"
+                          class="rounded-sm border border-border px-3 py-1.5 text-sm transition hover:opacity-90"
                         >
                           Resume
                         </button>
@@ -120,7 +120,7 @@ const subscriptions = await fetchSubscriptions(user.$id);
                         <input type="hidden" name="subscriptionId" value={sub.$id} />
                         <button
                           type="submit"
-                          class="rounded-lg border border-danger px-3 py-1.5 text-sm text-danger transition hover:opacity-90"
+                          class="rounded-sm border border-danger px-3 py-1.5 text-sm text-danger transition hover:opacity-90"
                         >
                           Cancel
                         </button>

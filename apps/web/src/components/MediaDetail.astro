@@ -30,9 +30,9 @@ const rating =
           <div class="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent"></div>
         </div>
 
-        <div class="mx-auto max-w-[1400px] px-7">
+        <div class="mx-auto max-w-[1400px] px-12">
           <div class="-mt-24 grid gap-6 md:grid-cols-[200px_1fr]">
-            <div class="hidden aspect-[2/3] overflow-hidden rounded-xl border border-border shadow-lg md:block">
+            <div class="hidden aspect-[2/3] overflow-hidden rounded-md border border-border shadow-lg md:block">
               {cover ? (
                 <img src={cover} alt={pub.title ?? ""} class="h-full w-full object-cover" />
               ) : (
@@ -66,11 +66,11 @@ const rating =
               <div class="mt-6">
                 {
                   locked ? (
-                    <div class="rounded-xl border border-dashed border-border px-6 py-10 text-center">
+                    <div class="rounded-md border border-dashed border-border px-6 py-10 text-center">
                       <p class="text-lg font-semibold">This {kind} requires a subscription or purchase.</p>
                       <a
                         href="/account/billing"
-                        class="mt-4 inline-block rounded-lg bg-primary px-4 py-2 text-primary-foreground"
+                        class="mt-4 inline-block rounded-sm bg-primary px-4 py-2 text-primary-foreground"
                       >
                         View plans
                       </a>
@@ -81,19 +81,19 @@ const rating =
                         controls
                         preload="metadata"
                         src={allowed[0].url}
-                        class="aspect-video w-full rounded-xl bg-black"
+                        class="aspect-video w-full rounded-md bg-black"
                       />
                     ) : kind === "audio" ? (
                       <audio controls preload="metadata" src={allowed[0].url} class="w-full" />
                     ) : (
                       <div class="grid gap-4 sm:grid-cols-2">
                         {allowed.map((m) => (
-                          <img src={m.url} alt={pub.title ?? ""} class="w-full rounded-xl" loading="lazy" />
+                          <img src={m.url} alt={pub.title ?? ""} class="w-full rounded-md" loading="lazy" />
                         ))}
                       </div>
                     )
                   ) : (
-                    <p class="rounded-xl border border-dashed border-border px-6 py-8 text-sm text-foreground-muted">
+                    <p class="rounded-md border border-dashed border-border px-6 py-8 text-sm text-foreground-muted">
                       Media unavailable.
                     </p>
                   )

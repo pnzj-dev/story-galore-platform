@@ -17,11 +17,11 @@ const navItems = [
 const initial = (user?.name ?? user?.email ?? "A").trim().charAt(0).toUpperCase();
 ---
 
-<header class="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur">
-  <nav class="mx-auto flex max-w-[1400px] items-center gap-6 px-6 py-3">
+<header class="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-[20px]">
+  <nav class="mx-auto flex max-w-[1400px] items-center gap-6 px-6 py-4">
     <a href="/" class="flex shrink-0 items-center gap-2 text-lg font-extrabold tracking-tight">
       <span
-        class="grid h-[26px] w-[26px] place-items-center rounded-md bg-gradient-to-br from-brand-500 to-accent text-[13px] font-black text-white"
+        class="grid h-[26px] w-[26px] place-items-center rounded-[7px] bg-gradient-to-br from-brand-500 to-accent text-[13px] font-black text-white"
       >
         SG
       </span>
@@ -34,7 +34,7 @@ const initial = (user?.name ?? user?.email ?? "A").trim().charAt(0).toUpperCase(
           <a
             href={item.href}
             aria-current={item.active ? "page" : undefined}
-            class={`rounded-md px-3 py-2 text-[13px] font-medium transition ${
+            class={`rounded-sm px-3 py-2 text-[13px] font-medium transition ${
               item.active
                 ? "bg-surface text-foreground"
                 : "text-foreground-muted hover:bg-surface hover:text-foreground"
@@ -108,7 +108,7 @@ const initial = (user?.name ?? user?.email ?? "A").trim().charAt(0).toUpperCase(
             <a href="/auth/login" class="text-sm text-foreground-muted transition hover:text-foreground">Sign in</a>
             <a
               href="/auth/register"
-              class="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
+              class="rounded-sm bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
             >
               Get started
             </a>

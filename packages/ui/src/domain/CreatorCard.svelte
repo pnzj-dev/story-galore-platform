@@ -6,7 +6,7 @@
 
 <a
   href={href}
-  class="group flex w-full items-center gap-3 rounded-xl border border-border bg-surface p-3 transition hover:-translate-y-1 hover:border-foreground-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
+  class="group flex w-full items-center gap-3 rounded-md border border-border bg-surface p-3 transition hover:-translate-y-1 hover:border-foreground-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
 >
   <div class="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-surface-elevated">
     {#if creator.avatarUrl}

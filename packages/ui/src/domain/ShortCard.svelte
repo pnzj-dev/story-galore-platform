@@ -7,7 +7,7 @@
 
 <a
   href={href}
-  class="group relative block aspect-[9/16] overflow-hidden rounded-xl border border-border bg-surface shadow-card transition hover:-translate-y-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
+  class="group relative block aspect-[9/16] overflow-hidden rounded-md border border-border bg-surface shadow-card transition hover:-translate-y-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
   aria-label={publication.title}
 >
   {#if publication.coverUrl && !imgFailed}

@@ -89,12 +89,12 @@
             <img
               src={page.url}
               alt={`Page ${page.position + 1}`}
-              class="max-h-[60vh] w-auto rounded-lg border border-border"
+              class="max-h-[60vh] w-auto rounded-sm border border-border"
               loading="lazy"
             />
           {:else}
             <div
-              class="flex aspect-[3/4] w-full items-center justify-center rounded-lg border border-border bg-surface text-foreground-muted"
+              class="flex aspect-[3/4] w-full items-center justify-center rounded-sm border border-border bg-surface text-foreground-muted"
             >
               Page {page.position + 1}
             </div>

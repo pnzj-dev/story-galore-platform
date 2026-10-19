@@ -94,7 +94,7 @@
   aria-label={`${publication.title} — ${badge}`}
 >
   <div
-    class="relative overflow-hidden rounded-xl border border-border bg-surface shadow-card {aspectClass[orientation]}"
+    class="relative overflow-hidden rounded-md border border-border bg-surface shadow-card {aspectClass[orientation]}"
   >
     {#if publication.coverUrl && !imgFailed}
       <img
