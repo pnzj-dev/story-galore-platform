@@ -1,11 +1,12 @@
 ---
+const year = new Date().getFullYear();
 ---
 
 <footer class="border-t border-border/60">
   <div
-    class="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-6 py-10 text-sm text-foreground-muted md:flex-row"
+    class="mx-auto flex max-w-[1400px] flex-col items-center justify-between gap-4 px-12 py-10 text-sm text-foreground-muted md:flex-row"
   >
-    <p>© 2026 StoryGalore</p>
+    <p>© {year} StoryGalore</p>
     <div class="flex gap-6">
       <a href="/help" class="transition hover:text-foreground">Help</a>
       <a href="/support" class="transition hover:text-foreground">Support</a>

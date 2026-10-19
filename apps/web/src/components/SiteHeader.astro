@@ -105,13 +105,20 @@ const initial = (user?.name ?? user?.email ?? "A").trim().charAt(0).toUpperCase(
           </>
         ) : (
           <>
-            <a href="/auth/login" class="text-sm text-foreground-muted transition hover:text-foreground">Sign in</a>
-            <a
-              href="/auth/register"
+            <button
+              type="button"
+              data-auth="signin"
+              class="text-sm text-foreground-muted transition hover:text-foreground"
+            >
+              Sign in
+            </button>
+            <button
+              type="button"
+              data-auth="register"
               class="rounded-sm bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
             >
               Get started
-            </a>
+            </button>
           </>
         )
       }

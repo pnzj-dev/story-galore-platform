@@ -31,12 +31,13 @@
             {(short.creatorName ?? '?').charAt(0)}
           </span>
           <span class="text-[13px] font-bold">{short.creatorName ?? '@creator'}</span>
-          <a
-            href="/auth/login"
+          <button
+            type="button"
+            data-auth="signin"
             class="ml-1 rounded-full border border-white/60 px-3 py-1 text-[11px] font-bold text-white"
           >
             Follow
-          </a>
+          </button>
         </div>
         <p class="mt-2 max-w-[280px] text-[12px] leading-5">{short.title}</p>
       </div>

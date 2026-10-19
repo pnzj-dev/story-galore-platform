@@ -1,5 +1,5 @@
 ---
-import Layout from "../../layouts/Layout.astro";
+import MinimalLayout from "../../layouts/MinimalLayout.astro";
 import { ThemeToggle } from "@storygalore/ui";
 import { actions } from "astro:actions";
 import { safeReturnTo } from "../../lib/returnTo";
@@ -14,7 +14,7 @@ if (result?.data?.ok) {
 const error = result?.error?.message;
 ---
 
-<Layout title="Sign in — StoryGalore">
+<MinimalLayout title="Sign in — StoryGalore">
   <div class="fixed end-4 top-4">
     <ThemeToggle client:load />
   </div>
@@ -67,4 +67,4 @@ const error = result?.error?.message;
       </p>
     </main>
   </div>
-</Layout>
+</MinimalLayout>

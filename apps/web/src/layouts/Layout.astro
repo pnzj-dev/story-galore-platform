@@ -4,6 +4,7 @@ import { ClientRouter } from "astro:transitions";
 import SiteHeader from "../components/SiteHeader.astro";
 import SiteFooter from "../components/SiteFooter.astro";
 import MobileNav from "../components/MobileNav.astro";
+import AuthModal from "../components/AuthModal.svelte";
 
 interface Props {
   title: string;
@@ -40,6 +41,12 @@ const canonicalUrl = Astro.site ? new URL(Astro.url.pathname, Astro.site).toStri
           }
         } catch (e) {}
       })();
+      document.addEventListener('click', function (e) {
+        var btn = e.target && e.target.closest ? e.target.closest('[data-auth]') : null;
+        if (btn) {
+          window.dispatchEvent(new CustomEvent('auth:open', { detail: btn.getAttribute('data-auth') }));
+        }
+      });
     </script>
     <slot name="head" />
   </head>
@@ -53,5 +60,6 @@ const canonicalUrl = Astro.site ? new URL(Astro.url.pathname, Astro.site).toStri
     </div>
     <SiteFooter />
     <MobileNav />
+    <AuthModal client:load />
   </body>
 </html>
