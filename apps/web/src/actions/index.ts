@@ -181,6 +181,23 @@ export const server = {
     },
   }),
 
+  updateSupportTicket: defineAction({
+    accept: "form",
+    input: z.object({
+      ticketId: z.string().min(1),
+      status: z.enum(["OPEN", "CLOSED"]),
+    }),
+    handler: async (input, context) => {
+      const user = context.locals.user;
+      if (!user) throw new ActionError({ code: "UNAUTHORIZED", message: "Sign in to continue." });
+      const out = await invokeApi("admin_support_ticket_update", input, user.$id);
+      if (out.status !== "SUCCESS") {
+        throw new ActionError({ code: "INTERNAL_SERVER_ERROR", message: "Could not update the ticket." });
+      }
+      return { ok: true };
+    },
+  }),
+
   logout: defineAction({
     accept: "form",
     handler: async (_, context) => {

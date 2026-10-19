@@ -84,6 +84,7 @@ var knownOperations = map[string]bool{
 	"admin_destructive_request": true, "admin_destructive_approve": true,
 	"admin_destructive_execute": true, "admin_destructive_list": true,
 	"admin_user_get": true, "admin_publication_get": true, "admin_creator_get": true,
+	"admin_support_ticket_list": true, "admin_support_ticket_get": true, "admin_support_ticket_update": true,
 	"admin_analytics_get":         true,
 	"admin_analytics_events_list": true,
 	"admin_analytics_aggregate":   true, "admin_analytics_daily_get": true,
@@ -323,6 +324,12 @@ func Main(ctx openruntimes.Context) openruntimes.Response {
 		return adminPublicationGet(ctx, &in, cl)
 	case "admin_creator_get":
 		return adminCreatorGet(ctx, &in, cl)
+	case "admin_support_ticket_list":
+		return adminSupportTicketList(ctx, &in, cl)
+	case "admin_support_ticket_get":
+		return adminSupportTicketGet(ctx, &in, cl)
+	case "admin_support_ticket_update":
+		return adminSupportTicketUpdate(ctx, &in, cl)
 	case "admin_analytics_get":
 		return adminAnalyticsGet(ctx, &in, cl)
 	case "admin_analytics_events_list":
@@ -1808,6 +1815,68 @@ func dailySeries(cl client.Client, table, dateField, sumField string, days int, 
 		series = append(series, map[string]interface{}{"date": day, "value": dayValues[day]})
 	}
 	return series
+}
+
+func adminSupportTicketList(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	if !adminActor(ctx, in, cl) {
+		return respond(ctx, in.OperationId, "FORBIDDEN", false)
+	}
+	service := tablesdb.New(cl)
+	list, err := service.ListRows(databaseID, "support_tickets", service.WithListRowsQueries([]string{
+		`{"method":"orderDesc","attribute":"createdAt"}`,
+		`{"method":"limit","values":[200]}`,
+	}))
+	if err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	var raw map[string]interface{}
+	if err := list.Decode(&raw); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	rows, _ := raw["rows"].([]interface{})
+	return success(ctx, in, map[string]interface{}{"items": rows})
+}
+
+func adminSupportTicketGet(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	if !adminActor(ctx, in, cl) {
+		return respond(ctx, in.OperationId, "FORBIDDEN", false)
+	}
+	var input struct {
+		TicketId string `json:"ticketId"`
+	}
+	if !decode(ctx, in, &input) || input.TicketId == "" {
+		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
+	}
+	service := tablesdb.New(cl)
+	row, err := service.GetRow(databaseID, "support_tickets", input.TicketId)
+	if err != nil {
+		return respond(ctx, in.OperationId, "RESOURCE_NOT_FOUND", false)
+	}
+	var m map[string]interface{}
+	if err := row.Decode(&m); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	return success(ctx, in, m)
+}
+
+func adminSupportTicketUpdate(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	if !adminActor(ctx, in, cl) {
+		return respond(ctx, in.OperationId, "FORBIDDEN", false)
+	}
+	var input struct {
+		TicketId string `json:"ticketId"`
+		Status   string `json:"status"`
+	}
+	if !decode(ctx, in, &input) || input.TicketId == "" || (input.Status != "OPEN" && input.Status != "CLOSED") {
+		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
+	}
+	if err := updateRow(cl, "support_tickets", input.TicketId, map[string]interface{}{
+		"status":    input.Status,
+		"updatedAt": now(),
+	}); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	return success(ctx, in, map[string]interface{}{"ok": true})
 }
 
 func adminOverviewGet(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {

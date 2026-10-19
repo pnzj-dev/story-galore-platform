@@ -1,0 +1,55 @@
+---
+import AdminLayout from "../../../../layouts/AdminLayout.astro";
+import { actions } from "astro:actions";
+import { fetchAdminSupportTicket } from "../../../../lib/gateway";
+
+const admin = Astro.locals.user;
+const ticketId = Astro.params.ticketId ?? "";
+const ticket = admin ? await fetchAdminSupportTicket(admin.$id, ticketId) : null;
+if (!ticket) Astro.response.status = 404;
+
+const result = Astro.getActionResult(actions.updateSupportTicket);
+if (result?.data?.ok) {
+  return Astro.redirect(`/admin/support/tickets/${ticketId}`);
+}
+const error = result?.error?.message;
+---
+
+<AdminLayout title="Admin — Ticket">
+  <main class="mx-auto max-w-[1600px] px-6 py-10">
+    <a href="/admin/support/tickets" class="text-sm text-foreground-muted transition hover:text-foreground">
+      &larr; Tickets
+    </a>
+
+    {
+      ticket ? (
+        <>
+          <div class="mt-4 flex items-center justify-between gap-3">
+            <h1 class="text-3xl font-bold">{ticket.subject}</h1>
+            <span class="text-xs uppercase tracking-wide text-foreground-muted">{ticket.status}</span>
+          </div>
+          {ticket.userId && <p class="mt-2 text-sm text-foreground-muted">From {ticket.userId}</p>}
+          <p class="mt-6 whitespace-pre-wrap leading-7 text-foreground-muted">{ticket.message}</p>
+
+          <form method="POST" action={actions.updateSupportTicket} class="mt-8 flex items-center gap-3">
+            <input type="hidden" name="ticketId" value={ticket.$id} />
+            {ticket.status === "OPEN" ? (
+              <input type="hidden" name="status" value="CLOSED" />
+            ) : (
+              <input type="hidden" name="status" value="OPEN" />
+            )}
+            <button
+              type="submit"
+              class="rounded-sm border border-border px-4 py-2 text-sm transition hover:opacity-90"
+            >
+              {ticket.status === "OPEN" ? "Close ticket" : "Reopen ticket"}
+            </button>
+            {error && <p class="text-sm text-danger">{error}</p>}
+          </form>
+        </>
+      ) : (
+        <p class="mt-8 text-foreground-muted">Ticket not found.</p>
+      )
+    }
+  </main>
+</AdminLayout>
