@@ -4,6 +4,7 @@
   "scripts": {
     "build": "pnpm --filter @storygalore/web build",
     "typecheck": "pnpm --filter @storygalore/web typecheck && pnpm --filter @storygalore/admin check",
+    "validate:typecheck": "pnpm typecheck",
     "test": "pnpm -r test",
     "appwrite:types": "appwrite types ./packages/appwrite-client/src/generated",
     "appwrite:pull": "appwrite pull all",
