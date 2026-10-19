@@ -15,19 +15,23 @@ Status: draft (for business sign-off before enablement of dynamic metering).
 
 ## StoryGalore-managed cost basis (Workers AI)
 
-Workers AI is billed in **neurons**: **$0.011 / 1,000 neurons**, with a **10,000-neuron/day free allocation** on the Workers plan.
+Workers AI is billed in **neurons** (Cloudflare-hosted models, **$0.011 / 1,000 neurons**, 10,000-neuron/day free) or in **units** (third-party models).
 
-| targetType | default model | indicative cost / generation | neurons |
-|---|---|---|---|
-| STORY_TEXT / DIALOGUE | `@cf/meta/llama-3.1-8b-instruct-awq` | ~$0.0004 (1K in + 1K out) | ~35K neurons / M tokens |
-| STORY_TEXT (cheap/draft) | `@cf/meta/llama-3.2-1b-instruct` | ~$0.0002 | ~18K neurons / M tokens |
-| IMAGE (future) | `@cf/black-forest-labs/flux-1-schnell` | ~$0.00005 / 512² tile | ~4.8 neurons / tile |
+| targetType | default model | indicative cost / generation |
+|---|---|---|
+| STORY_TEXT / DIALOGUE (default) | `@cf/qwen/qwen3.8-27b` | ~$0.0037 (1K in + 1K out: $0.45/M in, $3.20/M out) |
+| STORY_TEXT (cheap/draft) | `@cf/zai-org/glm-4.7-flash` | ~$0.00046 (1K in + 1K out: $0.06/M in, $0.40/M out) |
+| IMAGE (default) | `@cf/black-forest-labs/flux-2-klein-4b` | ~$0.00035 / 512² tile |
+| IMAGE (high quality) | `@cf/black-forest-labs/flux-2-dev` | ~$0.00062 / 512² tile · step |
+| VIDEO (feature-flagged, future) | `xai/grok-imagine-video` | $0.05–0.07 / second (third-party) |
 
 ## StoryGalore credit price (cost-plus, profitable)
 
-- Flat **`creditCost` = 1 credit ($0.01) per text generation** in V1.
-- Against ~$0.0004 of raw Workers AI cost, that is **~25× the raw cost** (and effectively ~100% margin once the 10K-neuron/day free tier absorbs the first generations). Target gross margin remains ≥ 60% with room to spare.
-- Per-model `creditCost` (e.g. 1B = 1 credit, 8B = 2 credits) is a later refinement.
+- Text generation: flat **`creditCost` = 1 credit ($0.01)**, against ~$0.0005–0.0037 of raw cost (≥ 2.7× margin, and effectively higher once the free tier applies).
+- Image generation: **1 credit** against ~$0.00035–0.00062 of raw cost (≥ 16× margin).
+- Video generation (future, feature-flagged): requires its own higher `creditCost` — a 5-second clip at $0.05–0.07/s is ~$0.25–0.35, so ~**30 credits** per clip, not 1.
+
+Per-model `creditCost` is the intended refinement so the price tracks the model (e.g. GLM-4.7-Flash = 1 credit, Qwen 3.8 27B = 2 credits, video = 30+ credits).
 
 ## BYOK / USER_HOSTED platform fee
 
