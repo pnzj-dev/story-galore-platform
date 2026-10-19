@@ -1,0 +1,25 @@
+schema: storygalore.workflow/v1
+version: 1
+id: prompt-redaction
+platform: cloudflare_workflows
+purpose: "Daily redaction of generation prompts past their retention window (docs/AI_PROMPT_RETENTION.md)."
+source: backend/cloudflare/workflows/prompt-redaction
+retention_policy: docs/AI_PROMPT_RETENTION.md
+trigger:
+  type: cron
+  schedule: "0 0 * * *"
+input: {}
+env:
+  APPWRITE_ENDPOINT: {kind: secret, required: true}
+  APPWRITE_PROJECT_ID: {kind: secret, required: true}
+  APPWRITE_API_KEY: {kind: secret, required: true, note: "narrowly scoped; never in workflow state"}
+  ADMIN_ACTOR_ID: {kind: secret, required: true, note: "admin service-account actor id"}
+steps:
+  - id: redact
+    description: "Call prompt_redact_expired to redact expired prompts to a content hash."
+    retry: {limit: 5, delay: 1m, backoff: exponential}
+security:
+  appwrite_access_via_scoped_key: true
+  no_raw_secrets_in_workflow_state: true
+  secrets_redacted: true
+status: IMPLEMENTED_PENDING_DEPLOYMENT

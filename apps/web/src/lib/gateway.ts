@@ -784,3 +784,18 @@ export async function fetchCreatorAnalytics(actorId: string): Promise<CreatorAna
   if (out.status !== "SUCCESS") return null;
   return out.result ?? {};
 }
+
+export interface AiProviderSummary {
+  providerId?: string;
+  displayName?: string;
+  creditEligible?: boolean;
+  creditCost?: number;
+  status?: string;
+}
+
+/** List ACTIVE AI providers (scoped server-side). */
+export async function fetchAiProviders(actorId: string): Promise<AiProviderSummary[]> {
+  const out = await invokeApi<{ items?: AiProviderSummary[] }>("ai_provider_list", {}, actorId);
+  if (out.status !== "SUCCESS" || !out.result?.items) return [];
+  return out.result.items;
+}

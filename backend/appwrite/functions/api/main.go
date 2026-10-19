@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"crypto/rand"
+	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -95,8 +96,9 @@ var knownOperations = map[string]bool{
 	"generation_list": true, "creator_analytics_get": true,
 	"generation_cancel": true, "generation_fail": true,
 	"generation_process": true, "generation_list_pending": true,
-	"generation_complete": true,
-	"ai_provider_list":    true, "ai_provider_get": true,
+	"generation_complete":   true,
+	"prompt_redact_expired": true,
+	"ai_provider_list":      true, "ai_provider_get": true,
 	"ai_provider_create": true, "ai_provider_update": true,
 }
 
@@ -170,6 +172,8 @@ func Main(ctx openruntimes.Context) openruntimes.Response {
 		return generationProcess(ctx, &in, cl)
 	case "generation_list_pending":
 		return generationListPending(ctx, &in, cl)
+	case "prompt_redact_expired":
+		return promptRedactExpired(ctx, &in, cl)
 	case "ai_provider_list":
 		return aiProviderList(ctx, &in, cl)
 	case "ai_provider_get":
@@ -2990,7 +2994,7 @@ func generationCancel(ctx openruntimes.Context, in *GatewayInput, cl client.Clie
 	case "COMPLETED", "FAILED", "CANCELLED":
 		return respond(ctx, in.OperationId, "CONFLICT", false)
 	}
-	if err := updateRow(cl, "studio_generation_requests", input.GenerationId, map[string]interface{}{"status": "CANCELLED"}); err != nil {
+	if err := updateRow(cl, "studio_generation_requests", input.GenerationId, map[string]interface{}{"status": "CANCELLED", "completedAt": now()}); err != nil {
 		return internalFailure(ctx, in, err)
 	}
 	if status == "RESERVED" || status == "PROCESSING" {
@@ -3017,7 +3021,7 @@ func generationFail(ctx openruntimes.Context, in *GatewayInput, cl client.Client
 	if status != "PROCESSING" && status != "SETTLING" {
 		return respond(ctx, in.OperationId, "CONFLICT", false)
 	}
-	if err := updateRow(cl, "studio_generation_requests", input.GenerationId, map[string]interface{}{"status": "FAILED"}); err != nil {
+	if err := updateRow(cl, "studio_generation_requests", input.GenerationId, map[string]interface{}{"status": "FAILED", "completedAt": now()}); err != nil {
 		return internalFailure(ctx, in, err)
 	}
 	_ = createCreditTransaction(cl, input.GenerationId, generationCreatorId(cl, input.GenerationId), "REFUND", reservedCreditAmount(cl, input.GenerationId))
@@ -3086,7 +3090,7 @@ func generationComplete(ctx openruntimes.Context, in *GatewayInput, cl client.Cl
 	if err := createRow(cl, "ai_generation_outputs", outputId, outRow); err != nil {
 		return internalFailure(ctx, in, err)
 	}
-	if err := updateRow(cl, "studio_generation_requests", input.GenerationId, map[string]interface{}{"status": "COMPLETED"}); err != nil {
+	if err := updateRow(cl, "studio_generation_requests", input.GenerationId, map[string]interface{}{"status": "COMPLETED", "completedAt": now()}); err != nil {
 		return internalFailure(ctx, in, err)
 	}
 	_ = createCreditTransaction(cl, input.GenerationId, generationCreatorId(cl, input.GenerationId), "SETTLE", reservedCreditAmount(cl, input.GenerationId))
@@ -3146,6 +3150,54 @@ func generationListPending(ctx openruntimes.Context, in *GatewayInput, cl client
 		}
 	}
 	return success(ctx, in, map[string]interface{}{"items": pending})
+}
+
+func promptRedactExpired(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	if !adminActor(ctx, in, cl) {
+		return respond(ctx, in.OperationId, "FORBIDDEN", false)
+	}
+	cutoff := time.Now().AddDate(0, 0, -30).UTC().Format(time.RFC3339Nano)
+	service := tablesdb.New(cl)
+	list, err := service.ListRows(databaseID, "studio_generation_requests", service.WithListRowsQueries([]string{
+		`{"method":"limit","values":[1000]}`,
+	}))
+	if err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	var raw map[string]interface{}
+	if err := list.Decode(&raw); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	rows, _ := raw["rows"].([]interface{})
+	redacted := 0
+	for _, r := range rows {
+		m, ok := r.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		status, _ := m["status"].(string)
+		if status != "COMPLETED" && status != "FAILED" && status != "CANCELLED" {
+			continue
+		}
+		completedAt, _ := m["completedAt"].(string)
+		if completedAt == "" || completedAt >= cutoff {
+			continue
+		}
+		prompt, _ := m["prompt"].(string)
+		if prompt == "" || strings.HasPrefix(prompt, "redacted:") {
+			continue
+		}
+		rowId, _ := m["$id"].(string)
+		if rowId == "" {
+			continue
+		}
+		sum := sha256.Sum256([]byte(prompt))
+		if err := updateRow(cl, "studio_generation_requests", rowId, map[string]interface{}{"prompt": "redacted:" + hex.EncodeToString(sum[:])}); err != nil {
+			return internalFailure(ctx, in, err)
+		}
+		redacted++
+	}
+	return success(ctx, in, map[string]interface{}{"redacted": redacted})
 }
 
 func aiProviderList(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {

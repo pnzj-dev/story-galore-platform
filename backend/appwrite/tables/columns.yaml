@@ -564,6 +564,7 @@ studio_tables:
       - {key: executionLocation, type: enum, elements: [CLOUD, USER_HOSTED], required: true}
       - {key: policyContext, type: text, required: true}
       - {key: status, type: enum, elements: [QUEUED, POLICY_CHECK, ALLOWED, RESERVED, PROCESSING, SETTLING, COMPLETED, FAILED, CANCELLED], required: false}
+      - {key: completedAt, type: datetime, required: false}
   - table: ai_credit_transactions
     source: contracts/deterministic/ai/persistence.yaml
     partition_key: creatorId

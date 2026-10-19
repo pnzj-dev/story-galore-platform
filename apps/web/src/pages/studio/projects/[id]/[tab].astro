@@ -2,7 +2,7 @@
 import StudioLayout from "@/layouts/StudioLayout.astro";
 import StudioProjectTabs from "@/components/StudioProjectTabs.astro";
 import { actions } from "astro:actions";
-import { fetchProject, fetchStoryBible, fetchCharacters, fetchWorld, fetchAssets, fetchStudioPublications, fetchPromptTemplates, fetchGenerations, fetchCreatorAnalytics } from "@/lib/gateway";
+import { fetchProject, fetchStoryBible, fetchCharacters, fetchWorld, fetchAssets, fetchStudioPublications, fetchPromptTemplates, fetchGenerations, fetchCreatorAnalytics, fetchAiProviders } from "@/lib/gateway";
 
 const user = Astro.locals.user;
 if (!user) {
@@ -40,6 +40,8 @@ const publications = tab === "publications" ? await fetchStudioPublications(user
 const promptTemplates = tab === "prompts" || tab === "ai" ? await fetchPromptTemplates(user.$id, projectId) : [];
 const generations = tab === "ai" ? await fetchGenerations(user.$id, projectId) : [];
 const analytics = tab === "analytics" ? await fetchCreatorAnalytics(user.$id) : null;
+const providers = tab === "ai" ? await fetchAiProviders(user.$id) : [];
+const creditProvider = providers.find((p) => p.creditEligible === true);
 
 const bibleResult = Astro.getActionResult(actions.saveStoryBible);
 if (bibleResult?.data?.ok) {
@@ -369,6 +371,16 @@ const generationError = generationResult?.error?.message;
           <p class="mt-1 text-sm text-foreground-muted">
             Submit a generation request. Credit eligibility is decided server-side; BYOK and user-hosted runs are never credit-eligible.
           </p>
+
+          {creditProvider ? (
+            <p class="mt-3 inline-block rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground-muted">
+              {creditProvider.displayName ?? creditProvider.providerId}: {creditProvider.creditCost ?? 1} credit(s) per generation
+            </p>
+          ) : (
+            <p class="mt-3 inline-block rounded-md border border-dashed border-border px-3 py-2 text-sm text-foreground-muted">
+              No credit-eligible provider registered yet.
+            </p>
+          )}
 
           <form method="POST" action={actions.requestGeneration} class="mt-4 max-w-lg space-y-4">
             <input type="hidden" name="projectId" value={projectId} />
