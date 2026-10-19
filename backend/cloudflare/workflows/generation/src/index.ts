@@ -1,4 +1,4 @@
-import { WorkflowEntrypoint, WorkflowStep, WorkflowEvent } from 'cloudflare:workers';
+import { WorkflowEntrypoint, WorkflowStep, WorkflowEvent, type Ai } from 'cloudflare:workers';
 
 /**
  * AI generation workflow (durable runner).
@@ -7,9 +7,10 @@ import { WorkflowEntrypoint, WorkflowStep, WorkflowEvent } from 'cloudflare:work
  * drives each through the generation state machine: RESERVED -> PROCESSING ->
  * COMPLETED (write output + settle) or FAILED (refund).
  *
- * The OpenAI-compatible connector resolves the provider + credential (from the
- * PROVIDER_CREDENTIALS secret) and calls the provider over https. It fails
- * closed when no credit-eligible provider or credential is configured.
+ * StoryGalore-managed (PLATFORM_CREDITS) generation uses the Workers AI binding
+ * (env.AI) — no external key. BYOK/USER_HOSTED uses the OpenAI-compatible HTTP
+ * adapter with the creator's credential. Both fail closed when no provider,
+ * credential, or model is configured.
  *
  * Appwrite access goes through the `api` gateway function (authorized domain
  * operations) using a narrowly-scoped API key and the admin service-account
@@ -21,9 +22,11 @@ type Env = {
   APPWRITE_PROJECT_ID: string;
   APPWRITE_API_KEY: string;
   ADMIN_ACTOR_ID: string;
-  /** JSON map of provider credential reference -> API key (Cloudflare Secret). */
+  /** Workers AI binding (native Cloudflare models). */
+  AI: Ai;
+  /** JSON map of provider credential reference -> API key (Cloudflare Secret), BYOK only. */
   PROVIDER_CREDENTIALS?: string;
-  /** Default model id for OpenAI-compatible providers. */
+  /** Fallback model id when no ai_models entry matches. */
   DEFAULT_MODEL_ID?: string;
 };
 
@@ -125,17 +128,26 @@ export class GenerationWorkflow extends WorkflowEntrypoint<Env, Params> {
     gen: GenerationRequest,
     model: string,
   ): Promise<{ text: string }> {
+    const protocol = String(provider.protocol ?? '');
+    if (!model) throw new Error('no model resolved');
+
+    if (protocol === 'WORKERS_AI') {
+      // Native Cloudflare model — no endpoint or API key required.
+      const result = (await this.env.AI.run(model, {
+        prompt: gen.prompt,
+        stream: false,
+      })) as { response?: string };
+      return { text: result.response ?? '' };
+    }
+
     const endpoint = String(provider.endpointRef ?? '');
     if (!endpoint) throw new Error('provider has no endpointRef');
-    const protocol = String(provider.protocol ?? '');
     if (protocol !== 'OPENAI_COMPATIBLE') throw new Error(`unsupported protocol ${protocol}`);
 
     const credentials = JSON.parse(this.env.PROVIDER_CREDENTIALS ?? '{}') as Record<string, string>;
     const credKey = String(provider.credentialRef ?? provider.providerId ?? '');
     const apiKey = credentials[credKey];
     if (!apiKey) throw new Error('no credential for provider');
-
-    if (!model) throw new Error('no model resolved');
 
     // SSRF guard: https only, and reject literal private/loopback/link-local hosts.
     let baseUrl: URL;

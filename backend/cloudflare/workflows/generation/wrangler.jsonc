@@ -3,6 +3,9 @@
   "main": "src/index.ts",
   "compatibility_date": "2026-10-01",
   "observability": { "enabled": true },
+  "ai": {
+    "binding": "AI"
+  },
   "exports": {
     "GenerationWorkflow": {
       "type": "workflow",

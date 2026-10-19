@@ -585,7 +585,7 @@ studio_tables:
       - {key: providerId, type: varchar, size: 255, required: true}
       - {key: displayName, type: varchar, size: 255, required: true}
       - {key: executionLocation, type: enum, elements: [CLOUD, USER_HOSTED], required: true}
-      - {key: protocol, type: enum, elements: [OPENAI_COMPATIBLE, OLLAMA, COMFYUI, PROVIDER_NATIVE, OTHER], required: true}
+      - {key: protocol, type: enum, elements: [OPENAI_COMPATIBLE, OLLAMA, COMFYUI, PROVIDER_NATIVE, WORKERS_AI, OTHER], required: true}
       - {key: ownerType, type: enum, elements: [STORYGALORE, WORKSPACE], required: true}
       - {key: ownership, type: enum, elements: [STORYGALORE, USER], required: true}
       - {key: creditEligible, type: boolean, required: true}
