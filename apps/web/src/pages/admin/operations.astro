@@ -12,7 +12,8 @@ const createIncidentResult = Astro.getActionResult(actions.createIncident);
 const updateIncidentResult = Astro.getActionResult(actions.updateIncident);
 const createAlertResult = Astro.getActionResult(actions.createAlert);
 const updateAlertResult = Astro.getActionResult(actions.updateAlert);
-if (createIncidentResult?.data?.ok || updateIncidentResult?.data?.ok || createAlertResult?.data?.ok || updateAlertResult?.data?.ok) {
+const evaluateAlertsResult = Astro.getActionResult(actions.evaluateAlerts);
+if (createIncidentResult?.data?.ok || updateIncidentResult?.data?.ok || createAlertResult?.data?.ok || updateAlertResult?.data?.ok || evaluateAlertsResult?.data?.ok) {
   return Astro.redirect("/admin/operations");
 }
 const incidentError = createIncidentResult?.error?.message ?? updateIncidentResult?.error?.message;
@@ -142,6 +143,13 @@ const alertError = createAlertResult?.error?.message ?? updateAlertResult?.error
     <section class="mt-10">
       <h2 class="text-2xl font-bold">Alerts</h2>
       <p class="mt-1 text-sm text-foreground-muted">Configuration-driven thresholds (metric + operator + threshold).</p>
+
+      <form method="POST" action={actions.evaluateAlerts} class="mt-4">
+        <button type="submit" class="rounded-sm border border-border px-4 py-2 text-sm font-semibold transition hover:bg-surface">
+          Run evaluation
+        </button>
+      </form>
+      <p class="mt-1 text-xs text-foreground-muted">Triggered alerts open an incident automatically.</p>
 
       <form method="POST" action={actions.createAlert} class="mt-4 max-w-lg space-y-3 rounded-md border border-border bg-surface p-4">
         <div>

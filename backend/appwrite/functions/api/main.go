@@ -107,7 +107,8 @@ var knownOperations = map[string]bool{
 	"incident_create": true, "incident_list": true, "incident_update": true,
 	"admin_plan_profitability": true,
 	"alert_create":             true, "alert_list": true, "alert_update": true,
-	"admin_ai_cost": true,
+	"alert_evaluate": true,
+	"admin_ai_cost":  true,
 }
 
 const databaseID = "main"
@@ -216,6 +217,8 @@ func Main(ctx openruntimes.Context) openruntimes.Response {
 		return alertList(ctx, &in, cl)
 	case "alert_update":
 		return alertUpdate(ctx, &in, cl)
+	case "alert_evaluate":
+		return alertEvaluate(ctx, &in, cl)
 	case "admin_ai_cost":
 		return adminAiCost(ctx, &in, cl)
 	case "creator_analytics_get":
@@ -2540,6 +2543,93 @@ func alertUpdate(ctx openruntimes.Context, in *GatewayInput, cl client.Client) o
 		return internalFailure(ctx, in, err)
 	}
 	return success(ctx, in, map[string]interface{}{"ok": true})
+}
+
+// metricValue computes the current value of a supported alert metric.
+func metricValue(cl client.Client, metric string) int {
+	switch metric {
+	case "generation.pending":
+		return countRows(cl, "studio_generation_requests", qEqual("status", "RESERVED")) + countRows(cl, "studio_generation_requests", qEqual("status", "QUEUED"))
+	case "generation.failed":
+		return countRows(cl, "studio_generation_requests", qEqual("status", "FAILED"))
+	case "domain_events.count":
+		return countRows(cl, "domain_events")
+	case "analytics_events.count":
+		return countRows(cl, "analytics_events")
+	case "incidents.open":
+		return countRows(cl, "incidents", qEqual("status", "OPEN")) + countRows(cl, "incidents", qEqual("status", "INVESTIGATING"))
+	default:
+		return 0
+	}
+}
+
+func evaluateOperator(op string, value, threshold int) bool {
+	switch op {
+	case "gt":
+		return value > threshold
+	case "gte":
+		return value >= threshold
+	case "lt":
+		return value < threshold
+	case "lte":
+		return value <= threshold
+	default:
+		return false
+	}
+}
+
+// alertEvaluate evaluates enabled alerts against their metrics. A triggered alert
+// records lastTriggeredAt and opens an incident.
+func alertEvaluate(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	if !adminActor(ctx, in, cl) {
+		return respond(ctx, in.OperationId, "FORBIDDEN", false)
+	}
+	service := tablesdb.New(cl)
+	list, err := service.ListRows(databaseID, "alerts", service.WithListRowsQueries([]string{
+		`{"method":"limit","values":[100]}`,
+	}))
+	if err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	var raw map[string]interface{}
+	if err := list.Decode(&raw); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	rows, _ := raw["rows"].([]interface{})
+	results := make([]map[string]interface{}, 0, len(rows))
+	for _, r := range rows {
+		m, ok := r.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		if enabled, _ := m["enabled"].(bool); !enabled {
+			continue
+		}
+		alertId, _ := m["$id"].(string)
+		name, _ := m["name"].(string)
+		metric, _ := m["metric"].(string)
+		operator, _ := m["operator"].(string)
+		threshold := toInt(m["threshold"])
+		severity, _ := m["severity"].(string)
+		subsystem, _ := m["metric"].(string)
+		value := metricValue(cl, metric)
+		triggered := evaluateOperator(operator, value, threshold)
+		if triggered {
+			if err := updateRow(cl, "alerts", alertId, map[string]interface{}{"lastTriggeredAt": now()}); err == nil {
+				rowId := newUUID()
+				_ = createRow(cl, "incidents", rowId, map[string]interface{}{
+					"id": rowId, "severity": severity, "status": "OPEN",
+					"subsystem": subsystem, "summary": "Alert triggered: " + name,
+					"startedAt": now(), "createdAt": now(),
+				})
+			}
+		}
+		results = append(results, map[string]interface{}{
+			"alertId": alertId, "name": name, "metric": metric, "value": value,
+			"threshold": threshold, "triggered": triggered,
+		})
+	}
+	return success(ctx, in, map[string]interface{}{"items": results})
 }
 
 // sumCreditAmount sums the ai_credit_transactions amount by status.

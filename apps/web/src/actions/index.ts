@@ -464,6 +464,19 @@ export const server = {
     },
   }),
 
+  evaluateAlerts: defineAction({
+    accept: "form",
+    handler: async (_, context) => {
+      const user = context.locals.user;
+      if (!user) throw new ActionError({ code: "UNAUTHORIZED", message: "Sign in to continue." });
+      const out = await invokeApi("alert_evaluate", {}, user.$id);
+      if (out.status !== "SUCCESS") {
+        throw new ActionError({ code: "INTERNAL_SERVER_ERROR", message: "Could not evaluate alerts." });
+      }
+      return { ok: true };
+    },
+  }),
+
   updateDocument: defineAction({
     accept: "form",
     input: z.object({

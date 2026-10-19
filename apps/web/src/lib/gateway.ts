@@ -584,6 +584,22 @@ export async function fetchAiCost(actorId: string): Promise<AiCost | null> {
   return out.result ?? {};
 }
 
+export interface AlertEvaluation {
+  alertId?: string;
+  name?: string;
+  metric?: string;
+  value?: number;
+  threshold?: number;
+  triggered?: boolean;
+}
+
+/** Evaluate enabled alerts against current metrics (admin-only). */
+export async function evaluateAlerts(actorId: string): Promise<AlertEvaluation[]> {
+  const out = await invokeApi<{ items?: AlertEvaluation[] }>("alert_evaluate", {}, actorId);
+  if (out.status !== "SUCCESS" || !out.result?.items) return [];
+  return out.result.items;
+}
+
 export async function fetchAdminRetention(actorId: string): Promise<RetentionSummary | null> {
   const out = await invokeApi<RetentionSummary>("admin_analytics_retention_get", {}, actorId);
   if (out.status !== "SUCCESS") return null;
