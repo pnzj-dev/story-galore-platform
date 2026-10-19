@@ -95,6 +95,8 @@ var knownOperations = map[string]bool{
 	"generation_list": true, "creator_analytics_get": true,
 	"generation_cancel": true, "generation_settle": true, "generation_fail": true,
 	"generation_process": true, "generation_list_pending": true,
+	"ai_provider_list": true, "ai_provider_get": true,
+	"ai_provider_create": true, "ai_provider_update": true,
 }
 
 const databaseID = "main"
@@ -167,6 +169,14 @@ func Main(ctx openruntimes.Context) openruntimes.Response {
 		return generationProcess(ctx, &in, cl)
 	case "generation_list_pending":
 		return generationListPending(ctx, &in, cl)
+	case "ai_provider_list":
+		return aiProviderList(ctx, &in, cl)
+	case "ai_provider_get":
+		return aiProviderGet(ctx, &in, cl)
+	case "ai_provider_create":
+		return aiProviderCreate(ctx, &in, cl)
+	case "ai_provider_update":
+		return aiProviderUpdate(ctx, &in, cl)
 	case "creator_analytics_get":
 		return creatorAnalyticsGet(ctx, &in, cl)
 	case "publication_validate":
@@ -3046,6 +3056,156 @@ func generationListPending(ctx openruntimes.Context, in *GatewayInput, cl client
 		}
 	}
 	return success(ctx, in, map[string]interface{}{"items": pending})
+}
+
+func aiProviderList(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	service := tablesdb.New(cl)
+	list, err := service.ListRows(databaseID, "ai_providers", service.WithListRowsQueries([]string{
+		`{"method":"limit","values":[200]}`,
+	}))
+	if err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	var raw map[string]interface{}
+	if err := list.Decode(&raw); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	rows, _ := raw["rows"].([]interface{})
+	if !adminActor(ctx, in, cl) {
+		rows = filterByStatus(rows, "ACTIVE")
+	}
+	return success(ctx, in, map[string]interface{}{"items": rows})
+}
+
+func aiProviderGet(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	var input struct {
+		ProviderId string `json:"providerId"`
+	}
+	if !decode(ctx, in, &input) || input.ProviderId == "" {
+		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
+	}
+	service := tablesdb.New(cl)
+	list, err := service.ListRows(databaseID, "ai_providers", service.WithListRowsQueries([]string{
+		qEqual("providerId", input.ProviderId),
+		`{"method":"limit","values":[1]}`,
+	}))
+	if err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	var raw map[string]interface{}
+	if err := list.Decode(&raw); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	rows, _ := raw["rows"].([]interface{})
+	if len(rows) == 0 {
+		return respond(ctx, in.OperationId, "RESOURCE_NOT_FOUND", false)
+	}
+	m, _ := rows[0].(map[string]interface{})
+	if !adminActor(ctx, in, cl) {
+		if s, _ := m["status"].(string); s != "ACTIVE" {
+			return respond(ctx, in.OperationId, "RESOURCE_NOT_FOUND", false)
+		}
+	}
+	return success(ctx, in, m)
+}
+
+func aiProviderCreate(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	if !adminActor(ctx, in, cl) {
+		return respond(ctx, in.OperationId, "FORBIDDEN", false)
+	}
+	var input struct {
+		ProviderId        string `json:"providerId"`
+		DisplayName       string `json:"displayName"`
+		ExecutionLocation string `json:"executionLocation"`
+		Protocol          string `json:"protocol"`
+		OwnerType         string `json:"ownerType"`
+		Ownership         string `json:"ownership"`
+		CreditEligible    bool   `json:"creditEligible"`
+		CredentialRef     string `json:"credentialRef"`
+		EndpointRef       string `json:"endpointRef"`
+	}
+	if !decode(ctx, in, &input) || input.ProviderId == "" || input.DisplayName == "" || input.ExecutionLocation == "" || input.Protocol == "" || input.OwnerType == "" || input.Ownership == "" {
+		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
+	}
+	// Server-enforce: only STORYGALORE-owned CLOUD providers are credit-eligible.
+	creditEligible := input.CreditEligible
+	if input.OwnerType != "STORYGALORE" || input.ExecutionLocation != "CLOUD" {
+		creditEligible = false
+	}
+	rowId := newUUID()
+	row := map[string]interface{}{
+		"id": rowId, "providerId": input.ProviderId, "displayName": input.DisplayName,
+		"executionLocation": input.ExecutionLocation, "protocol": input.Protocol,
+		"ownerType": input.OwnerType, "ownership": input.Ownership,
+		"creditEligible": creditEligible, "status": "ACTIVE", "createdAt": now(),
+	}
+	if input.CredentialRef != "" {
+		row["credentialRef"] = input.CredentialRef
+	}
+	if input.EndpointRef != "" {
+		row["endpointRef"] = input.EndpointRef
+	}
+	if err := createRow(cl, "ai_providers", rowId, row); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	return success(ctx, in, map[string]interface{}{"ok": true, "providerId": input.ProviderId, "creditEligible": creditEligible})
+}
+
+func aiProviderUpdate(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	if !adminActor(ctx, in, cl) {
+		return respond(ctx, in.OperationId, "FORBIDDEN", false)
+	}
+	var input struct {
+		ProviderId     string `json:"providerId"`
+		Status         string `json:"status"`
+		CreditEligible *bool  `json:"creditEligible"`
+	}
+	if !decode(ctx, in, &input) || input.ProviderId == "" {
+		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
+	}
+	service := tablesdb.New(cl)
+	list, err := service.ListRows(databaseID, "ai_providers", service.WithListRowsQueries([]string{
+		qEqual("providerId", input.ProviderId),
+		`{"method":"limit","values":[1]}`,
+	}))
+	if err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	var raw map[string]interface{}
+	if err := list.Decode(&raw); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	rows, _ := raw["rows"].([]interface{})
+	if len(rows) == 0 {
+		return respond(ctx, in.OperationId, "RESOURCE_NOT_FOUND", false)
+	}
+	m, _ := rows[0].(map[string]interface{})
+	rowId, _ := m["$id"].(string)
+	data := map[string]interface{}{}
+	if input.Status != "" {
+		data["status"] = input.Status
+	}
+	if input.CreditEligible != nil {
+		data["creditEligible"] = *input.CreditEligible
+	}
+	if err := updateRow(cl, "ai_providers", rowId, data); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	return success(ctx, in, map[string]interface{}{"ok": true})
+}
+
+func filterByStatus(rows []interface{}, status string) []interface{} {
+	out := make([]interface{}, 0, len(rows))
+	for _, r := range rows {
+		m, ok := r.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		if s, _ := m["status"].(string); s == status {
+			out = append(out, m)
+		}
+	}
+	return out
 }
 
 func promptTemplateList(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {

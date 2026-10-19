@@ -576,6 +576,24 @@ studio_tables:
       - {key: amount, type: integer, required: true}
       - {key: status, type: enum, elements: [RESERVED, SETTLED, REFUNDED], required: true}
       - {key: createdAt, type: datetime, required: true}
+  - table: ai_providers
+    source: contracts/deterministic/ai/persistence.yaml
+    partition_key: providerId
+    columns:
+      - {key: id, type: varchar, size: 255, required: true}
+      - {key: providerId, type: varchar, size: 255, required: true}
+      - {key: displayName, type: varchar, size: 255, required: true}
+      - {key: executionLocation, type: enum, elements: [CLOUD, USER_HOSTED], required: true}
+      - {key: protocol, type: enum, elements: [OPENAI_COMPATIBLE, OLLAMA, COMFYUI, PROVIDER_NATIVE, OTHER], required: true}
+      - {key: ownerType, type: enum, elements: [STORYGALORE, WORKSPACE], required: true}
+      - {key: ownership, type: enum, elements: [STORYGALORE, USER], required: true}
+      - {key: creditEligible, type: boolean, required: true}
+      - {key: status, type: enum, elements: [ACTIVE, DISABLED, UNREACHABLE, REQUIRES_REAUTH, POLICY_RESTRICTED], required: true}
+      - {key: credentialRef, type: varchar, size: 255, required: false}
+      - {key: endpointRef, type: varchar, size: 255, required: false}
+      - {key: createdAt, type: datetime, required: true}
+      - {key: lastTestedAt, type: datetime, required: false}
+      - {key: lastUsedAt, type: datetime, required: false}
   - table: studio_publication_validation_runs
     source: contracts/studio/validation.schema.yaml
     partition_key: documentId

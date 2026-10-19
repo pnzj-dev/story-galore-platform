@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { computeCreditEligibility, transitionGenerationStatus } from "./ai";
+import { computeCreditEligibility, transitionGenerationStatus, resolveCreditEligibleProvider, type AIProvider } from "./ai";
 
 describe("computeCreditEligibility", () => {
   it("allows StoryGalore-managed, credit-eligible cloud models", () => {
@@ -104,5 +104,50 @@ describe("transitionGenerationStatus", () => {
     expect(transitionGenerationStatus("ALLOWED", "PROCESS")).toBeNull(); // must RESERVE first
     expect(transitionGenerationStatus("RESERVED", "SETTLE")).toBeNull(); // must PROCESS first
     expect(transitionGenerationStatus("CANCELLED", "PROCESS")).toBeNull();
+  });
+});
+
+function provider(overrides: Partial<AIProvider> = {}): AIProvider {
+  return {
+    id: "p-1",
+    providerId: "openai",
+    displayName: "OpenAI",
+    executionLocation: "CLOUD",
+    protocol: "OPENAI_COMPATIBLE",
+    ownerType: "STORYGALORE",
+    ownership: "STORYGALORE",
+    creditEligible: true,
+    status: "ACTIVE",
+    createdAt: "2026-01-01T00:00:00.000Z",
+    ...overrides,
+  };
+}
+
+describe("resolveCreditEligibleProvider", () => {
+  it("resolves an ACTIVE, CLOUD, STORYGALORE, credit-eligible provider", () => {
+    const p = provider();
+    expect(resolveCreditEligibleProvider([p])).toBe(p);
+  });
+
+  it("fails closed when no providers are registered", () => {
+    expect(resolveCreditEligibleProvider([])).toBeNull();
+  });
+
+  it("ignores non-credit-eligible providers", () => {
+    expect(resolveCreditEligibleProvider([provider({ creditEligible: false })])).toBeNull();
+  });
+
+  it("ignores workspace-owned providers", () => {
+    expect(resolveCreditEligibleProvider([provider({ ownerType: "WORKSPACE" })])).toBeNull();
+  });
+
+  it("ignores disabled providers", () => {
+    expect(resolveCreditEligibleProvider([provider({ status: "DISABLED" })])).toBeNull();
+  });
+
+  it("ignores user-hosted providers", () => {
+    expect(
+      resolveCreditEligibleProvider([provider({ executionLocation: "USER_HOSTED" })]),
+    ).toBeNull();
   });
 });

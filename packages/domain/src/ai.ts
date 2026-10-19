@@ -198,3 +198,20 @@ export interface CreditTransaction {
   status: CreditTransactionStatus;
   createdAt: string;
 }
+
+/**
+ * Resolve the StoryGalore-managed, credit-eligible provider for a PLATFORM_CREDITS
+ * generation. Fails closed (null) when no ACTIVE, CLOUD, STORYGALORE-owned,
+ * credit-eligible provider is registered.
+ */
+export function resolveCreditEligibleProvider(providers: AIProvider[]): AIProvider | null {
+  return (
+    providers.find(
+      (p) =>
+        p.status === "ACTIVE" &&
+        p.executionLocation === "CLOUD" &&
+        p.ownerType === "STORYGALORE" &&
+        p.creditEligible,
+    ) ?? null
+  );
+}

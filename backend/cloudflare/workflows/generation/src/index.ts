@@ -78,12 +78,42 @@ export class GenerationWorkflow extends WorkflowEntrypoint<Env, Params> {
     });
     if (proc.status !== 'SUCCESS') throw new Error(`generation_process failed: ${proc.errorCode}`);
 
-    // TODO: invoke the registered provider/model connector here. Until one is
-    // registered, fail closed — no generation output is fabricated.
+    // Resolve the credit-eligible provider from the server-side catalog.
+    const provider = await this.resolveProvider();
+    if (!provider) {
+      await this.failClosed(gen, 'no credit-eligible provider registered');
+      return;
+    }
+
+    // TODO: invoke the provider/model connector using the resolved `provider`.
+    // Until the connector is registered, fail closed — no output is fabricated.
+    await this.failClosed(gen, 'provider connector not registered');
+  }
+
+  async resolveProvider(): Promise<Record<string, unknown> | null> {
+    const out = await this.invokeGateway<{ items?: Array<Record<string, unknown>> }>(
+      'ai_provider_list',
+      {},
+    );
+    if (out.status !== 'SUCCESS') throw new Error(`ai_provider_list failed: ${out.errorCode}`);
+    const providers = out.result?.items ?? [];
+    return (
+      providers.find(
+        (p) =>
+          String(p.status ?? '') === 'ACTIVE' &&
+          String(p.executionLocation ?? '') === 'CLOUD' &&
+          String(p.ownerType ?? '') === 'STORYGALORE' &&
+          p.creditEligible === true,
+      ) ?? null
+    );
+  }
+
+  async failClosed(gen: GenerationRequest, reason: string): Promise<void> {
     const fail = await this.invokeGateway<{ status?: string }>('generation_fail', {
       generationId: gen.requestId,
     });
     if (fail.status !== 'SUCCESS') throw new Error(`generation_fail failed: ${fail.errorCode}`);
+    console.log(`[generation] failed ${gen.requestId}: ${reason}`);
   }
 
   async invokeGateway<T>(operation: string, input: unknown): Promise<GatewayOutput<T>> {
