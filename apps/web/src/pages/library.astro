@@ -1,0 +1,32 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { MediaRail } from "@storygalore/ui";
+import { fetchContinueItems } from "../lib/gateway";
+
+const user = Astro.locals.user;
+if (!user) {
+  return Astro.redirect("/auth/login");
+}
+
+const continueItems = await fetchContinueItems(user.$id);
+---
+
+<Layout title="Library">
+  <main class="mx-auto max-w-[1400px] px-12 py-12">
+    <h1 class="font-serif text-3xl font-bold">Library</h1>
+    <p class="mt-2 text-foreground-muted">Your in-progress titles across every medium.</p>
+
+    <div class="mt-8">
+      <MediaRail
+        client:load
+        title="Continue"
+        items={continueItems}
+        emptyHint="Nothing in progress yet. Start reading, watching, or listening."
+      />
+    </div>
+
+    <div class="mt-12 rounded-md border border-dashed border-border px-6 py-8 text-sm text-foreground-muted">
+      Saved titles and collections are coming soon.
+    </div>
+  </main>
+</Layout>

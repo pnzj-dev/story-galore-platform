@@ -70,6 +70,60 @@ export const server = {
     },
   }),
 
+  forgotPassword: defineAction({
+    accept: "form",
+    input: z.object({ email: z.string().email() }),
+    handler: async (input, context) => {
+      const { account } = createServerClient({ endpoint, projectId });
+      try {
+        const resetUrl = `${context.url.origin}/auth/reset-password`;
+        await account.createRecovery(input.email, resetUrl);
+      } catch {
+        // Do not reveal whether the email exists.
+      }
+      return { ok: true };
+    },
+  }),
+
+  resetPassword: defineAction({
+    accept: "form",
+    input: z.object({
+      userId: z.string().min(1),
+      secret: z.string().min(1),
+      password: z.string().min(8).max(256),
+    }),
+    handler: async (input) => {
+      const { account } = createServerClient({ endpoint, projectId });
+      try {
+        await account.updateRecovery(input.userId, input.secret, input.password);
+        return { ok: true };
+      } catch {
+        throw new ActionError({ code: "BAD_REQUEST", message: "Invalid or expired reset link." });
+      }
+    },
+  }),
+
+  createSupportTicket: defineAction({
+    accept: "form",
+    input: z.object({
+      subject: z.string().min(1).max(255),
+      message: z.string().min(1).max(10000),
+    }),
+    handler: async (input, context) => {
+      const user = context.locals.user;
+      if (!user) throw new ActionError({ code: "UNAUTHORIZED", message: "Sign in to contact support." });
+      const out = await invokeApi(
+        "support_ticket_create",
+        { subject: input.subject, message: input.message },
+        user.$id,
+      );
+      if (out.status !== "SUCCESS") {
+        throw new ActionError({ code: "INTERNAL_SERVER_ERROR", message: "Could not submit your request." });
+      }
+      return { ok: true };
+    },
+  }),
+
   logout: defineAction({
     accept: "form",
     handler: async (_, context) => {

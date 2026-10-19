@@ -600,3 +600,27 @@ export async function fetchSubscriptions(actorId: string): Promise<SubscriptionS
   if (out.status !== "SUCCESS" || !out.result?.items) return [];
   return out.result.items;
 }
+
+export interface SupportTicket {
+  $id: string;
+  userId?: string;
+  subject?: string;
+  message?: string;
+  status?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+/** Fetch the authenticated user's support tickets. */
+export async function fetchSupportTickets(actorId: string): Promise<SupportTicket[]> {
+  const out = await invokeApi<{ items?: SupportTicket[] }>("support_ticket_list", {}, actorId);
+  if (out.status !== "SUCCESS" || !out.result?.items) return [];
+  return out.result.items;
+}
+
+/** Fetch a single support ticket (scoped to the actor server-side). */
+export async function fetchSupportTicket(actorId: string, ticketId: string): Promise<SupportTicket | null> {
+  const out = await invokeApi<SupportTicket>("support_ticket_get", { ticketId }, actorId);
+  if (out.status !== "SUCCESS" || !out.result) return null;
+  return out.result;
+}

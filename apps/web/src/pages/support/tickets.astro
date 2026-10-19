@@ -1,0 +1,52 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { fetchSupportTickets } from "../../lib/gateway";
+
+const user = Astro.locals.user;
+if (!user) {
+  return Astro.redirect("/auth/login");
+}
+
+const tickets = await fetchSupportTickets(user.$id);
+---
+
+<Layout title="Support requests">
+  <main class="mx-auto max-w-2xl px-12 py-12">
+    <div class="flex items-baseline justify-between">
+      <h1 class="font-serif text-3xl font-bold">Support requests</h1>
+      <a
+        href="/support/new"
+        class="rounded-sm bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
+      >
+        New request
+      </a>
+    </div>
+
+    {
+      tickets.length > 0 ? (
+        <ul class="mt-8 space-y-3">
+          {tickets.map((t) => (
+            <li>
+              <a
+                href={`/support/tickets/${t.$id}`}
+                class="block rounded-md border border-border bg-surface p-4 transition hover:border-foreground-muted"
+              >
+                <div class="flex items-center justify-between gap-3">
+                  <p class="font-semibold">{t.subject}</p>
+                  <span class="text-xs uppercase tracking-wide text-foreground-muted">{t.status}</span>
+                </div>
+                {t.createdAt && (
+                  <p class="mt-1 text-xs text-foreground-tertiary">{new Date(t.createdAt).toLocaleDateString()}</p>
+                )}
+              </a>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p class="mt-8 rounded-md border border-dashed border-border px-6 py-8 text-sm text-foreground-muted">
+          No support requests yet.
+        </p>
+      )
+    }
+  </main>
+</Layout>

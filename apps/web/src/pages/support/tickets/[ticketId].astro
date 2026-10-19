@@ -1,0 +1,37 @@
+---
+import Layout from "../../../layouts/Layout.astro";
+import { fetchSupportTicket } from "../../../lib/gateway";
+
+const user = Astro.locals.user;
+if (!user) {
+  return Astro.redirect("/auth/login");
+}
+
+const ticket = await fetchSupportTicket(user.$id, Astro.params.ticketId ?? "");
+if (!ticket) {
+  Astro.response.status = 404;
+}
+---
+
+<Layout title={ticket?.subject ?? "Support request"}>
+  {
+    ticket ? (
+      <main class="mx-auto max-w-2xl px-12 py-12">
+        <a href="/support/tickets" class="text-sm text-link hover:text-link">← All requests</a>
+        <div class="mt-4 flex items-center justify-between gap-3">
+          <h1 class="font-serif text-3xl font-bold">{ticket.subject}</h1>
+          <span class="text-xs uppercase tracking-wide text-foreground-muted">{ticket.status}</span>
+        </div>
+        {ticket.createdAt && (
+          <p class="mt-2 text-xs text-foreground-tertiary">Opened {new Date(ticket.createdAt).toLocaleString()}</p>
+        )}
+        <p class="mt-6 whitespace-pre-wrap leading-7 text-foreground-muted">{ticket.message}</p>
+      </main>
+    ) : (
+      <main class="mx-auto max-w-3xl px-6 py-24 text-center">
+        <h1 class="text-3xl font-bold">Request not found</h1>
+        <a href="/support/tickets" class="mt-6 inline-block text-link">Back to support</a>
+      </main>
+    )
+  }
+</Layout>

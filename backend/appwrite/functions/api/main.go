@@ -64,6 +64,7 @@ var knownOperations = map[string]bool{
 	"reading_progress_upsert": true, "reading_progress_complete": true,
 	"reading_progress_get": true, "continue_list": true,
 	"publication_list": true, "publication_get": true, "creator_list": true, "creator_get": true,
+	"support_ticket_create": true, "support_ticket_list": true, "support_ticket_get": true,
 	"creator_create": true, "creator_update": true,
 	"reader_manifest_get": true,
 	"document_create":     true, "document_list": true,
@@ -239,6 +240,12 @@ func Main(ctx openruntimes.Context) openruntimes.Response {
 		return publicationList(ctx, &in, cl)
 	case "publication_get":
 		return publicationGet(ctx, &in, cl)
+	case "support_ticket_create":
+		return supportTicketCreate(ctx, &in, cl)
+	case "support_ticket_list":
+		return supportTicketList(ctx, &in, cl)
+	case "support_ticket_get":
+		return supportTicketGet(ctx, &in, cl)
 	case "creator_list":
 		return creatorList(ctx, &in, cl)
 	case "creator_get":
@@ -3880,6 +3887,81 @@ func publicationGet(ctx openruntimes.Context, in *GatewayInput, cl client.Client
 		out["creatorName"] = resolveCreatorName(cl, creatorId)
 	}
 	return success(ctx, in, out)
+}
+
+func supportTicketCreate(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	var input struct {
+		Subject string `json:"subject"`
+		Message string `json:"message"`
+	}
+	_ = json.Unmarshal(in.Payload.Input, &input)
+	actorId := actorOrEmpty(in.ActorId)
+	if actorId == "" {
+		return respond(ctx, in.OperationId, "UNAUTHORIZED", false)
+	}
+	if input.Subject == "" || input.Message == "" {
+		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
+	}
+	rowId := newUUID()
+	nowStr := now()
+	row := map[string]interface{}{
+		"userId":    actorId,
+		"subject":   input.Subject,
+		"message":   input.Message,
+		"status":    "OPEN",
+		"createdAt": nowStr,
+		"updatedAt": nowStr,
+	}
+	if err := createRow(cl, "support_tickets", rowId, row); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	return success(ctx, in, map[string]interface{}{"ticketId": rowId})
+}
+
+func supportTicketList(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	actorId := actorOrEmpty(in.ActorId)
+	if actorId == "" {
+		return respond(ctx, in.OperationId, "UNAUTHORIZED", false)
+	}
+	service := tablesdb.New(cl)
+	list, err := service.ListRows(databaseID, "support_tickets", service.WithListRowsQueries([]string{
+		qEqual("userId", actorId),
+		`{"method":"orderDesc","attribute":"createdAt"}`,
+		`{"method":"limit","values":[100]}`,
+	}))
+	if err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	var raw map[string]interface{}
+	if err := list.Decode(&raw); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	rows, _ := raw["rows"].([]interface{})
+	return success(ctx, in, map[string]interface{}{"items": rows})
+}
+
+func supportTicketGet(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	var input struct {
+		TicketId string `json:"ticketId"`
+	}
+	_ = json.Unmarshal(in.Payload.Input, &input)
+	actorId := actorOrEmpty(in.ActorId)
+	if actorId == "" || input.TicketId == "" {
+		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
+	}
+	service := tablesdb.New(cl)
+	row, err := service.GetRow(databaseID, "support_tickets", input.TicketId)
+	if err != nil {
+		return respond(ctx, in.OperationId, "RESOURCE_NOT_FOUND", false)
+	}
+	var m map[string]interface{}
+	if err := row.Decode(&m); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	if uid, _ := m["userId"].(string); uid != actorId {
+		return respond(ctx, in.OperationId, "FORBIDDEN", false)
+	}
+	return success(ctx, in, m)
 }
 
 func creatorList(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {

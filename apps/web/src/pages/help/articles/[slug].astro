@@ -1,0 +1,55 @@
+---
+import Layout from "../../../layouts/Layout.astro";
+
+const slug = Astro.params.slug ?? "";
+
+const articles: Record<string, { title: string; body: string[] }> = {
+  "reading": {
+    title: "Reading & watching",
+    body: [
+      "Find books, videos, art, and audio from the navigation menu. Books open in the reader, video and audio play inline, and art opens as a gallery.",
+      "Pick up where you left off from the home page — your progress is saved automatically as you read or watch.",
+    ],
+  },
+  "billing": {
+    title: "Subscriptions & billing",
+    body: [
+      "Manage your plan, payment method, and billing history from Account → Billing.",
+      "Premium content unlocks automatically once your subscription is active. Your plan renews on its billing interval until you cancel.",
+    ],
+  },
+  "creating": {
+    title: "Creating",
+    body: [
+      "Sign in and open the Creator Studio to start a project, draft a book, and manage your media.",
+      "Studio tools are available to registered creators. Once you publish, your work appears in discovery.",
+    ],
+  },
+};
+
+const article = articles[slug];
+if (!article) {
+  Astro.response.status = 404;
+}
+---
+
+<Layout title={article?.title ?? "Help"}>
+  {
+    article ? (
+      <main class="mx-auto max-w-3xl px-12 py-12">
+        <a href="/help" class="text-sm text-link hover:text-link">← Help Center</a>
+        <h1 class="mt-4 font-serif text-3xl font-bold">{article.title}</h1>
+        <div class="mt-6 space-y-4">
+          {article.body.map((p) => (
+            <p class="leading-7 text-foreground-muted">{p}</p>
+          ))}
+        </div>
+      </main>
+    ) : (
+      <main class="mx-auto max-w-3xl px-6 py-24 text-center">
+        <h1 class="text-3xl font-bold">Article not found</h1>
+        <a href="/help" class="mt-6 inline-block text-link">Back to Help Center</a>
+      </main>
+    )
+  }
+</Layout>
