@@ -15,16 +15,18 @@ env:
   APPWRITE_PROJECT_ID: {kind: secret, required: true}
   APPWRITE_API_KEY: {kind: secret, required: true, note: "narrowly scoped; never in workflow state"}
   ADMIN_ACTOR_ID: {kind: secret, required: true, note: "admin service-account actor id"}
+  PROVIDER_CREDENTIALS: {kind: secret, required: true, note: "JSON map of provider credentialRef -> api key; never in workflow state"}
+  DEFAULT_MODEL_ID: {kind: secret, required: true, note: "default OpenAI-compatible model id"}
 steps:
   - id: list_reserved
     description: "List RESERVED (credit-eligible) generation requests via generation_list_pending."
     retry: {limit: 5, delay: 5s, backoff: exponential}
   - id: process
-    description: "Transition RESERVED -> PROCESSING via generation_process, then run the provider adapter and settle or fail."
+    description: "Transition RESERVED -> PROCESSING via generation_process, resolve the credit-eligible provider, invoke it over https, then generation_complete (output + settle) or generation_fail (refund)."
     retry: {limit: 3, delay: 10s, backoff: exponential}
-    note: "Provider adapter is the next implementation step; fails closed until registered."
+    note: "Fails closed when no credit-eligible provider, credential, or model is configured."
 security:
   appwrite_access_via_scoped_key: true
   no_raw_secrets_in_workflow_state: true
   secrets_redacted: true
-status: SCAFFOLDED_PENDING_PROVIDER_ADAPTER
+status: IMPLEMENTED_PENDING_DEPLOYMENT

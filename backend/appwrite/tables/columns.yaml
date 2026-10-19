@@ -594,6 +594,18 @@ studio_tables:
       - {key: createdAt, type: datetime, required: true}
       - {key: lastTestedAt, type: datetime, required: false}
       - {key: lastUsedAt, type: datetime, required: false}
+  - table: ai_generation_outputs
+    source: contracts/deterministic/ai/persistence.yaml
+    partition_key: generationId
+    indexes: [generationId_outputId]
+    columns:
+      - {key: outputId, type: varchar, size: 255, required: true}
+      - {key: generationId, type: varchar, size: 255, required: true}
+      - {key: providerId, type: varchar, size: 255, required: true}
+      - {key: modelId, type: varchar, size: 255, required: false}
+      - {key: status, type: enum, elements: [COMPLETED, FAILED], required: true}
+      - {key: outputRef, type: text, required: false}
+      - {key: createdAt, type: datetime, required: true}
   - table: studio_publication_validation_runs
     source: contracts/studio/validation.schema.yaml
     partition_key: documentId

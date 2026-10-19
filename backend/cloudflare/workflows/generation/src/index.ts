@@ -5,9 +5,11 @@ import { WorkflowEntrypoint, WorkflowStep, WorkflowEvent } from 'cloudflare:work
  *
  * Polls the gateway for RESERVED (credit-eligible) generation requests and
  * drives each through the generation state machine: RESERVED -> PROCESSING ->
- * COMPLETED (settle) or FAILED (refund). The actual provider/model call is a
- * separate registered adapter; until one is registered the workflow fails
- * closed rather than fabricating an output.
+ * COMPLETED (write output + settle) or FAILED (refund).
+ *
+ * The OpenAI-compatible connector resolves the provider + credential (from the
+ * PROVIDER_CREDENTIALS secret) and calls the provider over https. It fails
+ * closed when no credit-eligible provider or credential is configured.
  *
  * Appwrite access goes through the `api` gateway function (authorized domain
  * operations) using a narrowly-scoped API key and the admin service-account
@@ -19,6 +21,10 @@ type Env = {
   APPWRITE_PROJECT_ID: string;
   APPWRITE_API_KEY: string;
   ADMIN_ACTOR_ID: string;
+  /** JSON map of provider credential reference -> API key (Cloudflare Secret). */
+  PROVIDER_CREDENTIALS?: string;
+  /** Default model id for OpenAI-compatible providers. */
+  DEFAULT_MODEL_ID?: string;
 };
 
 type Params = {
@@ -35,6 +41,8 @@ interface GenerationRequest {
   requestId: string;
   status: string;
   billingMode: string;
+  prompt: string;
+  targetType: string;
 }
 
 export class GenerationWorkflow extends WorkflowEntrypoint<Env, Params> {
@@ -67,6 +75,8 @@ export class GenerationWorkflow extends WorkflowEntrypoint<Env, Params> {
         requestId: String(r.requestId ?? ''),
         status: String(r.status ?? ''),
         billingMode: String(r.billingMode ?? ''),
+        prompt: String(r.prompt ?? ''),
+        targetType: String(r.targetType ?? ''),
       }))
       .filter((g) => g.status === 'RESERVED');
   }
@@ -85,9 +95,50 @@ export class GenerationWorkflow extends WorkflowEntrypoint<Env, Params> {
       return;
     }
 
-    // TODO: invoke the provider/model connector using the resolved `provider`.
-    // Until the connector is registered, fail closed — no output is fabricated.
-    await this.failClosed(gen, 'provider connector not registered');
+    // Invoke the provider and record the output (or fail closed).
+    try {
+      const { text, model } = await this.invokeProvider(provider, gen);
+      const done = await this.invokeGateway<{ outputId?: string }>('generation_complete', {
+        generationId: gen.requestId,
+        providerId: String(provider.providerId ?? ''),
+        modelId: model,
+        outputRef: text,
+      });
+      if (done.status !== 'SUCCESS') throw new Error(`generation_complete failed: ${done.errorCode}`);
+    } catch (err) {
+      console.log(`[generation] provider error for ${gen.requestId}: ${err}`);
+      await this.failClosed(gen, 'provider invocation failed');
+    }
+  }
+
+  async invokeProvider(
+    provider: Record<string, unknown>,
+    gen: GenerationRequest,
+  ): Promise<{ text: string; model: string }> {
+    const endpoint = String(provider.endpointRef ?? '');
+    if (!endpoint) throw new Error('provider has no endpointRef');
+    const protocol = String(provider.protocol ?? '');
+    if (protocol !== 'OPENAI_COMPATIBLE') throw new Error(`unsupported protocol ${protocol}`);
+
+    const credentials = JSON.parse(this.env.PROVIDER_CREDENTIALS ?? '{}') as Record<string, string>;
+    const credKey = String(provider.credentialRef ?? provider.providerId ?? '');
+    const apiKey = credentials[credKey];
+    if (!apiKey) throw new Error('no credential for provider');
+
+    const model = this.env.DEFAULT_MODEL_ID ?? '';
+    if (!model) throw new Error('no default model configured');
+
+    // SSRF guard: only https endpoints are allowed.
+    if (!endpoint.startsWith('https://')) throw new Error('provider endpoint must be https');
+
+    const res = await fetch(`${endpoint}/chat/completions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+      body: JSON.stringify({ model, messages: [{ role: 'user', content: gen.prompt }] }),
+    });
+    if (!res.ok) throw new Error(`provider HTTP ${res.status}`);
+    const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
+    return { text: data.choices?.[0]?.message?.content ?? '', model };
   }
 
   async resolveProvider(): Promise<Record<string, unknown> | null> {

@@ -95,7 +95,8 @@ var knownOperations = map[string]bool{
 	"generation_list": true, "creator_analytics_get": true,
 	"generation_cancel": true, "generation_settle": true, "generation_fail": true,
 	"generation_process": true, "generation_list_pending": true,
-	"ai_provider_list": true, "ai_provider_get": true,
+	"generation_complete": true,
+	"ai_provider_list":    true, "ai_provider_get": true,
 	"ai_provider_create": true, "ai_provider_update": true,
 }
 
@@ -165,6 +166,8 @@ func Main(ctx openruntimes.Context) openruntimes.Response {
 		return generationSettle(ctx, &in, cl)
 	case "generation_fail":
 		return generationFail(ctx, &in, cl)
+	case "generation_complete":
+		return generationComplete(ctx, &in, cl)
 	case "generation_process":
 		return generationProcess(ctx, &in, cl)
 	case "generation_list_pending":
@@ -2974,7 +2977,7 @@ func generationSettle(ctx openruntimes.Context, in *GatewayInput, cl client.Clie
 	if err := updateRow(cl, "studio_generation_requests", input.GenerationId, map[string]interface{}{"status": "COMPLETED"}); err != nil {
 		return internalFailure(ctx, in, err)
 	}
-	_ = createCreditTransaction(cl, input.GenerationId, actorOrEmpty(in.ActorId), "SETTLE", 0)
+	_ = createCreditTransaction(cl, input.GenerationId, generationCreatorId(cl, input.GenerationId), "SETTLE", 0)
 	emit(ctx, cl, "studio.generation.completed.v1", input.GenerationId, actorOrEmpty(in.ActorId), map[string]interface{}{"generationId": input.GenerationId}, in.CorrelationId)
 	return success(ctx, in, map[string]interface{}{"status": "COMPLETED"})
 }
@@ -2999,9 +3002,78 @@ func generationFail(ctx openruntimes.Context, in *GatewayInput, cl client.Client
 	if err := updateRow(cl, "studio_generation_requests", input.GenerationId, map[string]interface{}{"status": "FAILED"}); err != nil {
 		return internalFailure(ctx, in, err)
 	}
-	_ = createCreditTransaction(cl, input.GenerationId, actorOrEmpty(in.ActorId), "REFUND", 0)
+	_ = createCreditTransaction(cl, input.GenerationId, generationCreatorId(cl, input.GenerationId), "REFUND", 0)
 	emit(ctx, cl, "studio.generation.failed.v1", input.GenerationId, actorOrEmpty(in.ActorId), map[string]interface{}{"generationId": input.GenerationId}, in.CorrelationId)
 	return success(ctx, in, map[string]interface{}{"status": "FAILED"})
+}
+
+// generationCreatorId resolves the creator who owns a generation request (via its project).
+func generationCreatorId(cl client.Client, generationId string) string {
+	service := tablesdb.New(cl)
+	row, err := service.GetRow(databaseID, "studio_generation_requests", generationId)
+	if err != nil {
+		return ""
+	}
+	var m map[string]interface{}
+	if row.Decode(&m) != nil {
+		return ""
+	}
+	projectId, _ := m["projectId"].(string)
+	if projectId == "" {
+		return ""
+	}
+	proj, err := service.GetRow(databaseID, "studio_projects", projectId)
+	if err != nil {
+		return ""
+	}
+	var pm map[string]interface{}
+	if proj.Decode(&pm) != nil {
+		return ""
+	}
+	creatorId, _ := pm["creatorId"].(string)
+	return creatorId
+}
+
+func generationComplete(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	if !adminActor(ctx, in, cl) {
+		return respond(ctx, in.OperationId, "FORBIDDEN", false)
+	}
+	var input struct {
+		GenerationId string `json:"generationId"`
+		ProviderId   string `json:"providerId"`
+		ModelId      string `json:"modelId"`
+		OutputRef    string `json:"outputRef"`
+	}
+	if !decode(ctx, in, &input) || input.GenerationId == "" || input.ProviderId == "" {
+		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
+	}
+	status, _, ok := generationRowOf(cl, input.GenerationId)
+	if !ok {
+		return respond(ctx, in.OperationId, "RESOURCE_NOT_FOUND", false)
+	}
+	if status != "PROCESSING" {
+		return respond(ctx, in.OperationId, "CONFLICT", false)
+	}
+	outputId := newUUID()
+	outRow := map[string]interface{}{
+		"outputId": outputId, "generationId": input.GenerationId,
+		"providerId": input.ProviderId, "status": "COMPLETED", "createdAt": now(),
+	}
+	if input.ModelId != "" {
+		outRow["modelId"] = input.ModelId
+	}
+	if input.OutputRef != "" {
+		outRow["outputRef"] = input.OutputRef
+	}
+	if err := createRow(cl, "ai_generation_outputs", outputId, outRow); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	if err := updateRow(cl, "studio_generation_requests", input.GenerationId, map[string]interface{}{"status": "COMPLETED"}); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	_ = createCreditTransaction(cl, input.GenerationId, generationCreatorId(cl, input.GenerationId), "SETTLE", 0)
+	emit(ctx, cl, "studio.generation.completed.v1", input.GenerationId, actorOrEmpty(in.ActorId), map[string]interface{}{"generationId": input.GenerationId, "outputId": outputId}, in.CorrelationId)
+	return success(ctx, in, map[string]interface{}{"status": "COMPLETED", "outputId": outputId})
 }
 
 func generationProcess(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
