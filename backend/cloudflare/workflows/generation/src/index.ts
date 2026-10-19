@@ -128,10 +128,17 @@ export class GenerationWorkflow extends WorkflowEntrypoint<Env, Params> {
     const model = this.env.DEFAULT_MODEL_ID ?? '';
     if (!model) throw new Error('no default model configured');
 
-    // SSRF guard: only https endpoints are allowed.
-    if (!endpoint.startsWith('https://')) throw new Error('provider endpoint must be https');
+    // SSRF guard: https only, and reject literal private/loopback/link-local hosts.
+    let baseUrl: URL;
+    try {
+      baseUrl = new URL(endpoint);
+    } catch {
+      throw new Error('provider endpoint is not a valid URL');
+    }
+    if (baseUrl.protocol !== 'https:') throw new Error('provider endpoint must be https');
+    if (isPrivateHost(baseUrl.hostname)) throw new Error('provider endpoint must not be a private/loopback host');
 
-    const res = await fetch(`${endpoint}/chat/completions`, {
+    const res = await fetch(`${baseUrl.origin}/chat/completions`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
       body: JSON.stringify({ model, messages: [{ role: 'user', content: gen.prompt }] }),
@@ -187,4 +194,30 @@ export class GenerationWorkflow extends WorkflowEntrypoint<Env, Params> {
     const execution = (await res.json()) as { responseBody?: string };
     return JSON.parse(execution.responseBody ?? '{}') as GatewayOutput<T>;
   }
+}
+
+/**
+ * Reject literal private, loopback, link-local, and reserved IP hosts.
+ * DNS-resolved hostnames are not checked here (the fetch goes through
+ * Cloudflare's network); BYOK/user-supplied endpoints will need a stronger
+ * guard before they are enabled.
+ */
+function isPrivateHost(hostname: string): boolean {
+  if (hostname === 'localhost') return true;
+  const ipv4 = hostname.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+  if (ipv4) {
+    const a = Number(ipv4[1]);
+    const b = Number(ipv4[2]);
+    if (a === 0 || a === 10 || a === 127) return true;
+    if (a === 172 && b >= 16 && b <= 31) return true;
+    if (a === 192 && b === 168) return true;
+    if (a === 169 && b === 254) return true; // link-local incl. cloud metadata
+    if (a >= 224) return true; // multicast/reserved
+  }
+  if (hostname.includes(':')) {
+    if (hostname === '::1') return true; // IPv6 loopback
+    const lower = hostname.toLowerCase();
+    if (lower.startsWith('fe80') || lower.startsWith('fc') || lower.startsWith('fd')) return true;
+  }
+  return false;
 }

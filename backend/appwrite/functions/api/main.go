@@ -93,7 +93,7 @@ var knownOperations = map[string]bool{
 	"admin_analytics_acquisition_get": true, "admin_analytics_cohorts_get": true,
 	"prompt_template_list": true, "prompt_template_create": true,
 	"generation_list": true, "creator_analytics_get": true,
-	"generation_cancel": true, "generation_settle": true, "generation_fail": true,
+	"generation_cancel": true, "generation_fail": true,
 	"generation_process": true, "generation_list_pending": true,
 	"generation_complete": true,
 	"ai_provider_list":    true, "ai_provider_get": true,
@@ -162,8 +162,6 @@ func Main(ctx openruntimes.Context) openruntimes.Response {
 		return generationList(ctx, &in, cl)
 	case "generation_cancel":
 		return generationCancel(ctx, &in, cl)
-	case "generation_settle":
-		return generationSettle(ctx, &in, cl)
 	case "generation_fail":
 		return generationFail(ctx, &in, cl)
 	case "generation_complete":
@@ -2819,18 +2817,18 @@ func requestGeneration(ctx openruntimes.Context, in *GatewayInput, cl client.Cli
 		return respond(ctx, in.OperationId, "UNAUTHORIZED", false)
 	}
 	var input struct {
-		RequestId         string   `json:"requestId"`
-		ProjectId         string   `json:"projectId"`
-		DraftId           *string  `json:"draftId"`
-		TargetType        string   `json:"targetType"`
-		PromptTemplateId  *string  `json:"promptTemplateId"`
-		Prompt            *string  `json:"prompt"`
-		InputAssetIds     []string `json:"inputAssetIds"`
-		BillingMode       string   `json:"billingMode"`
-		CreditEligible    *bool    `json:"creditEligible"`
-		CreditReason      *string  `json:"creditEligibilityReason"`
-		ExecutionLocation string   `json:"executionLocation"`
-		PolicyContext     string   `json:"policyContext"`
+		RequestId         string          `json:"requestId"`
+		ProjectId         string          `json:"projectId"`
+		DraftId           *string         `json:"draftId"`
+		TargetType        string          `json:"targetType"`
+		PromptTemplateId  *string         `json:"promptTemplateId"`
+		Prompt            *string         `json:"prompt"`
+		InputAssetIds     []string        `json:"inputAssetIds"`
+		BillingMode       string          `json:"billingMode"`
+		CreditEligible    *bool           `json:"creditEligible"`
+		CreditReason      *string         `json:"creditEligibilityReason"`
+		ExecutionLocation string          `json:"executionLocation"`
+		PolicyContext     json.RawMessage `json:"policyContext"`
 	}
 	if !decode(ctx, in, &input) || input.RequestId == "" || input.ProjectId == "" || input.TargetType == "" || input.BillingMode == "" || input.ExecutionLocation == "" {
 		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
@@ -2847,7 +2845,7 @@ func requestGeneration(ctx openruntimes.Context, in *GatewayInput, cl client.Cli
 	row := map[string]interface{}{
 		"requestId": input.RequestId, "projectId": input.ProjectId, "targetType": input.TargetType,
 		"billingMode": input.BillingMode, "executionLocation": input.ExecutionLocation,
-		"policyContext": input.PolicyContext, "creditEligible": creditEligible,
+		"policyContext": string(input.PolicyContext), "creditEligible": creditEligible,
 		"creditEligibilityReason": creditReason, "status": status,
 	}
 	if input.DraftId != nil {
@@ -2955,31 +2953,6 @@ func generationCancel(ctx openruntimes.Context, in *GatewayInput, cl client.Clie
 	}
 	emit(ctx, cl, "studio.generation.cancelled.v1", input.GenerationId, actorId, map[string]interface{}{"generationId": input.GenerationId}, in.CorrelationId)
 	return success(ctx, in, map[string]interface{}{"status": "CANCELLED"})
-}
-
-func generationSettle(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
-	if !adminActor(ctx, in, cl) {
-		return respond(ctx, in.OperationId, "FORBIDDEN", false)
-	}
-	var input struct {
-		GenerationId string `json:"generationId"`
-	}
-	if !decode(ctx, in, &input) || input.GenerationId == "" {
-		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
-	}
-	status, _, ok := generationRowOf(cl, input.GenerationId)
-	if !ok {
-		return respond(ctx, in.OperationId, "RESOURCE_NOT_FOUND", false)
-	}
-	if status != "PROCESSING" {
-		return respond(ctx, in.OperationId, "CONFLICT", false)
-	}
-	if err := updateRow(cl, "studio_generation_requests", input.GenerationId, map[string]interface{}{"status": "COMPLETED"}); err != nil {
-		return internalFailure(ctx, in, err)
-	}
-	_ = createCreditTransaction(cl, input.GenerationId, generationCreatorId(cl, input.GenerationId), "SETTLE", 0)
-	emit(ctx, cl, "studio.generation.completed.v1", input.GenerationId, actorOrEmpty(in.ActorId), map[string]interface{}{"generationId": input.GenerationId}, in.CorrelationId)
-	return success(ctx, in, map[string]interface{}{"status": "COMPLETED"})
 }
 
 func generationFail(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {

@@ -31,6 +31,9 @@ transitions:
 - from: RESERVED
   event: PROCESS
   to: PROCESSING
+- from: RESERVED
+  event: CANCEL
+  to: CANCELLED
 - from: PROCESSING
   event: SETTLE
   to: SETTLING

@@ -95,6 +95,7 @@ describe("transitionGenerationStatus", () => {
     expect(transitionGenerationStatus("SETTLING", "FAIL")).toBe("FAILED");
     expect(transitionGenerationStatus("QUEUED", "CANCEL")).toBe("CANCELLED");
     expect(transitionGenerationStatus("POLICY_CHECK", "CANCEL")).toBe("CANCELLED");
+    expect(transitionGenerationStatus("RESERVED", "CANCEL")).toBe("CANCELLED");
     expect(transitionGenerationStatus("PROCESSING", "CANCEL")).toBe("CANCELLED");
   });
 

@@ -226,7 +226,11 @@ export const server = {
         targetType: input.targetType,
         billingMode: input.billingMode,
         executionLocation: input.executionLocation,
-        policyContext: JSON.stringify({ source: "studio" }),
+        policyContext: {
+          source: "studio",
+          billingMode: input.billingMode,
+          executionLocation: input.executionLocation,
+        },
       };
       if (input.prompt) payload.prompt = input.prompt;
       if (input.promptTemplateId) payload.promptTemplateId = input.promptTemplateId;
