@@ -93,6 +93,7 @@ var knownOperations = map[string]bool{
 	"admin_analytics_acquisition_get": true, "admin_analytics_cohorts_get": true,
 	"prompt_template_list": true, "prompt_template_create": true,
 	"generation_list": true, "creator_analytics_get": true,
+	"generation_cancel": true, "generation_settle": true, "generation_fail": true,
 }
 
 const databaseID = "main"
@@ -155,6 +156,12 @@ func Main(ctx openruntimes.Context) openruntimes.Response {
 		return promptTemplateCreate(ctx, &in, cl)
 	case "generation_list":
 		return generationList(ctx, &in, cl)
+	case "generation_cancel":
+		return generationCancel(ctx, &in, cl)
+	case "generation_settle":
+		return generationSettle(ctx, &in, cl)
+	case "generation_fail":
+		return generationFail(ctx, &in, cl)
 	case "creator_analytics_get":
 		return creatorAnalyticsGet(ctx, &in, cl)
 	case "publication_validate":
@@ -2815,11 +2822,15 @@ func requestGeneration(ctx openruntimes.Context, in *GatewayInput, cl client.Cli
 	}
 	// Server-authoritative credit eligibility (never trust a client-provided flag).
 	creditEligible, creditReason := creditEligibilityFor(input.BillingMode, input.ExecutionLocation)
+	status := "QUEUED"
+	if creditEligible {
+		status = "RESERVED"
+	}
 	row := map[string]interface{}{
 		"requestId": input.RequestId, "projectId": input.ProjectId, "targetType": input.TargetType,
 		"billingMode": input.BillingMode, "executionLocation": input.ExecutionLocation,
 		"policyContext": input.PolicyContext, "creditEligible": creditEligible,
-		"creditEligibilityReason": creditReason,
+		"creditEligibilityReason": creditReason, "status": status,
 	}
 	if input.DraftId != nil {
 		row["draftId"] = *input.DraftId
@@ -2836,8 +2847,13 @@ func requestGeneration(ctx openruntimes.Context, in *GatewayInput, cl client.Cli
 	if err := createRow(cl, "studio_generation_requests", input.RequestId, row); err != nil {
 		return internalFailure(ctx, in, err)
 	}
+	if creditEligible {
+		if err := createCreditTransaction(cl, input.RequestId, actorId, "RESERVE", 0); err != nil {
+			return internalFailure(ctx, in, err)
+		}
+	}
 	emit(ctx, cl, "studio.generation.requested.v1", input.RequestId, actorId, map[string]interface{}{"requestId": input.RequestId, "billingMode": input.BillingMode, "executionLocation": input.ExecutionLocation}, in.CorrelationId)
-	return success(ctx, in, map[string]interface{}{"requestId": input.RequestId, "creditEligible": creditEligible, "creditEligibilityReason": creditReason})
+	return success(ctx, in, map[string]interface{}{"requestId": input.RequestId, "creditEligible": creditEligible, "creditEligibilityReason": creditReason, "status": status})
 }
 
 // creditEligibilityFor returns the server-authoritative credit eligibility for a
@@ -2857,6 +2873,120 @@ func creditEligibilityFor(billingMode, executionLocation string) (bool, string) 
 		return true, "STORYGALORE_MANAGED_MODEL"
 	}
 	return false, "PLATFORM_POLICY_DISABLED"
+}
+
+func createCreditTransaction(cl client.Client, generationId, creatorId, kind string, amount int) error {
+	txId := newUUID()
+	status := "RESERVED"
+	if kind == "SETTLE" {
+		status = "SETTLED"
+	} else if kind == "REFUND" {
+		status = "REFUNDED"
+	}
+	return createRow(cl, "ai_credit_transactions", txId, map[string]interface{}{
+		"transactionId": txId,
+		"generationId":  generationId,
+		"creatorId":     creatorId,
+		"kind":          kind,
+		"amount":        amount,
+		"status":        status,
+		"createdAt":     now(),
+	})
+}
+
+// generationRowOf returns the status + projectId of a generation request.
+func generationRowOf(cl client.Client, generationId string) (status, projectId string, ok bool) {
+	service := tablesdb.New(cl)
+	row, err := service.GetRow(databaseID, "studio_generation_requests", generationId)
+	if err != nil {
+		return "", "", false
+	}
+	var m map[string]interface{}
+	if row.Decode(&m) != nil {
+		return "", "", false
+	}
+	status, _ = m["status"].(string)
+	projectId, _ = m["projectId"].(string)
+	return status, projectId, true
+}
+
+func generationCancel(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	actorId := actorOrEmpty(in.ActorId)
+	if actorId == "" {
+		return respond(ctx, in.OperationId, "UNAUTHORIZED", false)
+	}
+	var input struct {
+		GenerationId string `json:"generationId"`
+	}
+	if !decode(ctx, in, &input) || input.GenerationId == "" {
+		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
+	}
+	status, projectId, ok := generationRowOf(cl, input.GenerationId)
+	if !ok || projectId == "" || !projectOwnedByActor(cl, projectId, actorId) {
+		return respond(ctx, in.OperationId, "FORBIDDEN", false)
+	}
+	switch status {
+	case "COMPLETED", "FAILED", "CANCELLED":
+		return respond(ctx, in.OperationId, "CONFLICT", false)
+	}
+	if err := updateRow(cl, "studio_generation_requests", input.GenerationId, map[string]interface{}{"status": "CANCELLED"}); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	if status == "RESERVED" || status == "PROCESSING" {
+		_ = createCreditTransaction(cl, input.GenerationId, actorId, "REFUND", 0)
+	}
+	emit(ctx, cl, "studio.generation.cancelled.v1", input.GenerationId, actorId, map[string]interface{}{"generationId": input.GenerationId}, in.CorrelationId)
+	return success(ctx, in, map[string]interface{}{"status": "CANCELLED"})
+}
+
+func generationSettle(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	if !adminActor(ctx, in, cl) {
+		return respond(ctx, in.OperationId, "FORBIDDEN", false)
+	}
+	var input struct {
+		GenerationId string `json:"generationId"`
+	}
+	if !decode(ctx, in, &input) || input.GenerationId == "" {
+		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
+	}
+	status, _, ok := generationRowOf(cl, input.GenerationId)
+	if !ok {
+		return respond(ctx, in.OperationId, "RESOURCE_NOT_FOUND", false)
+	}
+	if status != "PROCESSING" {
+		return respond(ctx, in.OperationId, "CONFLICT", false)
+	}
+	if err := updateRow(cl, "studio_generation_requests", input.GenerationId, map[string]interface{}{"status": "COMPLETED"}); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	_ = createCreditTransaction(cl, input.GenerationId, actorOrEmpty(in.ActorId), "SETTLE", 0)
+	emit(ctx, cl, "studio.generation.completed.v1", input.GenerationId, actorOrEmpty(in.ActorId), map[string]interface{}{"generationId": input.GenerationId}, in.CorrelationId)
+	return success(ctx, in, map[string]interface{}{"status": "COMPLETED"})
+}
+
+func generationFail(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	if !adminActor(ctx, in, cl) {
+		return respond(ctx, in.OperationId, "FORBIDDEN", false)
+	}
+	var input struct {
+		GenerationId string `json:"generationId"`
+	}
+	if !decode(ctx, in, &input) || input.GenerationId == "" {
+		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
+	}
+	status, _, ok := generationRowOf(cl, input.GenerationId)
+	if !ok {
+		return respond(ctx, in.OperationId, "RESOURCE_NOT_FOUND", false)
+	}
+	if status != "PROCESSING" && status != "SETTLING" {
+		return respond(ctx, in.OperationId, "CONFLICT", false)
+	}
+	if err := updateRow(cl, "studio_generation_requests", input.GenerationId, map[string]interface{}{"status": "FAILED"}); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	_ = createCreditTransaction(cl, input.GenerationId, actorOrEmpty(in.ActorId), "REFUND", 0)
+	emit(ctx, cl, "studio.generation.failed.v1", input.GenerationId, actorOrEmpty(in.ActorId), map[string]interface{}{"generationId": input.GenerationId}, in.CorrelationId)
+	return success(ctx, in, map[string]interface{}{"status": "FAILED"})
 }
 
 func promptTemplateList(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {

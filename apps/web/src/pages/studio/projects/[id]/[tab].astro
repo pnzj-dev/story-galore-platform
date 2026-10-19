@@ -461,9 +461,10 @@ const generationError = generationResult?.error?.message;
                         {g.billingMode} · {g.executionLocation}
                       </p>
                     </div>
-                    <span class="ml-4 shrink-0 text-xs text-foreground-muted">
-                      {g.creditEligible ? "credits" : (g.creditEligibilityReason ?? "ineligible")}
-                    </span>
+                    <div class="ml-4 flex shrink-0 items-center gap-3 text-xs text-foreground-muted">
+                      <span class="rounded-full border border-border px-2 py-0.5">{g.status ?? "QUEUED"}</span>
+                      <span>{g.creditEligible ? "credits" : (g.creditEligibilityReason ?? "ineligible")}</span>
+                    </div>
                   </li>
                 ))}
               </ul>

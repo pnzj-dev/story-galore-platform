@@ -755,6 +755,7 @@ export interface GenerationRequest {
   executionLocation?: string;
   creditEligible?: boolean;
   creditEligibilityReason?: string;
+  status?: string;
   prompt?: string;
   promptTemplateId?: string;
   draftId?: string;

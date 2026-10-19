@@ -143,3 +143,58 @@ export function computeCreditEligibility(input: CreditEligibilityInput): AICredi
   }
   return { eligible: false, reason: "PLATFORM_POLICY_DISABLED", fundingSource: "NONE" };
 }
+
+export type GenerationStatus =
+  | "QUEUED"
+  | "POLICY_CHECK"
+  | "ALLOWED"
+  | "RESERVED"
+  | "PROCESSING"
+  | "SETTLING"
+  | "COMPLETED"
+  | "FAILED"
+  | "CANCELLED";
+
+export type GenerationEvent =
+  | "POLICY_CHECK"
+  | "ALLOW"
+  | "DENY"
+  | "RESERVE"
+  | "PROCESS"
+  | "SETTLE"
+  | "COMPLETE"
+  | "FAIL"
+  | "CANCEL";
+
+const GENERATION_TRANSITIONS: Record<GenerationStatus, Partial<Record<GenerationEvent, GenerationStatus>>> = {
+  QUEUED: { POLICY_CHECK: "POLICY_CHECK", CANCEL: "CANCELLED" },
+  POLICY_CHECK: { ALLOW: "ALLOWED", DENY: "FAILED", CANCEL: "CANCELLED" },
+  ALLOWED: { RESERVE: "RESERVED" },
+  RESERVED: { PROCESS: "PROCESSING" },
+  PROCESSING: { SETTLE: "SETTLING", FAIL: "FAILED", CANCEL: "CANCELLED" },
+  SETTLING: { COMPLETE: "COMPLETED", FAIL: "FAILED" },
+  COMPLETED: {},
+  FAILED: {},
+  CANCELLED: {},
+};
+
+/**
+ * Deterministic generation state machine (contracts/deterministic/ai/state-machine.yaml).
+ * Returns the next status for a legal transition, or null for an illegal one.
+ */
+export function transitionGenerationStatus(from: GenerationStatus, event: GenerationEvent): GenerationStatus | null {
+  return GENERATION_TRANSITIONS[from]?.[event] ?? null;
+}
+
+export type CreditTransactionKind = "RESERVE" | "SETTLE" | "REFUND";
+export type CreditTransactionStatus = "RESERVED" | "SETTLED" | "REFUNDED";
+
+export interface CreditTransaction {
+  transactionId: string;
+  generationId: string;
+  creatorId: string;
+  kind: CreditTransactionKind;
+  amount: number;
+  status: CreditTransactionStatus;
+  createdAt: string;
+}

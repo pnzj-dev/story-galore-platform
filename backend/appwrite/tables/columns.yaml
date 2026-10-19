@@ -563,6 +563,19 @@ studio_tables:
       - {key: creditEligibilityReason, type: text, required: false}
       - {key: executionLocation, type: enum, elements: [CLOUD, USER_HOSTED], required: true}
       - {key: policyContext, type: text, required: true}
+      - {key: status, type: enum, elements: [QUEUED, POLICY_CHECK, ALLOWED, RESERVED, PROCESSING, SETTLING, COMPLETED, FAILED, CANCELLED], required: false}
+  - table: ai_credit_transactions
+    source: contracts/deterministic/ai/persistence.yaml
+    partition_key: creatorId
+    indexes: [generationId]
+    columns:
+      - {key: transactionId, type: varchar, size: 255, required: true}
+      - {key: generationId, type: varchar, size: 255, required: true}
+      - {key: creatorId, type: varchar, size: 255, required: true}
+      - {key: kind, type: enum, elements: [RESERVE, SETTLE, REFUND], required: true}
+      - {key: amount, type: integer, required: true}
+      - {key: status, type: enum, elements: [RESERVED, SETTLED, REFUNDED], required: true}
+      - {key: createdAt, type: datetime, required: true}
   - table: studio_publication_validation_runs
     source: contracts/studio/validation.schema.yaml
     partition_key: documentId
