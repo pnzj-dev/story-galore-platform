@@ -15,7 +15,7 @@
 
 <div
   bind:this={container}
-  class="h-[100dvh] w-full snap-y snap-mandatory overflow-y-scroll md:mx-auto md:my-4 md:h-[calc(100dvh-2rem)] md:max-w-[420px] md:rounded-2xl md:border md:border-border"
+  class="shorts-scroller h-[100dvh] w-full snap-y snap-mandatory overflow-y-scroll md:mx-auto md:my-4 md:h-[calc(100dvh-2rem)] md:max-w-[480px] md:rounded-2xl md:border md:border-border"
 >
   {#each shorts as short (short.id)}
     <section data-id={short.id} class="relative h-[100dvh] snap-start overflow-hidden bg-black">
@@ -76,3 +76,13 @@
     </section>
   {/each}
 </div>
+
+<style>
+  .shorts-scroller {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .shorts-scroller::-webkit-scrollbar {
+    display: none;
+  }
+</style>
