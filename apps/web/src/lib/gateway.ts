@@ -676,3 +676,34 @@ export async function fetchCharacters(actorId: string, projectId: string): Promi
   if (out.status !== "SUCCESS" || !out.result?.items) return [];
   return out.result.items;
 }
+
+export interface World {
+  $id?: string;
+  projectId?: string;
+  name?: string;
+  description?: string;
+  locations?: string;
+  rules?: string;
+}
+
+/** Fetch a project's world (scoped to the actor server-side). */
+export async function fetchWorld(actorId: string, projectId: string): Promise<World | null> {
+  const out = await invokeApi<World>("world_get", { projectId }, actorId);
+  if (out.status !== "SUCCESS") return null;
+  return out.result ?? {};
+}
+
+export interface StudioAsset {
+  $id?: string;
+  projectId?: string;
+  mediaAssetId?: string;
+  role?: string;
+  label?: string;
+}
+
+/** List a project's assets (scoped to the actor server-side). */
+export async function fetchAssets(actorId: string, projectId: string): Promise<StudioAsset[]> {
+  const out = await invokeApi<{ items?: StudioAsset[] }>("asset_list", { projectId }, actorId);
+  if (out.status !== "SUCCESS" || !out.result?.items) return [];
+  return out.result.items;
+}

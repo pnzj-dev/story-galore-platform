@@ -2,7 +2,7 @@
 import StudioLayout from "../../../../layouts/StudioLayout.astro";
 import StudioProjectTabs from "../../../../components/StudioProjectTabs.astro";
 import { actions } from "astro:actions";
-import { fetchProject, fetchStoryBible, fetchCharacters } from "../../../../lib/gateway";
+import { fetchProject, fetchStoryBible, fetchCharacters, fetchWorld, fetchAssets } from "../../../../lib/gateway";
 
 const user = Astro.locals.user;
 if (!user) {
@@ -34,6 +34,8 @@ const title = TITLES[tab] ?? tab;
 
 const storyBible = tab === "story-bible" ? await fetchStoryBible(user.$id, projectId) : null;
 const characters = tab === "characters" ? await fetchCharacters(user.$id, projectId) : [];
+const world = tab === "world" ? await fetchWorld(user.$id, projectId) : null;
+const assets = tab === "assets" ? await fetchAssets(user.$id, projectId) : [];
 
 const bibleResult = Astro.getActionResult(actions.saveStoryBible);
 if (bibleResult?.data?.ok) {
@@ -46,6 +48,12 @@ if (characterResult?.data?.ok) {
   return Astro.redirect(`/studio/projects/${projectId}/characters`);
 }
 const characterError = characterResult?.error?.message;
+
+const worldResult = Astro.getActionResult(actions.saveWorld);
+if (worldResult?.data?.ok) {
+  return Astro.redirect(`/studio/projects/${projectId}/world`);
+}
+const worldError = worldResult?.error?.message;
 ---
 
 <StudioLayout title={`${project.name} — ${title}`} active="projects">
@@ -165,6 +173,85 @@ const characterError = characterResult?.error?.message;
               Add character
             </button>
           </form>
+        </section>
+      ) : tab === "world" ? (
+        <section class="mt-8">
+          <h2 class="text-xl font-semibold">World</h2>
+          <p class="mt-1 text-sm text-foreground-muted">Describe the setting, locations, and rules of your world.</p>
+          <form method="POST" action={actions.saveWorld} class="mt-4 max-w-lg space-y-4">
+            <input type="hidden" name="projectId" value={projectId} />
+            <div>
+              <label for="wname" class="mb-1 block text-sm text-foreground-muted">Name</label>
+              <input
+                id="wname"
+                name="name"
+                type="text"
+                value={world?.name ?? ""}
+                class="w-full rounded-sm border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
+              />
+            </div>
+            <div>
+              <label for="wdescription" class="mb-1 block text-sm text-foreground-muted">Description</label>
+              <textarea
+                id="wdescription"
+                name="description"
+                rows="3"
+                class="w-full rounded-sm border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
+              >{world?.description ?? ""}</textarea>
+            </div>
+            <div>
+              <label for="locations" class="mb-1 block text-sm text-foreground-muted">Locations</label>
+              <textarea
+                id="locations"
+                name="locations"
+                rows="3"
+                class="w-full rounded-sm border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
+              >{world?.locations ?? ""}</textarea>
+            </div>
+            <div>
+              <label for="rules" class="mb-1 block text-sm text-foreground-muted">Rules</label>
+              <textarea
+                id="rules"
+                name="rules"
+                rows="3"
+                class="w-full rounded-sm border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
+              >{world?.rules ?? ""}</textarea>
+            </div>
+            {worldError && (
+              <p class="rounded-sm border border-danger bg-danger/15 px-3 py-2 text-sm text-danger" role="alert">
+                {worldError}
+              </p>
+            )}
+            <button
+              type="submit"
+              class="rounded-sm bg-primary px-4 py-2 font-semibold text-primary-foreground transition hover:opacity-90"
+            >
+              Save
+            </button>
+          </form>
+        </section>
+      ) : tab === "assets" ? (
+        <section class="mt-8">
+          <h2 class="text-xl font-semibold">Assets</h2>
+          {
+            assets.length > 0 ? (
+              <ul class="mt-4 space-y-2">
+                {assets.map((a) => (
+                  <li class="rounded-md border border-border bg-surface p-4">
+                    <div class="flex items-center justify-between">
+                      <p class="font-semibold">{a.label || a.role || "Asset"}</p>
+                      {a.role && <span class="text-xs text-foreground-muted">{a.role}</span>}
+                    </div>
+                    {a.mediaAssetId && <p class="mt-1 truncate text-xs text-foreground-tertiary">{a.mediaAssetId}</p>}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p class="mt-4 rounded-md border border-dashed border-border px-6 py-8 text-sm text-foreground-muted">
+                No assets yet.
+              </p>
+            )
+          }
         </section>
       ) : (
         <section class="mt-8">

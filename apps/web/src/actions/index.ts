@@ -161,6 +161,26 @@ export const server = {
     },
   }),
 
+  saveWorld: defineAction({
+    accept: "form",
+    input: z.object({
+      projectId: z.string().min(1),
+      name: z.string().max(255),
+      description: z.string().max(5000),
+      locations: z.string().max(10000),
+      rules: z.string().max(10000),
+    }),
+    handler: async (input, context) => {
+      const user = context.locals.user;
+      if (!user) throw new ActionError({ code: "UNAUTHORIZED", message: "Sign in to continue." });
+      const out = await invokeApi("world_upsert", input, user.$id);
+      if (out.status !== "SUCCESS") {
+        throw new ActionError({ code: "INTERNAL_SERVER_ERROR", message: "Could not save the world." });
+      }
+      return { ok: true };
+    },
+  }),
+
   logout: defineAction({
     accept: "form",
     handler: async (_, context) => {
