@@ -1,7 +1,7 @@
 ---
-import Layout from "../../layouts/Layout.astro";
+import Layout from "@/layouts/Layout.astro";
 import { actions } from "astro:actions";
-import { fetchPlans, fetchSubscriptions } from "../../lib/gateway";
+import { fetchPlans, fetchSubscriptions } from "@/lib/gateway";
 
 const user = Astro.locals.user;
 if (!user) {

@@ -1,7 +1,7 @@
 ---
-import AdminLayout from "../../layouts/AdminLayout.astro";
+import AdminLayout from "@/layouts/AdminLayout.astro";
 import { DataTable } from "@storygalore/ui";
-import { fetchAdminList } from "../../lib/gateway";
+import { fetchAdminList } from "@/lib/gateway";
 
 const user = Astro.locals.user;
 const comments = user ? await fetchAdminList("admin_comment_list", user.$id) : [];

@@ -1,8 +1,8 @@
 ---
-import Layout from "../../../../../layouts/Layout.astro";
+import Layout from "@/layouts/Layout.astro";
 import { actions } from "astro:actions";
-import DocumentMeta from "../../../../../components/DocumentMeta.svelte";
-import { fetchDocument, fetchMediaAssets } from "../../../../../lib/gateway";
+import DocumentMeta from "@/components/DocumentMeta.svelte";
+import { fetchDocument, fetchMediaAssets } from "@/lib/gateway";
 
 const user = Astro.locals.user;
 const projectId = Astro.params.id;

@@ -1,7 +1,7 @@
 ---
-import Layout from "../layouts/Layout.astro";
+import Layout from "@/layouts/Layout.astro";
 import { CreatorCard } from "@storygalore/ui";
-import { fetchCreators } from "../lib/gateway";
+import { fetchCreators } from "@/lib/gateway";
 
 const creators = await fetchCreators();
 ---

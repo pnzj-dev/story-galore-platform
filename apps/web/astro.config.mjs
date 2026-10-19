@@ -1,4 +1,5 @@
 import { defineConfig } from "astro/config";
+import { fileURLToPath } from "node:url";
 import svelte from "@astrojs/svelte";
 import node from "@astrojs/node";
 import tailwindcss from "@tailwindcss/vite";
@@ -10,6 +11,11 @@ export default defineConfig({
   adapter: node({ mode: "standalone" }),
   integrations: [svelte()],
   vite: {
+    resolve: {
+      alias: {
+        "@": fileURLToPath(new URL("./src", import.meta.url)),
+      },
+    },
     plugins: [tailwindcss()],
     ssr: {
       // These packages ship raw `.svelte` source files and must be processed

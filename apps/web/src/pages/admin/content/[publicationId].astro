@@ -1,7 +1,7 @@
 ---
-import AdminLayout from "../../../layouts/AdminLayout.astro";
-import AdminDetail from "../../../components/AdminDetail.astro";
-import { fetchAdminPublication } from "../../../lib/gateway";
+import AdminLayout from "@/layouts/AdminLayout.astro";
+import AdminDetail from "@/components/AdminDetail.astro";
+import { fetchAdminPublication } from "@/lib/gateway";
 
 const admin = Astro.locals.user;
 const publicationId = Astro.params.publicationId ?? "";

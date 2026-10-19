@@ -1,6 +1,6 @@
 ---
-import StudioLayout from "../../layouts/StudioLayout.astro";
-import { fetchCreator, fetchProjects } from "../../lib/gateway";
+import StudioLayout from "@/layouts/StudioLayout.astro";
+import { fetchCreator, fetchProjects } from "@/lib/gateway";
 
 const user = Astro.locals.user;
 const creator = user ? await fetchCreator(user.$id) : null;

@@ -1,8 +1,8 @@
 ---
-import StudioLayout from "../../../../layouts/StudioLayout.astro";
-import StudioProjectTabs from "../../../../components/StudioProjectTabs.astro";
+import StudioLayout from "@/layouts/StudioLayout.astro";
+import StudioProjectTabs from "@/components/StudioProjectTabs.astro";
 import { actions } from "astro:actions";
-import { fetchProject, fetchStoryBible, fetchCharacters, fetchWorld, fetchAssets, fetchStudioPublications } from "../../../../lib/gateway";
+import { fetchProject, fetchStoryBible, fetchCharacters, fetchWorld, fetchAssets, fetchStudioPublications } from "@/lib/gateway";
 
 const user = Astro.locals.user;
 if (!user) {

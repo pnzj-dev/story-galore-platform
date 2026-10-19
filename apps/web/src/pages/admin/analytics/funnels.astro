@@ -1,6 +1,6 @@
 ---
-import AdminLayout from "../../../layouts/AdminLayout.astro";
-import { fetchAdminFunnel } from "../../../lib/gateway";
+import AdminLayout from "@/layouts/AdminLayout.astro";
+import { fetchAdminFunnel } from "@/lib/gateway";
 
 const user = Astro.locals.user;
 const steps = user ? await fetchAdminFunnel(user.$id) : [];

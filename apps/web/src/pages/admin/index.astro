@@ -1,7 +1,7 @@
 ---
-import AdminLayout from "../../layouts/AdminLayout.astro";
+import AdminLayout from "@/layouts/AdminLayout.astro";
 import { KpiCard, TrendChart } from "@storygalore/ui";
-import { fetchAdminOverview } from "../../lib/gateway";
+import { fetchAdminOverview } from "@/lib/gateway";
 
 const user = Astro.locals.user;
 const overview = user ? await fetchAdminOverview(user.$id) : null;

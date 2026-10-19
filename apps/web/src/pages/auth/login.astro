@@ -1,8 +1,8 @@
 ---
-import MinimalLayout from "../../layouts/MinimalLayout.astro";
+import MinimalLayout from "@/layouts/MinimalLayout.astro";
 import { ThemeToggle } from "@storygalore/ui";
 import { actions } from "astro:actions";
-import { safeReturnTo } from "../../lib/returnTo";
+import { safeReturnTo } from "@/lib/returnTo";
 
 const returnTo = safeReturnTo(Astro.url.searchParams.get("returnTo"));
 const result = Astro.getActionResult(actions.login);

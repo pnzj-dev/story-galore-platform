@@ -1,6 +1,6 @@
 ---
-import AdminLayout from "../../layouts/AdminLayout.astro";
-import { fetchAdminAnalytics } from "../../lib/gateway";
+import AdminLayout from "@/layouts/AdminLayout.astro";
+import { fetchAdminAnalytics } from "@/lib/gateway";
 
 const user = Astro.locals.user;
 const analytics = user ? await fetchAdminAnalytics(user.$id) : null;

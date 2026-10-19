@@ -1,6 +1,6 @@
 ---
-import AdminLayout from "../../../layouts/AdminLayout.astro";
-import { fetchAdminSupportTickets } from "../../../lib/gateway";
+import AdminLayout from "@/layouts/AdminLayout.astro";
+import { fetchAdminSupportTickets } from "@/lib/gateway";
 
 const admin = Astro.locals.user;
 const tickets = admin ? await fetchAdminSupportTickets(admin.$id) : [];

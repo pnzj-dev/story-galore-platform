@@ -1,8 +1,8 @@
 ---
-import Layout from "../../layouts/Layout.astro";
+import Layout from "@/layouts/Layout.astro";
 import { MediaCard } from "@storygalore/ui";
 import type { MediaCardData } from "@storygalore/ui";
-import { fetchCreator, fetchPublications } from "../../lib/gateway";
+import { fetchCreator, fetchPublications } from "@/lib/gateway";
 
 const actorId = Astro.params.id ?? "";
 const creator = actorId ? await fetchCreator(actorId) : null;

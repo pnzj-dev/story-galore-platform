@@ -1,6 +1,6 @@
 ---
-import MediaDetail from "../../components/MediaDetail.astro";
-import { fetchPublication } from "../../lib/gateway";
+import MediaDetail from "@/components/MediaDetail.astro";
+import { fetchPublication } from "@/lib/gateway";
 
 const id = Astro.params.id ?? "";
 const detail = id ? await fetchPublication(id, Astro.locals.user?.$id ?? "") : null;

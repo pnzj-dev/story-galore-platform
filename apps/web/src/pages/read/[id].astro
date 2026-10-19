@@ -1,7 +1,7 @@
 ---
-import Layout from "../../layouts/Layout.astro";
-import Reader from "../../components/Reader.svelte";
-import { fetchReaderManifest, fetchReadingPosition } from "../../lib/gateway";
+import Layout from "@/layouts/Layout.astro";
+import Reader from "@/components/Reader.svelte";
+import { fetchReaderManifest, fetchReadingPosition } from "@/lib/gateway";
 
 const publicationId = Astro.params.id ?? "";
 const manifest = publicationId ? await fetchReaderManifest(publicationId, Astro.locals.user?.$id ?? "") : null;

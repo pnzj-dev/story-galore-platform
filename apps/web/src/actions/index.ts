@@ -2,7 +2,7 @@ import { defineAction, ActionError } from "astro:actions";
 import { z } from "astro:schema";
 import { createHash } from "node:crypto";
 import { createServerClient, createAdminClient, SESSION_COOKIE, ID } from "@storygalore/appwrite-client";
-import { invokeApi } from "../lib/gateway";
+import { invokeApi } from "@/lib/gateway";
 
 const endpoint = import.meta.env.PUBLIC_APPWRITE_ENDPOINT;
 const projectId = import.meta.env.PUBLIC_APPWRITE_PROJECT_ID;

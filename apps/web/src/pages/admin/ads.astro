@@ -1,7 +1,7 @@
 ---
-import AdminLayout from "../../layouts/AdminLayout.astro";
+import AdminLayout from "@/layouts/AdminLayout.astro";
 import { actions } from "astro:actions";
-import { fetchAdCampaigns, fetchAdPlacements } from "../../lib/gateway";
+import { fetchAdCampaigns, fetchAdPlacements } from "@/lib/gateway";
 
 const user = Astro.locals.user;
 const campaigns = await fetchAdCampaigns();

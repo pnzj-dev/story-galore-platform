@@ -1,6 +1,6 @@
 ---
-import AdminLayout from "../../../layouts/AdminLayout.astro";
-import { fetchAdminRetention } from "../../../lib/gateway";
+import AdminLayout from "@/layouts/AdminLayout.astro";
+import { fetchAdminRetention } from "@/lib/gateway";
 
 const user = Astro.locals.user;
 const r = user ? await fetchAdminRetention(user.$id) : null;

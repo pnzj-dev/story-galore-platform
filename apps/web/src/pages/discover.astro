@@ -1,8 +1,8 @@
 ---
-import Layout from "../layouts/Layout.astro";
+import Layout from "@/layouts/Layout.astro";
 import { MediaCard } from "@storygalore/ui";
 import type { MediaCardData } from "@storygalore/ui";
-import { fetchPublications } from "../lib/gateway";
+import { fetchPublications } from "@/lib/gateway";
 
 const genre = Astro.url.searchParams.get("genre");
 const heading = genre ? `Browse: ${genre.replace(/-/g, " ")}` : "Discover";

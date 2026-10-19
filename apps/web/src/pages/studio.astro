@@ -1,7 +1,7 @@
 ---
-import Layout from "../layouts/Layout.astro";
+import Layout from "@/layouts/Layout.astro";
 import { actions } from "astro:actions";
-import { fetchCreator, fetchProjects, fetchMediaAssets } from "../lib/gateway";
+import { fetchCreator, fetchProjects, fetchMediaAssets } from "@/lib/gateway";
 
 const user = Astro.locals.user;
 const creator = user ? await fetchCreator(user.$id) : null;

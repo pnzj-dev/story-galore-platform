@@ -1,7 +1,7 @@
 ---
-import Layout from "../../../layouts/Layout.astro";
-import ShortsPlayer from "../../../components/ShortsPlayer.svelte";
-import { fetchMediaByType } from "../../../lib/gateway";
+import Layout from "@/layouts/Layout.astro";
+import ShortsPlayer from "@/components/ShortsPlayer.svelte";
+import { fetchMediaByType } from "@/lib/gateway";
 
 const shorts = await fetchMediaByType("VIDEO", "SHORT_FILM");
 const id = Astro.params.id ?? "";
