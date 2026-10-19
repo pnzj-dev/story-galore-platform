@@ -39,6 +39,7 @@ export interface AIProvider {
   ownerType: "STORYGALORE" | "WORKSPACE";
   ownership: AIProviderOwnership;
   creditEligible: boolean;
+  creditCost?: number;
   ownerId?: string;
   status: "ACTIVE" | "DISABLED" | "UNREACHABLE" | "REQUIRES_REAUTH" | "POLICY_RESTRICTED";
   credentialRef?: string;

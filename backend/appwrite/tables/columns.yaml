@@ -588,6 +588,7 @@ studio_tables:
       - {key: ownerType, type: enum, elements: [STORYGALORE, WORKSPACE], required: true}
       - {key: ownership, type: enum, elements: [STORYGALORE, USER], required: true}
       - {key: creditEligible, type: boolean, required: true}
+      - {key: creditCost, type: integer, required: false}
       - {key: status, type: enum, elements: [ACTIVE, DISABLED, UNREACHABLE, REQUIRES_REAUTH, POLICY_RESTRICTED], required: true}
       - {key: credentialRef, type: varchar, size: 255, required: false}
       - {key: endpointRef, type: varchar, size: 255, required: false}

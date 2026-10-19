@@ -2864,7 +2864,7 @@ func requestGeneration(ctx openruntimes.Context, in *GatewayInput, cl client.Cli
 		return internalFailure(ctx, in, err)
 	}
 	if creditEligible {
-		if err := createCreditTransaction(cl, input.RequestId, actorId, "RESERVE", 0); err != nil {
+		if err := createCreditTransaction(cl, input.RequestId, actorId, "RESERVE", resolveCreditCost(cl)); err != nil {
 			return internalFailure(ctx, in, err)
 		}
 	}
@@ -2910,6 +2910,51 @@ func createCreditTransaction(cl client.Client, generationId, creatorId, kind str
 	})
 }
 
+const defaultGenerationCreditCost = 1
+
+// resolveCreditCost returns the default credit-eligible provider's creditCost,
+// or the platform default (1 credit) when no such provider is registered.
+func resolveCreditCost(cl client.Client) int {
+	service := tablesdb.New(cl)
+	list, err := service.ListRows(databaseID, "ai_providers", service.WithListRowsQueries([]string{
+		`{"method":"limit","values":[200]}`,
+	}))
+	if err != nil {
+		return defaultGenerationCreditCost
+	}
+	var raw map[string]interface{}
+	if list.Decode(&raw) != nil {
+		return defaultGenerationCreditCost
+	}
+	rows, _ := raw["rows"].([]interface{})
+	for _, r := range rows {
+		m, ok := r.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		status, _ := m["status"].(string)
+		loc, _ := m["executionLocation"].(string)
+		owner, _ := m["ownerType"].(string)
+		eligible, _ := m["creditEligible"].(bool)
+		if status == "ACTIVE" && loc == "CLOUD" && owner == "STORYGALORE" && eligible {
+			if cost := toInt(m["creditCost"]); cost > 0 {
+				return cost
+			}
+		}
+	}
+	return defaultGenerationCreditCost
+}
+
+// reservedCreditAmount returns the amount reserved for a generation (0 if none).
+func reservedCreditAmount(cl client.Client, generationId string) int {
+	for _, m := range listRowsByField(cl, "ai_credit_transactions", "generationId", generationId) {
+		if kind, _ := m["kind"].(string); kind == "RESERVE" {
+			return toInt(m["amount"])
+		}
+	}
+	return 0
+}
+
 // generationRowOf returns the status + projectId of a generation request.
 func generationRowOf(cl client.Client, generationId string) (status, projectId string, ok bool) {
 	service := tablesdb.New(cl)
@@ -2949,7 +2994,7 @@ func generationCancel(ctx openruntimes.Context, in *GatewayInput, cl client.Clie
 		return internalFailure(ctx, in, err)
 	}
 	if status == "RESERVED" || status == "PROCESSING" {
-		_ = createCreditTransaction(cl, input.GenerationId, actorId, "REFUND", 0)
+		_ = createCreditTransaction(cl, input.GenerationId, actorId, "REFUND", reservedCreditAmount(cl, input.GenerationId))
 	}
 	emit(ctx, cl, "studio.generation.cancelled.v1", input.GenerationId, actorId, map[string]interface{}{"generationId": input.GenerationId}, in.CorrelationId)
 	return success(ctx, in, map[string]interface{}{"status": "CANCELLED"})
@@ -2975,7 +3020,7 @@ func generationFail(ctx openruntimes.Context, in *GatewayInput, cl client.Client
 	if err := updateRow(cl, "studio_generation_requests", input.GenerationId, map[string]interface{}{"status": "FAILED"}); err != nil {
 		return internalFailure(ctx, in, err)
 	}
-	_ = createCreditTransaction(cl, input.GenerationId, generationCreatorId(cl, input.GenerationId), "REFUND", 0)
+	_ = createCreditTransaction(cl, input.GenerationId, generationCreatorId(cl, input.GenerationId), "REFUND", reservedCreditAmount(cl, input.GenerationId))
 	emit(ctx, cl, "studio.generation.failed.v1", input.GenerationId, actorOrEmpty(in.ActorId), map[string]interface{}{"generationId": input.GenerationId}, in.CorrelationId)
 	return success(ctx, in, map[string]interface{}{"status": "FAILED"})
 }
@@ -3044,7 +3089,7 @@ func generationComplete(ctx openruntimes.Context, in *GatewayInput, cl client.Cl
 	if err := updateRow(cl, "studio_generation_requests", input.GenerationId, map[string]interface{}{"status": "COMPLETED"}); err != nil {
 		return internalFailure(ctx, in, err)
 	}
-	_ = createCreditTransaction(cl, input.GenerationId, generationCreatorId(cl, input.GenerationId), "SETTLE", 0)
+	_ = createCreditTransaction(cl, input.GenerationId, generationCreatorId(cl, input.GenerationId), "SETTLE", reservedCreditAmount(cl, input.GenerationId))
 	emit(ctx, cl, "studio.generation.completed.v1", input.GenerationId, actorOrEmpty(in.ActorId), map[string]interface{}{"generationId": input.GenerationId, "outputId": outputId}, in.CorrelationId)
 	return success(ctx, in, map[string]interface{}{"status": "COMPLETED", "outputId": outputId})
 }
@@ -3166,6 +3211,7 @@ func aiProviderCreate(ctx openruntimes.Context, in *GatewayInput, cl client.Clie
 		OwnerType         string `json:"ownerType"`
 		Ownership         string `json:"ownership"`
 		CreditEligible    bool   `json:"creditEligible"`
+		CreditCost        int    `json:"creditCost"`
 		CredentialRef     string `json:"credentialRef"`
 		EndpointRef       string `json:"endpointRef"`
 	}
@@ -3177,12 +3223,16 @@ func aiProviderCreate(ctx openruntimes.Context, in *GatewayInput, cl client.Clie
 	if input.OwnerType != "STORYGALORE" || input.ExecutionLocation != "CLOUD" {
 		creditEligible = false
 	}
+	creditCost := input.CreditCost
+	if creditCost < 1 {
+		creditCost = 1
+	}
 	rowId := newUUID()
 	row := map[string]interface{}{
 		"id": rowId, "providerId": input.ProviderId, "displayName": input.DisplayName,
 		"executionLocation": input.ExecutionLocation, "protocol": input.Protocol,
 		"ownerType": input.OwnerType, "ownership": input.Ownership,
-		"creditEligible": creditEligible, "status": "ACTIVE", "createdAt": now(),
+		"creditEligible": creditEligible, "creditCost": creditCost, "status": "ACTIVE", "createdAt": now(),
 	}
 	if input.CredentialRef != "" {
 		row["credentialRef"] = input.CredentialRef
