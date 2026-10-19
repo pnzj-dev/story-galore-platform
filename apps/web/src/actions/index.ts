@@ -211,7 +211,7 @@ export const server = {
         }
       }
       context.cookies.delete(SESSION_COOKIE, { path: "/" });
-      return context.redirect("/");
+      return { ok: true };
     },
   }),
 

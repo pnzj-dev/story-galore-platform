@@ -5,8 +5,8 @@ import DocumentMeta from "@/components/DocumentMeta.svelte";
 import { fetchDocument, fetchMediaAssets } from "@/lib/gateway";
 
 const user = Astro.locals.user;
-const projectId = Astro.params.id;
-const documentId = Astro.params.docId;
+const projectId = Astro.params.id ?? "";
+const documentId = Astro.params.docId ?? "";
 
 if (!user) {
   return Astro.redirect("/login");

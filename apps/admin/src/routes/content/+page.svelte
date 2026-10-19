@@ -5,7 +5,7 @@
 	let { data }: PageProps = $props();
 
 	const columns = [
-		{ key: 'title', label: 'Title', href: (row) => `/content/${String(row.$id)}` },
+		{ key: 'title', label: 'Title', href: (row: Record<string, unknown>) => `/content/${String(row.$id)}` },
 		{ key: 'type', label: 'Type' },
 		{ key: 'status', label: 'Status' },
 		{ key: 'accessClass', label: 'Access' },

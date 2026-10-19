@@ -5,7 +5,7 @@ import { actions } from "astro:actions";
 import { fetchProject, fetchDocuments } from "@/lib/gateway";
 
 const user = Astro.locals.user;
-const projectId = Astro.params.id;
+const projectId = Astro.params.id ?? "";
 
 if (!user) {
   return Astro.redirect("/login");

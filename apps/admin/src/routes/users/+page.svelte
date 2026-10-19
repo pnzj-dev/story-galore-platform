@@ -5,7 +5,7 @@
 	let { data }: PageProps = $props();
 
 	const columns = [
-		{ key: 'name', label: 'Name', href: (row) => `/users/${String(row.$id)}` },
+		{ key: 'name', label: 'Name', href: (row: Record<string, unknown>) => `/users/${String(row.$id)}` },
 		{ key: 'email', label: 'Email' },
 		{ key: 'labels', label: 'Labels' },
 		{ key: 'createdAt', label: 'Created' }

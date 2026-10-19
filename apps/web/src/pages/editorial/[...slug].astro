@@ -1,5 +1,5 @@
 ---
-import Layout from '../../layouts/Layout.astro';
+import Layout from '@/layouts/Layout.astro';
 import { getCollection, render } from 'astro:content';
 
 const slug = Astro.params.slug;
@@ -30,7 +30,7 @@ const articleSchema = entry
     <article class="mx-auto max-w-3xl px-6 py-12">
       <h1 class="text-3xl font-bold">{entry.data.title}</h1>
       {entry.data.description && <p class="mt-2 text-lg text-foreground-muted">{entry.data.description}</p>}
-      <div class="mt-8 space-y-4 leading-relaxed"><Content /></div>
+      <div class="mt-8 space-y-4 leading-relaxed">{Content && <Content />}</div>
     </article>
   )}
   {!entry && (
