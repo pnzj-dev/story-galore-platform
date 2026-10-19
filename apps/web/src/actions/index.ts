@@ -124,6 +124,43 @@ export const server = {
     },
   }),
 
+  saveStoryBible: defineAction({
+    accept: "form",
+    input: z.object({
+      projectId: z.string().min(1),
+      premise: z.string().max(5000),
+      themes: z.string().max(2000),
+      tone: z.string().max(2000),
+    }),
+    handler: async (input, context) => {
+      const user = context.locals.user;
+      if (!user) throw new ActionError({ code: "UNAUTHORIZED", message: "Sign in to continue." });
+      const out = await invokeApi("story_bible_upsert", input, user.$id);
+      if (out.status !== "SUCCESS") {
+        throw new ActionError({ code: "INTERNAL_SERVER_ERROR", message: "Could not save the story bible." });
+      }
+      return { ok: true };
+    },
+  }),
+
+  createCharacter: defineAction({
+    accept: "form",
+    input: z.object({
+      projectId: z.string().min(1),
+      name: z.string().min(1).max(255),
+      description: z.string().max(5000),
+    }),
+    handler: async (input, context) => {
+      const user = context.locals.user;
+      if (!user) throw new ActionError({ code: "UNAUTHORIZED", message: "Sign in to continue." });
+      const out = await invokeApi("character_create", input, user.$id);
+      if (out.status !== "SUCCESS") {
+        throw new ActionError({ code: "INTERNAL_SERVER_ERROR", message: "Could not add the character." });
+      }
+      return { ok: true };
+    },
+  }),
+
   logout: defineAction({
     accept: "form",
     handler: async (_, context) => {

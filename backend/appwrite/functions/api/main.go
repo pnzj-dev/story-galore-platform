@@ -49,7 +49,8 @@ var knownOperations = map[string]bool{
 	"generation_create": true, "generation_apply_to_draft": true,
 	"publication_validate": true, "publication_publish": true,
 	"project_get": true, "project_list": true, "story_bible_get": true,
-	"character_list": true, "world_get": true, "asset_list": true,
+	"story_bible_upsert": true, "character_list": true, "character_create": true,
+	"world_get": true, "asset_list": true,
 	"document_get": true, "document_update": true, "page_get": true, "revision_list": true,
 	"operation_list": true, "generation_get": true,
 	"publication_validation_get": true,
@@ -153,9 +154,13 @@ func Main(ctx openruntimes.Context) openruntimes.Response {
 	case "project_list":
 		return projectList(ctx, &in, cl)
 	case "story_bible_get":
-		return getRow(ctx, &in, cl, "studio_story_bibles")
+		return storyBibleGet(ctx, &in, cl)
+	case "story_bible_upsert":
+		return storyBibleUpsert(ctx, &in, cl)
 	case "character_list":
-		return listRows(ctx, &in, cl, "studio_characters")
+		return characterList(ctx, &in, cl)
+	case "character_create":
+		return characterCreate(ctx, &in, cl)
 	case "world_get":
 		return getRow(ctx, &in, cl, "studio_worlds")
 	case "asset_list":
@@ -357,6 +362,167 @@ func projectList(ctx openruntimes.Context, in *GatewayInput, cl client.Client) o
 	}
 	rows, _ := raw["rows"].([]interface{})
 	return success(ctx, in, map[string]interface{}{"items": rows})
+}
+
+// projectOwnedByActor reports whether the actor is the creator of the project.
+func projectOwnedByActor(cl client.Client, projectId, actorId string) bool {
+	service := tablesdb.New(cl)
+	row, err := service.GetRow(databaseID, "studio_projects", projectId)
+	if err != nil {
+		return false
+	}
+	var m map[string]interface{}
+	if row.Decode(&m) != nil {
+		return false
+	}
+	creatorId, _ := m["creatorId"].(string)
+	return creatorId == actorId
+}
+
+func storyBibleGet(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	actorId := actorOrEmpty(in.ActorId)
+	if actorId == "" {
+		return respond(ctx, in.OperationId, "UNAUTHORIZED", false)
+	}
+	var input struct {
+		ProjectId string `json:"projectId"`
+	}
+	if !decode(ctx, in, &input) || input.ProjectId == "" {
+		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
+	}
+	if !projectOwnedByActor(cl, input.ProjectId, actorId) {
+		return respond(ctx, in.OperationId, "FORBIDDEN", false)
+	}
+	service := tablesdb.New(cl)
+	list, err := service.ListRows(databaseID, "studio_story_bibles", service.WithListRowsQueries([]string{
+		qEqual("projectId", input.ProjectId),
+		`{"method":"limit","values":[1]}`,
+	}))
+	if err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	var raw map[string]interface{}
+	if err := list.Decode(&raw); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	rows, _ := raw["rows"].([]interface{})
+	if len(rows) == 0 {
+		return success(ctx, in, map[string]interface{}{})
+	}
+	return success(ctx, in, rows[0])
+}
+
+func storyBibleUpsert(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	actorId := actorOrEmpty(in.ActorId)
+	if actorId == "" {
+		return respond(ctx, in.OperationId, "UNAUTHORIZED", false)
+	}
+	var input struct {
+		ProjectId string `json:"projectId"`
+		Premise   string `json:"premise"`
+		Themes    string `json:"themes"`
+		Tone      string `json:"tone"`
+	}
+	if !decode(ctx, in, &input) || input.ProjectId == "" {
+		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
+	}
+	if !projectOwnedByActor(cl, input.ProjectId, actorId) {
+		return respond(ctx, in.OperationId, "FORBIDDEN", false)
+	}
+	service := tablesdb.New(cl)
+	list, err := service.ListRows(databaseID, "studio_story_bibles", service.WithListRowsQueries([]string{
+		qEqual("projectId", input.ProjectId),
+		`{"method":"limit","values":[1]}`,
+	}))
+	if err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	var raw map[string]interface{}
+	if err := list.Decode(&raw); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	rows, _ := raw["rows"].([]interface{})
+	nowStr := now()
+	data := map[string]interface{}{
+		"premise":   input.Premise,
+		"themes":    input.Themes,
+		"tone":      input.Tone,
+		"updatedAt": nowStr,
+	}
+	if len(rows) == 0 {
+		data["projectId"] = input.ProjectId
+		if err := createRow(cl, "studio_story_bibles", newUUID(), data); err != nil {
+			return internalFailure(ctx, in, err)
+		}
+	} else {
+		row, _ := rows[0].(map[string]interface{})
+		rowId, _ := row["$id"].(string)
+		if err := updateRow(cl, "studio_story_bibles", rowId, data); err != nil {
+			return internalFailure(ctx, in, err)
+		}
+	}
+	return success(ctx, in, map[string]interface{}{"ok": true})
+}
+
+func characterList(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	actorId := actorOrEmpty(in.ActorId)
+	if actorId == "" {
+		return respond(ctx, in.OperationId, "UNAUTHORIZED", false)
+	}
+	var input struct {
+		ProjectId string `json:"projectId"`
+	}
+	if !decode(ctx, in, &input) || input.ProjectId == "" {
+		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
+	}
+	if !projectOwnedByActor(cl, input.ProjectId, actorId) {
+		return respond(ctx, in.OperationId, "FORBIDDEN", false)
+	}
+	service := tablesdb.New(cl)
+	list, err := service.ListRows(databaseID, "studio_characters", service.WithListRowsQueries([]string{
+		qEqual("projectId", input.ProjectId),
+		`{"method":"orderAsc","attribute":"name"}`,
+		`{"method":"limit","values":[200]}`,
+	}))
+	if err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	var raw map[string]interface{}
+	if err := list.Decode(&raw); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	rows, _ := raw["rows"].([]interface{})
+	return success(ctx, in, map[string]interface{}{"items": rows})
+}
+
+func characterCreate(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	actorId := actorOrEmpty(in.ActorId)
+	if actorId == "" {
+		return respond(ctx, in.OperationId, "UNAUTHORIZED", false)
+	}
+	var input struct {
+		ProjectId   string `json:"projectId"`
+		Name        string `json:"name"`
+		Description string `json:"description"`
+	}
+	if !decode(ctx, in, &input) || input.ProjectId == "" || input.Name == "" {
+		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
+	}
+	if !projectOwnedByActor(cl, input.ProjectId, actorId) {
+		return respond(ctx, in.OperationId, "FORBIDDEN", false)
+	}
+	rowId := newUUID()
+	if err := createRow(cl, "studio_characters", rowId, map[string]interface{}{
+		"id":          rowId,
+		"projectId":   input.ProjectId,
+		"name":        input.Name,
+		"description": input.Description,
+		"status":      "ACTIVE",
+		"revision":    1,
+	}); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	return success(ctx, in, map[string]interface{}{"ok": true, "characterId": rowId})
 }
 
 // subscriptionList returns the authenticated user's subscriptions (scoped to

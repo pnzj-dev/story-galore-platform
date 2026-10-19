@@ -645,3 +645,34 @@ export async function fetchAdminCreator(actorId: string, creatorActorId: string)
   if (out.status !== "SUCCESS" || !out.result) return null;
   return out.result;
 }
+
+export interface StoryBible {
+  $id?: string;
+  projectId?: string;
+  premise?: string;
+  themes?: string;
+  tone?: string;
+  updatedAt?: string;
+}
+
+/** Fetch a project's story bible (scoped to the actor server-side). */
+export async function fetchStoryBible(actorId: string, projectId: string): Promise<StoryBible | null> {
+  const out = await invokeApi<StoryBible>("story_bible_get", { projectId }, actorId);
+  if (out.status !== "SUCCESS") return null;
+  return out.result ?? {};
+}
+
+export interface Character {
+  $id?: string;
+  projectId?: string;
+  name?: string;
+  description?: string;
+  status?: string;
+}
+
+/** List a project's characters (scoped to the actor server-side). */
+export async function fetchCharacters(actorId: string, projectId: string): Promise<Character[]> {
+  const out = await invokeApi<{ items?: Character[] }>("character_list", { projectId }, actorId);
+  if (out.status !== "SUCCESS" || !out.result?.items) return [];
+  return out.result.items;
+}
