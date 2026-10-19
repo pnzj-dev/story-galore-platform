@@ -45,17 +45,27 @@ interface GenerationRequest {
   targetType: string;
 }
 
+const TARGET_CAPABILITY: Record<string, string> = {
+  STORY_TEXT: 'TEXT_GENERATION',
+  DIALOGUE: 'TEXT_GENERATION',
+  CHARACTER: 'TEXT_GENERATION',
+  PAGE: 'IMAGE_GENERATION',
+  PANEL: 'IMAGE_GENERATION',
+  IMAGE: 'IMAGE_GENERATION',
+  BACKGROUND: 'IMAGE_GENERATION',
+};
+
 export class GenerationWorkflow extends WorkflowEntrypoint<Env, Params> {
   async run(event: WorkflowEvent<Params>, step: WorkflowStep): Promise<void> {
     const batchSize = event.payload.batchSize ?? 20;
 
-    const reserved = await step.do(
-      'list reserved generations',
+    const pending = await step.do(
+      'list pending generations',
       { retries: { limit: 5, delay: '5 seconds', backoff: 'exponential' } },
-      async () => this.listReserved(),
+      async () => this.listPending(),
     );
 
-    for (const gen of reserved.slice(0, batchSize)) {
+    for (const gen of pending.slice(0, batchSize)) {
       await step.do(
         `process ${gen.requestId}`,
         { retries: { limit: 3, delay: '10 seconds', backoff: 'exponential' } },
@@ -64,21 +74,19 @@ export class GenerationWorkflow extends WorkflowEntrypoint<Env, Params> {
     }
   }
 
-  async listReserved(): Promise<GenerationRequest[]> {
+  async listPending(): Promise<GenerationRequest[]> {
     const out = await this.invokeGateway<{ items?: Array<Record<string, unknown>> }>(
       'generation_list_pending',
       {},
     );
     if (out.status !== 'SUCCESS') throw new Error(`generation_list_pending failed: ${out.errorCode}`);
-    return (out.result?.items ?? [])
-      .map((r) => ({
-        requestId: String(r.requestId ?? ''),
-        status: String(r.status ?? ''),
-        billingMode: String(r.billingMode ?? ''),
-        prompt: String(r.prompt ?? ''),
-        targetType: String(r.targetType ?? ''),
-      }))
-      .filter((g) => g.status === 'RESERVED');
+    return (out.result?.items ?? []).map((r) => ({
+      requestId: String(r.requestId ?? ''),
+      status: String(r.status ?? ''),
+      billingMode: String(r.billingMode ?? ''),
+      prompt: String(r.prompt ?? ''),
+      targetType: String(r.targetType ?? ''),
+    }));
   }
 
   async process(gen: GenerationRequest): Promise<void> {
@@ -89,15 +97,16 @@ export class GenerationWorkflow extends WorkflowEntrypoint<Env, Params> {
     if (proc.status !== 'SUCCESS') throw new Error(`generation_process failed: ${proc.errorCode}`);
 
     // Resolve the credit-eligible provider from the server-side catalog.
-    const provider = await this.resolveProvider();
+    const provider = await this.resolveProvider(gen.billingMode);
     if (!provider) {
-      await this.failClosed(gen, 'no credit-eligible provider registered');
+      await this.failClosed(gen, 'no provider registered for this billing mode');
       return;
     }
 
     // Invoke the provider and record the output (or fail closed).
     try {
-      const { text, model } = await this.invokeProvider(provider, gen);
+      const model = await this.resolveModel(gen.targetType, String(provider.providerId ?? ''));
+      const { text } = await this.invokeProvider(provider, gen, model);
       const done = await this.invokeGateway<{ outputId?: string }>('generation_complete', {
         generationId: gen.requestId,
         providerId: String(provider.providerId ?? ''),
@@ -114,7 +123,8 @@ export class GenerationWorkflow extends WorkflowEntrypoint<Env, Params> {
   async invokeProvider(
     provider: Record<string, unknown>,
     gen: GenerationRequest,
-  ): Promise<{ text: string; model: string }> {
+    model: string,
+  ): Promise<{ text: string }> {
     const endpoint = String(provider.endpointRef ?? '');
     if (!endpoint) throw new Error('provider has no endpointRef');
     const protocol = String(provider.protocol ?? '');
@@ -125,8 +135,7 @@ export class GenerationWorkflow extends WorkflowEntrypoint<Env, Params> {
     const apiKey = credentials[credKey];
     if (!apiKey) throw new Error('no credential for provider');
 
-    const model = this.env.DEFAULT_MODEL_ID ?? '';
-    if (!model) throw new Error('no default model configured');
+    if (!model) throw new Error('no model resolved');
 
     // SSRF guard: https only, and reject literal private/loopback/link-local hosts.
     let baseUrl: URL;
@@ -145,25 +154,58 @@ export class GenerationWorkflow extends WorkflowEntrypoint<Env, Params> {
     });
     if (!res.ok) throw new Error(`provider HTTP ${res.status}`);
     const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
-    return { text: data.choices?.[0]?.message?.content ?? '', model };
+    return { text: data.choices?.[0]?.message?.content ?? '' };
   }
 
-  async resolveProvider(): Promise<Record<string, unknown> | null> {
+  async resolveProvider(billingMode: string): Promise<Record<string, unknown> | null> {
     const out = await this.invokeGateway<{ items?: Array<Record<string, unknown>> }>(
       'ai_provider_list',
       {},
     );
     if (out.status !== 'SUCCESS') throw new Error(`ai_provider_list failed: ${out.errorCode}`);
     const providers = out.result?.items ?? [];
+    if (billingMode === 'PLATFORM_CREDITS') {
+      return (
+        providers.find(
+          (p) =>
+            String(p.status ?? '') === 'ACTIVE' &&
+            String(p.executionLocation ?? '') === 'CLOUD' &&
+            String(p.ownerType ?? '') === 'STORYGALORE' &&
+            p.creditEligible === true,
+        ) ?? null
+      );
+    }
+    // BYOK / USER_HOSTED: resolve a non-StoryGalore provider matching the location.
+    const location = billingMode === 'USER_HOSTED' ? 'USER_HOSTED' : 'CLOUD';
     return (
       providers.find(
         (p) =>
           String(p.status ?? '') === 'ACTIVE' &&
-          String(p.executionLocation ?? '') === 'CLOUD' &&
-          String(p.ownerType ?? '') === 'STORYGALORE' &&
-          p.creditEligible === true,
+          String(p.executionLocation ?? '') === location &&
+          String(p.ownerType ?? '') === 'WORKSPACE',
       ) ?? null
     );
+  }
+
+  async resolveModel(targetType: string, providerId: string): Promise<string> {
+    const out = await this.invokeGateway<{ items?: Array<Record<string, unknown>> }>(
+      'ai_model_list',
+      {},
+    );
+    if (out.status !== 'SUCCESS') throw new Error(`ai_model_list failed: ${out.errorCode}`);
+    const models = out.result?.items ?? [];
+    const capability = TARGET_CAPABILITY[targetType] ?? 'TEXT_GENERATION';
+    const match = models.find(
+      (m) =>
+        String(m.providerId ?? '') === providerId &&
+        String(m.status ?? '') === 'ACTIVE' &&
+        Array.isArray(m.capabilities) &&
+        m.capabilities.map(String).includes(capability),
+    );
+    if (match) return String(match.modelId ?? '');
+    const fallback = this.env.DEFAULT_MODEL_ID ?? '';
+    if (!fallback) throw new Error('no model resolved and no DEFAULT_MODEL_ID configured');
+    return fallback;
   }
 
   async failClosed(gen: GenerationRequest, reason: string): Promise<void> {

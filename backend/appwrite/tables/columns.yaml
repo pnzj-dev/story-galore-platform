@@ -608,6 +608,20 @@ studio_tables:
       - {key: status, type: enum, elements: [COMPLETED, FAILED], required: true}
       - {key: outputRef, type: text, required: false}
       - {key: createdAt, type: datetime, required: true}
+  - table: ai_models
+    source: contracts/deterministic/ai/persistence.yaml
+    partition_key: providerId
+    indexes: [providerId]
+    columns:
+      - {key: id, type: varchar, size: 255, required: true}
+      - {key: modelId, type: varchar, size: 255, required: true}
+      - {key: providerId, type: varchar, size: 255, required: true}
+      - {key: displayName, type: varchar, size: 255, required: false}
+      - {key: capabilities, type: varchar, array: true, required: true}
+      - {key: contextWindow, type: integer, required: false}
+      - {key: adultPolicy, type: enum, elements: [ADULT_ALLOWED, ADULT_NOT_ALLOWED, ADULT_REQUIRES_VERIFICATION], required: false}
+      - {key: status, type: enum, elements: [ACTIVE, DISABLED], required: true}
+      - {key: createdAt, type: datetime, required: true}
   - table: studio_publication_validation_runs
     source: contracts/studio/validation.schema.yaml
     partition_key: documentId

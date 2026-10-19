@@ -100,6 +100,8 @@ var knownOperations = map[string]bool{
 	"prompt_redact_expired": true,
 	"ai_provider_list":      true, "ai_provider_get": true,
 	"ai_provider_create": true, "ai_provider_update": true,
+	"ai_model_list": true, "ai_model_get": true,
+	"ai_model_create": true, "ai_model_update": true,
 }
 
 const databaseID = "main"
@@ -182,6 +184,14 @@ func Main(ctx openruntimes.Context) openruntimes.Response {
 		return aiProviderCreate(ctx, &in, cl)
 	case "ai_provider_update":
 		return aiProviderUpdate(ctx, &in, cl)
+	case "ai_model_list":
+		return aiModelList(ctx, &in, cl)
+	case "ai_model_get":
+		return aiModelGet(ctx, &in, cl)
+	case "ai_model_create":
+		return aiModelCreate(ctx, &in, cl)
+	case "ai_model_update":
+		return aiModelUpdate(ctx, &in, cl)
 	case "creator_analytics_get":
 		return creatorAnalyticsGet(ctx, &in, cl)
 	case "publication_validate":
@@ -2821,18 +2831,19 @@ func requestGeneration(ctx openruntimes.Context, in *GatewayInput, cl client.Cli
 		return respond(ctx, in.OperationId, "UNAUTHORIZED", false)
 	}
 	var input struct {
-		RequestId         string          `json:"requestId"`
-		ProjectId         string          `json:"projectId"`
-		DraftId           *string         `json:"draftId"`
-		TargetType        string          `json:"targetType"`
-		PromptTemplateId  *string         `json:"promptTemplateId"`
-		Prompt            *string         `json:"prompt"`
-		InputAssetIds     []string        `json:"inputAssetIds"`
-		BillingMode       string          `json:"billingMode"`
-		CreditEligible    *bool           `json:"creditEligible"`
-		CreditReason      *string         `json:"creditEligibilityReason"`
-		ExecutionLocation string          `json:"executionLocation"`
-		PolicyContext     json.RawMessage `json:"policyContext"`
+		RequestId         string            `json:"requestId"`
+		ProjectId         string            `json:"projectId"`
+		DraftId           *string           `json:"draftId"`
+		TargetType        string            `json:"targetType"`
+		PromptTemplateId  *string           `json:"promptTemplateId"`
+		Prompt            *string           `json:"prompt"`
+		Variables         map[string]string `json:"variables"`
+		InputAssetIds     []string          `json:"inputAssetIds"`
+		BillingMode       string            `json:"billingMode"`
+		CreditEligible    *bool             `json:"creditEligible"`
+		CreditReason      *string           `json:"creditEligibilityReason"`
+		ExecutionLocation string            `json:"executionLocation"`
+		PolicyContext     json.RawMessage   `json:"policyContext"`
 	}
 	if !decode(ctx, in, &input) || input.RequestId == "" || input.ProjectId == "" || input.TargetType == "" || input.BillingMode == "" || input.ExecutionLocation == "" {
 		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
@@ -2846,6 +2857,16 @@ func requestGeneration(ctx openruntimes.Context, in *GatewayInput, cl client.Cli
 	if creditEligible {
 		status = "RESERVED"
 	}
+	// Resolve a prompt template into a concrete prompt when no direct prompt is given.
+	resolvedPrompt := ""
+	if input.Prompt != nil {
+		resolvedPrompt = *input.Prompt
+	}
+	if resolvedPrompt == "" && input.PromptTemplateId != nil && *input.PromptTemplateId != "" {
+		if rp, err := resolvePromptTemplate(cl, *input.PromptTemplateId, input.Variables); err == nil {
+			resolvedPrompt = rp
+		}
+	}
 	row := map[string]interface{}{
 		"requestId": input.RequestId, "projectId": input.ProjectId, "targetType": input.TargetType,
 		"billingMode": input.BillingMode, "executionLocation": input.ExecutionLocation,
@@ -2858,8 +2879,8 @@ func requestGeneration(ctx openruntimes.Context, in *GatewayInput, cl client.Cli
 	if input.PromptTemplateId != nil {
 		row["promptTemplateId"] = *input.PromptTemplateId
 	}
-	if input.Prompt != nil {
-		row["prompt"] = *input.Prompt
+	if resolvedPrompt != "" {
+		row["prompt"] = resolvedPrompt
 	}
 	if len(input.InputAssetIds) > 0 {
 		row["inputAssetIds"] = input.InputAssetIds
@@ -2893,6 +2914,34 @@ func creditEligibilityFor(billingMode, executionLocation string) (bool, string) 
 		return true, "STORYGALORE_MANAGED_MODEL"
 	}
 	return false, "PLATFORM_POLICY_DISABLED"
+}
+
+// resolvePromptTemplate returns a prompt template's text with `{{variable}}`
+// placeholders substituted from the supplied values.
+func resolvePromptTemplate(cl client.Client, templateId string, variables map[string]string) (string, error) {
+	service := tablesdb.New(cl)
+	list, err := service.ListRows(databaseID, "studio_prompt_templates", service.WithListRowsQueries([]string{
+		qEqual("id", templateId),
+		`{"method":"limit","values":[1]}`,
+	}))
+	if err != nil {
+		return "", err
+	}
+	var raw map[string]interface{}
+	if err := list.Decode(&raw); err != nil {
+		return "", err
+	}
+	rows, _ := raw["rows"].([]interface{})
+	if len(rows) == 0 {
+		return "", fmt.Errorf("prompt template not found")
+	}
+	m, _ := rows[0].(map[string]interface{})
+	template, _ := m["template"].(string)
+	resolved := template
+	for k, v := range variables {
+		resolved = strings.ReplaceAll(resolved, "{{"+k+"}}", v)
+	}
+	return resolved, nil
 }
 
 func createCreditTransaction(cl client.Client, generationId, creatorId, kind string, amount int) error {
@@ -2998,7 +3047,9 @@ func generationCancel(ctx openruntimes.Context, in *GatewayInput, cl client.Clie
 		return internalFailure(ctx, in, err)
 	}
 	if status == "RESERVED" || status == "PROCESSING" {
-		_ = createCreditTransaction(cl, input.GenerationId, actorId, "REFUND", reservedCreditAmount(cl, input.GenerationId))
+		if amount := reservedCreditAmount(cl, input.GenerationId); amount > 0 {
+			_ = createCreditTransaction(cl, input.GenerationId, actorId, "REFUND", amount)
+		}
 	}
 	emit(ctx, cl, "studio.generation.cancelled.v1", input.GenerationId, actorId, map[string]interface{}{"generationId": input.GenerationId}, in.CorrelationId)
 	return success(ctx, in, map[string]interface{}{"status": "CANCELLED"})
@@ -3024,7 +3075,9 @@ func generationFail(ctx openruntimes.Context, in *GatewayInput, cl client.Client
 	if err := updateRow(cl, "studio_generation_requests", input.GenerationId, map[string]interface{}{"status": "FAILED", "completedAt": now()}); err != nil {
 		return internalFailure(ctx, in, err)
 	}
-	_ = createCreditTransaction(cl, input.GenerationId, generationCreatorId(cl, input.GenerationId), "REFUND", reservedCreditAmount(cl, input.GenerationId))
+	if amount := reservedCreditAmount(cl, input.GenerationId); amount > 0 {
+		_ = createCreditTransaction(cl, input.GenerationId, generationCreatorId(cl, input.GenerationId), "REFUND", amount)
+	}
 	emit(ctx, cl, "studio.generation.failed.v1", input.GenerationId, actorOrEmpty(in.ActorId), map[string]interface{}{"generationId": input.GenerationId}, in.CorrelationId)
 	return success(ctx, in, map[string]interface{}{"status": "FAILED"})
 }
@@ -3093,7 +3146,9 @@ func generationComplete(ctx openruntimes.Context, in *GatewayInput, cl client.Cl
 	if err := updateRow(cl, "studio_generation_requests", input.GenerationId, map[string]interface{}{"status": "COMPLETED", "completedAt": now()}); err != nil {
 		return internalFailure(ctx, in, err)
 	}
-	_ = createCreditTransaction(cl, input.GenerationId, generationCreatorId(cl, input.GenerationId), "SETTLE", reservedCreditAmount(cl, input.GenerationId))
+	if amount := reservedCreditAmount(cl, input.GenerationId); amount > 0 {
+		_ = createCreditTransaction(cl, input.GenerationId, generationCreatorId(cl, input.GenerationId), "SETTLE", amount)
+	}
 	emit(ctx, cl, "studio.generation.completed.v1", input.GenerationId, actorOrEmpty(in.ActorId), map[string]interface{}{"generationId": input.GenerationId, "outputId": outputId}, in.CorrelationId)
 	return success(ctx, in, map[string]interface{}{"status": "COMPLETED", "outputId": outputId})
 }
@@ -3112,7 +3167,7 @@ func generationProcess(ctx openruntimes.Context, in *GatewayInput, cl client.Cli
 	if !ok {
 		return respond(ctx, in.OperationId, "RESOURCE_NOT_FOUND", false)
 	}
-	if status != "RESERVED" {
+	if status != "RESERVED" && status != "QUEUED" {
 		return respond(ctx, in.OperationId, "CONFLICT", false)
 	}
 	if err := updateRow(cl, "studio_generation_requests", input.GenerationId, map[string]interface{}{"status": "PROCESSING"}); err != nil {
@@ -3353,6 +3408,131 @@ func filterByStatus(rows []interface{}, status string) []interface{} {
 		}
 	}
 	return out
+}
+
+func aiModelList(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	service := tablesdb.New(cl)
+	list, err := service.ListRows(databaseID, "ai_models", service.WithListRowsQueries([]string{
+		`{"method":"limit","values":[500]}`,
+	}))
+	if err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	var raw map[string]interface{}
+	if err := list.Decode(&raw); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	rows, _ := raw["rows"].([]interface{})
+	if !adminActor(ctx, in, cl) {
+		rows = filterByStatus(rows, "ACTIVE")
+	}
+	return success(ctx, in, map[string]interface{}{"items": rows})
+}
+
+func aiModelGet(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	var input struct {
+		ModelId string `json:"modelId"`
+	}
+	if !decode(ctx, in, &input) || input.ModelId == "" {
+		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
+	}
+	service := tablesdb.New(cl)
+	list, err := service.ListRows(databaseID, "ai_models", service.WithListRowsQueries([]string{
+		qEqual("modelId", input.ModelId),
+		`{"method":"limit","values":[1]}`,
+	}))
+	if err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	var raw map[string]interface{}
+	if err := list.Decode(&raw); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	rows, _ := raw["rows"].([]interface{})
+	if len(rows) == 0 {
+		return respond(ctx, in.OperationId, "RESOURCE_NOT_FOUND", false)
+	}
+	m, _ := rows[0].(map[string]interface{})
+	if !adminActor(ctx, in, cl) {
+		if s, _ := m["status"].(string); s != "ACTIVE" {
+			return respond(ctx, in.OperationId, "RESOURCE_NOT_FOUND", false)
+		}
+	}
+	return success(ctx, in, m)
+}
+
+func aiModelCreate(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	if !adminActor(ctx, in, cl) {
+		return respond(ctx, in.OperationId, "FORBIDDEN", false)
+	}
+	var input struct {
+		ModelId       string   `json:"modelId"`
+		ProviderId    string   `json:"providerId"`
+		DisplayName   string   `json:"displayName"`
+		Capabilities  []string `json:"capabilities"`
+		ContextWindow int      `json:"contextWindow"`
+		AdultPolicy   string   `json:"adultPolicy"`
+	}
+	if !decode(ctx, in, &input) || input.ModelId == "" || input.ProviderId == "" || len(input.Capabilities) == 0 {
+		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
+	}
+	rowId := newUUID()
+	row := map[string]interface{}{
+		"id": rowId, "modelId": input.ModelId, "providerId": input.ProviderId,
+		"capabilities": input.Capabilities, "status": "ACTIVE", "createdAt": now(),
+	}
+	if input.DisplayName != "" {
+		row["displayName"] = input.DisplayName
+	}
+	if input.ContextWindow > 0 {
+		row["contextWindow"] = input.ContextWindow
+	}
+	if input.AdultPolicy != "" {
+		row["adultPolicy"] = input.AdultPolicy
+	}
+	if err := createRow(cl, "ai_models", rowId, row); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	return success(ctx, in, map[string]interface{}{"ok": true, "modelId": input.ModelId})
+}
+
+func aiModelUpdate(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	if !adminActor(ctx, in, cl) {
+		return respond(ctx, in.OperationId, "FORBIDDEN", false)
+	}
+	var input struct {
+		ModelId string `json:"modelId"`
+		Status  string `json:"status"`
+	}
+	if !decode(ctx, in, &input) || input.ModelId == "" {
+		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
+	}
+	service := tablesdb.New(cl)
+	list, err := service.ListRows(databaseID, "ai_models", service.WithListRowsQueries([]string{
+		qEqual("modelId", input.ModelId),
+		`{"method":"limit","values":[1]}`,
+	}))
+	if err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	var raw map[string]interface{}
+	if err := list.Decode(&raw); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	rows, _ := raw["rows"].([]interface{})
+	if len(rows) == 0 {
+		return respond(ctx, in.OperationId, "RESOURCE_NOT_FOUND", false)
+	}
+	m, _ := rows[0].(map[string]interface{})
+	rowId, _ := m["$id"].(string)
+	data := map[string]interface{}{}
+	if input.Status != "" {
+		data["status"] = input.Status
+	}
+	if err := updateRow(cl, "ai_models", rowId, data); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	return success(ctx, in, map[string]interface{}{"ok": true})
 }
 
 func promptTemplateList(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
