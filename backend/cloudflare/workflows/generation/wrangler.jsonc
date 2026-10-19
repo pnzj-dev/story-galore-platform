@@ -1,16 +1,13 @@
 {
   "name": "storygalore-generation",
   "main": "src/index.ts",
-  "compatibility_date": "2025-01-01",
+  "compatibility_date": "2026-10-01",
   "observability": { "enabled": true },
-  "workflows": [
-    {
+  "exports": {
+    "GenerationWorkflow": {
+      "type": "workflow",
       "name": "generation",
-      "binding": "GENERATION",
-      "class_name": "GenerationWorkflow"
+      "schedules": ["*/5 * * * *"]
     }
-  ],
-  "triggers": {
-    "crons": ["*/5 * * * *"]
   }
 }

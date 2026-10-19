@@ -1,16 +1,13 @@
 {
   "name": "storygalore-prompt-redaction",
   "main": "src/index.ts",
-  "compatibility_date": "2025-01-01",
+  "compatibility_date": "2026-10-01",
   "observability": { "enabled": true },
-  "workflows": [
-    {
+  "exports": {
+    "PromptRedactionWorkflow": {
+      "type": "workflow",
       "name": "prompt-redaction",
-      "binding": "PROMPT_REDACTION",
-      "class_name": "PromptRedactionWorkflow"
+      "schedules": ["0 0 * * *"]
     }
-  ],
-  "triggers": {
-    "crons": ["0 0 * * *"]
   }
 }
