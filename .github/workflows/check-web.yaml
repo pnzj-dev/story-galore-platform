@@ -1,0 +1,47 @@
+name: Check Web (typecheck + build)
+
+on:
+  push:
+    branches: [main, dev, staging]
+    paths:
+      - 'apps/web/**'
+      - 'packages/ui/**'
+      - 'packages/domain/**'
+      - 'packages/appwrite-client/**'
+      - 'packages/config/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+  pull_request:
+    paths:
+      - 'apps/web/**'
+      - 'packages/ui/**'
+      - 'packages/domain/**'
+      - 'packages/appwrite-client/**'
+      - 'packages/config/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.11.2
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm validate:typecheck
+
+      - name: Build
+        run: pnpm build
