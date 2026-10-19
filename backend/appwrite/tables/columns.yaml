@@ -642,6 +642,38 @@ studio_tables:
       - {key: relatedIds, type: varchar, array: true, required: false}
       - {key: resolution, type: text, required: false}
       - {key: createdAt, type: datetime, required: true}
+  - table: alerts
+    source: docs/OPERATIONS_CENTER.md
+    partition_key: metric
+    columns:
+      - {key: id, type: varchar, size: 255, required: true}
+      - {key: name, type: varchar, size: 255, required: true}
+      - {key: metric, type: varchar, size: 255, required: true}
+      - {key: operator, type: varchar, size: 255, required: true}
+      - {key: severity, type: varchar, size: 255, required: true}
+      - {key: threshold, type: integer, required: true}
+      - {key: enabled, type: boolean, required: false}
+      - {key: lastTriggeredAt, type: datetime, required: false}
+      - {key: createdAt, type: datetime, required: true}
+  - table: metric_points
+    source: docs/OPERATIONS_CENTER.md
+    partition_key: metric
+    columns:
+      - {key: id, type: varchar, size: 255, required: true}
+      - {key: metric, type: varchar, size: 255, required: true}
+      - {key: value, type: integer, required: true}
+      - {key: recordedAt, type: datetime, required: true}
+  - table: notifications
+    source: docs/OPERATIONS_CENTER.md
+    partition_key: userId
+    columns:
+      - {key: id, type: varchar, size: 255, required: true}
+      - {key: userId, type: varchar, size: 255, required: true}
+      - {key: type, type: varchar, size: 255, required: true}
+      - {key: subject, type: varchar, size: 255, required: true}
+      - {key: body, type: text, required: true}
+      - {key: status, type: varchar, size: 255, required: true}
+      - {key: createdAt, type: datetime, required: true}
   - table: studio_publication_validation_runs
     source: contracts/studio/validation.schema.yaml
     partition_key: documentId
@@ -689,7 +721,6 @@ pending_columns:
   - table: ad_frequency_caps
   - table: ad_events
   - table: ad_metrics_daily
-  - table: notifications
   - table: notification_preferences
   - table: notification_delivery_attempts
   - table: provider_auth_tokens

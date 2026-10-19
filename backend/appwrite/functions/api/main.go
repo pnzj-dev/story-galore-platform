@@ -109,6 +109,7 @@ var knownOperations = map[string]bool{
 	"alert_create":             true, "alert_list": true, "alert_update": true,
 	"alert_evaluate": true,
 	"admin_ai_cost":  true,
+	"metric_ingest":  true,
 }
 
 const databaseID = "main"
@@ -119,6 +120,18 @@ func Main(ctx openruntimes.Context) openruntimes.Response {
 	// Raw Stripe webhook endpoint (received directly from Stripe).
 	if ctx.Req.Path == "/webhooks/stripe" {
 		return handleStripeWebhook(ctx, newClient(ctx))
+	}
+
+	// Scheduled alert evaluation (cron trigger; trusted, no actor).
+	if ctx.Req.Headers["x-appwrite-trigger"] == "schedule" {
+		cl := newClient(ctx)
+		results, err := evaluateAlertsCore(cl)
+		if err != nil {
+			ctx.Error("api: scheduled alert evaluation failed", err)
+			return respond(ctx, nil, "INTERNAL_FAILURE", true)
+		}
+		ctx.Log("api: scheduled alert evaluation", "alerts="+fmt.Sprint(len(results)))
+		return ctx.Res.Json(GatewayOutput{Status: "SUCCESS", Result: map[string]interface{}{"items": results}})
 	}
 
 	var in GatewayInput
@@ -221,6 +234,8 @@ func Main(ctx openruntimes.Context) openruntimes.Response {
 		return alertEvaluate(ctx, &in, cl)
 	case "admin_ai_cost":
 		return adminAiCost(ctx, &in, cl)
+	case "metric_ingest":
+		return metricIngest(ctx, &in, cl)
 	case "creator_analytics_get":
 		return creatorAnalyticsGet(ctx, &in, cl)
 	case "publication_validate":
@@ -2559,8 +2574,35 @@ func metricValue(cl client.Client, metric string) int {
 	case "incidents.open":
 		return countRows(cl, "incidents", qEqual("status", "OPEN")) + countRows(cl, "incidents", qEqual("status", "INVESTIGATING"))
 	default:
+		return latestMetricPoint(cl, metric)
+	}
+}
+
+// latestMetricPoint returns the most recent recorded value for an external metric.
+func latestMetricPoint(cl client.Client, metric string) int {
+	rows := listRowsByField(cl, "metric_points", "metric", metric)
+	if len(rows) == 0 {
 		return 0
 	}
+	return toInt(rows[len(rows)-1]["value"])
+}
+
+// metricIngest records an external metric point (e.g. MCP latency, workflow backlog).
+func metricIngest(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	var input struct {
+		Metric string `json:"metric"`
+		Value  int    `json:"value"`
+	}
+	if !decode(ctx, in, &input) || input.Metric == "" {
+		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
+	}
+	rowId := newUUID()
+	if err := createRow(cl, "metric_points", rowId, map[string]interface{}{
+		"id": rowId, "metric": input.Metric, "value": input.Value, "recordedAt": now(),
+	}); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	return success(ctx, in, map[string]interface{}{"ok": true})
 }
 
 func evaluateOperator(op string, value, threshold int) bool {
@@ -2578,22 +2620,19 @@ func evaluateOperator(op string, value, threshold int) bool {
 	}
 }
 
-// alertEvaluate evaluates enabled alerts against their metrics. A triggered alert
-// records lastTriggeredAt and opens an incident.
-func alertEvaluate(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
-	if !adminActor(ctx, in, cl) {
-		return respond(ctx, in.OperationId, "FORBIDDEN", false)
-	}
+// evaluateAlertsCore evaluates enabled alerts + records triggers (no auth check;
+// callers must authorize). Returns the evaluation results.
+func evaluateAlertsCore(cl client.Client) ([]map[string]interface{}, error) {
 	service := tablesdb.New(cl)
 	list, err := service.ListRows(databaseID, "alerts", service.WithListRowsQueries([]string{
 		`{"method":"limit","values":[100]}`,
 	}))
 	if err != nil {
-		return internalFailure(ctx, in, err)
+		return nil, err
 	}
 	var raw map[string]interface{}
 	if err := list.Decode(&raw); err != nil {
-		return internalFailure(ctx, in, err)
+		return nil, err
 	}
 	rows, _ := raw["rows"].([]interface{})
 	results := make([]map[string]interface{}, 0, len(rows))
@@ -2611,7 +2650,6 @@ func alertEvaluate(ctx openruntimes.Context, in *GatewayInput, cl client.Client)
 		operator, _ := m["operator"].(string)
 		threshold := toInt(m["threshold"])
 		severity, _ := m["severity"].(string)
-		subsystem, _ := m["metric"].(string)
 		value := metricValue(cl, metric)
 		triggered := evaluateOperator(operator, value, threshold)
 		if triggered {
@@ -2619,8 +2657,15 @@ func alertEvaluate(ctx openruntimes.Context, in *GatewayInput, cl client.Client)
 				rowId := newUUID()
 				_ = createRow(cl, "incidents", rowId, map[string]interface{}{
 					"id": rowId, "severity": severity, "status": "OPEN",
-					"subsystem": subsystem, "summary": "Alert triggered: " + name,
+					"subsystem": metric, "summary": "Alert triggered: " + name,
 					"startedAt": now(), "createdAt": now(),
+				})
+				notifId := newUUID()
+				_ = createRow(cl, "notifications", notifId, map[string]interface{}{
+					"id": notifId, "userId": "admin-service-account", "type": "ALERT",
+					"subject": "Alert triggered: " + name,
+					"body":    "Metric " + metric + " is " + fmt.Sprint(value) + " (threshold " + fmt.Sprint(threshold) + ").",
+					"status":  "PENDING", "createdAt": now(),
 				})
 			}
 		}
@@ -2628,6 +2673,19 @@ func alertEvaluate(ctx openruntimes.Context, in *GatewayInput, cl client.Client)
 			"alertId": alertId, "name": name, "metric": metric, "value": value,
 			"threshold": threshold, "triggered": triggered,
 		})
+	}
+	return results, nil
+}
+
+// alertEvaluate evaluates enabled alerts against their metrics. A triggered alert
+// records lastTriggeredAt and opens an incident.
+func alertEvaluate(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	if !adminActor(ctx, in, cl) {
+		return respond(ctx, in.OperationId, "FORBIDDEN", false)
+	}
+	results, err := evaluateAlertsCore(cl)
+	if err != nil {
+		return internalFailure(ctx, in, err)
 	}
 	return success(ctx, in, map[string]interface{}{"items": results})
 }
