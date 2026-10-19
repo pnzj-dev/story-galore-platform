@@ -110,12 +110,12 @@ export class GenerationWorkflow extends WorkflowEntrypoint<Env, Params> {
     // Invoke the provider and record the output (or fail closed).
     try {
       const model = await this.resolveModel(gen.targetType, String(provider.providerId ?? ''));
-      const { text } = await this.invokeProvider(provider, gen, model);
+      const { output } = await this.invokeProvider(provider, gen, model);
       const done = await this.invokeGateway<{ outputId?: string }>('generation_complete', {
         generationId: gen.requestId,
         providerId: String(provider.providerId ?? ''),
         modelId: model,
-        outputRef: text,
+        outputRef: output,
       });
       if (done.status !== 'SUCCESS') throw new Error(`generation_complete failed: ${done.errorCode}`);
     } catch (err) {
@@ -128,17 +128,34 @@ export class GenerationWorkflow extends WorkflowEntrypoint<Env, Params> {
     provider: Record<string, unknown>,
     gen: GenerationRequest,
     model: string,
-  ): Promise<{ text: string }> {
+  ): Promise<{ output: string }> {
     const protocol = String(provider.protocol ?? '');
     if (!model) throw new Error('no model resolved');
 
     if (protocol === 'WORKERS_AI') {
-      // Native Cloudflare model — no endpoint or API key required.
+      const capability = TARGET_CAPABILITY[gen.targetType] ?? 'TEXT_GENERATION';
+      if (capability === 'VIDEO_GENERATION') {
+        const result = (await this.env.AI.run(model, {
+          prompt: gen.prompt,
+          duration: 5,
+          resolution: '720p',
+          aspect_ratio: '16:9',
+        })) as { video?: string; result?: { video?: string } };
+        return { output: result.video ?? result.result?.video ?? '' };
+      }
+      if (capability === 'IMAGE_GENERATION') {
+        const result = (await this.env.AI.run(model, { prompt: gen.prompt })) as {
+          image?: string;
+          response?: string;
+        };
+        return { output: result.image ?? result.response ?? '' };
+      }
+      // TEXT_GENERATION
       const result = (await this.env.AI.run(model, {
         prompt: gen.prompt,
         stream: false,
       })) as { response?: string };
-      return { text: result.response ?? '' };
+      return { output: result.response ?? '' };
     }
 
     const endpoint = String(provider.endpointRef ?? '');
@@ -167,7 +184,7 @@ export class GenerationWorkflow extends WorkflowEntrypoint<Env, Params> {
     });
     if (!res.ok) throw new Error(`provider HTTP ${res.status}`);
     const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
-    return { text: data.choices?.[0]?.message?.content ?? '' };
+    return { output: data.choices?.[0]?.message?.content ?? '' };
   }
 
   async resolveProvider(billingMode: string): Promise<Record<string, unknown> | null> {
