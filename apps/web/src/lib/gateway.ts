@@ -721,3 +721,10 @@ export async function fetchAdminSupportTicket(actorId: string, ticketId: string)
   if (out.status !== "SUCCESS" || !out.result) return null;
   return out.result;
 }
+
+/** List a project's publications (all statuses, scoped to the actor). */
+export async function fetchStudioPublications(actorId: string, projectId: string): Promise<Array<Record<string, unknown>>> {
+  const out = await invokeApi<{ items?: Array<Record<string, unknown>> }>("studio_publication_list", { projectId }, actorId);
+  if (out.status !== "SUCCESS" || !out.result?.items) return [];
+  return out.result.items;
+}

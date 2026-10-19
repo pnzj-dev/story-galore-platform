@@ -51,7 +51,8 @@ var knownOperations = map[string]bool{
 	"project_get": true, "project_list": true, "story_bible_get": true,
 	"story_bible_upsert": true, "character_list": true, "character_create": true,
 	"world_get": true, "world_upsert": true, "asset_list": true,
-	"document_get": true, "document_update": true, "page_get": true, "revision_list": true,
+	"studio_publication_list": true,
+	"document_get":            true, "document_update": true, "page_get": true, "revision_list": true,
 	"operation_list": true, "generation_get": true,
 	"publication_validation_get": true,
 	"comment_create":             true, "comment_edit": true, "comment_delete": true,
@@ -168,6 +169,8 @@ func Main(ctx openruntimes.Context) openruntimes.Response {
 		return worldUpsert(ctx, &in, cl)
 	case "asset_list":
 		return assetList(ctx, &in, cl)
+	case "studio_publication_list":
+		return studioPublicationList(ctx, &in, cl)
 	case "document_get":
 		return documentGet(ctx, &in, cl)
 	case "document_update":
@@ -639,6 +642,37 @@ func assetList(ctx openruntimes.Context, in *GatewayInput, cl client.Client) ope
 	service := tablesdb.New(cl)
 	list, err := service.ListRows(databaseID, "studio_assets", service.WithListRowsQueries([]string{
 		qEqual("projectId", input.ProjectId),
+		`{"method":"limit","values":[200]}`,
+	}))
+	if err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	var raw map[string]interface{}
+	if err := list.Decode(&raw); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	rows, _ := raw["rows"].([]interface{})
+	return success(ctx, in, map[string]interface{}{"items": rows})
+}
+
+func studioPublicationList(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	actorId := actorOrEmpty(in.ActorId)
+	if actorId == "" {
+		return respond(ctx, in.OperationId, "UNAUTHORIZED", false)
+	}
+	var input struct {
+		ProjectId string `json:"projectId"`
+	}
+	if !decode(ctx, in, &input) || input.ProjectId == "" {
+		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
+	}
+	if !projectOwnedByActor(cl, input.ProjectId, actorId) {
+		return respond(ctx, in.OperationId, "FORBIDDEN", false)
+	}
+	service := tablesdb.New(cl)
+	list, err := service.ListRows(databaseID, "publications", service.WithListRowsQueries([]string{
+		qEqual("projectId", input.ProjectId),
+		`{"method":"orderDesc","attribute":"updatedAt"}`,
 		`{"method":"limit","values":[200]}`,
 	}))
 	if err != nil {
