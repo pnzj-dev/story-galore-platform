@@ -333,6 +333,21 @@ export async function fetchDocument(actorId: string, documentId: string): Promis
   return out.result;
 }
 
+export interface RevisionSummary {
+  $id?: string;
+  documentId?: string;
+  revision?: number;
+  immutable?: boolean;
+  createdAt?: string;
+}
+
+/** List a document's revisions, newest first (scoped server-side to the actor). */
+export async function fetchRevisions(actorId: string, documentId: string): Promise<RevisionSummary[]> {
+  const out = await invokeApi<{ items?: RevisionSummary[] }>("document_revision_list", { documentId }, actorId);
+  if (out.status !== "SUCCESS" || !out.result?.items) return [];
+  return out.result.items;
+}
+
 export interface MediaAssetSummary {
   $id?: string;
   id?: string;
@@ -503,6 +518,39 @@ export async function fetchAdminSecurity(actorId: string): Promise<AdminSecurity
   const out = await invokeApi<AdminSecurity>("admin_security_get", {}, actorId);
   if (out.status !== "SUCCESS") return null;
   return out.result ?? {};
+}
+
+export interface Incident {
+  $id?: string;
+  severity?: string;
+  status?: string;
+  startedAt?: string;
+  resolvedAt?: string;
+  subsystem?: string;
+  summary?: string;
+  owner?: string;
+  resolution?: string;
+  createdAt?: string;
+}
+
+/** List incidents, newest first (admin-only). */
+export async function fetchIncidents(actorId: string): Promise<Incident[]> {
+  const out = await invokeApi<{ items?: Incident[] }>("incident_list", {}, actorId);
+  if (out.status !== "SUCCESS" || !out.result?.items) return [];
+  return out.result.items;
+}
+
+export interface PlanProfitability {
+  planId?: string;
+  activeSubscribers?: number;
+  mrrCents?: number;
+}
+
+/** Active subscribers + monthly revenue grouped by plan (admin-only). */
+export async function fetchPlanProfitability(actorId: string): Promise<PlanProfitability[]> {
+  const out = await invokeApi<{ items?: PlanProfitability[] }>("admin_plan_profitability", {}, actorId);
+  if (out.status !== "SUCCESS" || !out.result?.items) return [];
+  return out.result.items;
 }
 
 export async function fetchAdminRetention(actorId: string): Promise<RetentionSummary | null> {

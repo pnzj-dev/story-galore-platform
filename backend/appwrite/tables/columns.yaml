@@ -627,6 +627,21 @@ studio_tables:
       - {key: adultPolicy, type: enum, elements: [ADULT_ALLOWED, ADULT_NOT_ALLOWED, ADULT_REQUIRES_VERIFICATION], required: false}
       - {key: status, type: enum, elements: [ACTIVE, DISABLED], required: true}
       - {key: createdAt, type: datetime, required: true}
+  - table: incidents
+    source: docs/OPERATIONS_CENTER.md
+    partition_key: status
+    columns:
+      - {key: id, type: varchar, size: 255, required: true}
+      - {key: severity, type: enum, elements: [LOW, MEDIUM, HIGH, CRITICAL], required: true}
+      - {key: status, type: enum, elements: [OPEN, INVESTIGATING, RESOLVED], required: true}
+      - {key: startedAt, type: datetime, required: true}
+      - {key: resolvedAt, type: datetime, required: false}
+      - {key: subsystem, type: varchar, size: 255, required: true}
+      - {key: summary, type: text, required: true}
+      - {key: owner, type: varchar, size: 255, required: false}
+      - {key: relatedIds, type: varchar, array: true, required: false}
+      - {key: resolution, type: text, required: false}
+      - {key: createdAt, type: datetime, required: true}
   - table: studio_publication_validation_runs
     source: contracts/studio/validation.schema.yaml
     partition_key: documentId

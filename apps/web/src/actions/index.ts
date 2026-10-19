@@ -373,6 +373,60 @@ export const server = {
     },
   }),
 
+  restoreRevision: defineAction({
+    accept: "form",
+    input: z.object({
+      documentId: z.string().min(1),
+      targetRevisionId: z.string().min(1),
+    }),
+    handler: async (input, context) => {
+      const user = context.locals.user;
+      if (!user) throw new ActionError({ code: "UNAUTHORIZED", message: "Sign in to continue." });
+      const out = await invokeApi("draft_revision_restore", input, user.$id);
+      if (out.status !== "SUCCESS") {
+        throw new ActionError({ code: "INTERNAL_SERVER_ERROR", message: "Could not restore the revision." });
+      }
+      return { ok: true };
+    },
+  }),
+
+  createIncident: defineAction({
+    accept: "form",
+    input: z.object({
+      severity: z.enum(["LOW", "MEDIUM", "HIGH", "CRITICAL"]),
+      subsystem: z.string().min(1).max(255),
+      summary: z.string().min(1).max(5000),
+      owner: z.string().max(255),
+    }),
+    handler: async (input, context) => {
+      const user = context.locals.user;
+      if (!user) throw new ActionError({ code: "UNAUTHORIZED", message: "Sign in to continue." });
+      const out = await invokeApi("incident_create", input, user.$id);
+      if (out.status !== "SUCCESS") {
+        throw new ActionError({ code: "INTERNAL_SERVER_ERROR", message: "Could not create the incident." });
+      }
+      return { ok: true };
+    },
+  }),
+
+  updateIncident: defineAction({
+    accept: "form",
+    input: z.object({
+      incidentId: z.string().min(1),
+      status: z.enum(["OPEN", "INVESTIGATING", "RESOLVED"]),
+      resolution: z.string().max(5000),
+    }),
+    handler: async (input, context) => {
+      const user = context.locals.user;
+      if (!user) throw new ActionError({ code: "UNAUTHORIZED", message: "Sign in to continue." });
+      const out = await invokeApi("incident_update", input, user.$id);
+      if (out.status !== "SUCCESS") {
+        throw new ActionError({ code: "INTERNAL_SERVER_ERROR", message: "Could not update the incident." });
+      }
+      return { ok: true };
+    },
+  }),
+
   updateDocument: defineAction({
     accept: "form",
     input: z.object({

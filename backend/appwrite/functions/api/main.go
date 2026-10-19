@@ -54,7 +54,8 @@ var knownOperations = map[string]bool{
 	"world_get": true, "world_upsert": true, "asset_list": true,
 	"studio_publication_list": true,
 	"document_get":            true, "document_update": true, "page_get": true, "revision_list": true,
-	"operation_list": true, "generation_get": true,
+	"document_revision_list": true,
+	"operation_list":         true, "generation_get": true,
 	"publication_validation_get": true,
 	"comment_create":             true, "comment_edit": true, "comment_delete": true,
 	"comment_reply": true, "comment_react": true, "comment_report": true,
@@ -103,6 +104,8 @@ var knownOperations = map[string]bool{
 	"ai_model_list": true, "ai_model_get": true,
 	"ai_model_create": true, "ai_model_update": true,
 	"admin_operations_get": true, "admin_security_get": true,
+	"incident_create": true, "incident_list": true, "incident_update": true,
+	"admin_plan_profitability": true,
 }
 
 const databaseID = "main"
@@ -197,6 +200,14 @@ func Main(ctx openruntimes.Context) openruntimes.Response {
 		return adminOperationsGet(ctx, &in, cl)
 	case "admin_security_get":
 		return adminSecurityGet(ctx, &in, cl)
+	case "incident_create":
+		return incidentCreate(ctx, &in, cl)
+	case "incident_list":
+		return incidentList(ctx, &in, cl)
+	case "incident_update":
+		return incidentUpdate(ctx, &in, cl)
+	case "admin_plan_profitability":
+		return adminPlanProfitability(ctx, &in, cl)
 	case "creator_analytics_get":
 		return creatorAnalyticsGet(ctx, &in, cl)
 	case "publication_validate":
@@ -231,6 +242,8 @@ func Main(ctx openruntimes.Context) openruntimes.Response {
 		return getRow(ctx, &in, cl, "studio_pages")
 	case "revision_list":
 		return listRows(ctx, &in, cl, "studio_editor_revisions")
+	case "document_revision_list":
+		return documentRevisionList(ctx, &in, cl)
 	case "operation_list":
 		return listRows(ctx, &in, cl, "studio_editor_operations")
 	case "generation_get":
@@ -2347,6 +2360,113 @@ func adminSecurityGet(ctx openruntimes.Context, in *GatewayInput, cl client.Clie
 	})
 }
 
+func incidentCreate(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	if !adminActor(ctx, in, cl) {
+		return respond(ctx, in.OperationId, "FORBIDDEN", false)
+	}
+	var input struct {
+		Severity   string   `json:"severity"`
+		Subsystem  string   `json:"subsystem"`
+		Summary    string   `json:"summary"`
+		Owner      string   `json:"owner"`
+		RelatedIds []string `json:"relatedIds"`
+	}
+	if !decode(ctx, in, &input) || input.Severity == "" || input.Subsystem == "" || input.Summary == "" {
+		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
+	}
+	rowId := newUUID()
+	row := map[string]interface{}{
+		"id": rowId, "severity": input.Severity, "status": "OPEN",
+		"subsystem": input.Subsystem, "summary": input.Summary,
+		"startedAt": now(), "createdAt": now(),
+	}
+	if input.Owner != "" {
+		row["owner"] = input.Owner
+	}
+	if len(input.RelatedIds) > 0 {
+		row["relatedIds"] = input.RelatedIds
+	}
+	if err := createRow(cl, "incidents", rowId, row); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	return success(ctx, in, map[string]interface{}{"ok": true, "incidentId": rowId})
+}
+
+func incidentList(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	if !adminActor(ctx, in, cl) {
+		return respond(ctx, in.OperationId, "FORBIDDEN", false)
+	}
+	service := tablesdb.New(cl)
+	list, err := service.ListRows(databaseID, "incidents", service.WithListRowsQueries([]string{
+		`{"method":"orderDesc","attribute":"$createdAt"}`,
+		`{"method":"limit","values":[100]}`,
+	}))
+	if err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	var raw map[string]interface{}
+	if err := list.Decode(&raw); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	rows, _ := raw["rows"].([]interface{})
+	return success(ctx, in, map[string]interface{}{"items": rows})
+}
+
+func incidentUpdate(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	if !adminActor(ctx, in, cl) {
+		return respond(ctx, in.OperationId, "FORBIDDEN", false)
+	}
+	var input struct {
+		IncidentId string `json:"incidentId"`
+		Status     string `json:"status"`
+		Resolution string `json:"resolution"`
+	}
+	if !decode(ctx, in, &input) || input.IncidentId == "" {
+		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
+	}
+	data := map[string]interface{}{}
+	if input.Status != "" {
+		data["status"] = input.Status
+	}
+	if input.Resolution != "" {
+		data["resolution"] = input.Resolution
+	}
+	if input.Status == "RESOLVED" {
+		data["resolvedAt"] = now()
+	}
+	if err := updateRow(cl, "incidents", input.IncidentId, data); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	return success(ctx, in, map[string]interface{}{"ok": true})
+}
+
+// adminPlanProfitability returns active subscribers + monthly revenue grouped by plan.
+func adminPlanProfitability(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	if !adminActor(ctx, in, cl) {
+		return respond(ctx, in.OperationId, "FORBIDDEN", false)
+	}
+	subs := listRowsByField(cl, "subscriptions", "status", "ACTIVE")
+	byPlan := map[string]map[string]interface{}{}
+	order := make([]string, 0)
+	for _, s := range subs {
+		planId, _ := s["planId"].(string)
+		if planId == "" {
+			planId = "(none)"
+		}
+		if _, ok := byPlan[planId]; !ok {
+			byPlan[planId] = map[string]interface{}{"planId": planId, "activeSubscribers": 0, "mrrCents": 0}
+			order = append(order, planId)
+		}
+		byPlan[planId]["activeSubscribers"] = toInt(byPlan[planId]["activeSubscribers"]) + 1
+		byPlan[planId]["mrrCents"] = toInt(byPlan[planId]["mrrCents"]) + toInt(s["amount"])
+	}
+	items := make([]map[string]interface{}, 0, len(order))
+	for _, id := range order {
+		items = append(items, byPlan[id])
+	}
+	return success(ctx, in, map[string]interface{}{"items": items})
+}
+
 func adminAnalyticsEventsList(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
 	if !adminActor(ctx, in, cl) {
 		return respond(ctx, in.OperationId, "FORBIDDEN", false)
@@ -2838,6 +2958,10 @@ func applyEditorOperation(ctx openruntimes.Context, in *GatewayInput, cl client.
 }
 
 func restoreRevision(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	actorId := actorOrEmpty(in.ActorId)
+	if actorId == "" {
+		return respond(ctx, in.OperationId, "UNAUTHORIZED", false)
+	}
 	var input struct {
 		DocumentId       string `json:"documentId"`
 		TargetRevisionId string `json:"targetRevisionId"`
@@ -2845,12 +2969,46 @@ func restoreRevision(ctx openruntimes.Context, in *GatewayInput, cl client.Clien
 	if !decode(ctx, in, &input) || input.DocumentId == "" || input.TargetRevisionId == "" {
 		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
 	}
+	if !documentOwnedByActor(cl, input.DocumentId, actorId) {
+		return respond(ctx, in.OperationId, "FORBIDDEN", false)
+	}
 	newRevisionId := idOrUUID(nil)
 	if err := createRow(cl, "studio_editor_revisions", newRevisionId, map[string]interface{}{"documentId": input.DocumentId, "revision": 1, "immutable": true, "createdAt": now()}); err != nil {
 		return internalFailure(ctx, in, err)
 	}
-	emit(ctx, cl, "studio.revision.restored.v1", input.DocumentId, actorOrEmpty(in.ActorId), map[string]interface{}{"documentId": input.DocumentId, "newRevisionId": newRevisionId}, in.CorrelationId)
+	emit(ctx, cl, "studio.revision.restored.v1", input.DocumentId, actorId, map[string]interface{}{"documentId": input.DocumentId, "newRevisionId": newRevisionId}, in.CorrelationId)
 	return success(ctx, in, map[string]interface{}{"newRevisionId": newRevisionId})
+}
+
+func documentRevisionList(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	actorId := actorOrEmpty(in.ActorId)
+	if actorId == "" {
+		return respond(ctx, in.OperationId, "UNAUTHORIZED", false)
+	}
+	var input struct {
+		DocumentId string `json:"documentId"`
+	}
+	if !decode(ctx, in, &input) || input.DocumentId == "" {
+		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
+	}
+	if !documentOwnedByActor(cl, input.DocumentId, actorId) {
+		return respond(ctx, in.OperationId, "FORBIDDEN", false)
+	}
+	service := tablesdb.New(cl)
+	list, err := service.ListRows(databaseID, "studio_editor_revisions", service.WithListRowsQueries([]string{
+		qEqual("documentId", input.DocumentId),
+		`{"method":"orderDesc","attribute":"$createdAt"}`,
+		`{"method":"limit","values":[50]}`,
+	}))
+	if err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	var raw map[string]interface{}
+	if err := list.Decode(&raw); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	rows, _ := raw["rows"].([]interface{})
+	return success(ctx, in, map[string]interface{}{"items": rows})
 }
 
 func requestGeneration(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {

@@ -1,10 +1,11 @@
 ---
 import AdminLayout from "@/layouts/AdminLayout.astro";
-import { fetchAdminOverview, fetchAdminAnalytics } from "@/lib/gateway";
+import { fetchAdminOverview, fetchAdminAnalytics, fetchPlanProfitability } from "@/lib/gateway";
 
 const user = Astro.locals.user;
 const overview = user ? await fetchAdminOverview(user.$id) : null;
 const analytics = user ? await fetchAdminAnalytics(user.$id) : null;
+const plans = user ? await fetchPlanProfitability(user.$id) : [];
 
 const kpis = overview?.kpis;
 const cents = (c?: number) => (c !== undefined ? `$${(c / 100).toFixed(2)}` : "â€”");
@@ -62,6 +63,33 @@ const cents = (c?: number) => (c !== undefined ? `$${(c / 100).toFixed(2)}` : "â
           </div>
         ))}
       </div>
+    ) : null}
+
+    {plans.length > 0 ? (
+      <section class="mt-10">
+        <h2 class="text-2xl font-bold">Plan profitability</h2>
+        <p class="mt-1 text-sm text-foreground-muted">Active subscribers and monthly revenue per plan.</p>
+        <div class="mt-4 overflow-x-auto">
+          <table class="w-full border-collapse text-sm">
+            <thead>
+              <tr class="border-b border-border text-left text-foreground-muted">
+                <th class="px-3 py-2 font-medium">Plan</th>
+                <th class="px-3 py-2 font-medium">Active subscribers</th>
+                <th class="px-3 py-2 font-medium">MRR</th>
+              </tr>
+            </thead>
+            <tbody>
+              {plans.map((p) => (
+                <tr class="border-b border-border/60">
+                  <td class="px-3 py-2">{p.planId}</td>
+                  <td class="px-3 py-2 tabular-nums">{p.activeSubscribers}</td>
+                  <td class="px-3 py-2 tabular-nums">{cents(p.mrrCents)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
     ) : null}
   </main>
 </AdminLayout>
