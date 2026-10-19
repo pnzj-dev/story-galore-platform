@@ -102,6 +102,7 @@ var knownOperations = map[string]bool{
 	"ai_provider_create": true, "ai_provider_update": true,
 	"ai_model_list": true, "ai_model_get": true,
 	"ai_model_create": true, "ai_model_update": true,
+	"admin_operations_get": true, "admin_security_get": true,
 }
 
 const databaseID = "main"
@@ -192,6 +193,10 @@ func Main(ctx openruntimes.Context) openruntimes.Response {
 		return aiModelCreate(ctx, &in, cl)
 	case "ai_model_update":
 		return aiModelUpdate(ctx, &in, cl)
+	case "admin_operations_get":
+		return adminOperationsGet(ctx, &in, cl)
+	case "admin_security_get":
+		return adminSecurityGet(ctx, &in, cl)
 	case "creator_analytics_get":
 		return creatorAnalyticsGet(ctx, &in, cl)
 	case "publication_validate":
@@ -2316,6 +2321,29 @@ func adminAnalyticsGet(ctx openruntimes.Context, in *GatewayInput, cl client.Cli
 		"paymentsByProvider":    countByField(cl, "payments", "provider"),
 		"paymentsByStatus":      countByField(cl, "payments", "status"),
 		"creatorsByStatus":      countByField(cl, "creators", "creatorStatus"),
+	})
+}
+
+func adminOperationsGet(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	if !adminActor(ctx, in, cl) {
+		return respond(ctx, in.OperationId, "FORBIDDEN", false)
+	}
+	return success(ctx, in, map[string]interface{}{
+		"domainEvents":        countRows(cl, "domain_events"),
+		"analyticsEvents":     countRows(cl, "analytics_events"),
+		"generationsByStatus": countByField(cl, "studio_generation_requests", "status"),
+		"pendingGenerations":  countRows(cl, "studio_generation_requests", qEqual("status", "RESERVED")) + countRows(cl, "studio_generation_requests", qEqual("status", "QUEUED")),
+		"failedGenerations":   countRows(cl, "studio_generation_requests", qEqual("status", "FAILED")),
+	})
+}
+
+func adminSecurityGet(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	if !adminActor(ctx, in, cl) {
+		return respond(ctx, in.OperationId, "FORBIDDEN", false)
+	}
+	return success(ctx, in, map[string]interface{}{
+		"auditEvents":  countRows(cl, "audit_events"),
+		"domainEvents": countRows(cl, "domain_events"),
 	})
 }
 

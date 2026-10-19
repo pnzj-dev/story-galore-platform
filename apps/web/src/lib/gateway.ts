@@ -478,6 +478,33 @@ export async function fetchAdminAnalytics(actorId: string): Promise<AnalyticsBre
   return out.result;
 }
 
+export interface AdminOperations {
+  domainEvents?: number;
+  analyticsEvents?: number;
+  generationsByStatus?: Record<string, number>;
+  pendingGenerations?: number;
+  failedGenerations?: number;
+}
+
+/** Fetch operational health (admin-only). */
+export async function fetchAdminOperations(actorId: string): Promise<AdminOperations | null> {
+  const out = await invokeApi<AdminOperations>("admin_operations_get", {}, actorId);
+  if (out.status !== "SUCCESS") return null;
+  return out.result ?? {};
+}
+
+export interface AdminSecurity {
+  auditEvents?: number;
+  domainEvents?: number;
+}
+
+/** Fetch security/audit summary (admin-only). */
+export async function fetchAdminSecurity(actorId: string): Promise<AdminSecurity | null> {
+  const out = await invokeApi<AdminSecurity>("admin_security_get", {}, actorId);
+  if (out.status !== "SUCCESS") return null;
+  return out.result ?? {};
+}
+
 export async function fetchAdminRetention(actorId: string): Promise<RetentionSummary | null> {
   const out = await invokeApi<RetentionSummary>("admin_analytics_retention_get", {}, actorId);
   if (out.status !== "SUCCESS") return null;
