@@ -1,0 +1,30 @@
+schema: storygalore.workflow/v1
+version: 1
+id: generation
+platform: cloudflare_workflows
+purpose: "Durable execution of AI generation requests: RESERVED -> PROCESSING -> COMPLETED (settle) or FAILED (refund)."
+source: backend/cloudflare/workflows/generation
+domain_contract: contracts/deterministic/ai/state-machine.yaml
+trigger:
+  type: cron
+  schedule: "*/5 * * * *"
+input:
+  batchSize: {type: integer, required: false, default: 20}
+env:
+  APPWRITE_ENDPOINT: {kind: secret, required: true}
+  APPWRITE_PROJECT_ID: {kind: secret, required: true}
+  APPWRITE_API_KEY: {kind: secret, required: true, note: "narrowly scoped; never in workflow state"}
+  ADMIN_ACTOR_ID: {kind: secret, required: true, note: "admin service-account actor id"}
+steps:
+  - id: list_reserved
+    description: "List RESERVED (credit-eligible) generation requests via generation_list_pending."
+    retry: {limit: 5, delay: 5s, backoff: exponential}
+  - id: process
+    description: "Transition RESERVED -> PROCESSING via generation_process, then run the provider adapter and settle or fail."
+    retry: {limit: 3, delay: 10s, backoff: exponential}
+    note: "Provider adapter is the next implementation step; fails closed until registered."
+security:
+  appwrite_access_via_scoped_key: true
+  no_raw_secrets_in_workflow_state: true
+  secrets_redacted: true
+status: SCAFFOLDED_PENDING_PROVIDER_ADAPTER

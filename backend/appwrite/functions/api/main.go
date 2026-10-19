@@ -94,6 +94,7 @@ var knownOperations = map[string]bool{
 	"prompt_template_list": true, "prompt_template_create": true,
 	"generation_list": true, "creator_analytics_get": true,
 	"generation_cancel": true, "generation_settle": true, "generation_fail": true,
+	"generation_process": true, "generation_list_pending": true,
 }
 
 const databaseID = "main"
@@ -162,6 +163,10 @@ func Main(ctx openruntimes.Context) openruntimes.Response {
 		return generationSettle(ctx, &in, cl)
 	case "generation_fail":
 		return generationFail(ctx, &in, cl)
+	case "generation_process":
+		return generationProcess(ctx, &in, cl)
+	case "generation_list_pending":
+		return generationListPending(ctx, &in, cl)
 	case "creator_analytics_get":
 		return creatorAnalyticsGet(ctx, &in, cl)
 	case "publication_validate":
@@ -2987,6 +2992,60 @@ func generationFail(ctx openruntimes.Context, in *GatewayInput, cl client.Client
 	_ = createCreditTransaction(cl, input.GenerationId, actorOrEmpty(in.ActorId), "REFUND", 0)
 	emit(ctx, cl, "studio.generation.failed.v1", input.GenerationId, actorOrEmpty(in.ActorId), map[string]interface{}{"generationId": input.GenerationId}, in.CorrelationId)
 	return success(ctx, in, map[string]interface{}{"status": "FAILED"})
+}
+
+func generationProcess(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	if !adminActor(ctx, in, cl) {
+		return respond(ctx, in.OperationId, "FORBIDDEN", false)
+	}
+	var input struct {
+		GenerationId string `json:"generationId"`
+	}
+	if !decode(ctx, in, &input) || input.GenerationId == "" {
+		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
+	}
+	status, _, ok := generationRowOf(cl, input.GenerationId)
+	if !ok {
+		return respond(ctx, in.OperationId, "RESOURCE_NOT_FOUND", false)
+	}
+	if status != "RESERVED" {
+		return respond(ctx, in.OperationId, "CONFLICT", false)
+	}
+	if err := updateRow(cl, "studio_generation_requests", input.GenerationId, map[string]interface{}{"status": "PROCESSING"}); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	emit(ctx, cl, "studio.generation.processing.v1", input.GenerationId, actorOrEmpty(in.ActorId), map[string]interface{}{"generationId": input.GenerationId}, in.CorrelationId)
+	return success(ctx, in, map[string]interface{}{"status": "PROCESSING"})
+}
+
+func generationListPending(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	if !adminActor(ctx, in, cl) {
+		return respond(ctx, in.OperationId, "FORBIDDEN", false)
+	}
+	service := tablesdb.New(cl)
+	list, err := service.ListRows(databaseID, "studio_generation_requests", service.WithListRowsQueries([]string{
+		`{"method":"limit","values":[500]}`,
+	}))
+	if err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	var raw map[string]interface{}
+	if err := list.Decode(&raw); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	rows, _ := raw["rows"].([]interface{})
+	pending := make([]interface{}, 0)
+	for _, r := range rows {
+		m, ok := r.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		s, _ := m["status"].(string)
+		if s == "QUEUED" || s == "RESERVED" {
+			pending = append(pending, m)
+		}
+	}
+	return success(ctx, in, map[string]interface{}{"items": pending})
 }
 
 func promptTemplateList(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
