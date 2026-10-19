@@ -554,7 +554,7 @@ studio_tables:
       - {key: requestId, type: varchar, size: 255, required: true}
       - {key: projectId, type: varchar, size: 255, required: true}
       - {key: draftId, type: varchar, size: 255, required: false}
-      - {key: targetType, type: enum, elements: [PAGE, PANEL, IMAGE, CHARACTER, BACKGROUND, DIALOGUE, STORY_TEXT], required: true}
+      - {key: targetType, type: enum, elements: [PAGE, PANEL, IMAGE, CHARACTER, BACKGROUND, DIALOGUE, STORY_TEXT, VIDEO], required: true}
       - {key: promptTemplateId, type: varchar, size: 255, required: false}
       - {key: prompt, type: text, required: false}
       - {key: inputAssetIds, type: varchar, array: true, required: false}
@@ -618,6 +618,7 @@ studio_tables:
       - {key: providerId, type: varchar, size: 255, required: true}
       - {key: displayName, type: varchar, size: 255, required: false}
       - {key: capabilities, type: varchar, array: true, required: true}
+      - {key: creditCost, type: integer, required: false}
       - {key: contextWindow, type: integer, required: false}
       - {key: adultPolicy, type: enum, elements: [ADULT_ALLOWED, ADULT_NOT_ALLOWED, ADULT_REQUIRES_VERIFICATION], required: false}
       - {key: status, type: enum, elements: [ACTIVE, DISABLED], required: true}

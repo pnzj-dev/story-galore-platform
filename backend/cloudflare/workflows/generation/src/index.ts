@@ -56,6 +56,7 @@ const TARGET_CAPABILITY: Record<string, string> = {
   PANEL: 'IMAGE_GENERATION',
   IMAGE: 'IMAGE_GENERATION',
   BACKGROUND: 'IMAGE_GENERATION',
+  VIDEO: 'VIDEO_GENERATION',
 };
 
 export class GenerationWorkflow extends WorkflowEntrypoint<Env, Params> {

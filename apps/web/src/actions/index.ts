@@ -210,7 +210,7 @@ export const server = {
     accept: "form",
     input: z.object({
       projectId: z.string().min(1),
-      targetType: z.enum(["PAGE", "PANEL", "IMAGE", "CHARACTER", "BACKGROUND", "DIALOGUE", "STORY_TEXT"]),
+      targetType: z.enum(["PAGE", "PANEL", "IMAGE", "CHARACTER", "BACKGROUND", "DIALOGUE", "STORY_TEXT", "VIDEO"]),
       prompt: z.string().max(20000),
       promptTemplateId: z.string().max(255),
       billingMode: z.enum(["PLATFORM_CREDITS", "BYOK", "USER_HOSTED"]),

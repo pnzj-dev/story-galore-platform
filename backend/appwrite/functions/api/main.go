@@ -2889,7 +2889,7 @@ func requestGeneration(ctx openruntimes.Context, in *GatewayInput, cl client.Cli
 		return internalFailure(ctx, in, err)
 	}
 	if creditEligible {
-		if err := createCreditTransaction(cl, input.RequestId, actorId, "RESERVE", resolveCreditCost(cl)); err != nil {
+		if err := createCreditTransaction(cl, input.RequestId, actorId, "RESERVE", resolveModelCreditCost(cl, input.TargetType)); err != nil {
 			return internalFailure(ctx, in, err)
 		}
 	}
@@ -2996,6 +2996,59 @@ func resolveCreditCost(cl client.Client) int {
 		}
 	}
 	return defaultGenerationCreditCost
+}
+
+func targetCapability(targetType string) string {
+	switch targetType {
+	case "PAGE", "PANEL", "IMAGE", "BACKGROUND":
+		return "IMAGE_GENERATION"
+	case "VIDEO":
+		return "VIDEO_GENERATION"
+	default:
+		return "TEXT_GENERATION"
+	}
+}
+
+// resolveModelCreditCost resolves the default model's creditCost for a targetType,
+// falling back to the provider-level creditCost or the platform default.
+func resolveModelCreditCost(cl client.Client, targetType string) int {
+	capability := targetCapability(targetType)
+	service := tablesdb.New(cl)
+	list, err := service.ListRows(databaseID, "ai_models", service.WithListRowsQueries([]string{
+		`{"method":"limit","values":[500]}`,
+	}))
+	if err != nil {
+		return resolveCreditCost(cl)
+	}
+	var raw map[string]interface{}
+	if list.Decode(&raw) != nil {
+		return resolveCreditCost(cl)
+	}
+	rows, _ := raw["rows"].([]interface{})
+	for _, r := range rows {
+		m, ok := r.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		status, _ := m["status"].(string)
+		if status != "ACTIVE" {
+			continue
+		}
+		caps, _ := m["capabilities"].([]interface{})
+		hasCap := false
+		for _, c := range caps {
+			if s, _ := c.(string); s == capability {
+				hasCap = true
+				break
+			}
+		}
+		if hasCap {
+			if cost := toInt(m["creditCost"]); cost > 0 {
+				return cost
+			}
+		}
+	}
+	return resolveCreditCost(cl)
 }
 
 // reservedCreditAmount returns the amount reserved for a generation (0 if none).
@@ -3470,16 +3523,21 @@ func aiModelCreate(ctx openruntimes.Context, in *GatewayInput, cl client.Client)
 		ProviderId    string   `json:"providerId"`
 		DisplayName   string   `json:"displayName"`
 		Capabilities  []string `json:"capabilities"`
+		CreditCost    int      `json:"creditCost"`
 		ContextWindow int      `json:"contextWindow"`
 		AdultPolicy   string   `json:"adultPolicy"`
 	}
 	if !decode(ctx, in, &input) || input.ModelId == "" || input.ProviderId == "" || len(input.Capabilities) == 0 {
 		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
 	}
+	creditCost := input.CreditCost
+	if creditCost < 1 {
+		creditCost = 1
+	}
 	rowId := newUUID()
 	row := map[string]interface{}{
 		"id": rowId, "modelId": input.ModelId, "providerId": input.ProviderId,
-		"capabilities": input.Capabilities, "status": "ACTIVE", "createdAt": now(),
+		"capabilities": input.Capabilities, "creditCost": creditCost, "status": "ACTIVE", "createdAt": now(),
 	}
 	if input.DisplayName != "" {
 		row["displayName"] = input.DisplayName
@@ -3501,8 +3559,9 @@ func aiModelUpdate(ctx openruntimes.Context, in *GatewayInput, cl client.Client)
 		return respond(ctx, in.OperationId, "FORBIDDEN", false)
 	}
 	var input struct {
-		ModelId string `json:"modelId"`
-		Status  string `json:"status"`
+		ModelId    string `json:"modelId"`
+		Status     string `json:"status"`
+		CreditCost *int   `json:"creditCost"`
 	}
 	if !decode(ctx, in, &input) || input.ModelId == "" {
 		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
@@ -3528,6 +3587,9 @@ func aiModelUpdate(ctx openruntimes.Context, in *GatewayInput, cl client.Client)
 	data := map[string]interface{}{}
 	if input.Status != "" {
 		data["status"] = input.Status
+	}
+	if input.CreditCost != nil {
+		data["creditCost"] = *input.CreditCost
 	}
 	if err := updateRow(cl, "ai_models", rowId, data); err != nil {
 		return internalFailure(ctx, in, err)
