@@ -101,6 +101,13 @@ export default {
   "settings.no": "No",
   "settings.yes": "Yes",
   "settings.save": "Save",
+  "settings.language": "Language preferences",
+  "settings.languageDescription":
+    "Choose which content languages appear in your discovery feed. Filtering is enforced server-side before results are paged.",
+  "settings.contentLanguageMode": "Show",
+  "settings.showAllLanguages": "All languages",
+  "settings.showSelectedLanguages": "Only selected languages",
+  "settings.contentLanguagesLabel": "Content languages",
 
   // Admin navigation
   "admin.label": "Admin",

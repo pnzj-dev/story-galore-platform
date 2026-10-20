@@ -841,6 +841,34 @@ export const server = {
     },
   }),
 
+  updateLanguagePreferences: defineAction({
+    accept: "form",
+    input: z.object({
+      contentLanguageMode: z.enum(["ALL", "ONLY_SELECTED"]),
+      contentLanguages: z.string().max(1000).default(""),
+    }),
+    handler: async (input, context) => {
+      const user = context.locals.user;
+      if (!user) throw new ActionError({ code: "UNAUTHORIZED", message: "Sign in." });
+      const contentLanguages = input.contentLanguages
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+      if (input.contentLanguageMode === "ONLY_SELECTED" && contentLanguages.length === 0) {
+        throw new ActionError({ code: "BAD_REQUEST", message: "Select at least one language." });
+      }
+      const out = await invokeApi(
+        "language_preferences_set",
+        { contentLanguages, contentLanguageMode: input.contentLanguageMode },
+        user.$id,
+      );
+      if (out.status !== "SUCCESS") {
+        throw new ActionError({ code: "BAD_REQUEST", message: "Could not save language preferences." });
+      }
+      return { ok: true };
+    },
+  }),
+
   subscribe: defineAction({
     accept: "form",
     input: z.object({

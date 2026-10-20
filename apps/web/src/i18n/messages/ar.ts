@@ -100,6 +100,13 @@ const ar = {
   "settings.no": "لا",
   "settings.yes": "نعم",
   "settings.save": "حفظ",
+  "settings.language": "تفضيلات اللغة",
+  "settings.languageDescription":
+    "اختر لغات المحتوى التي تظهر في خلاصة الاكتشاف. يُطبَّق التصفية على الخادم قبل ترقيم الصفحات.",
+  "settings.contentLanguageMode": "إظهار",
+  "settings.showAllLanguages": "كل اللغات",
+  "settings.showSelectedLanguages": "اللغات المحددة فقط",
+  "settings.contentLanguagesLabel": "لغات المحتوى",
 
   // Admin navigation
   "admin.label": "الإدارة",

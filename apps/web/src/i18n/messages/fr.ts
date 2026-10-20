@@ -101,6 +101,13 @@ const fr = {
   "settings.no": "Non",
   "settings.yes": "Oui",
   "settings.save": "Enregistrer",
+  "settings.language": "Préférences de langue",
+  "settings.languageDescription":
+    "Choisissez les langues de contenu qui apparaissent dans votre fil de découverte. Le filtrage est appliqué côté serveur avant la pagination.",
+  "settings.contentLanguageMode": "Afficher",
+  "settings.showAllLanguages": "Toutes les langues",
+  "settings.showSelectedLanguages": "Uniquement les langues sélectionnées",
+  "settings.contentLanguagesLabel": "Langues de contenu",
 
   // Admin navigation
   "admin.label": "Admin",

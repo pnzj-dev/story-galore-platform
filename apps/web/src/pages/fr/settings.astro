@@ -2,7 +2,9 @@
 import Layout from "@/layouts/Layout.astro";
 import { actions } from "astro:actions";
 import { getTranslations } from "@/i18n";
+import { CONTENT_LANGUAGES } from "@/i18n/languages";
 import { getRelativeLocaleUrl } from "astro:i18n";
+import { fetchLanguagePreferences } from "@/lib/gateway";
 
 const { t } = getTranslations(Astro.currentLocale);
 
@@ -11,11 +13,21 @@ if (!user) {
   return Astro.redirect(getRelativeLocaleUrl(Astro.currentLocale!, "auth/login"));
 }
 
-const result = Astro.getActionResult(actions.updateAdultSettings);
-if (result?.data?.ok) {
+const prefs = await fetchLanguagePreferences(user.$id);
+const selected = new Set(prefs.contentLanguages ?? []);
+const mode = prefs.contentLanguageMode ?? "ALL";
+
+const adultResult = Astro.getActionResult(actions.updateAdultSettings);
+if (adultResult?.data?.ok) {
   return Astro.redirect(getRelativeLocaleUrl(Astro.currentLocale!, "settings"));
 }
-const error = result?.error?.message;
+const adultError = adultResult?.error?.message;
+
+const langResult = Astro.getActionResult(actions.updateLanguagePreferences);
+if (langResult?.data?.ok) {
+  return Astro.redirect(getRelativeLocaleUrl(Astro.currentLocale!, "settings"));
+}
+const langError = langResult?.error?.message;
 ---
 
 <Layout title={t("menu.settings")}>
@@ -48,9 +60,53 @@ const error = result?.error?.message;
           </select>
         </div>
 
-        {error && (
+        {adultError && (
           <p class="rounded-sm border border-danger bg-danger/15 px-3 py-2 text-sm text-danger" role="alert">
-            {error}
+            {adultError}
+          </p>
+        )}
+
+        <button
+          type="submit"
+          class="rounded-sm bg-primary px-4 py-2 font-semibold text-primary-foreground transition hover:opacity-90"
+        >
+          {t("settings.save")}
+        </button>
+      </form>
+    </section>
+
+    <section class="mt-10">
+      <h2 class="text-xl font-semibold">{t("settings.language")}</h2>
+      <p class="mt-1 text-sm text-foreground-muted">{t("settings.languageDescription")}</p>
+      <form method="POST" action={actions.updateLanguagePreferences} class="mt-4 max-w-sm space-y-4">
+        <div>
+          <label for="contentLanguageMode" class="mb-1 block text-sm text-foreground-muted">{t("settings.contentLanguageMode")}</label>
+          <select
+            id="contentLanguageMode"
+            name="contentLanguageMode"
+            class="w-full rounded-sm border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
+          >
+            <option value="ALL" selected={mode === "ALL"}>{t("settings.showAllLanguages")}</option>
+            <option value="ONLY_SELECTED" selected={mode === "ONLY_SELECTED"}>{t("settings.showSelectedLanguages")}</option>
+          </select>
+        </div>
+
+        <fieldset>
+          <legend class="mb-2 block text-sm text-foreground-muted">{t("settings.contentLanguagesLabel")}</legend>
+          <input type="hidden" id="contentLanguages" name="contentLanguages" value={[...selected].join(",")} />
+          <div class="grid grid-cols-2 gap-2 sm:grid-cols-3">
+            {CONTENT_LANGUAGES.map((lang) => (
+              <label class="flex cursor-pointer items-center gap-2 text-sm">
+                <input type="checkbox" class="lang-checkbox" data-lang={lang.tag} checked={selected.has(lang.tag)} />
+                <span>{lang.nativeName}</span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+
+        {langError && (
+          <p class="rounded-sm border border-danger bg-danger/15 px-3 py-2 text-sm text-danger" role="alert">
+            {langError}
           </p>
         )}
 
@@ -64,3 +120,17 @@ const error = result?.error?.message;
     </section>
   </main>
 </Layout>
+
+<script>
+  const hidden = document.getElementById("contentLanguages") as HTMLInputElement | null;
+  const boxes = document.querySelectorAll<HTMLInputElement>(".lang-checkbox");
+  const sync = () => {
+    if (hidden) {
+      hidden.value = [...boxes]
+        .filter((box) => box.checked)
+        .map((box) => box.dataset.lang ?? "")
+        .join(",");
+    }
+  };
+  boxes.forEach((box) => box.addEventListener("change", sync));
+</script>

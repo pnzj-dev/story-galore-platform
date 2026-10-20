@@ -77,6 +77,7 @@ var knownOperations = map[string]bool{
 	"notification_list":        true,
 	"notification_mark_read":   true,
 	"language_preferences_set": true,
+	"language_preferences_get": true,
 	"publication_language_set": true,
 	"document_create":          true, "document_list": true,
 	"media_upload_initiate": true, "media_upload_complete": true,
@@ -377,6 +378,8 @@ func Main(ctx openruntimes.Context) openruntimes.Response {
 		return notificationMarkRead(ctx, &in, cl)
 	case "language_preferences_set":
 		return languagePreferencesSet(ctx, &in, cl)
+	case "language_preferences_get":
+		return languagePreferencesGet(ctx, &in, cl)
 	case "publication_language_set":
 		return publicationLanguageSet(ctx, &in, cl)
 	case "document_create":
@@ -6419,6 +6422,47 @@ func languagePreferencesSet(ctx openruntimes.Context, in *GatewayInput, cl clien
 		return internalFailure(ctx, in, err)
 	}
 	return success(ctx, in, map[string]interface{}{"ok": true})
+}
+
+// languagePreferencesGet returns the authenticated user's language preferences
+// (defaults to ALL + empty selection when none are stored).
+func languagePreferencesGet(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	userId := actorOrEmpty(in.ActorId)
+	if userId == "" {
+		return respond(ctx, in.OperationId, "UNAUTHORIZED", false)
+	}
+	service := tablesdb.New(cl)
+	list, err := service.ListRows(databaseID, "user_language_preferences", service.WithListRowsQueries([]string{
+		qEqual("userId", userId),
+		`{"method":"limit","values":[1]}`,
+	}))
+	if err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	var raw map[string]interface{}
+	if err := list.Decode(&raw); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	rows, _ := raw["rows"].([]interface{})
+	if len(rows) == 0 {
+		return success(ctx, in, map[string]interface{}{
+			"uiLocale":            "",
+			"contentLanguages":    []string{},
+			"contentLanguageMode": "ALL",
+			"direction":           "",
+		})
+	}
+	pref, _ := rows[0].(map[string]interface{})
+	mode, _ := pref["contentLanguageMode"].(string)
+	if mode == "" {
+		mode = "ALL"
+	}
+	return success(ctx, in, map[string]interface{}{
+		"uiLocale":            pref["uiLocale"],
+		"contentLanguages":    stringSlice(pref["contentLanguages"]),
+		"contentLanguageMode": mode,
+		"direction":           pref["direction"],
+	})
 }
 
 func findLanguagePrefs(cl client.Client, userId string) string {

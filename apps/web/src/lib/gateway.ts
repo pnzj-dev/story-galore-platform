@@ -98,6 +98,22 @@ export async function invokeApi<T>(
   }
 }
 
+export interface LanguagePreferences {
+  uiLocale?: string;
+  contentLanguages: string[];
+  contentLanguageMode: "ALL" | "ONLY_SELECTED";
+  direction?: string;
+}
+
+/** Fetch the authenticated user's content-language preferences (ALL by default). */
+export async function fetchLanguagePreferences(actorId: string): Promise<LanguagePreferences> {
+  const out = await invokeApi<LanguagePreferences>("language_preferences_get", {}, actorId);
+  if (out.status !== "SUCCESS" || !out.result) {
+    return { contentLanguages: [], contentLanguageMode: "ALL" };
+  }
+  return out.result;
+}
+
 /** Fetch the authenticated user's in-progress items for the Continue rail. */
 export async function fetchContinueItems(actorId: string): Promise<MediaCardData[]> {
   const out = await invokeApi<{ items?: ContinueItem[] }>("continue_list", {}, actorId);
