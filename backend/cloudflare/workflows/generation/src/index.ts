@@ -1,4 +1,4 @@
-import { WorkflowEntrypoint, WorkflowStep, WorkflowEvent, type Ai } from 'cloudflare:workers';
+import { WorkflowEntrypoint, WorkflowStep, WorkflowEvent, type Ai, type ExecutionContext } from 'cloudflare:workers';
 
 /**
  * AI generation workflow (durable runner).
@@ -28,6 +28,8 @@ type Env = {
   PROVIDER_CREDENTIALS?: string;
   /** Fallback model id when no ai_models entry matches. */
   DEFAULT_MODEL_ID?: string;
+  /** Shared secret the Appwrite cron presents to trigger this workflow over HTTP. */
+  TRIGGER_SECRET?: string;
 };
 
 type Params = {
@@ -300,3 +302,25 @@ function isPrivateHost(hostname: string): boolean {
   }
   return false;
 }
+
+/**
+ * HTTP trigger (scheduled by the Appwrite cron). The Appwrite gateway POSTs
+ * with `Authorization: Bearer <TRIGGER_SECRET>`; this creates a workflow
+ * instance (the sweep itself is idempotent). Replaces the Workers-Paid-gated
+ * `schedules` cron.
+ */
+export default {
+  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+    const expected = env.TRIGGER_SECRET ?? '';
+    const auth = request.headers.get('Authorization') ?? '';
+    if (!expected || auth !== `Bearer ${expected}`) {
+      return new Response('unauthorized', { status: 401 });
+    }
+    if (request.method !== 'POST') {
+      return new Response('method not allowed', { status: 405 });
+    }
+    const instance = await (ctx as unknown as { exports: { GenerationWorkflow: { create: (o?: unknown) => Promise<{ id: string }> } } })
+      .exports.GenerationWorkflow.create({});
+    return Response.json({ id: instance.id });
+  },
+};

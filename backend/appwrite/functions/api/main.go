@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"bytes"
 	"context"
 	"crypto/rand"
 	"crypto/sha256"
@@ -2610,37 +2609,37 @@ func metricIngest(ctx openruntimes.Context, in *GatewayInput, cl client.Client) 
 	return success(ctx, in, map[string]interface{}{"ok": true})
 }
 
-// triggerCloudflareWorkflows triggers the durable Cloudflare Workflows that
-// sweep for work each schedule firing. This Appwrite Functions cron replaces
-// the plan-gated Cloudflare Workflows `schedules` (Workers Free plan rejects
-// cron). Requires the Cloudflare account id + API token (Workers Scripts
-// Write) as function secrets CF_ACCOUNT_ID / CF_API_TOKEN.
+// triggerCloudflareWorkflows triggers the durable Cloudflare Workflows by
+// calling each workflow Worker's HTTP trigger endpoint (shared-secret guarded).
+// This Appwrite Functions cron replaces the Workers-Paid-gated `schedules`
+// cron and avoids a Cloudflare API token. Requires CF_TRIGGER_SECRET plus the
+// per-workflow Worker URLs (CF_GENERATION_URL, CF_OUTBOX_URL, CF_REDACTION_URL).
 func triggerCloudflareWorkflows(ctx openruntimes.Context) {
-	accountID := os.Getenv("CF_ACCOUNT_ID")
-	token := os.Getenv("CF_API_TOKEN")
-	if accountID == "" || token == "" {
-		ctx.Log("api: cloudflare workflow trigger skipped", "reason=CF_ACCOUNT_ID/CF_API_TOKEN unset")
+	secret := os.Getenv("CF_TRIGGER_SECRET")
+	if secret == "" {
+		ctx.Log("api: cloudflare workflow trigger skipped", "reason=CF_TRIGGER_SECRET unset")
 		return
 	}
-	for _, wf := range []string{"generation", "outbox-delivery"} {
-		triggerCloudflareWorkflow(ctx, accountID, token, wf)
-	}
+	triggerCloudflareHTTP(ctx, os.Getenv("CF_GENERATION_URL"), "generation", secret)
+	triggerCloudflareHTTP(ctx, os.Getenv("CF_OUTBOX_URL"), "outbox-delivery", secret)
 	// Prompt redaction is a daily sweep; run on the first firing of each UTC day.
 	nowUTC := time.Now().UTC()
 	if nowUTC.Hour() == 0 && nowUTC.Minute() < 5 {
-		triggerCloudflareWorkflow(ctx, accountID, token, "prompt-redaction")
+		triggerCloudflareHTTP(ctx, os.Getenv("CF_REDACTION_URL"), "prompt-redaction", secret)
 	}
 }
 
-func triggerCloudflareWorkflow(ctx openruntimes.Context, accountID, token, workflowName string) {
-	url := fmt.Sprintf("https://api.cloudflare.com/client/v4/accounts/%s/workflows/%s/instances", accountID, workflowName)
-	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader([]byte("{}")))
+func triggerCloudflareHTTP(ctx openruntimes.Context, url, workflowName, secret string) {
+	if url == "" {
+		ctx.Log("api: cloudflare trigger skipped", "workflow="+workflowName, "reason=url unset")
+		return
+	}
+	req, err := http.NewRequest(http.MethodPost, url, nil)
 	if err != nil {
 		ctx.Error("api: cloudflare trigger request build failed", err)
 		return
 	}
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+token)
+	req.Header.Set("Authorization", "Bearer "+secret)
 
 	client := &http.Client{Timeout: 10 * time.Second}
 	resp, err := client.Do(req)

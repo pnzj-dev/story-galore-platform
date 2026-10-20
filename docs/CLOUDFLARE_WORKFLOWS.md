@@ -27,23 +27,28 @@ Local development and automated tests MUST use the supported Cloudflare local/te
 The Cloudflare-native `schedules` cron is gated to the Workers Paid plan
 (`workflows.api.error.workflow.cron_requires_paid_plan`), so it is not used in
 V1. Periodic workflow triggers are driven by the Appwrite `api` function's cron
-schedule instead: on the schedule trigger the gateway calls the Cloudflare
-Workflows REST API to create a workflow instance.
+schedule instead: on the schedule trigger the gateway POSTs to each workflow
+Worker's HTTP trigger endpoint (guarded by a shared secret). Each Worker's
+`fetch` handler creates the workflow instance through `ctx.exports`.
 
 ```
 Appwrite Functions cron (*/5 * * * *)
-       |  POST /accounts/{account_id}/workflows/{workflow_name}/instances
-Cloudflare Workflows (durable execution)
+       |  POST <workflow-worker>.workers.dev  (Authorization: Bearer <secret>)
+Worker fetch handler -> ctx.exports.<Workflow>.create({})
 ```
 
 - `generation` and `outbox-delivery` are triggered every schedule firing.
 - `prompt-redaction` is triggered once daily (first firing of each UTC day).
 
-The trigger requires the Cloudflare account id and an API token with the
-`Workers Scripts Write` permission, stored as Appwrite function secrets
-`CF_ACCOUNT_ID` / `CF_API_TOKEN`. Without them the gateway logs a skip and
-continues; the trigger is a no-op (idempotent sweeps), so missing credentials
-degrade to "no scheduled trigger" rather than a failure.
+The trigger requires `CF_TRIGGER_SECRET` plus the per-workflow Worker URLs
+(`CF_GENERATION_URL`, `CF_OUTBOX_URL`, `CF_REDACTION_URL`) as Appwrite function
+secrets; the same `TRIGGER_SECRET` value is a `plain_text` binding on each
+workflow Worker. Without them the gateway logs a skip and continues; the trigger
+is a no-op (idempotent sweeps), so missing credentials degrade to "no scheduled
+trigger" rather than a failure.
+
+The HTTP-trigger path avoids a Cloudflare API token (the OAuth-scoped MCP
+connection cannot mint tokens), so it is the V1 default.
 
 Do not put a `schedules` array back into the workflow `wrangler.jsonc` unless
 the Workers plan is upgraded.

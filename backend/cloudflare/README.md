@@ -25,20 +25,22 @@ No example implementation is retained in the production repository. Integration 
 
 Cloudflare-native `schedules` cron is Workers-Paid-gated, so V1 drives periodic
 workflow triggers from the Appwrite `api` function's cron schedule. On the
-schedule trigger the gateway POSTs to
-`/accounts/{account_id}/workflows/{workflow_name}/instances` to create a
-workflow instance (`generation` + `outbox-delivery` every firing,
-`prompt-redaction` once daily).
+schedule trigger the gateway POSTs to each workflow Worker's HTTP trigger
+endpoint (`Authorization: Bearer <secret>`); the Worker's `fetch` handler
+creates the workflow instance via `ctx.exports` (`generation` +
+`outbox-delivery` every firing, `prompt-redaction` once daily).
 
 Required Appwrite function secrets on the `api` function:
 
-- `CF_ACCOUNT_ID` — the Cloudflare account id.
-- `CF_API_TOKEN` — a Cloudflare API token with the `Workers Scripts Write`
-  permission.
+- `CF_TRIGGER_SECRET` — the shared secret (also a `plain_text` `TRIGGER_SECRET`
+  binding on each workflow Worker).
+- `CF_GENERATION_URL` / `CF_OUTBOX_URL` / `CF_REDACTION_URL` — the workflow
+  Worker URLs.
 
-Without both, the gateway logs a skip (the trigger degrades to a no-op). Do not
-re-add a `schedules` array to any workflow `wrangler.jsonc` unless the Workers
-plan is upgraded.
+Without them, the gateway logs a skip (the trigger degrades to a no-op). The
+HTTP-trigger path avoids a Cloudflare API token (the OAuth-scoped MCP
+connection cannot mint tokens). Do not re-add a `schedules` array to any
+workflow `wrangler.jsonc` unless the Workers plan is upgraded.
 
 ## MCP boundary
 

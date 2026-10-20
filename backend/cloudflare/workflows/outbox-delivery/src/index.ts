@@ -1,4 +1,4 @@
-import { WorkflowEntrypoint, WorkflowStep, WorkflowEvent } from 'cloudflare:workers';
+import { WorkflowEntrypoint, WorkflowStep, WorkflowEvent, type ExecutionContext } from 'cloudflare:workers';
 
 /**
  * Outbox delivery workflow.
@@ -16,6 +16,8 @@ type Env = {
   APPWRITE_ENDPOINT: string;
   APPWRITE_PROJECT_ID: string;
   APPWRITE_API_KEY: string;
+  /** Shared secret the Appwrite cron presents to trigger this workflow over HTTP. */
+  TRIGGER_SECRET?: string;
 };
 
 type Params = {
@@ -100,3 +102,23 @@ export class OutboxDeliveryWorkflow extends WorkflowEntrypoint<Env, Params> {
     };
   }
 }
+
+/**
+ * HTTP trigger (scheduled by the Appwrite cron). POST with
+ * `Authorization: Bearer <TRIGGER_SECRET>` creates a workflow instance.
+ */
+export default {
+  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+    const expected = env.TRIGGER_SECRET ?? '';
+    const auth = request.headers.get('Authorization') ?? '';
+    if (!expected || auth !== `Bearer ${expected}`) {
+      return new Response('unauthorized', { status: 401 });
+    }
+    if (request.method !== 'POST') {
+      return new Response('method not allowed', { status: 405 });
+    }
+    const instance = await (ctx as unknown as { exports: { OutboxDeliveryWorkflow: { create: (o?: unknown) => Promise<{ id: string }> } } })
+      .exports.OutboxDeliveryWorkflow.create({});
+    return Response.json({ id: instance.id });
+  },
+};

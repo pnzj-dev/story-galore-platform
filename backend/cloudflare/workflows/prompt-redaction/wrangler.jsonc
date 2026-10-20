@@ -2,6 +2,7 @@
   "name": "storygalore-prompt-redaction",
   "main": "src/index.ts",
   "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["enable_ctx_exports"],
   "observability": { "enabled": true },
   "exports": {
     "PromptRedactionWorkflow": {

@@ -1,13 +1,13 @@
 {
   "name": "storygalore-outbox-delivery",
   "main": "src/index.ts",
-  "compatibility_date": "2025-01-01",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["enable_ctx_exports"],
   "observability": { "enabled": true },
-  "workflows": [
-    {
-      "name": "outbox-delivery",
-      "binding": "OUTBOX_DELIVERY",
-      "class_name": "OutboxDeliveryWorkflow"
+  "exports": {
+    "OutboxDeliveryWorkflow": {
+      "type": "workflow",
+      "name": "outbox-delivery"
     }
-  ]
+  }
 }
