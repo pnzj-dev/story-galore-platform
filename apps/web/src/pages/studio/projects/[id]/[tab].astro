@@ -3,6 +3,9 @@ import StudioLayout from "@/layouts/StudioLayout.astro";
 import StudioProjectTabs from "@/components/StudioProjectTabs.astro";
 import { actions } from "astro:actions";
 import { fetchProject, fetchStoryBible, fetchCharacters, fetchWorld, fetchAssets, fetchStudioPublications, fetchPromptTemplates, fetchGenerations, fetchCreatorAnalytics, fetchAiProviders, fetchDocuments } from "@/lib/gateway";
+import { getTranslations } from "@/i18n";
+
+const { t } = getTranslations(Astro.currentLocale);
 
 const user = Astro.locals.user;
 if (!user) {
@@ -18,16 +21,16 @@ if (!project) {
 }
 
 const TITLES: Record<string, string> = {
-  "story-bible": "Story Bible",
-  characters: "Characters",
-  world: "World",
-  assets: "Assets",
-  prompts: "Prompts",
-  ai: "AI",
-  drafts: "Drafts",
-  editor: "Editor",
-  publications: "Publications",
-  analytics: "Analytics",
+  "story-bible": t("studio.tab.storyBible"),
+  characters: t("studio.tab.characters"),
+  world: t("studio.tab.world"),
+  assets: t("studio.tab.assets"),
+  prompts: t("studio.tab.prompts"),
+  ai: t("studio.tab.ai"),
+  drafts: t("studio.tab.drafts"),
+  editor: t("studio.tab.editor"),
+  publications: t("studio.tab.publications"),
+  analytics: t("studio.tab.analytics"),
 };
 
 const title = TITLES[tab] ?? tab;
@@ -84,7 +87,7 @@ const documentError = documentResult?.error?.message;
 <StudioLayout title={`${project.name} — ${title}`} active="projects">
   <main class="mx-auto max-w-5xl px-12 py-10">
     <a href="/studio/projects" class="text-sm text-foreground-muted transition hover:text-foreground">
-      &larr; Projects
+      {t("studio.backToProjects")}
     </a>
     <h1 class="mt-4 text-3xl font-bold">{project.name}</h1>
 
@@ -95,14 +98,14 @@ const documentError = documentResult?.error?.message;
     {
       tab === "story-bible" ? (
         <section class="mt-8">
-          <h2 class="text-xl font-semibold">Story Bible</h2>
+          <h2 class="text-xl font-semibold">{t("studio.tab.storyBible")}</h2>
           <p class="mt-1 text-sm text-foreground-muted">
-            Capture the premise, themes, and tone that anchor this project.
+            {t("studio.bible.desc")}
           </p>
           <form method="POST" action={actions.saveStoryBible} class="mt-4 max-w-lg space-y-4">
             <input type="hidden" name="projectId" value={projectId} />
             <div>
-              <label for="premise" class="mb-1 block text-sm text-foreground-muted">Premise</label>
+              <label for="premise" class="mb-1 block text-sm text-foreground-muted">{t("studio.bible.premise")}</label>
               <textarea
                 id="premise"
                 name="premise"
@@ -111,7 +114,7 @@ const documentError = documentResult?.error?.message;
               >{storyBible?.premise ?? ""}</textarea>
             </div>
             <div>
-              <label for="themes" class="mb-1 block text-sm text-foreground-muted">Themes</label>
+              <label for="themes" class="mb-1 block text-sm text-foreground-muted">{t("studio.bible.themes")}</label>
               <input
                 id="themes"
                 name="themes"
@@ -121,7 +124,7 @@ const documentError = documentResult?.error?.message;
               />
             </div>
             <div>
-              <label for="tone" class="mb-1 block text-sm text-foreground-muted">Tone</label>
+              <label for="tone" class="mb-1 block text-sm text-foreground-muted">{t("studio.bible.tone")}</label>
               <input
                 id="tone"
                 name="tone"
@@ -139,13 +142,13 @@ const documentError = documentResult?.error?.message;
               type="submit"
               class="rounded-sm bg-primary px-4 py-2 font-semibold text-primary-foreground transition hover:opacity-90"
             >
-              Save
+              {t("studio.save")}
             </button>
           </form>
         </section>
       ) : tab === "characters" ? (
         <section class="mt-8">
-          <h2 class="text-xl font-semibold">Characters</h2>
+          <h2 class="text-xl font-semibold">{t("studio.tab.characters")}</h2>
 
           {
             characters.length > 0 ? (
@@ -159,7 +162,7 @@ const documentError = documentResult?.error?.message;
               </ul>
             ) : (
               <p class="mt-4 rounded-md border border-dashed border-border px-6 py-8 text-sm text-foreground-muted">
-                No characters yet.
+                {t("studio.characters.none")}
               </p>
             )
           }
@@ -167,7 +170,7 @@ const documentError = documentResult?.error?.message;
           <form method="POST" action={actions.createCharacter} class="mt-6 max-w-lg space-y-4">
             <input type="hidden" name="projectId" value={projectId} />
             <div>
-              <label for="name" class="mb-1 block text-sm text-foreground-muted">Name</label>
+              <label for="name" class="mb-1 block text-sm text-foreground-muted">{t("studio.field.name")}</label>
               <input
                 id="name"
                 name="name"
@@ -178,7 +181,7 @@ const documentError = documentResult?.error?.message;
               />
             </div>
             <div>
-              <label for="description" class="mb-1 block text-sm text-foreground-muted">Description</label>
+              <label for="description" class="mb-1 block text-sm text-foreground-muted">{t("studio.field.description")}</label>
               <textarea
                 id="description"
                 name="description"
@@ -195,18 +198,18 @@ const documentError = documentResult?.error?.message;
               type="submit"
               class="rounded-sm bg-primary px-4 py-2 font-semibold text-primary-foreground transition hover:opacity-90"
             >
-              Add character
+              {t("studio.characters.add")}
             </button>
           </form>
         </section>
       ) : tab === "world" ? (
         <section class="mt-8">
-          <h2 class="text-xl font-semibold">World</h2>
-          <p class="mt-1 text-sm text-foreground-muted">Describe the setting, locations, and rules of your world.</p>
+          <h2 class="text-xl font-semibold">{t("studio.tab.world")}</h2>
+          <p class="mt-1 text-sm text-foreground-muted">{t("studio.world.desc")}</p>
           <form method="POST" action={actions.saveWorld} class="mt-4 max-w-lg space-y-4">
             <input type="hidden" name="projectId" value={projectId} />
             <div>
-              <label for="wname" class="mb-1 block text-sm text-foreground-muted">Name</label>
+              <label for="wname" class="mb-1 block text-sm text-foreground-muted">{t("studio.field.name")}</label>
               <input
                 id="wname"
                 name="name"
@@ -216,7 +219,7 @@ const documentError = documentResult?.error?.message;
               />
             </div>
             <div>
-              <label for="wdescription" class="mb-1 block text-sm text-foreground-muted">Description</label>
+              <label for="wdescription" class="mb-1 block text-sm text-foreground-muted">{t("studio.field.description")}</label>
               <textarea
                 id="wdescription"
                 name="description"
@@ -225,7 +228,7 @@ const documentError = documentResult?.error?.message;
               >{world?.description ?? ""}</textarea>
             </div>
             <div>
-              <label for="locations" class="mb-1 block text-sm text-foreground-muted">Locations</label>
+              <label for="locations" class="mb-1 block text-sm text-foreground-muted">{t("studio.world.locations")}</label>
               <textarea
                 id="locations"
                 name="locations"
@@ -234,7 +237,7 @@ const documentError = documentResult?.error?.message;
               >{world?.locations ?? ""}</textarea>
             </div>
             <div>
-              <label for="rules" class="mb-1 block text-sm text-foreground-muted">Rules</label>
+              <label for="rules" class="mb-1 block text-sm text-foreground-muted">{t("studio.world.rules")}</label>
               <textarea
                 id="rules"
                 name="rules"
@@ -251,20 +254,20 @@ const documentError = documentResult?.error?.message;
               type="submit"
               class="rounded-sm bg-primary px-4 py-2 font-semibold text-primary-foreground transition hover:opacity-90"
             >
-              Save
+              {t("studio.save")}
             </button>
           </form>
         </section>
       ) : tab === "assets" ? (
         <section class="mt-8">
-          <h2 class="text-xl font-semibold">Assets</h2>
+          <h2 class="text-xl font-semibold">{t("studio.tab.assets")}</h2>
           {
             assets.length > 0 ? (
               <ul class="mt-4 space-y-2">
                 {assets.map((a) => (
                   <li class="rounded-md border border-border bg-surface p-4">
                     <div class="flex items-center justify-between">
-                      <p class="font-semibold">{a.label || a.role || "Asset"}</p>
+                      <p class="font-semibold">{a.label || a.role || t("studio.assets.default")}</p>
                       {a.role && <span class="text-xs text-foreground-muted">{a.role}</span>}
                     </div>
                     {a.mediaAssetId && <p class="mt-1 truncate text-xs text-foreground-tertiary">{a.mediaAssetId}</p>}
@@ -273,21 +276,21 @@ const documentError = documentResult?.error?.message;
               </ul>
             ) : (
               <p class="mt-4 rounded-md border border-dashed border-border px-6 py-8 text-sm text-foreground-muted">
-                No assets yet.
+                {t("studio.assets.none")}
               </p>
             )
           }
         </section>
       ) : tab === "publications" ? (
         <section class="mt-8">
-          <h2 class="text-xl font-semibold">Publications</h2>
+          <h2 class="text-xl font-semibold">{t("studio.tab.publications")}</h2>
           {
             publications.length > 0 ? (
               <ul class="mt-4 space-y-2">
                 {publications.map((p) => (
                   <li class="flex items-center justify-between rounded-md border border-border bg-surface p-4">
                     <div class="min-w-0 flex-1">
-                      <p class="truncate font-semibold">{p.title || "Untitled"}</p>
+                      <p class="truncate font-semibold">{p.title || t("studio.untitled")}</p>
                       {p.format && <p class="truncate text-sm text-foreground-muted">{p.format}</p>}
                     </div>
                     <span class="ml-4 shrink-0 text-xs text-foreground-muted">{p.status}</span>
@@ -296,32 +299,32 @@ const documentError = documentResult?.error?.message;
               </ul>
             ) : (
               <p class="mt-4 rounded-md border border-dashed border-border px-6 py-8 text-sm text-foreground-muted">
-                No publications yet.
+                {t("studio.publications.none")}
               </p>
             )
           }
         </section>
       ) : tab === "prompts" ? (
         <section class="mt-8">
-          <h2 class="text-xl font-semibold">Prompt templates</h2>
-          <p class="mt-1 text-sm text-foreground-muted">Reusable prompts for AI generation, scoped to this project.</p>
+          <h2 class="text-xl font-semibold">{t("studio.prompts.title")}</h2>
+          <p class="mt-1 text-sm text-foreground-muted">{t("studio.prompts.desc")}</p>
 
           {
             promptTemplates.length > 0 ? (
               <ul class="mt-4 space-y-2">
-                {promptTemplates.map((t) => (
+                {promptTemplates.map((pt) => (
                   <li class="rounded-md border border-border bg-surface p-4">
-                    <p class="font-semibold">{t.name}</p>
-                    <p class="mt-1 whitespace-pre-wrap text-sm text-foreground-muted">{t.template}</p>
-                    {t.variables && t.variables.length > 0 && (
-                      <p class="mt-2 text-xs text-foreground-tertiary">Variables: {t.variables.join(", ")}</p>
+                    <p class="font-semibold">{pt.name}</p>
+                    <p class="mt-1 whitespace-pre-wrap text-sm text-foreground-muted">{pt.template}</p>
+                    {pt.variables && pt.variables.length > 0 && (
+                      <p class="mt-2 text-xs text-foreground-tertiary">{t("studio.prompts.variables")}: {pt.variables.join(", ")}</p>
                     )}
                   </li>
                 ))}
               </ul>
             ) : (
               <p class="mt-4 rounded-md border border-dashed border-border px-6 py-8 text-sm text-foreground-muted">
-                No prompt templates yet.
+                {t("studio.prompts.none")}
               </p>
             )
           }
@@ -329,7 +332,7 @@ const documentError = documentResult?.error?.message;
           <form method="POST" action={actions.createPromptTemplate} class="mt-6 max-w-lg space-y-4">
             <input type="hidden" name="projectId" value={projectId} />
             <div>
-              <label for="pname" class="mb-1 block text-sm text-foreground-muted">Name</label>
+              <label for="pname" class="mb-1 block text-sm text-foreground-muted">{t("studio.field.name")}</label>
               <input
                 id="pname"
                 name="name"
@@ -340,7 +343,7 @@ const documentError = documentResult?.error?.message;
               />
             </div>
             <div>
-              <label for="ptemplate" class="mb-1 block text-sm text-foreground-muted">Template</label>
+              <label for="ptemplate" class="mb-1 block text-sm text-foreground-muted">{t("studio.prompts.template")}</label>
               <textarea
                 id="ptemplate"
                 name="template"
@@ -350,7 +353,7 @@ const documentError = documentResult?.error?.message;
               ></textarea>
             </div>
             <div>
-              <label for="pvariables" class="mb-1 block text-sm text-foreground-muted">Variables (comma-separated)</label>
+              <label for="pvariables" class="mb-1 block text-sm text-foreground-muted">{t("studio.prompts.variablesField")}</label>
               <input
                 id="pvariables"
                 name="variables"
@@ -368,74 +371,74 @@ const documentError = documentResult?.error?.message;
               type="submit"
               class="rounded-sm bg-primary px-4 py-2 font-semibold text-primary-foreground transition hover:opacity-90"
             >
-              Add template
+              {t("studio.prompts.add")}
             </button>
           </form>
         </section>
       ) : tab === "ai" ? (
         <section class="mt-8">
-          <h2 class="text-xl font-semibold">AI generation</h2>
+          <h2 class="text-xl font-semibold">{t("studio.tab.ai")}</h2>
           <p class="mt-1 text-sm text-foreground-muted">
-            Submit a generation request. Credit eligibility is decided server-side; BYOK and user-hosted runs are never credit-eligible.
+            {t("studio.ai.desc")}
           </p>
 
           {creditProvider ? (
             <p class="mt-3 inline-block rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground-muted">
-              {creditProvider.displayName ?? creditProvider.providerId}: {creditProvider.creditCost ?? 1} credit(s) per generation
+              {creditProvider.displayName ?? creditProvider.providerId}: {creditProvider.creditCost ?? 1} {t("studio.ai.creditsPerGen")}
             </p>
           ) : (
             <p class="mt-3 inline-block rounded-md border border-dashed border-border px-3 py-2 text-sm text-foreground-muted">
-              No credit-eligible provider registered yet.
+              {t("studio.ai.noProvider")}
             </p>
           )}
 
           <form method="POST" action={actions.requestGeneration} class="mt-4 max-w-lg space-y-4">
             <input type="hidden" name="projectId" value={projectId} />
             <div>
-              <label for="gtarget" class="mb-1 block text-sm text-foreground-muted">Target type</label>
+              <label for="gtarget" class="mb-1 block text-sm text-foreground-muted">{t("studio.ai.targetType")}</label>
               <select
                 id="gtarget"
                 name="targetType"
                 required
                 class="w-full rounded-sm border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
               >
-                <option value="PAGE">Page</option>
-                <option value="PANEL">Panel</option>
-                <option value="IMAGE">Image</option>
-                <option value="CHARACTER">Character</option>
-                <option value="BACKGROUND">Background</option>
-                <option value="DIALOGUE">Dialogue</option>
-                <option value="STORY_TEXT">Story text</option>
-                <option value="VIDEO">Video</option>
+                <option value="PAGE">{t("studio.ai.target.page")}</option>
+                <option value="PANEL">{t("studio.ai.target.panel")}</option>
+                <option value="IMAGE">{t("studio.ai.target.image")}</option>
+                <option value="CHARACTER">{t("studio.ai.target.character")}</option>
+                <option value="BACKGROUND">{t("studio.ai.target.background")}</option>
+                <option value="DIALOGUE">{t("studio.ai.target.dialogue")}</option>
+                <option value="STORY_TEXT">{t("studio.ai.target.storyText")}</option>
+                <option value="VIDEO">{t("studio.ai.target.video")}</option>
               </select>
             </div>
             <div>
-              <label for="gbilling" class="mb-1 block text-sm text-foreground-muted">Billing mode</label>
+              <label for="gbilling" class="mb-1 block text-sm text-foreground-muted">{t("studio.ai.billingMode")}</label>
               <select
                 id="gbilling"
                 name="billingMode"
                 required
                 class="w-full rounded-sm border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
               >
-                <option value="PLATFORM_CREDITS">StoryGalore credits</option>
-                <option value="BYOK">BYOK</option>
-                <option value="USER_HOSTED">User-hosted</option>
+                <option value="PLATFORM_CREDITS">{t("studio.ai.billing.platformCredits")}</option>
+                <option value="BYOK">{t("studio.ai.billing.byok")}</option>
+                <option value="USER_HOSTED">{t("studio.ai.billing.userHosted")}</option>
               </select>
             </div>
             <div>
-              <label for="glocation" class="mb-1 block text-sm text-foreground-muted">Execution location</label>
+              <label for="glocation" class="mb-1 block text-sm text-foreground-muted">{t("studio.ai.execLocation")}</label>
               <select
                 id="glocation"
                 name="executionLocation"
                 required
                 class="w-full rounded-sm border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
               >
-                <option value="CLOUD">Cloud</option>
-                <option value="USER_HOSTED">User-hosted</option>
+                <option value="CLOUD">{t("studio.ai.location.cloud")}</option>
+                <option value="USER_HOSTED">{t("studio.ai.location.userHosted")}</option>
               </select>
             </div>
             <div>
-              <label for="gprompt" class="mb-1 block text-sm text-foreground-muted">Prompt</label>
+              <label for="gprompt" class="mb-1 block text-sm text-foreground-muted">{t("studio.ai.prompt")}</label>
               <textarea
                 id="gprompt"
                 name="prompt"
@@ -444,23 +447,23 @@ const documentError = documentResult?.error?.message;
               ></textarea>
             </div>
             <div>
-              <label for="gtemplate" class="mb-1 block text-sm text-foreground-muted">Prompt template (optional)</label>
+              <label for="gtemplate" class="mb-1 block text-sm text-foreground-muted">{t("studio.ai.promptTemplate")}</label>
               <select
                 id="gtemplate"
                 name="promptTemplateId"
                 class="w-full rounded-sm border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
               >
-                <option value="">— none —</option>
+                <option value="">{t("studio.none")}</option>
                 {promptTemplates.map((t) => (
                   <option value={t.$id || t.id}>{t.name}</option>
                 ))}
               </select>
             </div>
             <div>
-              <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-foreground-muted">Video options (for VIDEO)</p>
+              <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-foreground-muted">{t("studio.ai.videoOptions")}</p>
               <div class="grid grid-cols-3 gap-3">
                 <div>
-                  <label for="gduration" class="mb-1 block text-sm text-foreground-muted">Duration (s)</label>
+                  <label for="gduration" class="mb-1 block text-sm text-foreground-muted">{t("studio.ai.duration")}</label>
                   <input
                     id="gduration"
                     name="duration"
@@ -472,7 +475,7 @@ const documentError = documentResult?.error?.message;
                   />
                 </div>
                 <div>
-                  <label for="gresolution" class="mb-1 block text-sm text-foreground-muted">Resolution</label>
+                  <label for="gresolution" class="mb-1 block text-sm text-foreground-muted">{t("studio.ai.resolution")}</label>
                   <select
                     id="gresolution"
                     name="resolution"
@@ -484,7 +487,7 @@ const documentError = documentResult?.error?.message;
                   </select>
                 </div>
                 <div>
-                  <label for="gaspect" class="mb-1 block text-sm text-foreground-muted">Aspect</label>
+                  <label for="gaspect" class="mb-1 block text-sm text-foreground-muted">{t("studio.ai.aspect")}</label>
                   <select
                     id="gaspect"
                     name="aspectRatio"
@@ -511,11 +514,11 @@ const documentError = documentResult?.error?.message;
               type="submit"
               class="rounded-sm bg-primary px-4 py-2 font-semibold text-primary-foreground transition hover:opacity-90"
             >
-              Submit request
+              {t("studio.ai.submit")}
             </button>
           </form>
 
-          <h3 class="mt-10 text-lg font-semibold">Requests</h3>
+          <h3 class="mt-10 text-lg font-semibold">{t("studio.ai.requests")}</h3>
           {
             generations.length > 0 ? (
               <ul class="mt-4 space-y-2">
@@ -529,49 +532,49 @@ const documentError = documentResult?.error?.message;
                     </div>
                     <div class="ml-4 flex shrink-0 items-center gap-3 text-xs text-foreground-muted">
                       <span class="rounded-full border border-border px-2 py-0.5">{g.status ?? "QUEUED"}</span>
-                      <span>{g.creditEligible ? "credits" : (g.creditEligibilityReason ?? "ineligible")}</span>
+                      <span>{g.creditEligible ? t("studio.ai.credits") : (g.creditEligibilityReason ?? t("studio.ai.ineligible"))}</span>
                     </div>
                   </li>
                 ))}
               </ul>
             ) : (
               <p class="mt-4 rounded-md border border-dashed border-border px-6 py-8 text-sm text-foreground-muted">
-                No generation requests yet.
+                {t("studio.ai.none")}
               </p>
             )
           }
         </section>
       ) : tab === "analytics" ? (
         <section class="mt-8">
-          <h2 class="text-xl font-semibold">Analytics</h2>
-          <p class="mt-1 text-sm text-foreground-muted">Your workspace metrics, computed live from your projects.</p>
+          <h2 class="text-xl font-semibold">{t("studio.tab.analytics")}</h2>
+          <p class="mt-1 text-sm text-foreground-muted">{t("studio.analytics.desc")}</p>
 
           <div class="mt-6 grid grid-cols-2 gap-4 md:grid-cols-3">
             <div class="rounded-md border border-border bg-surface p-4">
               <p class="text-2xl font-bold">{analytics?.projects ?? 0}</p>
-              <p class="text-sm text-foreground-muted">Projects</p>
+              <p class="text-sm text-foreground-muted">{t("studio.nav.projects")}</p>
             </div>
             <div class="rounded-md border border-border bg-surface p-4">
               <p class="text-2xl font-bold">{analytics?.documents ?? 0}</p>
-              <p class="text-sm text-foreground-muted">Documents</p>
+              <p class="text-sm text-foreground-muted">{t("studio.documents")}</p>
             </div>
             <div class="rounded-md border border-border bg-surface p-4">
               <p class="text-2xl font-bold">{analytics?.promptTemplates ?? 0}</p>
-              <p class="text-sm text-foreground-muted">Prompt templates</p>
+              <p class="text-sm text-foreground-muted">{t("studio.prompts.title")}</p>
             </div>
             <div class="rounded-md border border-border bg-surface p-4">
               <p class="text-2xl font-bold">{analytics?.generationTotal ?? 0}</p>
-              <p class="text-sm text-foreground-muted">Generations</p>
+              <p class="text-sm text-foreground-muted">{t("studio.analytics.generations")}</p>
             </div>
             <div class="rounded-md border border-border bg-surface p-4">
               <p class="text-2xl font-bold">{analytics?.generationCreditEligible ?? 0}</p>
-              <p class="text-sm text-foreground-muted">Credit-eligible generations</p>
+              <p class="text-sm text-foreground-muted">{t("studio.analytics.creditEligible")}</p>
             </div>
           </div>
 
           {analytics?.generationsByBilling ? (
             <div class="mt-6">
-              <h3 class="text-lg font-semibold">Generations by billing mode</h3>
+              <h3 class="text-lg font-semibold">{t("studio.analytics.byBilling")}</h3>
               <ul class="mt-3 space-y-2">
                 {Object.entries(analytics.generationsByBilling).map(([mode, count]) => (
                   <li class="flex items-center justify-between rounded-md border border-border bg-surface p-3">
@@ -585,8 +588,8 @@ const documentError = documentResult?.error?.message;
         </section>
       ) : tab === "drafts" ? (
         <section class="mt-8">
-          <h2 class="text-xl font-semibold">Drafts</h2>
-          <p class="mt-1 text-sm text-foreground-muted">Your project's documents. Open a draft to edit pages and panels.</p>
+          <h2 class="text-xl font-semibold">{t("studio.tab.drafts")}</h2>
+          <p class="mt-1 text-sm text-foreground-muted">{t("studio.drafts.desc")}</p>
 
           {
             documents.length > 0 ? (
@@ -594,21 +597,21 @@ const documentError = documentResult?.error?.message;
                 {documents.map((d) => (
                   <li class="flex items-center justify-between rounded-md border border-border bg-surface p-4">
                     <div class="min-w-0 flex-1">
-                      <p class="truncate font-semibold">{d.title || "Untitled"}</p>
+                      <p class="truncate font-semibold">{d.title || t("studio.untitled")}</p>
                       <p class="truncate text-sm text-foreground-muted">{d.type}{d.format ? ` · ${d.format}` : ""}</p>
                     </div>
                     <a
                       href={`/studio/projects/${projectId}/documents/${d.$id}`}
                       class="ml-4 shrink-0 rounded-sm border border-border px-3 py-1.5 text-sm transition hover:bg-surface"
                     >
-                      Open editor
+                      {t("studio.drafts.openEditor")}
                     </a>
                   </li>
                 ))}
               </ul>
             ) : (
               <p class="mt-4 rounded-md border border-dashed border-border px-6 py-8 text-sm text-foreground-muted">
-                No drafts yet.
+                {t("studio.drafts.none")}
               </p>
             )
           }
@@ -616,7 +619,7 @@ const documentError = documentResult?.error?.message;
           <form method="POST" action={actions.createDocument} class="mt-6 max-w-lg space-y-4">
             <input type="hidden" name="projectId" value={projectId} />
             <div>
-              <label for="dtitle" class="mb-1 block text-sm text-foreground-muted">Title</label>
+              <label for="dtitle" class="mb-1 block text-sm text-foreground-muted">{t("studio.field.title")}</label>
               <input
                 id="dtitle"
                 name="title"
@@ -626,18 +629,18 @@ const documentError = documentResult?.error?.message;
               />
             </div>
             <div>
-              <label for="dtype" class="mb-1 block text-sm text-foreground-muted">Type</label>
+              <label for="dtype" class="mb-1 block text-sm text-foreground-muted">{t("studio.field.type")}</label>
               <select
                 id="dtype"
                 name="type"
                 required
                 class="w-full rounded-sm border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
               >
-                <option value="BOOK">Book</option>
-                <option value="POST">Post</option>
-                <option value="VIDEO">Video</option>
-                <option value="AUDIO">Audio</option>
-                <option value="MIXED">Mixed</option>
+                <option value="BOOK">{t("studio.type.book")}</option>
+                <option value="POST">{t("studio.type.post")}</option>
+                <option value="VIDEO">{t("studio.type.video")}</option>
+                <option value="AUDIO">{t("studio.type.audio")}</option>
+                <option value="MIXED">{t("studio.type.mixed")}</option>
               </select>
             </div>
             {documentError && (
@@ -649,7 +652,7 @@ const documentError = documentResult?.error?.message;
               type="submit"
               class="rounded-sm bg-primary px-4 py-2 font-semibold text-primary-foreground transition hover:opacity-90"
             >
-              New draft
+              {t("studio.drafts.new")}
             </button>
           </form>
         </section>
@@ -657,7 +660,7 @@ const documentError = documentResult?.error?.message;
         <section class="mt-8">
           <h2 class="text-xl font-semibold">{title}</h2>
           <p class="mt-4 rounded-md border border-dashed border-border px-6 py-10 text-sm text-foreground-muted">
-            This section is coming soon.
+            {t("studio.comingSoon")}
           </p>
         </section>
       )

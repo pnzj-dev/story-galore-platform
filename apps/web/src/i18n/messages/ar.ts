@@ -161,6 +161,208 @@ const ar = {
   "studio.handle": "المعرّف",
   "studio.displayName": "اسم العرض",
   "studio.bio": "نبذة",
+
+  // Studio layout + navigation
+  "studio.brand": "الاستوديو",
+  "studio.nav.dashboard": "لوحة التحكم",
+  "studio.nav.projects": "المشاريع",
+  "studio.backToSite": "← العودة إلى الموقع",
+  "studio.backToProjects": "← المشاريع",
+  "studio.backToProject": "← العودة إلى المشروع",
+
+  // Studio tabs
+  "studio.tab.overview": "نظرة عامة",
+  "studio.tab.storyBible": "موسوعة القصة",
+  "studio.tab.characters": "الشخصيات",
+  "studio.tab.world": "العالم",
+  "studio.tab.assets": "الأصول",
+  "studio.tab.prompts": "المطالبات",
+  "studio.tab.ai": "الذكاء الاصطناعي",
+  "studio.tab.drafts": "المسودات",
+  "studio.tab.editor": "المحرر",
+  "studio.tab.publications": "المنشورات",
+  "studio.tab.analytics": "التحليلات",
+
+  // Studio common fields
+  "studio.field.title": "العنوان",
+  "studio.field.type": "النوع",
+  "studio.field.format": "الصيغة",
+  "studio.field.name": "الاسم",
+  "studio.field.description": "الوصف",
+  "studio.save": "حفظ",
+  "studio.untitled": "بدون عنوان",
+  "studio.untitledProject": "مشروع بدون عنوان",
+  "studio.untitledDocument": "مستند بدون عنوان",
+  "studio.comingSoon": "هذا القسم قادم قريبًا.",
+
+  // Media types
+  "studio.type.book": "كتاب",
+  "studio.type.post": "منشور",
+  "studio.type.video": "فيديو",
+  "studio.type.audio": "صوت",
+  "studio.type.mixed": "مختلط",
+
+  // Book formats
+  "studio.format.comic": "قصص مصورة",
+  "studio.format.manga": "مانغا",
+  "studio.format.manhwa": "مانهوا",
+  "studio.format.manhua": "مانهوا",
+  "studio.format.bandeDessinee": "قصص مصورة",
+  "studio.format.graphicNovel": "رواية مصورة",
+  "studio.format.webtoon": "ويبتون",
+  "studio.format.novel": "رواية",
+  "studio.format.lightNovel": "رواية خفيفة",
+  "studio.format.nonfiction": "غير روائي",
+  "studio.format.educational": "تعليمي",
+
+  // Studio dashboard
+  "studio.dashboard.welcome": "مرحبًا بعودتك",
+  "studio.dashboard.creator": "المبدع",
+  "studio.dashboard.viewProjects": "عرض المشاريع",
+
+  // Studio projects index
+  "studio.projects.wip": "أعمالك الجارية.",
+  "studio.projects.noProjects": "لا توجد مشاريع بعد. أنشئ واحدًا من الصفحة الرئيسية للاستوديو.",
+
+  // Studio project detail
+  "studio.newDocument": "مستند جديد",
+  "studio.newDocumentDesc": "ابدأ أي نوع من المنشورات — القصة المصورة مجرد صيغة كتاب واحدة.",
+  "studio.formatBooksOnly": "الصيغة (للكتب فقط)",
+  "studio.createDocument": "إنشاء المستند",
+  "studio.documents": "المستندات",
+  "studio.noDocuments": "لا توجد مستندات بعد. أنشئ مستندك الأول أعلاه.",
+
+  // Story bible
+  "studio.bible.desc": "سجّل الفرضية والمواضيع والنبرة التي ترسّخ هذا المشروع.",
+  "studio.bible.premise": "الفرضية",
+  "studio.bible.themes": "المواضيع",
+  "studio.bible.tone": "النبرة",
+
+  // Characters
+  "studio.characters.none": "لا توجد شخصيات بعد.",
+  "studio.characters.add": "إضافة شخصية",
+
+  // World
+  "studio.world.desc": "صِف الإطار والمواقع والقواعد في عالمك.",
+  "studio.world.locations": "المواقع",
+  "studio.world.rules": "القواعد",
+
+  // Assets
+  "studio.assets.none": "لا توجد أصول بعد.",
+  "studio.assets.default": "أصل",
+
+  // Publications
+  "studio.publications.none": "لا توجد منشورات بعد.",
+
+  // Prompts
+  "studio.prompts.title": "قوالب المطالبات",
+  "studio.prompts.desc": "مطالبات قابلة لإعادة الاستخدام لتوليد الذكاء الاصطناعي، مقتصرة على هذا المشروع.",
+  "studio.prompts.variables": "المتغيرات",
+  "studio.prompts.none": "لا توجد قوالب مطالبات بعد.",
+  "studio.prompts.template": "القالب",
+  "studio.prompts.variablesField": "المتغيرات (مفصولة بفواصل)",
+  "studio.prompts.add": "إضافة قالب",
+
+  // AI generation
+  "studio.ai.desc": "قدّم طلب توليد. تُحدَّد أهلية الأرصدة من جهة الخادم؛ ولا تكون عمليات BYOK والاستضافة الذاتية مؤهلة للأرصدة أبدًا.",
+  "studio.ai.creditsPerGen": "رصيد (أرصدة) لكل توليد",
+  "studio.ai.noProvider": "لم يُسجَّل مزوّد مؤهل للأرصدة بعد.",
+  "studio.ai.targetType": "النوع المستهدف",
+  "studio.ai.target.page": "صفحة",
+  "studio.ai.target.panel": "لوحة",
+  "studio.ai.target.image": "صورة",
+  "studio.ai.target.character": "شخصية",
+  "studio.ai.target.background": "خلفية",
+  "studio.ai.target.dialogue": "حوار",
+  "studio.ai.target.storyText": "نص القصة",
+  "studio.ai.target.video": "فيديو",
+  "studio.ai.billingMode": "طريقة الفوترة",
+  "studio.ai.billing.platformCredits": "أرصدة StoryGalore",
+  "studio.ai.billing.byok": "BYOK",
+  "studio.ai.billing.userHosted": "استضافة ذاتية",
+  "studio.ai.execLocation": "موقع التنفيذ",
+  "studio.ai.location.cloud": "سحابة",
+  "studio.ai.location.userHosted": "استضافة ذاتية",
+  "studio.ai.prompt": "المطالبة",
+  "studio.ai.promptTemplate": "قالب المطالبة (اختياري)",
+  "studio.ai.videoOptions": "خيارات الفيديو (للفيديو)",
+  "studio.ai.duration": "المدة (ثانية)",
+  "studio.ai.resolution": "الدقة",
+  "studio.ai.aspect": "النسبة",
+  "studio.ai.submit": "إرسال الطلب",
+  "studio.ai.requests": "الطلبات",
+  "studio.ai.credits": "أرصدة",
+  "studio.ai.ineligible": "غير مؤهل",
+  "studio.ai.none": "لا توجد طلبات توليد بعد.",
+
+  // Creator analytics
+  "studio.analytics.desc": "مقاييس مساحة عملك، محسوبة مباشرة من مشاريعك.",
+  "studio.analytics.generations": "عمليات التوليد",
+  "studio.analytics.creditEligible": "عمليات توليد مؤهلة للأرصدة",
+  "studio.analytics.byBilling": "عمليات التوليد حسب طريقة الفوترة",
+
+  // Drafts
+  "studio.drafts.desc": "مستندات مشروعك. افتح مسودة لتعديل الصفحات واللوحات.",
+  "studio.drafts.openEditor": "فتح المحرر",
+  "studio.drafts.none": "لا توجد مسودات بعد.",
+  "studio.drafts.new": "مسودة جديدة",
+
+  // Editor
+  "studio.editor.details": "التفاصيل",
+  "studio.editor.pages": "الصفحات",
+  "studio.editor.width": "العرض (بكسل)",
+  "studio.editor.height": "الارتفاع (بكسل)",
+  "studio.editor.addPage": "إضافة صفحة",
+  "studio.editor.pageLabel": "الصفحة",
+  "studio.editor.defaultDims": "الأبعاد الافتراضية",
+  "studio.editor.deletePage": "حذف الصفحة",
+  "studio.editor.setBackground": "تعيين الخلفية…",
+  "studio.editor.set": "تعيين",
+  "studio.editor.panels": "اللوحات",
+  "studio.editor.delete": "حذف",
+  "studio.editor.updatePanel": "تحديث اللوحة",
+  "studio.editor.noPanels": "لا توجد لوحات بعد.",
+  "studio.editor.shape": "الشكل",
+  "studio.editor.addPanel": "إضافة لوحة",
+  "studio.editor.shape.rectangle": "مستطيل",
+  "studio.editor.shape.rounded": "مستدير",
+  "studio.editor.shape.circle": "دائرة",
+  "studio.editor.shape.custom": "مخصص",
+  "studio.editor.noPages": "لا توجد صفحات بعد. أضف صفحتك الأولى أعلاه.",
+  "studio.editor.comingSoon": "تحرير المحتوى لهذا النوع من الوسائط قادم قريبًا. يمكنك تعيين العنوان والصيغة أعلاه.",
+  "studio.editor.mediaLibrary": "مكتبة الوسائط",
+  "studio.editor.mediaLibraryDesc": "ارفع الصور (الأغلفة، فنون الصفحات، المعرض، الصور الرمزية) — خط وسائط واحد عام.",
+  "studio.editor.uploadImage": "رفع صورة",
+  "studio.editor.noImages": "لم تُرفَع أي صور بعد.",
+  "studio.editor.revisions": "سجل المراجعات",
+  "studio.editor.revisionsDesc": "استعد مراجعة سابقة لهذه المسودة.",
+  "studio.editor.revisionLabel": "المراجعة",
+  "studio.editor.restore": "استعادة",
+  "studio.editor.noRevisions": "لا توجد مراجعات بعد — تُسجَّل المراجعات عند تغيّر المستند.",
+  "studio.editor.publish": "نشر",
+  "studio.editor.publishDesc": "تحقّق من هذا المستند وانشره كمنشور عام.",
+  "studio.editor.contentRating": "التصنيف العمري",
+  "studio.editor.rating.allAges": "لجميع الأعمار",
+  "studio.editor.rating.teen": "مراهقون",
+  "studio.editor.rating.adult": "18+",
+  "studio.editor.contentOrigin": "أصل المحتوى",
+  "studio.editor.origin.human": "بشري",
+  "studio.editor.origin.aiAssisted": "بمساعدة الذكاء الاصطناعي",
+  "studio.editor.origin.aiGenerated": "مولَّد بالذكاء الاصطناعي",
+  "studio.editor.origin.hybrid": "هجين",
+  "studio.editor.access": "الوصول",
+  "studio.editor.access.free": "مجاني",
+  "studio.editor.access.subscription": "اشتراك",
+  "studio.editor.access.purchase": "شراء لمرة واحدة",
+  "studio.editor.cover": "صورة الغلاف",
+  "studio.editor.noCover": "بدون غلاف",
+
+  // Document meta (autosave status)
+  "studio.meta.saving": "جارٍ الحفظ…",
+  "studio.meta.saved": "تم الحفظ",
+  "studio.meta.error": "تعذّر الحفظ — ستتم إعادة المحاولة",
+  "studio.meta.offline": "غير متصل — ستتم مزامنة التغييرات عند إعادة الاتصال",
+  "studio.meta.autosave": "حفظ تلقائي أثناء الكتابة",
 } satisfies Record<keyof typeof en, string>;
 
 export default ar;

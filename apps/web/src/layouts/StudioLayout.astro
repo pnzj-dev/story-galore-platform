@@ -1,6 +1,7 @@
 ---
 import "@/styles/global.css";
 import { ClientRouter } from "astro:transitions";
+import { getTranslations } from "@/i18n";
 
 interface Props {
   title: string;
@@ -8,19 +9,20 @@ interface Props {
 }
 
 const { title, active } = Astro.props;
+const { locale, dir, t } = getTranslations(Astro.currentLocale);
 const user = Astro.locals.user;
 if (!user) {
   return Astro.redirect("/auth/login");
 }
 
 const NAV = [
-  { href: "/studio/dashboard", label: "Dashboard", key: "dashboard" },
-  { href: "/studio/projects", label: "Projects", key: "projects" },
+  { href: "/studio/dashboard", label: t("studio.nav.dashboard"), key: "dashboard" },
+  { href: "/studio/projects", label: t("studio.nav.projects"), key: "projects" },
 ];
 ---
 
 <!doctype html>
-<html lang="en" dir="ltr" data-theme="dark">
+<html lang={locale} dir={dir} data-theme="dark">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -50,7 +52,7 @@ const NAV = [
           <span class="grid h-[22px] w-[22px] place-items-center rounded-md bg-gradient-to-br from-brand-500 to-accent text-[11px] font-black text-white">
             SG
           </span>
-          Studio
+          {t("studio.brand")}
         </a>
         <nav class="mt-6 space-y-0.5">
           {NAV.map((item) => (
@@ -67,7 +69,7 @@ const NAV = [
           ))}
         </nav>
         <a href="/" class="mt-6 block px-3 text-sm text-foreground-muted/60 transition hover:text-foreground">
-          ← Back to site
+          {t("studio.backToSite")}
         </a>
       </aside>
       <div class="min-w-0 flex-1">

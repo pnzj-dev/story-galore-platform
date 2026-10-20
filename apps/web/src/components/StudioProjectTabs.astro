@@ -1,23 +1,26 @@
 ---
+import { getTranslations } from "@/i18n";
+
 interface Props {
   projectId: string;
   active?: string;
 }
 
 const { projectId, active = "" } = Astro.props;
+const { t } = getTranslations(Astro.currentLocale);
 
 const TABS = [
-  { key: "", label: "Overview" },
-  { key: "story-bible", label: "Story Bible" },
-  { key: "characters", label: "Characters" },
-  { key: "world", label: "World" },
-  { key: "assets", label: "Assets" },
-  { key: "prompts", label: "Prompts" },
-  { key: "ai", label: "AI" },
-  { key: "drafts", label: "Drafts" },
-  { key: "editor", label: "Editor" },
-  { key: "publications", label: "Publications" },
-  { key: "analytics", label: "Analytics" },
+  { key: "", label: t("studio.tab.overview") },
+  { key: "story-bible", label: t("studio.tab.storyBible") },
+  { key: "characters", label: t("studio.tab.characters") },
+  { key: "world", label: t("studio.tab.world") },
+  { key: "assets", label: t("studio.tab.assets") },
+  { key: "prompts", label: t("studio.tab.prompts") },
+  { key: "ai", label: t("studio.tab.ai") },
+  { key: "drafts", label: t("studio.tab.drafts") },
+  { key: "editor", label: t("studio.tab.editor") },
+  { key: "publications", label: t("studio.tab.publications") },
+  { key: "analytics", label: t("studio.tab.analytics") },
 ];
 ---
 

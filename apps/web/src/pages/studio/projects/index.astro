@@ -1,15 +1,17 @@
 ---
 import StudioLayout from "@/layouts/StudioLayout.astro";
 import { fetchProjects } from "@/lib/gateway";
+import { getTranslations } from "@/i18n";
 
+const { t } = getTranslations(Astro.currentLocale);
 const user = Astro.locals.user;
 const projects = user ? await fetchProjects(user.$id) : [];
 ---
 
-<StudioLayout title="Studio — Projects" active="projects">
+<StudioLayout title={`${t("studio.brand")} — ${t("studio.nav.projects")}`} active="projects">
   <main class="mx-auto max-w-5xl px-12 py-10">
-    <h1 class="text-3xl font-bold">Projects</h1>
-    <p class="mt-2 text-foreground-muted">Your works-in-progress.</p>
+    <h1 class="text-3xl font-bold">{t("studio.nav.projects")}</h1>
+    <p class="mt-2 text-foreground-muted">{t("studio.projects.wip")}</p>
 
     {
       projects.length > 0 ? (
@@ -31,7 +33,7 @@ const projects = user ? await fetchProjects(user.$id) : [];
         </ul>
       ) : (
         <p class="mt-8 rounded-md border border-dashed border-border px-6 py-8 text-sm text-foreground-muted">
-          No projects yet. Create one from the studio home.
+          {t("studio.projects.noProjects")}
         </p>
       )
     }

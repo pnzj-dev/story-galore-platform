@@ -1,26 +1,28 @@
 ---
 import StudioLayout from "@/layouts/StudioLayout.astro";
 import { fetchCreator, fetchProjects } from "@/lib/gateway";
+import { getTranslations } from "@/i18n";
 
+const { t } = getTranslations(Astro.currentLocale);
 const user = Astro.locals.user;
 const creator = user ? await fetchCreator(user.$id) : null;
 const projects = creator && user ? await fetchProjects(user.$id) : [];
 ---
 
-<StudioLayout title="Studio — Dashboard" active="dashboard">
+<StudioLayout title={`${t("studio.brand")} — ${t("studio.nav.dashboard")}`} active="dashboard">
   <main class="mx-auto max-w-5xl px-12 py-10">
-    <h1 class="text-3xl font-bold">Dashboard</h1>
+    <h1 class="text-3xl font-bold">{t("studio.nav.dashboard")}</h1>
     <p class="mt-2 text-foreground-muted">
-      Welcome back{creator?.displayName ? `, ${creator.displayName}` : ""}.
+      {t("studio.dashboard.welcome")}{creator?.displayName ? `, ${creator.displayName}` : ""}.
     </p>
 
     <div class="mt-8 grid gap-4 sm:grid-cols-3">
       <div class="rounded-md border border-border bg-surface p-4">
-        <p class="text-xs uppercase tracking-widest text-foreground-tertiary">Projects</p>
+        <p class="text-xs uppercase tracking-widest text-foreground-tertiary">{t("studio.nav.projects")}</p>
         <p class="mt-1 text-3xl font-bold">{projects.length}</p>
       </div>
       <div class="rounded-md border border-border bg-surface p-4">
-        <p class="text-xs uppercase tracking-widest text-foreground-tertiary">Creator</p>
+        <p class="text-xs uppercase tracking-widest text-foreground-tertiary">{t("studio.dashboard.creator")}</p>
         <p class="mt-1 text-lg font-bold">{creator ? `@${creator.handle}` : "—"}</p>
       </div>
     </div>
@@ -29,7 +31,7 @@ const projects = creator && user ? await fetchProjects(user.$id) : [];
       href="/studio/projects"
       class="mt-8 inline-block rounded-sm bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
     >
-      View projects
+      {t("studio.dashboard.viewProjects")}
     </a>
   </main>
 </StudioLayout>

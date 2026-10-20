@@ -3,6 +3,34 @@ import Layout from "@/layouts/Layout.astro";
 import { actions } from "astro:actions";
 import DocumentMeta from "@/components/DocumentMeta.svelte";
 import { fetchDocument, fetchMediaAssets, fetchRevisions } from "@/lib/gateway";
+import { getTranslations } from "@/i18n";
+
+const { t } = getTranslations(Astro.currentLocale);
+
+const labels = {
+  title: t("studio.field.title"),
+  format: t("studio.field.format"),
+  saving: t("studio.meta.saving"),
+  saved: t("studio.meta.saved"),
+  error: t("studio.meta.error"),
+  offline: t("studio.meta.offline"),
+  autosave: t("studio.meta.autosave"),
+};
+
+const bookFormats = [
+  { value: "", label: "—" },
+  { value: "COMIC", label: t("studio.format.comic") },
+  { value: "MANGA", label: t("studio.format.manga") },
+  { value: "MANHWA", label: t("studio.format.manhwa") },
+  { value: "MANHUA", label: t("studio.format.manhua") },
+  { value: "BANDE_DESSINEE", label: t("studio.format.bandeDessinee") },
+  { value: "GRAPHIC_NOVEL", label: t("studio.format.graphicNovel") },
+  { value: "WEBTOON", label: t("studio.format.webtoon") },
+  { value: "NOVEL", label: t("studio.format.novel") },
+  { value: "LIGHT_NOVEL", label: t("studio.format.lightNovel") },
+  { value: "NONFICTION", label: t("studio.format.nonfiction") },
+  { value: "EDUCATIONAL", label: t("studio.format.educational") },
+];
 
 const user = Astro.locals.user;
 const projectId = Astro.params.id ?? "";
@@ -66,17 +94,17 @@ function parseBounds(bounds?: string): { x: number; y: number; width: number; he
 }
 ---
 
-<Layout title={doc.document.title ?? "Document"}>
+<Layout title={doc.document.title ?? t("studio.untitledDocument")}>
   <main class="mx-auto max-w-4xl px-6 py-12">
     <a
       href={`/studio/projects/${projectId}`}
       class="text-sm text-foreground-muted transition hover:text-foreground"
     >
-      &larr; Back to project
+      {t("studio.backToProject")}
     </a>
 
     <header class="mt-4 flex flex-wrap items-center gap-3">
-      <h1 class="text-3xl font-bold">{doc.document.title || "Untitled document"}</h1>
+      <h1 class="text-3xl font-bold">{doc.document.title || t("studio.untitledDocument")}</h1>
       <span class="rounded-full border border-border px-2 py-0.5 text-xs text-foreground-muted">
         {doc.document.type}
       </span>
@@ -88,7 +116,7 @@ function parseBounds(bounds?: string): { x: number; y: number; width: number; he
     </header>
 
     <section class="mt-6">
-      <h2 class="text-xl font-semibold">Details</h2>
+      <h2 class="text-xl font-semibold">{t("studio.editor.details")}</h2>
       <div class="mt-4">
         <DocumentMeta
           client:load
@@ -96,6 +124,8 @@ function parseBounds(bounds?: string): { x: number; y: number; width: number; he
           initialTitle={doc.document.title ?? ""}
           initialFormat={doc.document.format ?? ""}
           showFormat={doc.document.type === "BOOK"}
+          labels={labels}
+          bookFormats={bookFormats}
         />
       </div>
     </section>
@@ -108,12 +138,12 @@ function parseBounds(bounds?: string): { x: number; y: number; width: number; he
 
     {isSequentialArt ? (
       <section class="mt-10">
-        <h2 class="text-xl font-semibold">Pages</h2>
+        <h2 class="text-xl font-semibold">{t("studio.editor.pages")}</h2>
         <form method="POST" action={actions.addPage} class="mt-4 flex flex-wrap items-end gap-3">
           <input type="hidden" name="documentId" value={documentId} />
           <input type="hidden" name="position" value={doc.pages.length} />
           <div>
-            <label for="width" class="mb-1 block text-sm text-foreground-muted">Width (px)</label>
+            <label for="width" class="mb-1 block text-sm text-foreground-muted">{t("studio.editor.width")}</label>
             <input
               id="width"
               name="width"
@@ -124,7 +154,7 @@ function parseBounds(bounds?: string): { x: number; y: number; width: number; he
             />
           </div>
           <div>
-            <label for="height" class="mb-1 block text-sm text-foreground-muted">Height (px)</label>
+            <label for="height" class="mb-1 block text-sm text-foreground-muted">{t("studio.editor.height")}</label>
             <input
               id="height"
               name="height"
@@ -138,7 +168,7 @@ function parseBounds(bounds?: string): { x: number; y: number; width: number; he
             type="submit"
             class="rounded-sm bg-primary px-4 py-2 font-semibold text-primary-foreground transition hover:opacity-90"
           >
-            Add page
+            {t("studio.editor.addPage")}
           </button>
         </form>
 
@@ -148,9 +178,9 @@ function parseBounds(bounds?: string): { x: number; y: number; width: number; he
               <li class="rounded-md border border-border bg-surface p-4">
                 <div class="flex items-center justify-between">
                   <div>
-                    <p class="font-medium text-foreground">Page {i + 1}</p>
+                    <p class="font-medium text-foreground">{t("studio.editor.pageLabel")} {i + 1}</p>
                     <p class="text-xs text-foreground-muted">
-                      {page.width && page.height ? `${page.width} × ${page.height}px` : "default dimensions"}
+                      {page.width && page.height ? `${page.width} × ${page.height}px` : t("studio.editor.defaultDims")}
                     </p>
                   </div>
                   <form method="POST" action={actions.deletePage}>
@@ -159,7 +189,7 @@ function parseBounds(bounds?: string): { x: number; y: number; width: number; he
                       type="submit"
                       class="rounded-sm border border-danger/40 px-3 py-1 text-xs text-danger transition hover:bg-danger/10"
                     >
-                      Delete page
+                      {t("studio.editor.deletePage")}
                     </button>
                   </form>
                 </div>
@@ -171,7 +201,7 @@ function parseBounds(bounds?: string): { x: number; y: number; width: number; he
                       name="backgroundAssetId"
                       class="rounded-sm border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
                     >
-                      <option value="">Set background…</option>
+                      <option value="">{t("studio.editor.setBackground")}</option>
                       {mediaAssets.map((a) => (
                         <option value={a.$id}>
                           {a.mimeType}
@@ -183,13 +213,13 @@ function parseBounds(bounds?: string): { x: number; y: number; width: number; he
                       type="submit"
                       class="rounded-sm bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground transition hover:opacity-90"
                     >
-                      Set
+                      {t("studio.editor.set")}
                     </button>
                   </form>
                 )}
 
                 <div class="mt-3">
-                  <p class="text-sm text-foreground-muted">Panels</p>
+                  <p class="text-sm text-foreground-muted">{t("studio.editor.panels")}</p>
                   {(page.panels?.length ?? 0) > 0 ? (
                     <ul class="mt-2 space-y-2">
                       {page.panels!.map((panel, j) => {
@@ -207,7 +237,7 @@ function parseBounds(bounds?: string): { x: number; y: number; width: number; he
                                   type="submit"
                                   class="rounded-sm border border-danger/40 px-2 py-0.5 text-xs text-danger transition hover:bg-danger/10"
                                 >
-                                  Delete
+                                  {t("studio.editor.delete")}
                                 </button>
                               </form>
                             </div>
@@ -249,16 +279,16 @@ function parseBounds(bounds?: string): { x: number; y: number; width: number; he
                                 name="shape"
                                 class="col-span-4 rounded-md border border-border bg-surface px-2 py-1 text-xs outline-none focus:border-primary"
                               >
-                                <option value="RECTANGLE" selected={panel.shape === "RECTANGLE"}>Rectangle</option>
-                                <option value="ROUNDED" selected={panel.shape === "ROUNDED"}>Rounded</option>
-                                <option value="CIRCLE" selected={panel.shape === "CIRCLE"}>Circle</option>
-                                <option value="CUSTOM" selected={panel.shape === "CUSTOM"}>Custom</option>
+                                <option value="RECTANGLE" selected={panel.shape === "RECTANGLE"}>{t("studio.editor.shape.rectangle")}</option>
+                                <option value="ROUNDED" selected={panel.shape === "ROUNDED"}>{t("studio.editor.shape.rounded")}</option>
+                                <option value="CIRCLE" selected={panel.shape === "CIRCLE"}>{t("studio.editor.shape.circle")}</option>
+                                <option value="CUSTOM" selected={panel.shape === "CUSTOM"}>{t("studio.editor.shape.custom")}</option>
                               </select>
                               <button
                                 type="submit"
                                 class="col-span-4 rounded-md bg-primary px-2 py-1 text-xs font-semibold text-primary-foreground transition hover:opacity-90"
                               >
-                                Update panel
+                                {t("studio.editor.updatePanel")}
                               </button>
                             </form>
                           </li>
@@ -266,30 +296,30 @@ function parseBounds(bounds?: string): { x: number; y: number; width: number; he
                       })}
                     </ul>
                   ) : (
-                    <p class="mt-2 text-sm text-foreground-muted">No panels yet.</p>
+                    <p class="mt-2 text-sm text-foreground-muted">{t("studio.editor.noPanels")}</p>
                   )}
 
                   <form method="POST" action={actions.addPanel} class="mt-3 flex flex-wrap items-end gap-3">
                     <input type="hidden" name="pageId" value={page.$id} />
                     <input type="hidden" name="position" value={page.panels?.length ?? 0} />
                     <div>
-                      <label for={`shape-${page.$id}`} class="mb-1 block text-sm text-foreground-muted">Shape</label>
+                      <label for={`shape-${page.$id}`} class="mb-1 block text-sm text-foreground-muted">{t("studio.editor.shape")}</label>
                       <select
                         id={`shape-${page.$id}`}
                         name="shape"
                         class="rounded-sm border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
                       >
-                        <option value="RECTANGLE">Rectangle</option>
-                        <option value="ROUNDED">Rounded</option>
-                        <option value="CIRCLE">Circle</option>
-                        <option value="CUSTOM">Custom</option>
+                        <option value="RECTANGLE">{t("studio.editor.shape.rectangle")}</option>
+                        <option value="ROUNDED">{t("studio.editor.shape.rounded")}</option>
+                        <option value="CIRCLE">{t("studio.editor.shape.circle")}</option>
+                        <option value="CUSTOM">{t("studio.editor.shape.custom")}</option>
                       </select>
                     </div>
                     <button
                       type="submit"
                       class="rounded-sm bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
                     >
-                      Add panel
+                      {t("studio.editor.addPanel")}
                     </button>
                   </form>
                 </div>
@@ -298,20 +328,20 @@ function parseBounds(bounds?: string): { x: number; y: number; width: number; he
           </ul>
         ) : (
           <p class="mt-4 rounded-md border border-dashed border-border px-6 py-8 text-sm text-foreground-muted">
-            No pages yet. Add your first page above.
+            {t("studio.editor.noPages")}
           </p>
         )}
       </section>
     ) : (
       <section class="mt-10 rounded-md border border-dashed border-border px-6 py-10 text-sm text-foreground-muted">
-        Content editing for this media type is coming soon. You can set the title and format above.
+        {t("studio.editor.comingSoon")}
       </section>
     )}
 
     <section class="mt-10">
-      <h2 class="text-xl font-semibold">Media library</h2>
+      <h2 class="text-xl font-semibold">{t("studio.editor.mediaLibrary")}</h2>
       <p class="mt-1 text-sm text-foreground-muted">
-        Upload images (covers, page art, gallery, avatars) — one general media pipeline.
+        {t("studio.editor.mediaLibraryDesc")}
       </p>
       <form method="POST" action={actions.uploadMedia} enctype="multipart/form-data" class="mt-4 max-w-sm space-y-4">
         <input
@@ -325,7 +355,7 @@ function parseBounds(bounds?: string): { x: number; y: number; width: number; he
           type="submit"
           class="rounded-sm bg-primary px-4 py-2 font-semibold text-primary-foreground transition hover:opacity-90"
         >
-          Upload image
+          {t("studio.editor.uploadImage")}
         </button>
       </form>
 
@@ -340,20 +370,20 @@ function parseBounds(bounds?: string): { x: number; y: number; width: number; he
           ))}
         </ul>
       ) : (
-        <p class="mt-4 text-sm text-foreground-muted">No images uploaded yet.</p>
+        <p class="mt-4 text-sm text-foreground-muted">{t("studio.editor.noImages")}</p>
       )}
     </section>
 
     <section class="mt-10">
-      <h2 class="text-xl font-semibold">Revision history</h2>
-      <p class="mt-1 text-sm text-foreground-muted">Restore a previous revision of this draft.</p>
+      <h2 class="text-xl font-semibold">{t("studio.editor.revisions")}</h2>
+      <p class="mt-1 text-sm text-foreground-muted">{t("studio.editor.revisionsDesc")}</p>
 
       {revisions.length > 0 ? (
         <ul class="mt-4 space-y-2">
           {revisions.map((r) => (
             <li class="flex items-center justify-between rounded-md border border-border bg-surface p-3">
               <div class="min-w-0 flex-1">
-                <p class="text-sm font-semibold">Revision {r.revision ?? "—"}</p>
+                <p class="text-sm font-semibold">{t("studio.editor.revisionLabel")} {r.revision ?? "—"}</p>
                 <p class="text-xs text-foreground-muted">{r.createdAt ?? ""}</p>
               </div>
               <form method="POST" action={actions.restoreRevision}>
@@ -363,7 +393,7 @@ function parseBounds(bounds?: string): { x: number; y: number; width: number; he
                   type="submit"
                   class="ml-4 shrink-0 rounded-sm border border-border px-3 py-1 text-xs transition hover:bg-surface"
                 >
-                  Restore
+                  {t("studio.editor.restore")}
                 </button>
               </form>
             </li>
@@ -371,20 +401,20 @@ function parseBounds(bounds?: string): { x: number; y: number; width: number; he
         </ul>
       ) : (
         <p class="mt-4 rounded-md border border-dashed border-border px-6 py-8 text-sm text-foreground-muted">
-          No revisions yet — revisions are recorded when the document changes.
+          {t("studio.editor.noRevisions")}
         </p>
       )}
     </section>
 
     <section class="mt-10">
-      <h2 class="text-xl font-semibold">Publish</h2>
+      <h2 class="text-xl font-semibold">{t("studio.editor.publish")}</h2>
       <p class="mt-1 text-sm text-foreground-muted">
-        Validate and publish this document as a public publication.
+        {t("studio.editor.publishDesc")}
       </p>
       <form method="POST" action={actions.publishPublication} class="mt-4 max-w-sm space-y-4">
         <input type="hidden" name="documentId" value={documentId} />
         <div>
-          <label for="pub-title" class="mb-1 block text-sm text-foreground-muted">Title</label>
+          <label for="pub-title" class="mb-1 block text-sm text-foreground-muted">{t("studio.field.title")}</label>
           <input
             id="pub-title"
             name="title"
@@ -395,7 +425,7 @@ function parseBounds(bounds?: string): { x: number; y: number; width: number; he
           />
         </div>
         <div>
-          <label for="pub-description" class="mb-1 block text-sm text-foreground-muted">Description</label>
+          <label for="pub-description" class="mb-1 block text-sm text-foreground-muted">{t("studio.field.description")}</label>
           <textarea
             id="pub-description"
             name="description"
@@ -403,51 +433,51 @@ function parseBounds(bounds?: string): { x: number; y: number; width: number; he
           ></textarea>
         </div>
         <div>
-          <label for="pub-contentRating" class="mb-1 block text-sm text-foreground-muted">Content rating</label>
+          <label for="pub-contentRating" class="mb-1 block text-sm text-foreground-muted">{t("studio.editor.contentRating")}</label>
           <select
             id="pub-contentRating"
             name="contentRating"
             class="w-full rounded-sm border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
           >
-            <option value="ALL_AGES">All ages</option>
-            <option value="TEEN">Teen</option>
-            <option value="ADULT_18_PLUS">18+</option>
+            <option value="ALL_AGES">{t("studio.editor.rating.allAges")}</option>
+            <option value="TEEN">{t("studio.editor.rating.teen")}</option>
+            <option value="ADULT_18_PLUS">{t("studio.editor.rating.adult")}</option>
           </select>
         </div>
         <div>
-          <label for="pub-contentOrigin" class="mb-1 block text-sm text-foreground-muted">Content origin</label>
+          <label for="pub-contentOrigin" class="mb-1 block text-sm text-foreground-muted">{t("studio.editor.contentOrigin")}</label>
           <select
             id="pub-contentOrigin"
             name="contentOrigin"
             class="w-full rounded-sm border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
           >
-            <option value="HUMAN">Human</option>
-            <option value="AI_ASSISTED">AI-assisted</option>
-            <option value="AI_GENERATED">AI-generated</option>
-            <option value="HYBRID">Hybrid</option>
+            <option value="HUMAN">{t("studio.editor.origin.human")}</option>
+            <option value="AI_ASSISTED">{t("studio.editor.origin.aiAssisted")}</option>
+            <option value="AI_GENERATED">{t("studio.editor.origin.aiGenerated")}</option>
+            <option value="HYBRID">{t("studio.editor.origin.hybrid")}</option>
           </select>
         </div>
         <div>
-          <label for="pub-accessClass" class="mb-1 block text-sm text-foreground-muted">Access</label>
+          <label for="pub-accessClass" class="mb-1 block text-sm text-foreground-muted">{t("studio.editor.access")}</label>
           <select
             id="pub-accessClass"
             name="accessClass"
             class="w-full rounded-sm border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
           >
-            <option value="FREE">Free</option>
-            <option value="SUBSCRIPTION">Subscription</option>
-            <option value="PURCHASE">One-time purchase</option>
+            <option value="FREE">{t("studio.editor.access.free")}</option>
+            <option value="SUBSCRIPTION">{t("studio.editor.access.subscription")}</option>
+            <option value="PURCHASE">{t("studio.editor.access.purchase")}</option>
           </select>
         </div>
         {mediaAssets.length > 0 && (
           <div>
-            <label for="pub-cover" class="mb-1 block text-sm text-foreground-muted">Cover image</label>
+            <label for="pub-cover" class="mb-1 block text-sm text-foreground-muted">{t("studio.editor.cover")}</label>
             <select
               id="pub-cover"
               name="coverMediaAssetId"
               class="w-full rounded-sm border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
             >
-              <option value="">No cover</option>
+              <option value="">{t("studio.editor.noCover")}</option>
               {mediaAssets.map((a) => (
                 <option value={a.$id}>
                   {a.mimeType}
@@ -468,7 +498,7 @@ function parseBounds(bounds?: string): { x: number; y: number; width: number; he
           type="submit"
           class="w-full rounded-sm bg-primary px-4 py-2 font-semibold text-primary-foreground transition hover:opacity-90"
         >
-          Publish
+          {t("studio.editor.publish")}
         </button>
       </form>
     </section>
