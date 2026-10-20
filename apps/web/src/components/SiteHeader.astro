@@ -1,13 +1,15 @@
 ---
 import { ThemeToggle } from "@storygalore/ui";
 import NotificationCenter from "@/components/NotificationCenter.svelte";
-import { fetchNotifications } from "@/lib/gateway";
+import UserMenu from "@/components/UserMenu.svelte";
+import { fetchNotifications, fetchCreator } from "@/lib/gateway";
 import { actions } from "astro:actions";
 
 const user = Astro.locals.user;
 const pathname = Astro.url.pathname;
 
 const notifications = user ? await fetchNotifications(user.$id) : [];
+const isCreator = user ? Boolean(await fetchCreator(user.$id)) : false;
 
 const navItems = [
   { label: "Home", href: "/", active: pathname === "/" },
@@ -77,20 +79,13 @@ const initial = (user?.name ?? user?.email ?? "A").trim().charAt(0).toUpperCase(
 
       {
         user ? (
-          <>
-            <a
-              href="/account/billing"
-              class="grid h-[38px] w-[38px] place-items-center rounded-full border border-border bg-gradient-to-br from-brand-500 to-accent text-sm font-bold text-white"
-              aria-label="Account"
-            >
-              {initial}
-            </a>
-            <form method="POST" action={actions.logout}>
-              <button type="submit" class="text-sm text-foreground-muted transition hover:text-foreground">
-                Sign out
-              </button>
-            </form>
-          </>
+          <UserMenu
+            client:load
+            initial={initial}
+            name={user.name ?? undefined}
+            email={user.email ?? undefined}
+            isCreator={isCreator}
+          />
         ) : (
           <>
             <button

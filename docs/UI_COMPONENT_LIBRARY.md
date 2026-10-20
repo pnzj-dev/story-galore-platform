@@ -30,7 +30,7 @@ apps/web -> @storygalore/ui
 Button, IconButton, Input, Textarea, Select, Checkbox, Switch, Dialog, Drawer, Popover, Tooltip, DropdownMenu, Tabs, Pagination, Avatar, Skeleton, Spinner, Toast, Alert, EmptyState, ErrorState, OfflineState, StatusBadge.
 
 ### Product composites
-Header, Sidebar, Breadcrumbs, FilterBar, SearchBox, ContentCard, CreatorCard, MediaGallery, DataTable, MetricCard, ChartShell, UploadDropzone, AsyncButton, ConfirmationDialog, PermissionGate, EntitlementBadge.
+Header, Sidebar, Breadcrumbs, FilterBar, SearchBox, ContentCard, CreatorCard, MediaGallery, DataTable, MetricCard, ChartShell, UploadDropzone, AsyncButton, ConfirmationDialog, PermissionGate, EntitlementBadge, UserMenu.
 
 ### Domain components
 ComicCard, SeriesCard, CreatorCard, ContentRatingBadge, AgeGate, DraftStatus, AutosaveIndicator, RevisionHistory, ConflictResolver, AssetUploader, ReaderToolbar, ReadingProgress, CommentComposer, ProviderSelector, ModelSelector, GenerationStatus, CreditMeter, SubscriptionCard, PaymentStatus, AdSlot, ModerationStatus, PolicyDecisionBadge.

@@ -9,7 +9,7 @@ rules:
   public_admin_shared_primitives: true
 components:
   primitives: [Button, IconButton, Link, Input, Textarea, Select, Combobox, Checkbox, Radio, Switch, Slider, Tabs, Dialog, Drawer, Dropdown, Tooltip, Toast, Alert, Badge, Avatar, Card, Progress, Skeleton]
-  navigation: [Header, Sidebar, Breadcrumbs, Pagination, CommandPalette, MobileNavigation]
+  navigation: [Header, Sidebar, Breadcrumbs, Pagination, CommandPalette, MobileNavigation, UserMenu]
   media: [MediaCard, StoryCard, SeriesCard, CreatorCard, Gallery, ComicPage, Cover, MediaUploader, MediaPreview]
   studio: [StudioShell, InspectorPanel, PropertiesPanel, CanvasToolbar, Timeline, LayerList, AssetBrowser, GenerationPanel, DraftStatus]
   admin: [DataTable, FilterBar, KPIGrid, KPI, ChartCard, AuditLog, OperationStatus, HealthStatus, EmptyState, ErrorState]
