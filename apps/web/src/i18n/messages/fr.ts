@@ -120,6 +120,24 @@ const fr = {
   "admin.system": "Système",
   "admin.settings": "Paramètres",
 
+  // Admin overview
+  "admin.overviewDesc": "Comment se porte la plateforme ?",
+  "admin.kpi.activePaid": "Abonnés payants actifs",
+  "admin.kpi.mrr": "MRR",
+  "admin.kpi.newSubs": "Nouveaux abonnés (30 j)",
+  "admin.kpi.churned": "Désabonnés (30 j)",
+  "admin.kpi.revenue": "Revenus (30 j)",
+  "admin.kpi.activeReaders": "Lecteurs actifs (30 j)",
+  "admin.kpi.published": "Contenu publié",
+  "admin.kpi.aiJobs": "Tâches IA (30 j)",
+  "admin.chart.revenue": "Tendance des revenus (30 j)",
+  "admin.chart.revenueDesc": "Revenus de paiement encaissés par jour.",
+  "admin.chart.newSubs": "Nouveaux abonnés (30 j)",
+  "admin.chart.newSubsDesc": "Nouveaux abonnements par jour.",
+  "admin.chart.churn": "Attrition (30 j)",
+  "admin.chart.churnDesc": "Annulations par jour.",
+  "admin.noAnalytics": "Aucune analyse disponible.",
+
   // Studio
   "studio.title": "Studio créateur",
   "studio.profileImage": "Image de profil",

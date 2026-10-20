@@ -120,6 +120,24 @@ export default {
   "admin.system": "System",
   "admin.settings": "Settings",
 
+  // Admin overview
+  "admin.overviewDesc": "How is the platform doing?",
+  "admin.kpi.activePaid": "Active paid subscribers",
+  "admin.kpi.mrr": "MRR",
+  "admin.kpi.newSubs": "New subscribers (30d)",
+  "admin.kpi.churned": "Churned (30d)",
+  "admin.kpi.revenue": "Revenue (30d)",
+  "admin.kpi.activeReaders": "Active readers (30d)",
+  "admin.kpi.published": "Published content",
+  "admin.kpi.aiJobs": "AI jobs (30d)",
+  "admin.chart.revenue": "Revenue trend (30d)",
+  "admin.chart.revenueDesc": "Captured payment revenue per day.",
+  "admin.chart.newSubs": "New subscribers (30d)",
+  "admin.chart.newSubsDesc": "New subscriptions per day.",
+  "admin.chart.churn": "Churn (30d)",
+  "admin.chart.churnDesc": "Cancellations per day.",
+  "admin.noAnalytics": "No analytics available.",
+
   // Studio
   "studio.title": "Creator Studio",
   "studio.profileImage": "Profile image",

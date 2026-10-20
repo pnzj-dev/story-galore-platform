@@ -119,6 +119,24 @@ const ar = {
   "admin.system": "النظام",
   "admin.settings": "الإعدادات",
 
+  // Admin overview
+  "admin.overviewDesc": "كيف تسير المنصة؟",
+  "admin.kpi.activePaid": "المشتركون المدفوعون النشطون",
+  "admin.kpi.mrr": "الإيراد المتكرر الشهري",
+  "admin.kpi.newSubs": "مشتركون جدد (30 يومًا)",
+  "admin.kpi.churned": "المُلغَون (30 يومًا)",
+  "admin.kpi.revenue": "الإيرادات (30 يومًا)",
+  "admin.kpi.activeReaders": "قرّاء نشطون (30 يومًا)",
+  "admin.kpi.published": "محتوى منشور",
+  "admin.kpi.aiJobs": "مهام الذكاء الاصطناعي (30 يومًا)",
+  "admin.chart.revenue": "اتجاه الإيرادات (30 يومًا)",
+  "admin.chart.revenueDesc": "إيرادات المدفوعات المحصّلة يوميًا.",
+  "admin.chart.newSubs": "مشتركون جدد (30 يومًا)",
+  "admin.chart.newSubsDesc": "اشتراكات جديدة يوميًا.",
+  "admin.chart.churn": "الإلغاء (30 يومًا)",
+  "admin.chart.churnDesc": "عمليات الإلغاء يوميًا.",
+  "admin.noAnalytics": "لا توجد تحليلات متاحة.",
+
   // Studio
   "studio.title": "استوديو المبدعين",
   "studio.profileImage": "صورة الملف الشخصي",

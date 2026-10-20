@@ -2,6 +2,9 @@
 import AdminLayout from "@/layouts/AdminLayout.astro";
 import { KpiCard, TrendChart } from "@storygalore/ui";
 import { fetchAdminOverview } from "@/lib/gateway";
+import { getTranslations } from "@/i18n";
+
+const { t } = getTranslations(Astro.currentLocale);
 
 const user = Astro.locals.user;
 const overview = user ? await fetchAdminOverview(user.$id) : null;
@@ -14,49 +17,49 @@ const k = overview?.kpis;
 const c = overview?.charts;
 ---
 
-<AdminLayout title="Admin — Overview">
+<AdminLayout title={`${t("admin.label")} — ${t("admin.overview")}`}>
   <main class="mx-auto max-w-[1600px] px-6 py-10">
     <header class="flex items-center justify-between">
       <div>
-        <h1 class="text-3xl font-bold">Overview</h1>
-        <p class="mt-1 text-sm text-foreground-muted">How is the platform doing?</p>
+        <h1 class="text-3xl font-bold">{t("admin.overview")}</h1>
+        <p class="mt-1 text-sm text-foreground-muted">{t("admin.overviewDesc")}</p>
       </div>
       <a href="/admin/ads" class="rounded-sm border border-border px-4 py-2 text-sm font-semibold text-foreground transition hover:border-foreground-muted">
-        Ads &amp; Monetization
+        {t("admin.ads")}
       </a>
     </header>
 
     {overview ? (
       <>
         <section class="mt-8 grid grid-cols-2 gap-4 md:grid-cols-4">
-          <KpiCard label="Active paid subscribers" value={String(k?.activePaidSubscribers ?? 0)} />
-          <KpiCard label="MRR" value={fmtCents(k?.mrrCents ?? 0)} />
-          <KpiCard label="New subscribers (30d)" value={String(k?.newSubscribers30d ?? 0)} />
-          <KpiCard label="Churned (30d)" value={String(k?.churned30d ?? 0)} />
-          <KpiCard label="Revenue (30d)" value={fmtCents(k?.revenue30dCents ?? 0)} />
-          <KpiCard label="Active readers (30d)" value={String(k?.activeReaders30d ?? 0)} />
-          <KpiCard label="Published content" value={String(k?.publishedContent ?? 0)} />
-          <KpiCard label="AI jobs (30d)" value={String(k?.aiJobs30d ?? 0)} />
+          <KpiCard label={t("admin.kpi.activePaid")} value={String(k?.activePaidSubscribers ?? 0)} />
+          <KpiCard label={t("admin.kpi.mrr")} value={fmtCents(k?.mrrCents ?? 0)} />
+          <KpiCard label={t("admin.kpi.newSubs")} value={String(k?.newSubscribers30d ?? 0)} />
+          <KpiCard label={t("admin.kpi.churned")} value={String(k?.churned30d ?? 0)} />
+          <KpiCard label={t("admin.kpi.revenue")} value={fmtCents(k?.revenue30dCents ?? 0)} />
+          <KpiCard label={t("admin.kpi.activeReaders")} value={String(k?.activeReaders30d ?? 0)} />
+          <KpiCard label={t("admin.kpi.published")} value={String(k?.publishedContent ?? 0)} />
+          <KpiCard label={t("admin.kpi.aiJobs")} value={String(k?.aiJobs30d ?? 0)} />
         </section>
 
         <section class="mt-8 grid gap-4 md:grid-cols-3">
           <div class="rounded-md border border-border bg-surface p-4">
-            <h2 class="font-semibold text-foreground">Revenue trend (30d)</h2>
-            <p class="mt-1 text-xs text-foreground-muted">Captured payment revenue per day.</p>
+            <h2 class="font-semibold text-foreground">{t("admin.chart.revenue")}</h2>
+            <p class="mt-1 text-xs text-foreground-muted">{t("admin.chart.revenueDesc")}</p>
             <div class="mt-4">
               <TrendChart series={c?.revenueTrend ?? []} formatValue={fmtCents} color="var(--color-chart-1)" />
             </div>
           </div>
           <div class="rounded-md border border-border bg-surface p-4">
-            <h2 class="font-semibold text-foreground">New subscribers (30d)</h2>
-            <p class="mt-1 text-xs text-foreground-muted">New subscriptions per day.</p>
+            <h2 class="font-semibold text-foreground">{t("admin.chart.newSubs")}</h2>
+            <p class="mt-1 text-xs text-foreground-muted">{t("admin.chart.newSubsDesc")}</p>
             <div class="mt-4">
               <TrendChart series={c?.newSubscriberTrend ?? []} kind="bar" color="var(--color-chart-2)" />
             </div>
           </div>
           <div class="rounded-md border border-border bg-surface p-4">
-            <h2 class="font-semibold text-foreground">Churn (30d)</h2>
-            <p class="mt-1 text-xs text-foreground-muted">Cancellations per day.</p>
+            <h2 class="font-semibold text-foreground">{t("admin.chart.churn")}</h2>
+            <p class="mt-1 text-xs text-foreground-muted">{t("admin.chart.churnDesc")}</p>
             <div class="mt-4">
               <TrendChart series={c?.churnTrend ?? []} kind="bar" color="var(--color-danger)" />
             </div>
@@ -65,7 +68,7 @@ const c = overview?.charts;
       </>
     ) : (
       <p class="mt-8 rounded-md border border-dashed border-border px-6 py-8 text-sm text-foreground-muted">
-        No analytics available.
+        {t("admin.noAnalytics")}
       </p>
     )}
   </main>
