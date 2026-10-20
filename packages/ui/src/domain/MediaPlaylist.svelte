@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { onDestroy } from 'svelte';
   import { ListVideo, ChevronDown, ChevronUp } from '@lucide/svelte';
   import MediaPlayer from './MediaPlayer.svelte';
   import type { PlaylistItem } from '../types';
@@ -12,7 +11,9 @@
     kind = 'video',
     autoplayNext = true,
     initialIndex = 0,
+    initialTime = 0,
     onitemchange,
+    onprogress,
     class: className = '',
   }: {
     items: PlaylistItem[];
@@ -20,7 +21,10 @@
     kind?: 'video' | 'audio';
     autoplayNext?: boolean;
     initialIndex?: number;
+    /** Initial playback position in seconds (resume) for the first item. */
+    initialTime?: number;
     onitemchange?: (index: number, item: PlaylistItem) => void;
+    onprogress?: (index: number, item: PlaylistItem, seconds: number, duration: number) => void;
     class?: string;
   } = $props();
 
@@ -62,7 +66,9 @@
     upNext = false;
   }
 
-  onDestroy(() => clearInterval(timer));
+  $effect(() => {
+    return () => clearInterval(timer);
+  });
 </script>
 
 <div class={className}>
@@ -74,7 +80,9 @@
           {kind}
           guarded={guarded}
           autoplay={wantsPlay}
+          startAt={wantsPlay ? 0 : initialTime}
           onended={onEnded}
+          ontimeupdate={(t, d) => onprogress?.(currentIndex, current, t, d)}
           class="aspect-video w-full rounded-md"
         />
       {/key}

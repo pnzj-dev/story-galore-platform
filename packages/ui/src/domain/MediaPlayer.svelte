@@ -9,7 +9,9 @@
     autoplay = false,
     controls = true,
     guarded = false,
+    startAt = 0,
     onended,
+    ontimeupdate,
     class: className = '',
   }: {
     src: string;
@@ -20,8 +22,12 @@
     controls?: boolean;
     /** Disable the native download/picture-in-picture affordances and right-click save. */
     guarded?: boolean;
+    /** Initial playback position in seconds (resume). */
+    startAt?: number;
     /** Fired when the media plays to completion. */
     onended?: () => void;
+    /** Fired on timeupdate with the current position and duration in seconds. */
+    ontimeupdate?: (currentTime: number, duration: number) => void;
     class?: string;
   } = $props();
 
@@ -71,6 +77,17 @@
   function blockContextMenu(e: MouseEvent) {
     if (guarded) e.preventDefault();
   }
+
+  function onLoadedMetadata() {
+    if (mediaEl && startAt > 0 && mediaEl.duration > 0 && mediaEl.currentTime < startAt) {
+      mediaEl.currentTime = startAt;
+      currentTime = startAt;
+    }
+  }
+
+  function onTimeUpdate() {
+    if (mediaEl) ontimeupdate?.(mediaEl.currentTime, mediaEl.duration);
+  }
 </script>
 
 <div
@@ -86,6 +103,8 @@
       controlslist={guarded ? 'nodownload' : undefined}
       oncontextmenu={blockContextMenu}
       onended={onended}
+      onloadedmetadata={onLoadedMetadata}
+      ontimeupdate={onTimeUpdate}
       bind:currentTime={currentTime}
       bind:duration={duration}
       bind:volume={volume}
@@ -107,6 +126,8 @@
       disablepictureinpicture={guarded}
       oncontextmenu={blockContextMenu}
       onended={onended}
+      onloadedmetadata={onLoadedMetadata}
+      ontimeupdate={onTimeUpdate}
       bind:currentTime={currentTime}
       bind:duration={duration}
       bind:volume={volume}

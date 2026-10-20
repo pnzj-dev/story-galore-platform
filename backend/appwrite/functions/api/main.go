@@ -1425,10 +1425,20 @@ func authorizeMediaDelivery(cl client.Client, mediaId, action, actorId string, d
 		decision.Reasons = append(decision.Reasons, "ORIGIN_MISSING")
 		return decision
 	}
+	mediaType, _ := am["type"].(string)
+	isStreaming := mediaType == "VIDEO" || mediaType == "AUDIO"
 	if decision.AccessClass == "PUBLIC" {
-		decision.URL = buildPreviewURL(bucket, fileId, dims...)
+		if isStreaming {
+			decision.URL = buildDownloadURL(bucket, fileId)
+		} else {
+			decision.URL = buildPreviewURL(bucket, fileId, dims...)
+		}
 	} else {
-		decision.URL = resolveDeliveryURL(cl, bucket, fileId, time.Hour, dims...)
+		if isStreaming {
+			decision.URL = resolveDownloadURL(cl, bucket, fileId, time.Hour)
+		} else {
+			decision.URL = resolveDeliveryURL(cl, bucket, fileId, time.Hour, dims...)
+		}
 	}
 	decision.Allowed = true
 	return decision
@@ -5653,6 +5663,27 @@ func resolveDeliveryURL(cl client.Client, bucket, fileId string, ttl time.Durati
 		}
 	}
 	return u
+}
+
+// buildDownloadURL returns a permanent raw-file URL (no token) for non-image
+// media (video/audio), which the preview endpoint does not serve.
+func buildDownloadURL(bucket, fileId string) string {
+	endpoint := publicMediaEndpoint()
+	return endpoint + "/storage/buckets/" + bucket + "/files/" + fileId + "/download?project=" + os.Getenv("APPWRITE_FUNCTION_PROJECT_ID")
+}
+
+// resolveDownloadURL issues a short-lived file token and returns a tokenized
+// download URL for protected non-image media (video/audio).
+func resolveDownloadURL(cl client.Client, bucket, fileId string, ttl time.Duration) string {
+	expire := time.Now().UTC().Add(ttl).Format(time.RFC3339)
+	t := tokens.New(cl)
+	token, err := t.CreateFileToken(bucket, fileId, t.WithCreateFileTokenExpire(expire))
+	if err != nil || token.Secret == "" {
+		return ""
+	}
+	endpoint := publicMediaEndpoint()
+	project := os.Getenv("APPWRITE_FUNCTION_PROJECT_ID")
+	return endpoint + "/storage/buckets/" + bucket + "/files/" + fileId + "/download?token=" + token.Secret + "&project=" + project
 }
 
 func resolveCreatorName(cl client.Client, creatorId string) string {

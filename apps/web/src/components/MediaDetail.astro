@@ -30,6 +30,7 @@ const userId = Astro.locals.user?.$id ?? "";
 const pubId = pub?.$id ?? "";
 let videoItems: PlaylistItem[] = [];
 let videoInitialIndex = 0;
+let videoInitialTime = 0;
 if (kind === "video" && pubId) {
   if (pub?.seriesId) {
     const episodes = await fetchSeriesEpisodes(pub.seriesId, userId);
@@ -56,7 +57,10 @@ if (kind === "video" && pubId) {
       const progress = await fetchMediaProgress(userId, pubId);
       if (progress.pageId) {
         const idx = videoItems.findIndex((it) => it.mediaId === progress.pageId);
-        if (idx >= 0) videoInitialIndex = idx;
+        if (idx >= 0) {
+          videoInitialIndex = idx;
+          videoInitialTime = progress.position;
+        }
       }
     }
   }
@@ -124,6 +128,7 @@ if (kind === "video" && pubId) {
                         publicationId={pubId}
                         items={videoItems}
                         initialIndex={videoInitialIndex}
+                        initialTime={videoInitialTime}
                       />
                     ) : kind === "audio" ? (
                       <audio

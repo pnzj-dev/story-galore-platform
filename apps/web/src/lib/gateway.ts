@@ -34,6 +34,16 @@ interface ContinueItem {
 
 const VALID_TYPES: MediaType[] = ["BOOK", "POST", "VIDEO", "AUDIO", "MIXED"];
 
+/** Format seconds as M:SS (or H:MM:SS) for resume labels. */
+function formatClock(totalSeconds: number): string {
+  const s = Math.max(0, Math.floor(totalSeconds));
+  const m = Math.floor(s / 60);
+  const h = Math.floor(m / 60);
+  const rem = s % 60;
+  if (h > 0) return `${h}:${String(m % 60).padStart(2, "0")}:${String(rem).padStart(2, "0")}`;
+  return `${m}:${String(rem).padStart(2, "0")}`;
+}
+
 /**
  * Invoke the `api` gateway function synchronously (server-side only).
  * Uses the narrowly-scoped server API key; never call from the browser.
@@ -101,6 +111,7 @@ export async function fetchContinueItems(actorId: string): Promise<MediaCardData
       const type = VALID_TYPES.includes(pub.type as MediaType)
         ? (pub.type as MediaType)
         : "BOOK";
+      const isTimed = type === "VIDEO" || type === "AUDIO";
       return {
         id: progress.publicationId,
         title: pub.title ?? "Untitled",
@@ -111,7 +122,14 @@ export async function fetchContinueItems(actorId: string): Promise<MediaCardData
         creatorName: item.creatorName,
         progress: {
           percentComplete: progress.percentComplete ?? 0,
-          label: progress.position != null ? `Page ${progress.position + 1}` : undefined,
+          label:
+            progress.position != null
+              ? isTimed
+                ? progress.position > 0
+                  ? formatClock(progress.position)
+                  : undefined
+                : `Page ${progress.position + 1}`
+              : undefined,
         },
       } satisfies MediaCardData;
     });
