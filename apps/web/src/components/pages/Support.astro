@@ -1,0 +1,33 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { getTranslations } from "@/i18n";
+
+const { t } = getTranslations(Astro.currentLocale);
+---
+
+<Layout title={t("support.title")}>
+  <main class="mx-auto max-w-3xl px-6 py-12">
+    <h1 class="text-3xl font-bold">{t("support.title")}</h1>
+    <p class="mt-2 text-foreground-muted">{t("support.here")}</p>
+
+    <div class="mt-8 space-y-6">
+      <p class="text-foreground-muted">
+        {t("support.intro")}{" "}
+        <a href="/help" class="text-link">{t("support.helpCenter")}</a>.{" "}
+        {t("support.introAfter")}
+      </p>
+
+      <div class="rounded-xl border border-border bg-surface p-6">
+        <p class="text-sm font-medium text-foreground-muted">{t("support.email")}</p>
+        <a
+          href="mailto:support@story-galore.online"
+          class="mt-1 inline-block text-lg font-semibold text-link"
+        >
+          support@story-galore.online
+        </a>
+      </div>
+
+      <p class="text-sm text-foreground-muted">{t("support.reply")}</p>
+    </div>
+  </main>
+</Layout>

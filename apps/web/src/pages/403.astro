@@ -1,13 +1,5 @@
 ---
-import Layout from '@/layouts/Layout.astro';
-
-Astro.response.status = 403;
+import ErrorPage from "@/components/pages/ErrorPage.astro";
 ---
 
-<Layout title="Forbidden">
-  <main class="mx-auto max-w-3xl px-6 py-24 text-center">
-    <h1 class="font-serif text-3xl font-bold">Forbidden</h1>
-    <p class="mt-2 text-foreground-muted">You don&rsquo;t have permission to access this page.</p>
-    <a href="/" class="mt-6 inline-block text-link">Back home</a>
-  </main>
-</Layout>
+<ErrorPage status={403} titleKey="error.forbidden" bodyKey="error.forbiddenBody" />

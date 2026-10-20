@@ -1,6 +1,7 @@
 import { defineMiddleware } from "astro:middleware";
 import { createServerClient, SESSION_COOKIE } from "@storygalore/appwrite-client";
 import type { Models } from "@storygalore/appwrite-client";
+import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from "@/i18n/languages";
 
 /**
  * Route groups that require authentication. Middleware is an early gate only;
@@ -8,6 +9,16 @@ import type { Models } from "@storygalore/appwrite-client";
  * independently at each execution boundary.
  */
 const PROTECTED_PREFIXES = ["/account", "/library", "/settings", "/creator", "/studio", "/admin"];
+
+/** Split a leading non-default locale prefix (e.g. /fr/settings -> { fr, /settings }). */
+function splitLocale(pathname: string): { locale: string; path: string } {
+  const parts = pathname.split("/");
+  const candidate = parts[1] ?? "";
+  if (candidate !== DEFAULT_LOCALE && SUPPORTED_LOCALES.includes(candidate)) {
+    return { locale: candidate, path: "/" + parts.slice(2).join("/") };
+  }
+  return { locale: DEFAULT_LOCALE, path: pathname };
+}
 
 export const onRequest = defineMiddleware(async (context, next) => {
   const endpoint = import.meta.env.PUBLIC_APPWRITE_ENDPOINT;
@@ -32,13 +43,15 @@ export const onRequest = defineMiddleware(async (context, next) => {
   context.locals.user = user;
 
   const pathname = context.url.pathname;
+  const { locale, path } = splitLocale(pathname);
   const isProtected = PROTECTED_PREFIXES.some(
-    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+    (prefix) => path === prefix || path.startsWith(`${prefix}/`),
   );
 
   if (isProtected && !user) {
     const returnTo = encodeURIComponent(pathname + context.url.search);
-    return context.redirect(`/auth/login?returnTo=${returnTo}`);
+    const loginPath = locale === DEFAULT_LOCALE ? "/auth/login" : `/${locale}/auth/login`;
+    return context.redirect(`${loginPath}?returnTo=${returnTo}`);
   }
 
   return next();

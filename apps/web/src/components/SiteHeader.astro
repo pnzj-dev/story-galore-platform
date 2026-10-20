@@ -3,7 +3,13 @@ import { ThemeToggle } from "@storygalore/ui";
 import NotificationCenter from "@/components/NotificationCenter.svelte";
 import UserMenu from "@/components/UserMenu.svelte";
 import { fetchNotifications, fetchCreator } from "@/lib/gateway";
-import { actions } from "astro:actions";
+import type { MessageKey } from "@/i18n";
+
+interface Props {
+  t: (key: MessageKey) => string;
+}
+
+const { t } = Astro.props;
 
 const user = Astro.locals.user;
 const pathname = Astro.url.pathname;
@@ -12,12 +18,12 @@ const notifications = user ? await fetchNotifications(user.$id) : [];
 const isCreator = user ? Boolean(await fetchCreator(user.$id)) : false;
 
 const navItems = [
-  { label: "Home", href: "/", active: pathname === "/" },
-  { label: "Videos", href: "/videos", active: pathname.startsWith("/videos") },
-  { label: "Shorts", href: "/shorts", active: pathname.startsWith("/shorts") },
-  { label: "Books", href: "/books", active: pathname.startsWith("/books") },
-  { label: "Images", href: "/images", active: pathname.startsWith("/images") },
-  { label: "Audio", href: "/audio", active: pathname.startsWith("/audio") },
+  { label: t("nav.home"), href: "/", active: pathname === "/" },
+  { label: t("nav.videos"), href: "/videos", active: pathname.startsWith("/videos") },
+  { label: t("nav.shorts"), href: "/shorts", active: pathname.startsWith("/shorts") },
+  { label: t("nav.books"), href: "/books", active: pathname.startsWith("/books") },
+  { label: t("nav.images"), href: "/images", active: pathname.startsWith("/images") },
+  { label: t("nav.audio"), href: "/audio", active: pathname.startsWith("/audio") },
 ];
 
 const initial = (user?.name ?? user?.email ?? "A").trim().charAt(0).toUpperCase();
@@ -68,11 +74,20 @@ const initial = (user?.name ?? user?.email ?? "A").trim().charAt(0).toUpperCase(
           <circle cx="11" cy="11" r="7"></circle>
           <path d="m20 20-3.5-3.5"></path>
         </svg>
-        Search…
+        {t("nav.search")}
       </a>
 
       {user && (
-        <NotificationCenter client:load items={notifications} />
+        <NotificationCenter
+          client:load
+          items={notifications}
+          title={t("notif.title")}
+          markAllReadLabel={t("notif.markAllRead")}
+          allLabel={t("notif.all")}
+          unreadLabel={t("notif.unread")}
+          emptyLabel={t("notif.noNotifications")}
+          preferencesLabel={t("notif.preferences")}
+        />
       )}
 
       <ThemeToggle client:load />
@@ -85,6 +100,12 @@ const initial = (user?.name ?? user?.email ?? "A").trim().charAt(0).toUpperCase(
             name={user.name ?? undefined}
             email={user.email ?? undefined}
             isCreator={isCreator}
+            accountLabel={t("menu.account")}
+            libraryLabel={t("menu.library")}
+            settingsLabel={t("menu.settings")}
+            billingLabel={t("menu.billing")}
+            studioLabel={t("menu.creatorStudio")}
+            signOutLabel={t("menu.signOut")}
           />
         ) : (
           <>
@@ -93,14 +114,14 @@ const initial = (user?.name ?? user?.email ?? "A").trim().charAt(0).toUpperCase(
               data-auth="signin"
               class="text-sm text-foreground-muted transition hover:text-foreground"
             >
-              Sign in
+              {t("nav.signIn")}
             </button>
             <button
               type="button"
               data-auth="register"
               class="rounded-sm bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
             >
-              Get started
+              {t("nav.getStarted")}
             </button>
           </>
         )

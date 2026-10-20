@@ -1,4 +1,11 @@
 ---
+import type { MessageKey } from "@/i18n";
+
+interface Props {
+  t: (key: MessageKey) => string;
+}
+
+const { t } = Astro.props;
 const year = new Date().getFullYear();
 ---
 
@@ -8,8 +15,8 @@ const year = new Date().getFullYear();
   >
     <p>© {year} StoryGalore</p>
     <div class="flex gap-6">
-      <a href="/help" class="transition hover:text-foreground">Help</a>
-      <a href="/support" class="transition hover:text-foreground">Support</a>
+      <a href="/help" class="transition hover:text-foreground">{t("footer.help")}</a>
+      <a href="/support" class="transition hover:text-foreground">{t("footer.support")}</a>
     </div>
   </div>
 </footer>

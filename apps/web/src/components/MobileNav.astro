@@ -1,12 +1,19 @@
 ---
+import type { MessageKey } from "@/i18n";
+
+interface Props {
+  t: (key: MessageKey) => string;
+}
+
+const { t } = Astro.props;
 const pathname = Astro.url.pathname;
 
 const items = [
-  { label: "Home", href: "/", icon: "home", active: pathname === "/" },
-  { label: "Search", href: "/discover", icon: "search", active: pathname.startsWith("/discover") },
-  { label: "Shorts", href: "/shorts", icon: "shorts", active: pathname.startsWith("/shorts") },
-  { label: "Library", href: "/library", icon: "library", active: pathname.startsWith("/library") },
-  { label: "Profile", href: "/account", icon: "profile", active: pathname.startsWith("/account") || pathname.startsWith("/settings") },
+  { label: t("nav.home"), href: "/", icon: "home", active: pathname === "/" },
+  { label: t("mobile.search"), href: "/discover", icon: "search", active: pathname.startsWith("/discover") },
+  { label: t("nav.shorts"), href: "/shorts", icon: "shorts", active: pathname.startsWith("/shorts") },
+  { label: t("menu.library"), href: "/library", icon: "library", active: pathname.startsWith("/library") },
+  { label: t("mobile.profile"), href: "/account", icon: "profile", active: pathname.startsWith("/account") || pathname.startsWith("/settings") },
 ];
 ---
 

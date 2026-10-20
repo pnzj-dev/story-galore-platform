@@ -1,13 +1,5 @@
 ---
-import Layout from '@/layouts/Layout.astro';
-
-Astro.response.status = 500;
+import ErrorPage from "@/components/pages/ErrorPage.astro";
 ---
 
-<Layout title="Server error">
-  <main class="mx-auto max-w-3xl px-6 py-24 text-center">
-    <h1 class="font-serif text-3xl font-bold">Something went wrong</h1>
-    <p class="mt-2 text-foreground-muted">An unexpected error occurred. Please try again.</p>
-    <a href="/" class="mt-6 inline-block text-link">Back home</a>
-  </main>
-</Layout>
+<ErrorPage status={500} titleKey="error.serverError" bodyKey="error.serverErrorBody" />

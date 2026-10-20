@@ -1,0 +1,23 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { getTranslations } from "@/i18n";
+import type { MessageKey } from "@/i18n";
+
+interface Props {
+  status: number;
+  titleKey: MessageKey;
+  bodyKey: MessageKey;
+}
+
+const { status, titleKey, bodyKey } = Astro.props;
+const { t } = getTranslations(Astro.currentLocale);
+Astro.response.status = status;
+---
+
+<Layout title={t(titleKey)}>
+  <main class="mx-auto max-w-3xl px-6 py-24 text-center">
+    <h1 class="font-serif text-3xl font-bold">{t(titleKey)}</h1>
+    <p class="mt-2 text-foreground-muted">{t(bodyKey)}</p>
+    <a href="/" class="mt-6 inline-block text-link">{t("error.backHome")}</a>
+  </main>
+</Layout>

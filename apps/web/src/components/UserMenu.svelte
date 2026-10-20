@@ -6,11 +6,23 @@
     name,
     email,
     isCreator = false,
+    accountLabel = 'Account',
+    libraryLabel = 'Library',
+    settingsLabel = 'Settings',
+    billingLabel = 'Billing',
+    studioLabel = 'Creator Studio',
+    signOutLabel = 'Sign out',
   }: {
     initial: string;
     name?: string;
     email?: string;
     isCreator?: boolean;
+    accountLabel?: string;
+    libraryLabel?: string;
+    settingsLabel?: string;
+    billingLabel?: string;
+    studioLabel?: string;
+    signOutLabel?: string;
   } = $props();
 
   let open = $state(false);
@@ -54,27 +66,27 @@
       class="absolute right-0 top-full z-50 mt-2 w-56 overflow-hidden rounded-md border border-border bg-surface shadow-lg"
     >
       <div class="border-b border-border px-4 py-3">
-        <p class="truncate text-sm font-semibold text-foreground">{name ?? 'Account'}</p>
+        <p class="truncate text-sm font-semibold text-foreground">{name ?? accountLabel}</p>
         {#if email}
           <p class="truncate text-xs text-foreground-muted">{email}</p>
         {/if}
       </div>
 
       <a role="menuitem" href="/account" class="block px-4 py-2 text-sm text-foreground transition hover:bg-surface-elevated">
-        Account
+        {accountLabel}
       </a>
       <a role="menuitem" href="/library" class="block px-4 py-2 text-sm text-foreground transition hover:bg-surface-elevated">
-        Library
+        {libraryLabel}
       </a>
       <a role="menuitem" href="/settings" class="block px-4 py-2 text-sm text-foreground transition hover:bg-surface-elevated">
-        Settings
+        {settingsLabel}
       </a>
       <a role="menuitem" href="/account/billing" class="block px-4 py-2 text-sm text-foreground transition hover:bg-surface-elevated">
-        Billing
+        {billingLabel}
       </a>
       {#if isCreator}
         <a role="menuitem" href="/studio" class="block px-4 py-2 text-sm text-foreground transition hover:bg-surface-elevated">
-          Creator Studio
+          {studioLabel}
         </a>
       {/if}
 
@@ -85,7 +97,7 @@
             type="submit"
             class="block w-full px-4 py-2 text-left text-sm text-foreground transition hover:bg-surface-elevated"
           >
-            Sign out
+            {signOutLabel}
           </button>
         </form>
       </div>

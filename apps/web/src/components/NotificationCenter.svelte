@@ -4,8 +4,20 @@
 
   let {
     items = [],
+    title = 'Notifications',
+    markAllReadLabel = 'Mark all as read',
+    allLabel = 'All',
+    unreadLabel = 'Unread',
+    emptyLabel = 'No notifications.',
+    preferencesLabel = 'Notification preferences →',
   }: {
     items?: NotificationItem[];
+    title?: string;
+    markAllReadLabel?: string;
+    allLabel?: string;
+    unreadLabel?: string;
+    emptyLabel?: string;
+    preferencesLabel?: string;
   } = $props();
 
   let open = $state(false);
@@ -81,13 +93,13 @@
       class="fixed inset-y-0 right-0 z-50 flex w-full max-w-[420px] flex-col border-l border-border-strong bg-surface"
     >
       <div class="flex items-center justify-between border-b border-border px-5 py-4">
-        <h3 class="text-base font-bold">Notifications</h3>
+        <h3 class="text-base font-bold">{title}</h3>
         <button
           type="button"
           onclick={markAllRead}
           class="text-xs font-semibold text-brand-400 transition hover:text-brand-300"
         >
-          Mark all as read
+          {markAllReadLabel}
         </button>
       </div>
 
@@ -99,7 +111,7 @@
           class:text-foreground={filter === 'all'}
           class="rounded-full px-3 py-1.5 text-xs font-semibold text-foreground-muted transition"
         >
-          All
+          {allLabel}
         </button>
         <button
           type="button"
@@ -108,7 +120,7 @@
           class:text-foreground={filter === 'unread'}
           class="rounded-full px-3 py-1.5 text-xs font-semibold text-foreground-muted transition"
         >
-          Unread{#if unreadCount > 0} · {unreadCount}{/if}
+          {unreadLabel}{#if unreadCount > 0} · {unreadCount}{/if}
         </button>
       </div>
 
@@ -156,14 +168,14 @@
           {/each}
         {:else}
           <p class="rounded-md border border-dashed border-border px-6 py-8 text-center text-sm text-foreground-muted">
-            No notifications.
+            {emptyLabel}
           </p>
         {/if}
       </div>
 
       <div class="border-t border-border px-5 py-3 text-center">
         <a href="/account/notifications" class="text-xs font-semibold text-brand-400 transition hover:text-brand-300">
-          Notification preferences →
+          {preferencesLabel}
         </a>
       </div>
     </aside>

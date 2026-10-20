@@ -10,6 +10,14 @@ export default defineConfig({
   site: "http://187.126.0.227",
   adapter: node({ mode: "standalone" }),
   integrations: [svelte()],
+  i18n: {
+    defaultLocale: "en",
+    locales: ["en", "fr", "ar"],
+    routing: {
+      // English lives at the unprefixed root; fr/ar get /fr/ and /ar/ prefixes.
+      prefixDefaultLocale: false,
+    },
+  },
   vite: {
     resolve: {
       alias: {
