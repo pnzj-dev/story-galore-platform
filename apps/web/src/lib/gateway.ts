@@ -266,6 +266,24 @@ export async function fetchMediaProgress(
   return { position: out.result.position ?? 0, pageId: out.result.pageId };
 }
 
+export interface NotificationItem {
+  $id: string;
+  userId?: string;
+  type?: string;
+  subject?: string;
+  body?: string;
+  status?: string;
+  read?: boolean;
+  createdAt?: string;
+}
+
+/** Fetch the authenticated user's notifications, newest first. */
+export async function fetchNotifications(actorId: string): Promise<NotificationItem[]> {
+  const out = await invokeApi<{ items?: NotificationItem[] }>("notification_list", {}, actorId);
+  if (out.status !== "SUCCESS" || !out.result?.items) return [];
+  return out.result.items;
+}
+
 /** Fetch a single published publication with its authorized media URLs. */
 export async function fetchPublication(
   publicationId: string,

@@ -7,11 +7,13 @@
     items,
     initialIndex = 0,
     initialTime = 0,
+    autoplay = false,
   }: {
     publicationId: string;
     items: PlaylistItem[];
     initialIndex?: number;
     initialTime?: number;
+    autoplay?: boolean;
   } = $props();
 
   let lastSave = 0;
@@ -53,6 +55,7 @@
   kind="video"
   {initialIndex}
   {initialTime}
+  {autoplay}
   onitemchange={onItemChange}
   onprogress={onProgress}
 />

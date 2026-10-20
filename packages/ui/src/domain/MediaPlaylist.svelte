@@ -12,6 +12,7 @@
     autoplayNext = true,
     initialIndex = 0,
     initialTime = 0,
+    autoplay = false,
     onitemchange,
     onprogress,
     class: className = '',
@@ -23,6 +24,8 @@
     initialIndex?: number;
     /** Initial playback position in seconds (resume) for the first item. */
     initialTime?: number;
+    /** Auto-play the first item on mount (e.g. from a "continue watching" card). */
+    autoplay?: boolean;
     onitemchange?: (index: number, item: PlaylistItem) => void;
     onprogress?: (index: number, item: PlaylistItem, seconds: number, duration: number) => void;
     class?: string;
@@ -32,7 +35,7 @@
   let upNext = $state(false);
   let countdown = $state(UP_NEXT_SECONDS);
   let tracklistOpen = $state(false);
-  let wantsPlay = $state(false);
+  let wantsPlay = $state(autoplay);
   let timer: ReturnType<typeof setInterval> | undefined;
 
   const current = $derived(items[currentIndex]);

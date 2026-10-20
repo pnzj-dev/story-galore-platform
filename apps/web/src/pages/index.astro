@@ -28,14 +28,26 @@ function hrefFor(item: { id: string; type: string }): string {
   }
 }
 
+// Continue-watching cards go straight to the player (auto-play + resume).
+function playHrefFor(item: { id: string; type: string }): string {
+  switch (item.type) {
+    case "VIDEO":
+      return `/watch/${item.id}?autoplay=1`;
+    case "AUDIO":
+      return `/listen/${item.id}?autoplay=1`;
+    case "POST":
+      return `/posts/${item.id}?autoplay=1`;
+    default:
+      return `/read/${item.id}`;
+  }
+}
+
 const featured = videoItems[0] ?? bookItems[0];
 const featuredHref = featured ? hrefFor(featured) : "/discover";
 const featuredRating =
   featured && featured.contentRating && featured.contentRating !== "ALL_AGES"
     ? featured.contentRating
     : null;
-
-const watchItems = continueItems.length > 0 ? continueItems : videoItems;
 ---
 
 <Layout title={`${title} — Read. Create. Discover.`} description={description}>
@@ -115,8 +127,16 @@ const watchItems = continueItems.length > 0 ? continueItems : videoItems;
     }
 
     <section class="mx-auto max-w-[1400px] space-y-12 px-12 py-12">
-      <MediaRail client:load title="Continue Watching" items={watchItems} />
-      <MediaRail client:load title="Continue Reading" items={bookItems} />
+      {
+        user && continueItems.length > 0 && (
+          <MediaRail
+            client:load
+            title="Continue Watching"
+            items={continueItems}
+            getHref={playHrefFor}
+          />
+        )
+      }
 
       {homeAd?.url && (
         <div class="rounded-md border border-border bg-surface/40 p-4">

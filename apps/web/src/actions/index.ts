@@ -315,6 +315,28 @@ export const server = {
     },
   }),
 
+  markNotificationsRead: defineAction({
+    accept: "json",
+    input: z.object({
+      notificationId: z.string().optional(),
+    }),
+    handler: async (input, context) => {
+      const user = context.locals.user;
+      if (!user) {
+        throw new ActionError({ code: "UNAUTHORIZED", message: "Sign in to manage notifications." });
+      }
+      const out = await invokeApi(
+        "notification_mark_read",
+        { notificationId: input.notificationId },
+        user.$id,
+      );
+      if (out.status !== "SUCCESS") {
+        throw new ActionError({ code: "INTERNAL_SERVER_ERROR", message: "Could not update notifications." });
+      }
+      return { ok: true };
+    },
+  }),
+
   becomeCreator: defineAction({
     accept: "form",
     input: z.object({

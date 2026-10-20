@@ -674,6 +674,7 @@ studio_tables:
       - {key: subject, type: varchar, size: 255, required: true}
       - {key: body, type: text, required: true}
       - {key: status, type: varchar, size: 255, required: true}
+      - {key: read, type: boolean, required: false}
       - {key: createdAt, type: datetime, required: true}
   - table: studio_publication_validation_runs
     source: contracts/studio/validation.schema.yaml

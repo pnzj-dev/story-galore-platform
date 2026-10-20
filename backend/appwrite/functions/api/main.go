@@ -72,9 +72,11 @@ var knownOperations = map[string]bool{
 	"publication_list": true, "publication_get": true, "creator_list": true, "creator_get": true,
 	"support_ticket_create": true, "support_ticket_list": true, "support_ticket_get": true,
 	"creator_create": true, "creator_update": true,
-	"reader_manifest_get": true,
-	"series_episodes":     true,
-	"document_create":     true, "document_list": true,
+	"reader_manifest_get":    true,
+	"series_episodes":        true,
+	"notification_list":      true,
+	"notification_mark_read": true,
+	"document_create":        true, "document_list": true,
 	"media_upload_initiate": true, "media_upload_complete": true,
 	"media_asset_list": true, "media_asset_get": true,
 	"media_delivery_authorize": true,
@@ -367,6 +369,10 @@ func Main(ctx openruntimes.Context) openruntimes.Response {
 		return readerManifestGet(ctx, &in, cl)
 	case "series_episodes":
 		return seriesEpisodes(ctx, &in, cl)
+	case "notification_list":
+		return notificationList(ctx, &in, cl)
+	case "notification_mark_read":
+		return notificationMarkRead(ctx, &in, cl)
 	case "document_create":
 		return documentCreate(ctx, &in, cl)
 	case "document_list":
@@ -6211,6 +6217,80 @@ func seriesEpisodes(ctx openruntimes.Context, in *GatewayInput, cl client.Client
 		items = append(items, episode)
 	}
 	return success(ctx, in, map[string]interface{}{"items": items})
+}
+
+// notificationList returns the authenticated user's notifications, newest first.
+func notificationList(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	userId := actorOrEmpty(in.ActorId)
+	if userId == "" {
+		return respond(ctx, in.OperationId, "UNAUTHORIZED", false)
+	}
+	service := tablesdb.New(cl)
+	list, err := service.ListRows(databaseID, "notifications", service.WithListRowsQueries([]string{
+		qEqual("userId", userId),
+		`{"method":"orderDesc","attribute":"createdAt"}`,
+		`{"method":"limit","values":[50]}`,
+	}))
+	if err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	var raw map[string]interface{}
+	if err := list.Decode(&raw); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	rows, _ := raw["rows"].([]interface{})
+	return success(ctx, in, map[string]interface{}{"items": rows})
+}
+
+// notificationMarkRead marks one notification (or all, when notificationId is
+// empty) as read for the authenticated user.
+func notificationMarkRead(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	var input struct {
+		NotificationId string `json:"notificationId"`
+	}
+	_ = json.Unmarshal(in.Payload.Input, &input)
+	userId := actorOrEmpty(in.ActorId)
+	if userId == "" {
+		return respond(ctx, in.OperationId, "UNAUTHORIZED", false)
+	}
+	service := tablesdb.New(cl)
+	if input.NotificationId != "" {
+		row, err := service.GetRow(databaseID, "notifications", input.NotificationId)
+		if err != nil {
+			return respond(ctx, in.OperationId, "RESOURCE_NOT_FOUND", false)
+		}
+		var nm map[string]interface{}
+		if row.Decode(&nm) != nil {
+			return respond(ctx, in.OperationId, "RESOURCE_NOT_FOUND", false)
+		}
+		uid, _ := nm["userId"].(string)
+		if uid != userId {
+			return respond(ctx, in.OperationId, "RESOURCE_NOT_FOUND", false)
+		}
+		if err := updateRow(cl, "notifications", input.NotificationId, map[string]interface{}{"read": true}); err != nil {
+			return internalFailure(ctx, in, err)
+		}
+	} else {
+		list, err := service.ListRows(databaseID, "notifications", service.WithListRowsQueries([]string{
+			qEqual("userId", userId),
+			`{"method":"limit","values":[100]}`,
+		}))
+		if err != nil {
+			return internalFailure(ctx, in, err)
+		}
+		var raw map[string]interface{}
+		if err := list.Decode(&raw); err != nil {
+			return internalFailure(ctx, in, err)
+		}
+		for _, r := range raw["rows"].([]interface{}) {
+			if m, ok := r.(map[string]interface{}); ok {
+				if id, ok := m["$id"].(string); ok {
+					_ = updateRow(cl, "notifications", id, map[string]interface{}{"read": true})
+				}
+			}
+		}
+	}
+	return success(ctx, in, map[string]interface{}{"ok": true})
 }
 
 // --- query helpers ---

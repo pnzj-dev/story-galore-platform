@@ -24,6 +24,9 @@ const rating =
       : "Teen"
     : null;
 
+// "Continue watching" cards land on ?autoplay=1 to start playback immediately.
+const autoplay = Astro.url.searchParams.get("autoplay") === "1";
+
 // Build the ordered video playlist: series episodes (cross-publication) or
 // parts within this publication, plus the resume index from saved progress.
 const userId = Astro.locals.user?.$id ?? "";
@@ -129,6 +132,7 @@ if (kind === "video" && pubId) {
                         items={videoItems}
                         initialIndex={videoInitialIndex}
                         initialTime={videoInitialTime}
+                        autoplay={autoplay}
                       />
                     ) : kind === "audio" ? (
                       <audio
@@ -136,6 +140,7 @@ if (kind === "video" && pubId) {
                         controlslist="nodownload"
                         preload="metadata"
                         src={allowed[0].url}
+                        autoplay={autoplay}
                         class="w-full"
                       />
                     ) : (
