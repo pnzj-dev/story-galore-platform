@@ -229,6 +229,14 @@ export default {
   "admin.flags.toggle": "Toggle",
   "admin.flags.noFlags": "No feature flags configured yet.",
 
+  // Comment moderation
+  "admin.moderation.empty": "No comments to moderate.",
+  "admin.moderation.approve": "Approve",
+  "admin.moderation.hide": "Hide",
+  "admin.moderation.remove": "Remove",
+  "admin.moderation.pending": "Pending",
+  "admin.moderation.by": "by",
+
   // Settings
   "settings.adultContent": "Adult content",
   "settings.adultContentDescription":

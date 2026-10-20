@@ -324,7 +324,7 @@ tables_with_columns:
       - {key: userId, type: varchar, size: 255, required: true}
       - {key: parentCommentId, type: varchar, size: 255, required: false}
       - {key: body, type: text, required: true}
-      - {key: status, type: enum, elements: [PENDING_REVIEW, PUBLISHED, HIDDEN, REMOVED, DELETED], required: true}
+      - {key: status, type: enum, elements: [PENDING_REVIEW, VISIBLE, HIDDEN, REMOVED], required: true}
       - {key: createdAt, type: datetime, required: true}
       - {key: updatedAt, type: datetime, required: true}
   - table: reactions

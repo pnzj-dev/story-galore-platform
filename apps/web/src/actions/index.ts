@@ -936,6 +936,54 @@ export const server = {
     },
   }),
 
+  moderateComment: defineAction({
+    accept: "form",
+    input: z.object({
+      commentId: z.string().min(1),
+      status: z.enum(["VISIBLE", "HIDDEN", "REMOVED"]),
+    }),
+    handler: async (input, context) => {
+      const user = context.locals.user;
+      if (!user) throw new ActionError({ code: "UNAUTHORIZED", message: "Sign in." });
+      const out = await invokeApi(
+        "comment_moderate",
+        { commentId: input.commentId, status: input.status },
+        user.$id,
+      );
+      if (out.status !== "SUCCESS") {
+        throw new ActionError({ code: "BAD_REQUEST", message: "Could not moderate the comment." });
+      }
+      return { ok: true };
+    },
+  }),
+
+  listNotifications: defineAction({
+    accept: "json",
+    handler: async (_, context) => {
+      const user = context.locals.user;
+      if (!user) return { items: [] };
+      const out = await invokeApi<{ items?: unknown[] }>("notification_list", {}, user.$id);
+      if (out.status !== "SUCCESS") return { items: [] };
+      return { items: out.result?.items ?? [] };
+    },
+  }),
+
+  listGenerations: defineAction({
+    accept: "json",
+    input: z.object({ projectId: z.string().min(1) }),
+    handler: async (input, context) => {
+      const user = context.locals.user;
+      if (!user) return { items: [] };
+      const out = await invokeApi<{ items?: unknown[] }>(
+        "generation_list",
+        { projectId: input.projectId },
+        user.$id,
+      );
+      if (out.status !== "SUCCESS") return { items: [] };
+      return { items: out.result?.items ?? [] };
+    },
+  }),
+
   subscribe: defineAction({
     accept: "form",
     input: z.object({

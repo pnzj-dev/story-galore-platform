@@ -1,5 +1,6 @@
 <script lang="ts">
   import { actions } from 'astro:actions';
+  import { createBrowserClient } from '@storygalore/appwrite-client';
   import type { NotificationItem } from '@/lib/gateway';
 
   let {
@@ -56,6 +57,38 @@
     SYSTEM: 'bg-info/90 text-white',
     ALERT: 'bg-warning/90 text-[#2b1a00]',
   };
+
+  // Realtime: subscribe to notification changes and re-fetch.
+  $effect(() => {
+    const endpoint = import.meta.env.PUBLIC_APPWRITE_ENDPOINT;
+    const projectId = import.meta.env.PUBLIC_APPWRITE_PROJECT_ID;
+    if (!endpoint || !projectId) return;
+    let unsub: (() => void) | undefined;
+    void (async () => {
+      try {
+        const { client, account } = createBrowserClient({ endpoint, projectId });
+        try {
+          await account.get();
+        } catch {
+          try {
+            await account.createAnonymousSession();
+          } catch {
+            /* realtime unavailable */
+          }
+        }
+        const sub = client.subscribe('databases.main.collections.notifications.documents', async () => {
+          const r = await actions.listNotifications();
+          if (!r.error && r.data) rows = (r.data.items ?? []) as NotificationItem[];
+        });
+        unsub = () => sub.unsubscribe();
+      } catch {
+        /* realtime unavailable */
+      }
+    })();
+    return () => {
+      unsub?.();
+    };
+  });
 </script>
 
 <div class="relative">

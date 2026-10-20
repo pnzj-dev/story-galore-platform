@@ -229,6 +229,14 @@ const fr = {
   "admin.flags.toggle": "Basculer",
   "admin.flags.noFlags": "Aucun feature flag configuré pour l'instant.",
 
+  // Comment moderation
+  "admin.moderation.empty": "Aucun commentaire à modérer.",
+  "admin.moderation.approve": "Approuver",
+  "admin.moderation.hide": "Masquer",
+  "admin.moderation.remove": "Supprimer",
+  "admin.moderation.pending": "En attente",
+  "admin.moderation.by": "par",
+
   // Settings
   "settings.adultContent": "Contenu adulte",
   "settings.adultContentDescription":

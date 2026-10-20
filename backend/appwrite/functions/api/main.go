@@ -435,7 +435,7 @@ func Main(ctx openruntimes.Context) openruntimes.Response {
 	case "admin_creator_list":
 		return adminListRows(ctx, &in, cl, "creators")
 	case "admin_comment_list":
-		return adminListRows(ctx, &in, cl, "comments")
+		return adminCommentList(ctx, &in, cl)
 	case "admin_destructive_request":
 		return adminDestructiveRequest(ctx, &in, cl)
 	case "admin_destructive_approve":
@@ -2134,6 +2134,35 @@ func adminListRows(ctx openruntimes.Context, in *GatewayInput, cl client.Client,
 	}
 	rows, _ := raw["rows"].([]interface{})
 	return success(ctx, in, map[string]interface{}{"items": rows})
+}
+
+// adminCommentList returns all comments with resolved author names (moderation queue).
+func adminCommentList(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	if !adminActor(ctx, in, cl) {
+		return respond(ctx, in.OperationId, "FORBIDDEN", false)
+	}
+	service := tablesdb.New(cl)
+	list, err := service.ListRows(databaseID, "comments", service.WithListRowsQueries([]string{
+		`{"method":"orderDesc","attribute":"createdAt"}`,
+		`{"method":"limit","values":[200]}`,
+	}))
+	if err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	var raw map[string]interface{}
+	if err := list.Decode(&raw); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	rows, _ := raw["rows"].([]interface{})
+	items := make([]map[string]interface{}, 0, len(rows))
+	for _, r := range rows {
+		m, _ := r.(map[string]interface{})
+		if userId, ok := m["userId"].(string); ok {
+			m["authorName"] = resolveUserName(cl, userId)
+		}
+		items = append(items, m)
+	}
+	return success(ctx, in, map[string]interface{}{"items": items})
 }
 
 // --- destructive admin (approval/break-glass) ---
@@ -4822,7 +4851,7 @@ func commentList(ctx openruntimes.Context, in *GatewayInput, cl client.Client) o
 		}
 		status, _ := c["status"].(string)
 		userId, _ := c["userId"].(string)
-		if status != "PUBLISHED" && userId != actorId {
+		if status != "VISIBLE" && userId != actorId {
 			continue
 		}
 		c["authorName"] = resolveUserName(cl, userId)

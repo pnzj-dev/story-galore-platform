@@ -1,38 +1,87 @@
 ---
 import AdminLayout from "@/layouts/AdminLayout.astro";
-import { DataTable } from "@storygalore/ui";
-import { fetchAdminList } from "@/lib/gateway";
+import { actions } from "astro:actions";
+import { fetchAdminComments } from "@/lib/gateway";
 import { getTranslations } from "@/i18n";
 
 const { t } = getTranslations(Astro.currentLocale);
 const user = Astro.locals.user;
-const comments = user ? await fetchAdminList("admin_comment_list", user.$id) : [];
+const comments = user ? await fetchAdminComments(user.$id) : [];
 
-const columns = [
-  { key: "targetType", label: t("admin.target") },
-  { key: "status", label: t("admin.status") },
-  { key: "body", label: t("admin.body") },
-  { key: "createdAt", label: t("admin.created") },
-];
-
-const rows = comments.map((c) => ({
-  $id: String(c.$id ?? ""),
-  targetType: String(c.targetType ?? ""),
-  status: String(c.status ?? ""),
-  body: String(c.body ?? "").slice(0, 80),
-  createdAt: String(c.createdAt ?? "").slice(0, 10),
-}));
+const result = Astro.getActionResult(actions.moderateComment);
+if (result?.data?.ok) {
+  return Astro.redirect("/admin/moderation");
+}
+const error = result?.error?.message;
 ---
 
 <AdminLayout title={`${t("admin.label")} — ${t("admin.moderation")}`}>
   <main class="mx-auto max-w-[1600px] px-6 py-10">
-    <header>
-      <h1 class="text-3xl font-bold">{t("admin.moderation")}</h1>
-      <p class="mt-1 text-sm text-foreground-muted">{comments.length} {t("admin.count.comments")}.</p>
-    </header>
+    <h1 class="text-3xl font-bold">{t("admin.moderation")}</h1>
+    <p class="mt-1 text-sm text-foreground-muted">{comments.length} {t("admin.count.comments")}.</p>
 
-    <div class="mt-8">
-      <DataTable columns={columns} rows={rows} rowKey="$id" searchable />
-    </div>
+    {error && (
+      <p class="mt-4 rounded-sm border border-danger bg-danger/15 px-3 py-2 text-sm text-danger" role="alert">
+        {error}
+      </p>
+    )}
+
+    {comments.length > 0 ? (
+      <ul class="mt-8 space-y-3">
+        {comments.map((c) => (
+          <li class="rounded-md border border-border bg-surface p-4">
+            <div class="flex flex-wrap items-center gap-2 text-xs text-foreground-muted">
+              <span class="font-semibold text-foreground">{c.authorName || "Anonymous"}</span>
+              <span>·</span>
+              <span>{c.createdAt ? new Date(c.createdAt).toLocaleString() : ""}</span>
+              <span>·</span>
+              <span class="rounded-full border border-border px-2 py-0.5">{c.status}</span>
+              {c.status === "PENDING_REVIEW" && <span class="text-warning">{t("admin.moderation.pending")}</span>}
+            </div>
+            <p class="mt-2 whitespace-pre-wrap text-sm text-foreground">{c.body}</p>
+            <div class="mt-3 flex flex-wrap gap-2">
+              {c.status !== "VISIBLE" && (
+                <form method="POST" action={actions.moderateComment}>
+                  <input type="hidden" name="commentId" value={c.$id} />
+                  <input type="hidden" name="status" value="VISIBLE" />
+                  <button
+                    type="submit"
+                    class="rounded-sm border border-success px-3 py-1 text-xs text-success transition hover:bg-success/10"
+                  >
+                    {t("admin.moderation.approve")}
+                  </button>
+                </form>
+              )}
+              {c.status !== "HIDDEN" && (
+                <form method="POST" action={actions.moderateComment}>
+                  <input type="hidden" name="commentId" value={c.$id} />
+                  <input type="hidden" name="status" value="HIDDEN" />
+                  <button
+                    type="submit"
+                    class="rounded-sm border border-border px-3 py-1 text-xs transition hover:bg-surface"
+                  >
+                    {t("admin.moderation.hide")}
+                  </button>
+                </form>
+              )}
+              <form method="POST" action={actions.moderateComment}>
+                <input type="hidden" name="commentId" value={c.$id} />
+                <input type="hidden" name="status" value="REMOVED" />
+                <button
+                  type="submit"
+                  class="rounded-sm border border-danger px-3 py-1 text-xs text-danger transition hover:bg-danger/10"
+                >
+                  {t("admin.moderation.remove")}
+                </button>
+              </form>
+            </div>
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <p class="mt-8 rounded-md border border-dashed border-border px-6 py-8 text-sm text-foreground-muted">
+        {t("admin.moderation.empty")}
+      </p>
+    )}
   </main>
 </AdminLayout>

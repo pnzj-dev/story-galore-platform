@@ -171,7 +171,7 @@
             <span class="text-xs text-foreground-muted">{fmtDate(c.createdAt)}</span>
           </div>
           <p class="mt-1 whitespace-pre-wrap text-sm text-foreground">{c.body}</p>
-          {#if c.status && c.status !== 'PUBLISHED'}
+          {#if c.status && c.status !== 'VISIBLE'}
             <span class="mt-1 inline-block text-xs text-foreground-muted">{labels.pending}</span>
           {/if}
 

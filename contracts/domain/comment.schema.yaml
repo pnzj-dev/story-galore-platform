@@ -9,7 +9,7 @@ properties:
   userId: {type: string, minLength: 1}
   parentCommentId: {type: string, description: Parent comment for flat replies.}
   body: {type: string, minLength: 1}
-  status: {type: string, enum: [PENDING_REVIEW, PUBLISHED, HIDDEN, REMOVED, DELETED]}
+  status: {type: string, enum: [PENDING_REVIEW, VISIBLE, HIDDEN, REMOVED]}
   createdAt: {type: string, format: date-time}
   updatedAt: {type: string, format: date-time}
 additionalProperties: false

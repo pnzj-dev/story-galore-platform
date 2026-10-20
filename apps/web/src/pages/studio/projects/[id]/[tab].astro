@@ -1,6 +1,7 @@
 ---
 import StudioLayout from "@/layouts/StudioLayout.astro";
 import StudioProjectTabs from "@/components/StudioProjectTabs.astro";
+import GenerationsList from "@/components/GenerationsList.svelte";
 import { actions } from "astro:actions";
 import { fetchProject, fetchStoryBible, fetchCharacters, fetchWorld, fetchAssets, fetchStudioPublications, fetchPromptTemplates, fetchGenerations, fetchCreatorAnalytics, fetchAiProviders, fetchDocuments } from "@/lib/gateway";
 import { getTranslations } from "@/i18n";
@@ -519,30 +520,12 @@ const documentError = documentResult?.error?.message;
           </form>
 
           <h3 class="mt-10 text-lg font-semibold">{t("studio.ai.requests")}</h3>
-          {
-            generations.length > 0 ? (
-              <ul class="mt-4 space-y-2">
-                {generations.map((g) => (
-                  <li class="flex items-center justify-between rounded-md border border-border bg-surface p-4">
-                    <div class="min-w-0 flex-1">
-                      <p class="font-semibold">{g.targetType}</p>
-                      <p class="truncate text-sm text-foreground-muted">
-                        {g.billingMode} · {g.executionLocation}
-                      </p>
-                    </div>
-                    <div class="ml-4 flex shrink-0 items-center gap-3 text-xs text-foreground-muted">
-                      <span class="rounded-full border border-border px-2 py-0.5">{g.status ?? "QUEUED"}</span>
-                      <span>{g.creditEligible ? t("studio.ai.credits") : (g.creditEligibilityReason ?? t("studio.ai.ineligible"))}</span>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p class="mt-4 rounded-md border border-dashed border-border px-6 py-8 text-sm text-foreground-muted">
-                {t("studio.ai.none")}
-              </p>
-            )
-          }
+          <GenerationsList
+            client:load
+            projectId={projectId}
+            initial={generations}
+            labels={{ none: t("studio.ai.none"), credits: t("studio.ai.credits"), ineligible: t("studio.ai.ineligible") }}
+          />
         </section>
       ) : tab === "analytics" ? (
         <section class="mt-8">

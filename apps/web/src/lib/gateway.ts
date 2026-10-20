@@ -138,6 +138,13 @@ export async function fetchComments(
   return out.result.items;
 }
 
+/** Fetch all comments with author names (admin moderation queue). */
+export async function fetchAdminComments(actorId: string): Promise<CommentItem[]> {
+  const out = await invokeApi<{ items?: CommentItem[] }>("admin_comment_list", {}, actorId);
+  if (out.status !== "SUCCESS" || !out.result?.items) return [];
+  return out.result.items;
+}
+
 /** Search PUBLISHED publications by title/description (server-authoritative). */
 export async function searchPublications(query: string, type?: string): Promise<MediaCardData[]> {
   const out = await invokeApi<{ items?: PublicationItem[] }>("search", { query, type }, "");

@@ -228,6 +228,14 @@ const ar = {
   "admin.flags.toggle": "تبديل",
   "admin.flags.noFlags": "لا توجد مفاتيح ميزات مكوّنة بعد.",
 
+  // Comment moderation
+  "admin.moderation.empty": "لا توجد تعليقات للمراجعة.",
+  "admin.moderation.approve": "اعتماد",
+  "admin.moderation.hide": "إخفاء",
+  "admin.moderation.remove": "حذف",
+  "admin.moderation.pending": "قيد الانتظار",
+  "admin.moderation.by": "بواسطة",
+
   // Settings
   "settings.adultContent": "المحتوى للبالغين",
   "settings.adultContentDescription":
