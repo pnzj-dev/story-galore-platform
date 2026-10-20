@@ -2,21 +2,23 @@
 import AdminLayout from "@/layouts/AdminLayout.astro";
 import { DataTable } from "@storygalore/ui";
 import { fetchAdminList } from "@/lib/gateway";
+import { getTranslations } from "@/i18n";
 
+const { t } = getTranslations(Astro.currentLocale);
 const user = Astro.locals.user;
 const pubs = user ? await fetchAdminList("admin_publication_list", user.$id) : [];
 
 const columns = [
-  { key: "title", label: "Title" },
-  { key: "type", label: "Type" },
-  { key: "status", label: "Status" },
-  { key: "accessClass", label: "Access" },
-  { key: "contentRating", label: "Rating" },
+  { key: "title", label: t("admin.title") },
+  { key: "type", label: t("admin.type") },
+  { key: "status", label: t("admin.status") },
+  { key: "accessClass", label: t("admin.access") },
+  { key: "contentRating", label: t("admin.rating") },
 ];
 
 const rows = pubs.map((p) => ({
   $id: String(p.$id ?? ""),
-  title: String(p.title ?? "Untitled"),
+  title: String(p.title ?? t("admin.untitled")),
   type: String(p.type ?? ""),
   status: String(p.status ?? ""),
   accessClass: String(p.accessClass ?? "FREE"),
@@ -24,11 +26,11 @@ const rows = pubs.map((p) => ({
 }));
 ---
 
-<AdminLayout title="Admin — Content">
+<AdminLayout title={`${t("admin.label")} — ${t("admin.content")}`}>
   <main class="mx-auto max-w-[1600px] px-6 py-10">
     <header>
-      <h1 class="text-3xl font-bold">Content</h1>
-      <p class="mt-1 text-sm text-foreground-muted">{pubs.length} publication(s).</p>
+      <h1 class="text-3xl font-bold">{t("admin.content")}</h1>
+      <p class="mt-1 text-sm text-foreground-muted">{pubs.length} {t("admin.count.publications")}.</p>
     </header>
 
     <div class="mt-8">

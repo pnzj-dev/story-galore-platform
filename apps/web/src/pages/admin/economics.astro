@@ -1,7 +1,9 @@
 ---
 import AdminLayout from "@/layouts/AdminLayout.astro";
 import { fetchAdminOverview, fetchAdminAnalytics, fetchPlanProfitability, fetchAiCost } from "@/lib/gateway";
+import { getTranslations } from "@/i18n";
 
+const { t } = getTranslations(Astro.currentLocale);
 const user = Astro.locals.user;
 const overview = user ? await fetchAdminOverview(user.$id) : null;
 const analytics = user ? await fetchAdminAnalytics(user.$id) : null;
@@ -12,44 +14,44 @@ const kpis = overview?.kpis;
 const cents = (c?: number) => (c !== undefined ? `$${(c / 100).toFixed(2)}` : "—");
 ---
 
-<AdminLayout title="Admin — Economics">
+<AdminLayout title={`${t("admin.label")} — ${t("admin.economics")}`}>
   <main class="mx-auto max-w-[1600px] px-6 py-10">
     <header>
-      <h1 class="text-3xl font-bold">Economics</h1>
-      <p class="mt-1 text-sm text-foreground-muted">Consumer economics — revenue, subscriptions, and payment throughput.</p>
+      <h1 class="text-3xl font-bold">{t("admin.economics")}</h1>
+      <p class="mt-1 text-sm text-foreground-muted">{t("admin.economicsDesc")}</p>
     </header>
 
     {kpis ? (
       <div class="mt-8 grid gap-4 sm:grid-cols-2 md:grid-cols-4">
         <div class="rounded-md border border-border bg-surface p-4">
           <p class="text-2xl font-bold tabular-nums">{cents(kpis.mrrCents)}</p>
-          <p class="text-sm text-foreground-muted">MRR</p>
+          <p class="text-sm text-foreground-muted">{t("admin.mrr")}</p>
         </div>
         <div class="rounded-md border border-border bg-surface p-4">
           <p class="text-2xl font-bold tabular-nums">{cents(kpis.revenue30dCents)}</p>
-          <p class="text-sm text-foreground-muted">Revenue (30d)</p>
+          <p class="text-sm text-foreground-muted">{t("admin.revenue30d")}</p>
         </div>
         <div class="rounded-md border border-border bg-surface p-4">
           <p class="text-2xl font-bold tabular-nums">{kpis.activePaidSubscribers}</p>
-          <p class="text-sm text-foreground-muted">Active paid subscribers</p>
+          <p class="text-sm text-foreground-muted">{t("admin.activePaidSubscribers")}</p>
         </div>
         <div class="rounded-md border border-border bg-surface p-4">
           <p class="text-2xl font-bold tabular-nums">{kpis.churned30d}</p>
-          <p class="text-sm text-foreground-muted">Churned (30d)</p>
+          <p class="text-sm text-foreground-muted">{t("admin.churned30d")}</p>
         </div>
       </div>
     ) : (
       <p class="mt-8 rounded-md border border-dashed border-border px-6 py-8 text-sm text-foreground-muted">
-        No economics data available.
+        {t("admin.noEconomics")}
       </p>
     )}
 
     {analytics ? (
       <div class="mt-8 grid gap-4 md:grid-cols-3">
         {[
-          { title: "Payments by provider", entries: analytics.paymentsByProvider },
-          { title: "Payments by status", entries: analytics.paymentsByStatus },
-          { title: "Subscriptions by status", entries: analytics.subscriptionsByStatus },
+          { title: t("admin.section.paymentsByProvider"), entries: analytics.paymentsByProvider },
+          { title: t("admin.section.paymentsByStatus"), entries: analytics.paymentsByStatus },
+          { title: t("admin.section.subscriptionsByStatus"), entries: analytics.subscriptionsByStatus },
         ].map((s) => (
           <div class="rounded-md border border-border bg-surface p-4">
             <h2 class="font-semibold">{s.title}</h2>
@@ -68,15 +70,15 @@ const cents = (c?: number) => (c !== undefined ? `$${(c / 100).toFixed(2)}` : "�
 
     {plans.length > 0 ? (
       <section class="mt-10">
-        <h2 class="text-2xl font-bold">Plan profitability</h2>
-        <p class="mt-1 text-sm text-foreground-muted">Active subscribers and monthly revenue per plan.</p>
+        <h2 class="text-2xl font-bold">{t("admin.planProfitability")}</h2>
+        <p class="mt-1 text-sm text-foreground-muted">{t("admin.planProfitabilityDesc")}</p>
         <div class="mt-4 overflow-x-auto">
           <table class="w-full border-collapse text-sm">
             <thead>
               <tr class="border-b border-border text-left text-foreground-muted">
-                <th class="px-3 py-2 font-medium">Plan</th>
-                <th class="px-3 py-2 font-medium">Active subscribers</th>
-                <th class="px-3 py-2 font-medium">MRR</th>
+                <th class="px-3 py-2 font-medium">{t("admin.plan")}</th>
+                <th class="px-3 py-2 font-medium">{t("admin.activeSubscribers")}</th>
+                <th class="px-3 py-2 font-medium">{t("admin.mrr")}</th>
               </tr>
             </thead>
             <tbody>
@@ -95,20 +97,20 @@ const cents = (c?: number) => (c !== undefined ? `$${(c / 100).toFixed(2)}` : "�
 
     {aiCost ? (
       <section class="mt-10">
-        <h2 class="text-2xl font-bold">AI cost</h2>
-        <p class="mt-1 text-sm text-foreground-muted">Credit throughput (reserved / settled / refunded).</p>
+        <h2 class="text-2xl font-bold">{t("admin.aiCost")}</h2>
+        <p class="mt-1 text-sm text-foreground-muted">{t("admin.aiCostDesc")}</p>
         <div class="mt-4 grid gap-4 sm:grid-cols-3">
           <div class="rounded-md border border-border bg-surface p-4">
             <p class="text-2xl font-bold tabular-nums">{aiCost.creditsReserved ?? 0}</p>
-            <p class="text-sm text-foreground-muted">Credits reserved</p>
+            <p class="text-sm text-foreground-muted">{t("admin.creditsReserved")}</p>
           </div>
           <div class="rounded-md border border-border bg-surface p-4">
             <p class="text-2xl font-bold tabular-nums">{aiCost.creditsSettled ?? 0}</p>
-            <p class="text-sm text-foreground-muted">Credits settled</p>
+            <p class="text-sm text-foreground-muted">{t("admin.creditsSettled")}</p>
           </div>
           <div class="rounded-md border border-border bg-surface p-4">
             <p class="text-2xl font-bold tabular-nums">{aiCost.creditsRefunded ?? 0}</p>
-            <p class="text-sm text-foreground-muted">Credits refunded</p>
+            <p class="text-sm text-foreground-muted">{t("admin.creditsRefunded")}</p>
           </div>
         </div>
       </section>

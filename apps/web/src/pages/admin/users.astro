@@ -2,15 +2,17 @@
 import AdminLayout from "@/layouts/AdminLayout.astro";
 import { DataTable } from "@storygalore/ui";
 import { fetchAdminUsers } from "@/lib/gateway";
+import { getTranslations } from "@/i18n";
 
+const { t } = getTranslations(Astro.currentLocale);
 const user = Astro.locals.user;
 const users = user ? await fetchAdminUsers(user.$id) : [];
 
 const columns = [
-  { key: "name", label: "Name" },
-  { key: "email", label: "Email" },
-  { key: "labels", label: "Labels" },
-  { key: "createdAt", label: "Created" },
+  { key: "name", label: t("admin.name") },
+  { key: "email", label: t("admin.email") },
+  { key: "labels", label: t("admin.labels") },
+  { key: "createdAt", label: t("admin.created") },
 ];
 
 const rows = users.map((u) => ({
@@ -22,11 +24,11 @@ const rows = users.map((u) => ({
 }));
 ---
 
-<AdminLayout title="Admin — Users">
+<AdminLayout title={`${t("admin.label")} — ${t("admin.users")}`}>
   <main class="mx-auto max-w-[1600px] px-6 py-10">
     <header>
-      <h1 class="text-3xl font-bold">Users</h1>
-      <p class="mt-1 text-sm text-foreground-muted">{users.length} user(s).</p>
+      <h1 class="text-3xl font-bold">{t("admin.users")}</h1>
+      <p class="mt-1 text-sm text-foreground-muted">{users.length} {t("admin.count.users")}.</p>
     </header>
 
     <div class="mt-8">

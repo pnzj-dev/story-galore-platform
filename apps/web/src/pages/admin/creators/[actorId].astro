@@ -2,17 +2,19 @@
 import AdminLayout from "@/layouts/AdminLayout.astro";
 import AdminDetail from "@/components/AdminDetail.astro";
 import { fetchAdminCreator } from "@/lib/gateway";
+import { getTranslations } from "@/i18n";
 
+const { t } = getTranslations(Astro.currentLocale);
 const admin = Astro.locals.user;
 const actorId = Astro.params.actorId ?? "";
 const detail = admin ? await fetchAdminCreator(admin.$id, actorId) : null;
 if (!detail) Astro.response.status = 404;
-const title = typeof detail?.displayName === "string" ? detail.displayName : "Creator";
+const title = typeof detail?.displayName === "string" ? detail.displayName : t("admin.creator");
 ---
 
-<AdminLayout title="Admin — Creator">
+<AdminLayout title={`${t("admin.label")} — ${t("admin.creator")}`}>
   <main class="mx-auto max-w-[1600px] px-6 py-10">
-    <a href="/admin/creators" class="text-sm text-foreground-muted transition hover:text-foreground">← Creators</a>
+    <a href="/admin/creators" class="text-sm text-foreground-muted transition hover:text-foreground">{t("admin.backToCreators")}</a>
     {detail ? (
       <>
         <h1 class="mt-4 text-3xl font-bold">{title}</h1>
@@ -21,7 +23,7 @@ const title = typeof detail?.displayName === "string" ? detail.displayName : "Cr
         </div>
       </>
     ) : (
-      <p class="mt-8 text-foreground-muted">Creator not found.</p>
+      <p class="mt-8 text-foreground-muted">{t("admin.notFound.creator")}</p>
     )}
   </main>
 </AdminLayout>

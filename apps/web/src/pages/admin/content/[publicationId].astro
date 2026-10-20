@@ -2,17 +2,19 @@
 import AdminLayout from "@/layouts/AdminLayout.astro";
 import AdminDetail from "@/components/AdminDetail.astro";
 import { fetchAdminPublication } from "@/lib/gateway";
+import { getTranslations } from "@/i18n";
 
+const { t } = getTranslations(Astro.currentLocale);
 const admin = Astro.locals.user;
 const publicationId = Astro.params.publicationId ?? "";
 const detail = admin ? await fetchAdminPublication(admin.$id, publicationId) : null;
 if (!detail) Astro.response.status = 404;
-const title = typeof detail?.title === "string" ? detail.title : "Publication";
+const title = typeof detail?.title === "string" ? detail.title : t("admin.publication");
 ---
 
-<AdminLayout title="Admin — Content">
+<AdminLayout title={`${t("admin.label")} — ${t("admin.content")}`}>
   <main class="mx-auto max-w-[1600px] px-6 py-10">
-    <a href="/admin/content" class="text-sm text-foreground-muted transition hover:text-foreground">← Content</a>
+    <a href="/admin/content" class="text-sm text-foreground-muted transition hover:text-foreground">{t("admin.backToContent")}</a>
     {detail ? (
       <>
         <h1 class="mt-4 text-3xl font-bold">{title}</h1>
@@ -21,7 +23,7 @@ const title = typeof detail?.title === "string" ? detail.title : "Publication";
         </div>
       </>
     ) : (
-      <p class="mt-8 text-foreground-muted">Publication not found.</p>
+      <p class="mt-8 text-foreground-muted">{t("admin.notFound.publication")}</p>
     )}
   </main>
 </AdminLayout>

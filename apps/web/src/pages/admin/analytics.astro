@@ -1,30 +1,32 @@
 ---
 import AdminLayout from "@/layouts/AdminLayout.astro";
 import { fetchAdminAnalytics } from "@/lib/gateway";
+import { getTranslations } from "@/i18n";
 
+const { t } = getTranslations(Astro.currentLocale);
 const user = Astro.locals.user;
 const analytics = user ? await fetchAdminAnalytics(user.$id) : null;
 
 const sections = [
-  { title: "Content by type", entries: analytics?.contentByType },
-  { title: "Content by status", entries: analytics?.contentByStatus },
-  { title: "Subscriptions by status", entries: analytics?.subscriptionsByStatus },
-  { title: "Payments by provider", entries: analytics?.paymentsByProvider },
-  { title: "Payments by status", entries: analytics?.paymentsByStatus },
-  { title: "Creators by status", entries: analytics?.creatorsByStatus },
+  { title: t("admin.section.contentByType"), entries: analytics?.contentByType },
+  { title: t("admin.section.contentByStatus"), entries: analytics?.contentByStatus },
+  { title: t("admin.section.subscriptionsByStatus"), entries: analytics?.subscriptionsByStatus },
+  { title: t("admin.section.paymentsByProvider"), entries: analytics?.paymentsByProvider },
+  { title: t("admin.section.paymentsByStatus"), entries: analytics?.paymentsByStatus },
+  { title: t("admin.section.creatorsByStatus"), entries: analytics?.creatorsByStatus },
 ];
 ---
 
-<AdminLayout title="Admin — Analytics">
+<AdminLayout title={`${t("admin.label")} — ${t("admin.analytics")}`}>
   <main class="mx-auto max-w-[1600px] px-6 py-10">
     <header>
-      <h1 class="text-3xl font-bold">Analytics</h1>
-      <p class="mt-1 text-sm text-foreground-muted">Why? — distributions over the authoritative domain tables.</p>
+      <h1 class="text-3xl font-bold">{t("admin.analytics")}</h1>
+      <p class="mt-1 text-sm text-foreground-muted">{t("admin.analyticsDesc")}</p>
       <div class="mt-3 flex flex-wrap gap-3 text-sm">
-        <a href="/admin/analytics/retention" class="text-link hover:underline">Retention</a>
-        <a href="/admin/analytics/funnels" class="text-link hover:underline">Funnels</a>
-        <a href="/admin/analytics/acquisition" class="text-link hover:underline">Acquisition</a>
-        <a href="/admin/analytics/cohorts" class="text-link hover:underline">Cohorts</a>
+        <a href="/admin/analytics/retention" class="text-link hover:underline">{t("admin.analytics.retention")}</a>
+        <a href="/admin/analytics/funnels" class="text-link hover:underline">{t("admin.analytics.funnels")}</a>
+        <a href="/admin/analytics/acquisition" class="text-link hover:underline">{t("admin.analytics.acquisition")}</a>
+        <a href="/admin/analytics/cohorts" class="text-link hover:underline">{t("admin.analytics.cohorts")}</a>
       </div>
     </header>
 
@@ -46,7 +48,7 @@ const sections = [
       </div>
     ) : (
       <p class="mt-8 rounded-md border border-dashed border-border px-6 py-8 text-sm text-foreground-muted">
-        No analytics available.
+        {t("admin.noAnalytics")}
       </p>
     )}
   </main>

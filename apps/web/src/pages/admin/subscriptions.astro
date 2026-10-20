@@ -2,15 +2,17 @@
 import AdminLayout from "@/layouts/AdminLayout.astro";
 import { DataTable } from "@storygalore/ui";
 import { fetchAdminList } from "@/lib/gateway";
+import { getTranslations } from "@/i18n";
 
+const { t } = getTranslations(Astro.currentLocale);
 const user = Astro.locals.user;
 const subs = user ? await fetchAdminList("admin_subscription_list", user.$id) : [];
 
 const columns = [
-  { key: "userId", label: "User" },
-  { key: "planId", label: "Plan" },
-  { key: "status", label: "Status" },
-  { key: "createdAt", label: "Created" },
+  { key: "userId", label: t("admin.user") },
+  { key: "planId", label: t("admin.plan") },
+  { key: "status", label: t("admin.status") },
+  { key: "createdAt", label: t("admin.created") },
 ];
 
 const rows = subs.map((s) => ({
@@ -22,11 +24,11 @@ const rows = subs.map((s) => ({
 }));
 ---
 
-<AdminLayout title="Admin — Subscriptions">
+<AdminLayout title={`${t("admin.label")} — ${t("admin.subscriptions")}`}>
   <main class="mx-auto max-w-[1600px] px-6 py-10">
     <header>
-      <h1 class="text-3xl font-bold">Subscriptions</h1>
-      <p class="mt-1 text-sm text-foreground-muted">{subs.length} subscription(s).</p>
+      <h1 class="text-3xl font-bold">{t("admin.subscriptions")}</h1>
+      <p class="mt-1 text-sm text-foreground-muted">{subs.length} {t("admin.count.subscriptions")}.</p>
     </header>
 
     <div class="mt-8">

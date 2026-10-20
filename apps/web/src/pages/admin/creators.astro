@@ -2,15 +2,17 @@
 import AdminLayout from "@/layouts/AdminLayout.astro";
 import { DataTable } from "@storygalore/ui";
 import { fetchAdminList } from "@/lib/gateway";
+import { getTranslations } from "@/i18n";
 
+const { t } = getTranslations(Astro.currentLocale);
 const user = Astro.locals.user;
 const creators = user ? await fetchAdminList("admin_creator_list", user.$id) : [];
 
 const columns = [
-  { key: "handle", label: "Handle" },
-  { key: "displayName", label: "Display name" },
-  { key: "creatorStatus", label: "Status" },
-  { key: "verificationStatus", label: "Verification" },
+  { key: "handle", label: t("admin.handle") },
+  { key: "displayName", label: t("admin.displayName") },
+  { key: "creatorStatus", label: t("admin.status") },
+  { key: "verificationStatus", label: t("admin.verification") },
 ];
 
 const rows = creators.map((c) => ({
@@ -22,11 +24,11 @@ const rows = creators.map((c) => ({
 }));
 ---
 
-<AdminLayout title="Admin — Creators">
+<AdminLayout title={`${t("admin.label")} — ${t("admin.creators")}`}>
   <main class="mx-auto max-w-[1600px] px-6 py-10">
     <header>
-      <h1 class="text-3xl font-bold">Creators</h1>
-      <p class="mt-1 text-sm text-foreground-muted">{creators.length} creator(s).</p>
+      <h1 class="text-3xl font-bold">{t("admin.creators")}</h1>
+      <p class="mt-1 text-sm text-foreground-muted">{creators.length} {t("admin.count.creators")}.</p>
     </header>
 
     <div class="mt-8">

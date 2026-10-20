@@ -2,13 +2,15 @@
 import AdminLayout from "@/layouts/AdminLayout.astro";
 import { DataTable } from "@storygalore/ui";
 import { fetchAdminCohorts } from "@/lib/gateway";
+import { getTranslations } from "@/i18n";
 
+const { t } = getTranslations(Astro.currentLocale);
 const user = Astro.locals.user;
 const cohorts = user ? await fetchAdminCohorts(user.$id) : [];
 
 const columns = [
-  { key: "date", label: "Cohort" },
-  { key: "size", label: "Size", align: "right" },
+  { key: "date", label: t("admin.cohort") },
+  { key: "size", label: t("admin.size"), align: "right" },
   { key: "d1", label: "D+1", align: "right" },
   { key: "d3", label: "D+3", align: "right" },
   { key: "d7", label: "D+7", align: "right" },
@@ -24,13 +26,13 @@ const rows = cohorts.map((c) => ({
 }));
 ---
 
-<AdminLayout title="Admin — Cohorts">
+<AdminLayout title={`${t("admin.label")} — ${t("admin.analytics.cohorts")}`}>
   <main class="mx-auto max-w-4xl px-6 py-10">
     <a href="/admin/analytics" class="text-sm text-foreground-muted transition hover:text-foreground">
-      &larr; Analytics
+      {t("admin.backToAnalytics")}
     </a>
-    <h1 class="mt-2 text-3xl font-bold">Cohorts</h1>
-    <p class="mt-1 text-sm text-foreground-muted">Actors grouped by first-active day, with D+1/D+3/D+7 retention.</p>
+    <h1 class="mt-2 text-3xl font-bold">{t("admin.analytics.cohorts")}</h1>
+    <p class="mt-1 text-sm text-foreground-muted">{t("admin.cohortsDesc")}</p>
 
     <div class="mt-6">
       <DataTable columns={columns} rows={rows} rowKey="$id" />

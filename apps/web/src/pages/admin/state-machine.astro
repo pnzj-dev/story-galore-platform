@@ -1,25 +1,27 @@
 ---
 import AdminLayout from "@/layouts/AdminLayout.astro";
 import { fetchAdminAnalytics, fetchAdminOperations } from "@/lib/gateway";
+import { getTranslations } from "@/i18n";
 
+const { t } = getTranslations(Astro.currentLocale);
 const user = Astro.locals.user;
 const analytics = user ? await fetchAdminAnalytics(user.$id) : null;
 const ops = user ? await fetchAdminOperations(user.$id) : null;
 
 const sections = [
-  { title: "Content by status", entries: analytics?.contentByStatus },
-  { title: "Subscriptions by status", entries: analytics?.subscriptionsByStatus },
-  { title: "Payments by status", entries: analytics?.paymentsByStatus },
-  { title: "Creators by status", entries: analytics?.creatorsByStatus },
-  { title: "Generations by status", entries: ops?.generationsByStatus },
+  { title: t("admin.section.contentByStatus"), entries: analytics?.contentByStatus },
+  { title: t("admin.section.subscriptionsByStatus"), entries: analytics?.subscriptionsByStatus },
+  { title: t("admin.section.paymentsByStatus"), entries: analytics?.paymentsByStatus },
+  { title: t("admin.section.creatorsByStatus"), entries: analytics?.creatorsByStatus },
+  { title: t("admin.section.generationsByStatus"), entries: ops?.generationsByStatus },
 ];
 ---
 
-<AdminLayout title="Admin — State Machine">
+<AdminLayout title={`${t("admin.label")} — ${t("admin.stateMachine")}`}>
   <main class="mx-auto max-w-[1600px] px-6 py-10">
     <header>
-      <h1 class="text-3xl font-bold">State Machine</h1>
-      <p class="mt-1 text-sm text-foreground-muted">Domain lifecycle distributions across the authoritative tables.</p>
+      <h1 class="text-3xl font-bold">{t("admin.stateMachine")}</h1>
+      <p class="mt-1 text-sm text-foreground-muted">{t("admin.stateMachineDesc")}</p>
     </header>
 
     {sections.some((s) => s.entries && Object.keys(s.entries).length > 0) ? (
@@ -40,7 +42,7 @@ const sections = [
       </div>
     ) : (
       <p class="mt-8 rounded-md border border-dashed border-border px-6 py-8 text-sm text-foreground-muted">
-        No state-machine data available.
+        {t("admin.noStateMachine")}
       </p>
     )}
   </main>

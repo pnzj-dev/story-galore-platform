@@ -1,37 +1,39 @@
 ---
 import AdminLayout from "@/layouts/AdminLayout.astro";
 import { fetchAdminSupportTickets } from "@/lib/gateway";
+import { getTranslations } from "@/i18n";
 
+const { t } = getTranslations(Astro.currentLocale);
 const admin = Astro.locals.user;
 const tickets = admin ? await fetchAdminSupportTickets(admin.$id) : [];
 ---
 
-<AdminLayout title="Admin — Support">
+<AdminLayout title={`${t("admin.label")} — ${t("admin.supportTickets")}`}>
   <main class="mx-auto max-w-[1600px] px-6 py-10">
-    <h1 class="text-3xl font-bold">Support tickets</h1>
-    <p class="mt-1 text-sm text-foreground-muted">{tickets.length} ticket(s).</p>
+    <h1 class="text-3xl font-bold">{t("admin.supportTickets")}</h1>
+    <p class="mt-1 text-sm text-foreground-muted">{tickets.length} {t("admin.count.tickets")}.</p>
 
     {
       tickets.length > 0 ? (
         <ul class="mt-8 space-y-3">
-          {tickets.map((t) => (
+          {tickets.map((ticket) => (
             <li>
               <a
-                href={`/admin/support/tickets/${t.$id}`}
+                href={`/admin/support/tickets/${ticket.$id}`}
                 class="block rounded-md border border-border bg-surface p-4 transition hover:border-foreground-muted"
               >
                 <div class="flex items-center justify-between gap-3">
-                  <p class="font-semibold">{t.subject}</p>
-                  <span class="text-xs uppercase tracking-wide text-foreground-muted">{t.status}</span>
+                  <p class="font-semibold">{ticket.subject}</p>
+                  <span class="text-xs uppercase tracking-wide text-foreground-muted">{ticket.status}</span>
                 </div>
-                {t.userId && <p class="mt-1 truncate text-xs text-foreground-tertiary">{t.userId}</p>}
+                {ticket.userId && <p class="mt-1 truncate text-xs text-foreground-tertiary">{ticket.userId}</p>}
               </a>
             </li>
           ))}
         </ul>
       ) : (
         <p class="mt-8 rounded-md border border-dashed border-border px-6 py-8 text-sm text-foreground-muted">
-          No tickets.
+          {t("admin.noTickets")}
         </p>
       )
     }

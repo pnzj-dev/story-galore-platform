@@ -2,17 +2,19 @@
 import AdminLayout from "@/layouts/AdminLayout.astro";
 import { DataTable } from "@storygalore/ui";
 import { fetchAdminList } from "@/lib/gateway";
+import { getTranslations } from "@/i18n";
 
+const { t } = getTranslations(Astro.currentLocale);
 const user = Astro.locals.user;
 const payments = user ? await fetchAdminList("admin_payment_list", user.$id) : [];
 
 const columns = [
-  { key: "userId", label: "User" },
-  { key: "amount", label: "Amount" },
-  { key: "currency", label: "Currency" },
-  { key: "provider", label: "Provider" },
-  { key: "status", label: "Status" },
-  { key: "createdAt", label: "Created" },
+  { key: "userId", label: t("admin.user") },
+  { key: "amount", label: t("admin.amount") },
+  { key: "currency", label: t("admin.currency") },
+  { key: "provider", label: t("admin.provider") },
+  { key: "status", label: t("admin.status") },
+  { key: "createdAt", label: t("admin.created") },
 ];
 
 const rows = payments.map((p) => ({
@@ -26,11 +28,11 @@ const rows = payments.map((p) => ({
 }));
 ---
 
-<AdminLayout title="Admin — Payments">
+<AdminLayout title={`${t("admin.label")} — ${t("admin.payments")}`}>
   <main class="mx-auto max-w-[1600px] px-6 py-10">
     <header>
-      <h1 class="text-3xl font-bold">Payments</h1>
-      <p class="mt-1 text-sm text-foreground-muted">{payments.length} payment(s).</p>
+      <h1 class="text-3xl font-bold">{t("admin.payments")}</h1>
+      <p class="mt-1 text-sm text-foreground-muted">{payments.length} {t("admin.count.payments")}.</p>
     </header>
 
     <div class="mt-8">

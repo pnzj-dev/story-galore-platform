@@ -1,18 +1,20 @@
 ---
 import AdminLayout from "@/layouts/AdminLayout.astro";
+import { getTranslations } from "@/i18n";
 
+const { t } = getTranslations(Astro.currentLocale);
 const slug = (Astro.params.slug ?? "").split("/").filter(Boolean);
 const title = slug
   .map((s) => s.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()))
   .join(" — ");
 ---
 
-<AdminLayout title={`Admin — ${title || "Section"}`}>
+<AdminLayout title={`${t("admin.label")} — ${title || t("admin.section")}`}>
   <main class="mx-auto max-w-[1600px] px-6 py-10">
-    <a href="/admin" class="text-sm text-foreground-muted transition hover:text-foreground">← Admin</a>
-    <h1 class="mt-4 text-3xl font-bold">{title || "Section"}</h1>
+    <a href="/admin" class="text-sm text-foreground-muted transition hover:text-foreground">{t("admin.backToAdmin")}</a>
+    <h1 class="mt-4 text-3xl font-bold">{title || t("admin.section")}</h1>
     <p class="mt-8 rounded-md border border-dashed border-border px-6 py-10 text-sm text-foreground-muted">
-      This section is coming soon.
+      {t("admin.sectionComingSoon")}
     </p>
   </main>
 </AdminLayout>

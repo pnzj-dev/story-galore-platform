@@ -2,15 +2,17 @@
 import AdminLayout from "@/layouts/AdminLayout.astro";
 import { DataTable } from "@storygalore/ui";
 import { fetchAdminList } from "@/lib/gateway";
+import { getTranslations } from "@/i18n";
 
+const { t } = getTranslations(Astro.currentLocale);
 const user = Astro.locals.user;
 const comments = user ? await fetchAdminList("admin_comment_list", user.$id) : [];
 
 const columns = [
-  { key: "targetType", label: "Target" },
-  { key: "status", label: "Status" },
-  { key: "body", label: "Body" },
-  { key: "createdAt", label: "Created" },
+  { key: "targetType", label: t("admin.target") },
+  { key: "status", label: t("admin.status") },
+  { key: "body", label: t("admin.body") },
+  { key: "createdAt", label: t("admin.created") },
 ];
 
 const rows = comments.map((c) => ({
@@ -22,11 +24,11 @@ const rows = comments.map((c) => ({
 }));
 ---
 
-<AdminLayout title="Admin — Moderation">
+<AdminLayout title={`${t("admin.label")} — ${t("admin.moderation")}`}>
   <main class="mx-auto max-w-[1600px] px-6 py-10">
     <header>
-      <h1 class="text-3xl font-bold">Moderation</h1>
-      <p class="mt-1 text-sm text-foreground-muted">{comments.length} comment(s).</p>
+      <h1 class="text-3xl font-bold">{t("admin.moderation")}</h1>
+      <p class="mt-1 text-sm text-foreground-muted">{comments.length} {t("admin.count.comments")}.</p>
     </header>
 
     <div class="mt-8">

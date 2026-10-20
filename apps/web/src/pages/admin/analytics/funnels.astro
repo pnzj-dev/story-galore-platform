@@ -1,19 +1,21 @@
 ---
 import AdminLayout from "@/layouts/AdminLayout.astro";
 import { fetchAdminFunnel } from "@/lib/gateway";
+import { getTranslations } from "@/i18n";
 
+const { t } = getTranslations(Astro.currentLocale);
 const user = Astro.locals.user;
 const steps = user ? await fetchAdminFunnel(user.$id) : [];
 ---
 
-<AdminLayout title="Admin — Funnels">
+<AdminLayout title={`${t("admin.label")} — ${t("admin.analytics.funnels")}`}>
   <main class="mx-auto max-w-4xl px-6 py-10">
     <a href="/admin/analytics" class="text-sm text-foreground-muted transition hover:text-foreground">
-      &larr; Analytics
+      {t("admin.backToAnalytics")}
     </a>
-    <h1 class="mt-2 text-3xl font-bold">Funnels</h1>
+    <h1 class="mt-2 text-3xl font-bold">{t("admin.analytics.funnels")}</h1>
     <p class="mt-1 text-sm text-foreground-muted">
-      Distinct actors per step: creator &rarr; project &rarr; document &rarr; publish.
+      {t("admin.funnelsDesc")}
     </p>
 
     {steps.length > 0 ? (
@@ -27,7 +29,7 @@ const steps = user ? await fetchAdminFunnel(user.$id) : [];
       </ol>
     ) : (
       <p class="mt-6 rounded-md border border-dashed border-border px-6 py-8 text-sm text-foreground-muted">
-        No funnel data yet.
+        {t("admin.noFunnel")}
       </p>
     )}
   </main>
