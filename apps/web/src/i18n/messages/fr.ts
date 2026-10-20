@@ -100,6 +100,43 @@ const fr = {
   "auth.oauthDiscord": "Continuer avec Discord",
   "auth.callbackError": "Échec de la connexion. Veuillez réessayer.",
 
+  // Public story detail
+  "story.notFound": "Publication introuvable",
+  "story.backHome": "Retour à l'accueil",
+  "story.noPages": "Aucune page pour l'instant.",
+  "story.readingFormat": "format de lecture",
+  "story.pages": "pages",
+
+  // Account AI
+  "account.ai.title": "Crédits et utilisation de l'IA",
+  "account.ai.desc": "La génération IA est mesurée et vérifiée côté serveur. L'éligibilité aux crédits dépend du mode de facturation et du lieu d'exécution de chaque demande.",
+  "account.ai.provider": "Fournisseur de crédits",
+  "account.ai.noProvider": "Aucun fournisseur éligible aux crédits n'est encore enregistré. Les exécutions BYOK et auto-hébergées ne consomment jamais de crédits de la plateforme.",
+  "account.ai.creditsPerGen": "crédit(s) par génération",
+  "account.ai.usage": "Utilisation",
+  "account.ai.total": "Générations au total",
+  "account.ai.creditEligible": "Générations éligibles aux crédits",
+  "account.ai.projects": "Projets",
+  "account.ai.byBilling": "Par mode de facturation",
+
+  // Creator workspace
+  "creator.notFound": "Créateur introuvable",
+  "creator.notAuthorized": "Non autorisé",
+  "creator.notAuthorizedDesc": "Vous n'avez pas accès à cet espace de travail de créateur.",
+  "creator.workspace": "Espace de travail du créateur",
+  "creator.openStudio": "Ouvrir le Studio",
+  "creator.projects": "Projets",
+  "creator.noProjects": "Aucun projet pour l'instant.",
+
+  // Support attachments
+  "support.attachments": "Pièces jointes",
+  "support.backToRequest": "← Retour à la demande",
+  "support.attachmentsDesc": "Fichiers joints à la demande",
+  "support.files": "Fichiers",
+  "support.noAttachments": "Aucune pièce jointe pour l'instant. Les pièces jointes des demandes d'assistance ne sont pas activées pour cette version.",
+  "support.notFound": "Demande introuvable",
+  "support.backToSupport": "Retour à l'assistance",
+
   // Settings
   "settings.adultContent": "Contenu adulte",
   "settings.adultContentDescription":

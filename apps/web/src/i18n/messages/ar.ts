@@ -99,6 +99,43 @@ const ar = {
   "auth.oauthDiscord": "المتابعة عبر Discord",
   "auth.callbackError": "فشل تسجيل الدخول. يرجى المحاولة مرة أخرى.",
 
+  // Public story detail
+  "story.notFound": "المنشور غير موجود",
+  "story.backHome": "العودة إلى الرئيسية",
+  "story.noPages": "لا توجد صفحات بعد.",
+  "story.readingFormat": "صيغة القراءة",
+  "story.pages": "صفحات",
+
+  // Account AI
+  "account.ai.title": "أرصدة واستخدام الذكاء الاصطناعي",
+  "account.ai.desc": "يُقاس توليد الذكاء الاصطناعي وتُتحقق أهليته من جهة الخادم. تعتمد أهلية الأرصدة على طريقة الفوترة وموقع تنفيذ كل طلب.",
+  "account.ai.provider": "مزوّد الأرصدة",
+  "account.ai.noProvider": "لم يُسجَّل مزوّد مؤهل للأرصدة بعد. عمليات BYOK والاستضافة الذاتية لا تستهلك أرصدة المنصة أبدًا.",
+  "account.ai.creditsPerGen": "رصيد (أرصدة) لكل توليد",
+  "account.ai.usage": "الاستخدام",
+  "account.ai.total": "إجمالي عمليات التوليد",
+  "account.ai.creditEligible": "عمليات توليد مؤهلة للأرصدة",
+  "account.ai.projects": "المشاريع",
+  "account.ai.byBilling": "حسب طريقة الفوترة",
+
+  // Creator workspace
+  "creator.notFound": "المبدع غير موجود",
+  "creator.notAuthorized": "غير مصرّح",
+  "creator.notAuthorizedDesc": "ليس لديك وصول إلى مساحة عمل هذا المبدع.",
+  "creator.workspace": "مساحة عمل المبدع",
+  "creator.openStudio": "فتح الاستوديو",
+  "creator.projects": "المشاريع",
+  "creator.noProjects": "لا توجد مشاريع بعد.",
+
+  // Support attachments
+  "support.attachments": "المرفقات",
+  "support.backToRequest": "← العودة إلى الطلب",
+  "support.attachmentsDesc": "الملفات المرفقة بالطلب",
+  "support.files": "الملفات",
+  "support.noAttachments": "لا توجد مرفقات بعد. مرفقات طلبات الدعم غير مفعّلة في هذا الإصدار.",
+  "support.notFound": "الطلب غير موجود",
+  "support.backToSupport": "العودة إلى الدعم",
+
   // Settings
   "settings.adultContent": "المحتوى للبالغين",
   "settings.adultContentDescription":

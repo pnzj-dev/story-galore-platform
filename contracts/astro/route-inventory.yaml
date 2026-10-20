@@ -487,7 +487,7 @@ routes:
   kind: page
   notes: Must satisfy exact admin-rbac entry, role grant, scope, projection, risk
     and approval policy.
-- path: /admin/creator
+- path: /admin/creators
   group: admin
   authentication: REQUIRED
   capability: creator.operations.read

@@ -100,6 +100,43 @@ export default {
   "auth.oauthDiscord": "Continue with Discord",
   "auth.callbackError": "Sign-in failed. Please try again.",
 
+  // Public story detail
+  "story.notFound": "Publication not found",
+  "story.backHome": "Back home",
+  "story.noPages": "No pages yet.",
+  "story.readingFormat": "reading format",
+  "story.pages": "pages",
+
+  // Account AI
+  "account.ai.title": "AI credits & usage",
+  "account.ai.desc": "AI generation is metered and entitlement-checked server-side. Credit eligibility depends on the billing mode and execution location of each request.",
+  "account.ai.provider": "Credit provider",
+  "account.ai.noProvider": "No credit-eligible provider is registered yet. BYOK and user-hosted runs never consume platform credits.",
+  "account.ai.creditsPerGen": "credit(s) per generation",
+  "account.ai.usage": "Usage",
+  "account.ai.total": "Total generations",
+  "account.ai.creditEligible": "Credit-eligible generations",
+  "account.ai.projects": "Projects",
+  "account.ai.byBilling": "By billing mode",
+
+  // Creator workspace
+  "creator.notFound": "Creator not found",
+  "creator.notAuthorized": "Not authorized",
+  "creator.notAuthorizedDesc": "You do not have access to this creator workspace.",
+  "creator.workspace": "Creator workspace",
+  "creator.openStudio": "Open Studio",
+  "creator.projects": "Projects",
+  "creator.noProjects": "No projects yet.",
+
+  // Support attachments
+  "support.attachments": "Attachments",
+  "support.backToRequest": "← Back to request",
+  "support.attachmentsDesc": "Files attached to request",
+  "support.files": "Files",
+  "support.noAttachments": "No attachments yet. Attachments for support requests are not enabled for this release.",
+  "support.notFound": "Request not found",
+  "support.backToSupport": "Back to support",
+
   // Settings
   "settings.adultContent": "Adult content",
   "settings.adultContentDescription":

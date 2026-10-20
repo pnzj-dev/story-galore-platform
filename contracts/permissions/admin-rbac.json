@@ -449,7 +449,7 @@
       "projection": "content_operations_safe"
     },
     {
-      "route": "/admin/creator",
+      "route": "/admin/creators",
       "capability": "creator.operations.read",
       "roles": [
         "CREATOR_SUPPORT",
