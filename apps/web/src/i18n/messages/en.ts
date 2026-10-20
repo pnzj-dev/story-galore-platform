@@ -137,6 +137,70 @@ export default {
   "support.notFound": "Request not found",
   "support.backToSupport": "Back to support",
 
+  // Account (index + billing)
+  "account.title": "Account",
+  "account.yourAccount": "Your account",
+  "account.settingsDesc": "Content preferences and age verification.",
+  "account.billingDesc": "Manage your subscription and payment methods.",
+  "account.creatorStudioDesc": "Draft, publish, and manage your work.",
+  "account.billingTitle": "Billing & Subscription",
+  "account.plans": "Plans",
+  "account.noPlans": "No plans are available yet.",
+  "account.payWith": "Pay with",
+  "account.cardStripe": "Card (Stripe)",
+  "account.cryptoNowPayments": "Crypto (NOWPayments)",
+  "account.emailCrypto": "Email (crypto subscriptions)",
+  "account.subscribe": "Subscribe",
+  "account.yourSubscriptions": "Your subscriptions",
+  "account.noSubscriptions": "You have no subscriptions yet.",
+  "account.pause": "Pause",
+  "account.resume": "Resume",
+  "account.cancel": "Cancel",
+
+  // Support (user ticket pages)
+  "support.newRequest": "New support request",
+  "support.contact": "Contact support",
+  "support.tellUs": "Tell us what's going on and we'll get back to you.",
+  "support.submitted": "Your request was submitted. We'll follow up by email.",
+  "support.subject": "Subject",
+  "support.message": "Message",
+  "support.submit": "Submit",
+  "support.requests": "Support requests",
+  "support.new": "New request",
+  "support.noRequests": "No support requests yet.",
+  "support.request": "Support request",
+  "support.backToRequests": "← All requests",
+  "support.opened": "Opened",
+
+  // Creators (public list + profile)
+  "creators.title": "Creators",
+  "creators.desc": "Discover independent creators across every medium.",
+  "creators.none": "No creators yet. Check back soon.",
+  "creators.publishedStories": "Published stories",
+  "creators.noPublished": "No published stories yet.",
+  "creators.notFound": "Creator not found",
+
+  // Library
+  "library.title": "Library",
+  "library.desc": "Your in-progress titles across every medium.",
+  "library.continue": "Continue",
+  "library.emptyHint": "Nothing in progress yet. Start reading, watching, or listening.",
+  "library.comingSoon": "Saved titles and collections are coming soon.",
+
+  // Media detail / reader / shorts
+  "media.locked": "This title requires a subscription or purchase.",
+  "media.viewPlans": "View plans",
+  "media.unavailable": "Media unavailable.",
+  "media.notFound": "Not found",
+  "media.episodeLabel": "Episode",
+  "media.partLabel": "Part",
+  "media.reader": "Reader",
+  "media.watch": "Watch",
+  "media.listen": "Listen",
+  "media.post": "Post",
+  "media.shorts": "Shorts",
+  "media.noShorts": "No shorts yet",
+
   // Settings
   "settings.adultContent": "Adult content",
   "settings.adultContentDescription":

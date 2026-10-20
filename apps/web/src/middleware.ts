@@ -44,6 +44,13 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   const pathname = context.url.pathname;
   const { locale, path } = splitLocale(pathname);
+
+  // Legacy alias: /admin/creator (singular) -> /admin/creators (plural).
+  if (path === "/admin/creator") {
+    const target = locale === DEFAULT_LOCALE ? "/admin/creators" : `/${locale}/admin/creators`;
+    return context.redirect(target, 301);
+  }
+
   const isProtected = PROTECTED_PREFIXES.some(
     (prefix) => path === prefix || path.startsWith(`${prefix}/`),
   );

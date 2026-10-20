@@ -1,6 +1,9 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import { fetchSupportTicket } from "@/lib/gateway";
+import { getTranslations } from "@/i18n";
+
+const { t } = getTranslations(Astro.currentLocale);
 
 const user = Astro.locals.user;
 if (!user) {
@@ -13,24 +16,24 @@ if (!ticket) {
 }
 ---
 
-<Layout title={ticket?.subject ?? "Support request"}>
+<Layout title={ticket?.subject ?? t("support.request")}>
   {
     ticket ? (
       <main class="mx-auto max-w-2xl px-12 py-12">
-        <a href="/support/tickets" class="text-sm text-link hover:text-link">← All requests</a>
+        <a href="/support/tickets" class="text-sm text-link hover:text-link">{t("support.backToRequests")}</a>
         <div class="mt-4 flex items-center justify-between gap-3">
           <h1 class="font-serif text-3xl font-bold">{ticket.subject}</h1>
           <span class="text-xs uppercase tracking-wide text-foreground-muted">{ticket.status}</span>
         </div>
         {ticket.createdAt && (
-          <p class="mt-2 text-xs text-foreground-tertiary">Opened {new Date(ticket.createdAt).toLocaleString()}</p>
+          <p class="mt-2 text-xs text-foreground-tertiary">{t("support.opened")} {new Date(ticket.createdAt).toLocaleString()}</p>
         )}
         <p class="mt-6 whitespace-pre-wrap leading-7 text-foreground-muted">{ticket.message}</p>
       </main>
     ) : (
       <main class="mx-auto max-w-3xl px-6 py-24 text-center">
-        <h1 class="text-3xl font-bold">Request not found</h1>
-        <a href="/support/tickets" class="mt-6 inline-block text-link">Back to support</a>
+        <h1 class="text-3xl font-bold">{t("support.notFound")}</h1>
+        <a href="/support/tickets" class="mt-6 inline-block text-link">{t("support.backToSupport")}</a>
       </main>
     )
   }

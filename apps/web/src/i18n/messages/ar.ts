@@ -136,6 +136,70 @@ const ar = {
   "support.notFound": "الطلب غير موجود",
   "support.backToSupport": "العودة إلى الدعم",
 
+  // Account (index + billing)
+  "account.title": "الحساب",
+  "account.yourAccount": "حسابك",
+  "account.settingsDesc": "تفضيلات المحتوى والتحقق من العمر.",
+  "account.billingDesc": "أدر اشتراكك وطرق الدفع.",
+  "account.creatorStudioDesc": "صغ وانشر وأدر أعمالك.",
+  "account.billingTitle": "الفوترة والاشتراك",
+  "account.plans": "الخطط",
+  "account.noPlans": "لا توجد خطط متاحة بعد.",
+  "account.payWith": "الدفع عبر",
+  "account.cardStripe": "بطاقة (Stripe)",
+  "account.cryptoNowPayments": "عملات رقمية (NOWPayments)",
+  "account.emailCrypto": "البريد الإلكتروني (اشتراكات العملات الرقمية)",
+  "account.subscribe": "اشترك",
+  "account.yourSubscriptions": "اشتراكاتك",
+  "account.noSubscriptions": "ليس لديك أي اشتراكات بعد.",
+  "account.pause": "إيقاف مؤقت",
+  "account.resume": "استئناف",
+  "account.cancel": "إلغاء",
+
+  // Support (user ticket pages)
+  "support.newRequest": "طلب دعم جديد",
+  "support.contact": "تواصل مع الدعم",
+  "support.tellUs": "أخبرنا بما يحدث وسنرد عليك.",
+  "support.submitted": "تم إرسال طلبك. سنتابع معك عبر البريد الإلكتروني.",
+  "support.subject": "الموضوع",
+  "support.message": "الرسالة",
+  "support.submit": "إرسال",
+  "support.requests": "طلبات الدعم",
+  "support.new": "طلب جديد",
+  "support.noRequests": "لا توجد طلبات دعم بعد.",
+  "support.request": "طلب دعم",
+  "support.backToRequests": "← كل الطلبات",
+  "support.opened": "فُتح في",
+
+  // Creators (public list + profile)
+  "creators.title": "المبدعون",
+  "creators.desc": "اكتشف مبدعين مستقلين عبر كل الوسائط.",
+  "creators.none": "لا يوجد مبدعون بعد. عد قريبًا.",
+  "creators.publishedStories": "القصص المنشورة",
+  "creators.noPublished": "لا توجد قصص منشورة بعد.",
+  "creators.notFound": "المبدع غير موجود",
+
+  // Library
+  "library.title": "المكتبة",
+  "library.desc": "عناوينك الجارية عبر كل الوسائط.",
+  "library.continue": "متابعة",
+  "library.emptyHint": "لا شيء قيد التقدم بعد. ابدأ بالقراءة أو المشاهدة أو الاستماع.",
+  "library.comingSoon": "العناوين والمجموعات المحفوظة قادمة قريبًا.",
+
+  // Media detail / reader / shorts
+  "media.locked": "يتطلب هذا العنوان اشتراكًا أو شراءً.",
+  "media.viewPlans": "عرض الخطط",
+  "media.unavailable": "الوسائط غير متاحة.",
+  "media.notFound": "غير موجود",
+  "media.episodeLabel": "الحلقة",
+  "media.partLabel": "الجزء",
+  "media.reader": "القارئ",
+  "media.watch": "مشاهدة",
+  "media.listen": "استماع",
+  "media.post": "منشور",
+  "media.shorts": "المقاطع القصيرة",
+  "media.noShorts": "لا توجد مقاطع قصيرة بعد",
+
   // Settings
   "settings.adultContent": "المحتوى للبالغين",
   "settings.adultContentDescription":

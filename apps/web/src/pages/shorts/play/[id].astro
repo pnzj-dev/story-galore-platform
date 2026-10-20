@@ -2,19 +2,22 @@
 import Layout from "@/layouts/Layout.astro";
 import ShortsPlayer from "@/components/ShortsPlayer.svelte";
 import { fetchMediaByType } from "@/lib/gateway";
+import { getTranslations } from "@/i18n";
+
+const { t } = getTranslations(Astro.currentLocale);
 
 const shorts = await fetchMediaByType("VIDEO", "SHORT_FILM");
 const id = Astro.params.id ?? "";
 ---
 
-<Layout title="Shorts">
+<Layout title={t("media.shorts")}>
   {
     shorts.length > 0 ? (
       <ShortsPlayer client:load shorts={shorts} initialId={id} />
     ) : (
       <main class="px-6 py-24 text-center">
-        <h1 class="text-2xl font-bold">No shorts yet</h1>
-        <a href="/" class="mt-4 inline-block text-link">Back home</a>
+        <h1 class="text-2xl font-bold">{t("media.noShorts")}</h1>
+        <a href="/" class="mt-4 inline-block text-link">{t("story.backHome")}</a>
       </main>
     )
   }

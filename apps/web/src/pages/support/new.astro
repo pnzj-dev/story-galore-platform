@@ -1,6 +1,9 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import { actions } from "astro:actions";
+import { getTranslations } from "@/i18n";
+
+const { t } = getTranslations(Astro.currentLocale);
 
 const user = Astro.locals.user;
 if (!user) {
@@ -12,20 +15,20 @@ const submitted = Boolean(result?.data?.ok);
 const error = result?.error?.message;
 ---
 
-<Layout title="New support request">
+<Layout title={t("support.newRequest")}>
   <main class="mx-auto max-w-2xl px-12 py-12">
-    <h1 class="font-serif text-3xl font-bold">Contact support</h1>
-    <p class="mt-2 text-foreground-muted">Tell us what&rsquo;s going on and we&rsquo;ll get back to you.</p>
+    <h1 class="font-serif text-3xl font-bold">{t("support.contact")}</h1>
+    <p class="mt-2 text-foreground-muted">{t("support.tellUs")}</p>
 
     {
       submitted ? (
         <p class="mt-6 rounded-md border border-success bg-success/15 px-4 py-3 text-sm text-success">
-          Your request was submitted. We&rsquo;ll follow up by email.
+          {t("support.submitted")}
         </p>
       ) : (
         <form method="POST" action={actions.createSupportTicket} class="mt-6 max-w-lg space-y-4">
           <div>
-            <label for="subject" class="mb-1 block text-sm text-foreground-muted">Subject</label>
+            <label for="subject" class="mb-1 block text-sm text-foreground-muted">{t("support.subject")}</label>
             <input
               id="subject"
               name="subject"
@@ -36,7 +39,7 @@ const error = result?.error?.message;
             />
           </div>
           <div>
-            <label for="message" class="mb-1 block text-sm text-foreground-muted">Message</label>
+            <label for="message" class="mb-1 block text-sm text-foreground-muted">{t("support.message")}</label>
             <textarea
               id="message"
               name="message"
@@ -55,7 +58,7 @@ const error = result?.error?.message;
             type="submit"
             class="rounded-sm bg-primary px-4 py-2 font-semibold text-primary-foreground transition hover:opacity-90"
           >
-            Submit
+            {t("support.submit")}
           </button>
         </form>
       )

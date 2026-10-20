@@ -1,10 +1,12 @@
 ---
 import MediaDetail from "@/components/MediaDetail.astro";
 import { fetchPublication } from "@/lib/gateway";
+import { getTranslations } from "@/i18n";
 
+const { t } = getTranslations(Astro.currentLocale);
 const id = Astro.params.id ?? "";
 const detail = id ? await fetchPublication(id, Astro.locals.user?.$id ?? "") : null;
 if (!detail) Astro.response.status = 404;
 ---
 
-<MediaDetail detail={detail} kind="post" title="Post" />
+<MediaDetail detail={detail} kind="post" title={t("media.post")} />

@@ -137,6 +137,70 @@ const fr = {
   "support.notFound": "Demande introuvable",
   "support.backToSupport": "Retour à l'assistance",
 
+  // Account (index + billing)
+  "account.title": "Compte",
+  "account.yourAccount": "Votre compte",
+  "account.settingsDesc": "Préférences de contenu et vérification de l'âge.",
+  "account.billingDesc": "Gérez votre abonnement et vos moyens de paiement.",
+  "account.creatorStudioDesc": "Rédigez, publiez et gérez votre travail.",
+  "account.billingTitle": "Facturation et abonnement",
+  "account.plans": "Formules",
+  "account.noPlans": "Aucune formule n'est disponible pour l'instant.",
+  "account.payWith": "Payer avec",
+  "account.cardStripe": "Carte (Stripe)",
+  "account.cryptoNowPayments": "Crypto (NOWPayments)",
+  "account.emailCrypto": "E-mail (abonnements crypto)",
+  "account.subscribe": "S'abonner",
+  "account.yourSubscriptions": "Vos abonnements",
+  "account.noSubscriptions": "Vous n'avez aucun abonnement pour l'instant.",
+  "account.pause": "Mettre en pause",
+  "account.resume": "Reprendre",
+  "account.cancel": "Annuler",
+
+  // Support (user ticket pages)
+  "support.newRequest": "Nouvelle demande d'assistance",
+  "support.contact": "Contacter l'assistance",
+  "support.tellUs": "Dites-nous ce qui se passe et nous vous répondrons.",
+  "support.submitted": "Votre demande a été soumise. Nous vous répondrons par e-mail.",
+  "support.subject": "Objet",
+  "support.message": "Message",
+  "support.submit": "Envoyer",
+  "support.requests": "Demandes d'assistance",
+  "support.new": "Nouvelle demande",
+  "support.noRequests": "Aucune demande d'assistance pour l'instant.",
+  "support.request": "Demande d'assistance",
+  "support.backToRequests": "← Toutes les demandes",
+  "support.opened": "Ouverte le",
+
+  // Creators (public list + profile)
+  "creators.title": "Créateurs",
+  "creators.desc": "Découvrez des créateurs indépendants sur tous les supports.",
+  "creators.none": "Aucun créateur pour l'instant. Revenez bientôt.",
+  "creators.publishedStories": "Histoires publiées",
+  "creators.noPublished": "Aucune histoire publiée pour l'instant.",
+  "creators.notFound": "Créateur introuvable",
+
+  // Library
+  "library.title": "Bibliothèque",
+  "library.desc": "Vos titres en cours sur tous les supports.",
+  "library.continue": "Continuer",
+  "library.emptyHint": "Rien en cours pour l'instant. Commencez à lire, regarder ou écouter.",
+  "library.comingSoon": "Les titres et collections enregistrés arrivent bientôt.",
+
+  // Media detail / reader / shorts
+  "media.locked": "Ce titre nécessite un abonnement ou un achat.",
+  "media.viewPlans": "Voir les formules",
+  "media.unavailable": "Média indisponible.",
+  "media.notFound": "Introuvable",
+  "media.episodeLabel": "Épisode",
+  "media.partLabel": "Partie",
+  "media.reader": "Lecteur",
+  "media.watch": "Regarder",
+  "media.listen": "Écouter",
+  "media.post": "Publication",
+  "media.shorts": "Shorts",
+  "media.noShorts": "Aucun short pour l'instant",
+
   // Settings
   "settings.adultContent": "Contenu adulte",
   "settings.adultContentDescription":

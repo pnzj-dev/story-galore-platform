@@ -2,14 +2,16 @@
 import Layout from "@/layouts/Layout.astro";
 import { CreatorCard } from "@storygalore/ui";
 import { fetchCreators } from "@/lib/gateway";
+import { getTranslations } from "@/i18n";
 
+const { t } = getTranslations(Astro.currentLocale);
 const creators = await fetchCreators();
 ---
 
-<Layout title="Creators">
+<Layout title={t("creators.title")}>
   <main class="mx-auto max-w-[1400px] px-12 py-12">
-    <h1 class="text-3xl font-bold">Creators</h1>
-    <p class="mt-2 text-foreground-muted">Discover independent creators across every medium.</p>
+    <h1 class="text-3xl font-bold">{t("creators.title")}</h1>
+    <p class="mt-2 text-foreground-muted">{t("creators.desc")}</p>
 
     {
       creators.length > 0 ? (
@@ -18,7 +20,7 @@ const creators = await fetchCreators();
         </div>
       ) : (
         <p class="mt-8 rounded-xl border border-dashed border-border px-6 py-8 text-sm text-foreground-muted">
-          No creators yet. Check back soon.
+          {t("creators.none")}
         </p>
       )
     }

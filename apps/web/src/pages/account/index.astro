@@ -1,6 +1,9 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import { actions } from "astro:actions";
+import { getTranslations } from "@/i18n";
+
+const { t } = getTranslations(Astro.currentLocale);
 
 const user = Astro.locals.user;
 if (!user) {
@@ -10,7 +13,7 @@ if (!user) {
 const initial = (user.name ?? user.email ?? "A").trim().charAt(0).toUpperCase();
 ---
 
-<Layout title="Account">
+<Layout title={t("account.title")}>
   <main class="mx-auto max-w-4xl px-12 py-12">
     <div class="flex items-center gap-4">
       <span
@@ -19,7 +22,7 @@ const initial = (user.name ?? user.email ?? "A").trim().charAt(0).toUpperCase();
         {initial}
       </span>
       <div class="min-w-0">
-        <h1 class="font-serif text-3xl font-bold">{user.name ?? "Your account"}</h1>
+        <h1 class="font-serif text-3xl font-bold">{user.name ?? t("account.yourAccount")}</h1>
         {user.email && <p class="truncate text-sm text-foreground-muted">{user.email}</p>}
       </div>
     </div>
@@ -29,22 +32,29 @@ const initial = (user.name ?? user.email ?? "A").trim().charAt(0).toUpperCase();
         href="/settings"
         class="rounded-md border border-border bg-surface p-4 transition hover:border-foreground-muted"
       >
-        <h2 class="font-semibold">Settings</h2>
-        <p class="mt-1 text-sm text-foreground-muted">Content preferences and age verification.</p>
+        <h2 class="font-semibold">{t("menu.settings")}</h2>
+        <p class="mt-1 text-sm text-foreground-muted">{t("account.settingsDesc")}</p>
       </a>
       <a
         href="/account/billing"
         class="rounded-md border border-border bg-surface p-4 transition hover:border-foreground-muted"
       >
-        <h2 class="font-semibold">Billing</h2>
-        <p class="mt-1 text-sm text-foreground-muted">Manage your subscription and payment methods.</p>
+        <h2 class="font-semibold">{t("menu.billing")}</h2>
+        <p class="mt-1 text-sm text-foreground-muted">{t("account.billingDesc")}</p>
+      </a>
+      <a
+        href="/account/ai"
+        class="rounded-md border border-border bg-surface p-4 transition hover:border-foreground-muted"
+      >
+        <h2 class="font-semibold">{t("account.ai.title")}</h2>
+        <p class="mt-1 text-sm text-foreground-muted">{t("account.ai.desc")}</p>
       </a>
       <a
         href="/studio"
         class="rounded-md border border-border bg-surface p-4 transition hover:border-foreground-muted"
       >
-        <h2 class="font-semibold">Creator Studio</h2>
-        <p class="mt-1 text-sm text-foreground-muted">Draft, publish, and manage your work.</p>
+        <h2 class="font-semibold">{t("menu.creatorStudio")}</h2>
+        <p class="mt-1 text-sm text-foreground-muted">{t("account.creatorStudioDesc")}</p>
       </a>
     </div>
 
@@ -53,7 +63,7 @@ const initial = (user.name ?? user.email ?? "A").trim().charAt(0).toUpperCase();
         type="submit"
         class="rounded-sm border border-border px-4 py-2 text-sm transition hover:opacity-90"
       >
-        Sign out
+        {t("menu.signOut")}
       </button>
     </form>
   </main>

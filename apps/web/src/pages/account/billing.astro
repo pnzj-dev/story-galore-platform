@@ -2,6 +2,9 @@
 import Layout from "@/layouts/Layout.astro";
 import { actions } from "astro:actions";
 import { fetchPlans, fetchSubscriptions } from "@/lib/gateway";
+import { getTranslations } from "@/i18n";
+
+const { t } = getTranslations(Astro.currentLocale);
 
 const user = Astro.locals.user;
 if (!user) {
@@ -12,15 +15,15 @@ const plans = await fetchPlans(user.$id);
 const subscriptions = await fetchSubscriptions(user.$id);
 ---
 
-<Layout title="Billing & Subscription">
+<Layout title={t("account.billingTitle")}>
   <main class="mx-auto max-w-4xl px-6 py-12">
-    <h1 class="font-serif text-3xl font-bold">Billing & Subscription</h1>
+    <h1 class="font-serif text-3xl font-bold">{t("account.billingTitle")}</h1>
 
     <section class="mt-8">
-      <h2 class="text-xl font-semibold">Plans</h2>
+      <h2 class="text-xl font-semibold">{t("account.plans")}</h2>
       {
         plans.length === 0 ? (
-          <p class="mt-2 text-sm text-foreground-muted">No plans are available yet.</p>
+          <p class="mt-2 text-sm text-foreground-muted">{t("account.noPlans")}</p>
         ) : (
           <div class="mt-4 grid gap-4 sm:grid-cols-2">
             {plans.map((plan) => (
@@ -39,20 +42,20 @@ const subscriptions = await fetchSubscriptions(user.$id);
                   <input type="hidden" name="planId" value={plan.$id} />
                   <div>
                     <label for={`provider-${plan.$id}`} class="mb-1 block text-sm text-foreground-muted">
-                      Pay with
+                      {t("account.payWith")}
                     </label>
                     <select
                       name="provider"
                       id={`provider-${plan.$id}`}
                       class="w-full rounded-sm border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
                     >
-                      <option value="STRIPE">Card (Stripe)</option>
-                      <option value="NOWPAYMENTS">Crypto (NOWPayments)</option>
+                      <option value="STRIPE">{t("account.cardStripe")}</option>
+                      <option value="NOWPAYMENTS">{t("account.cryptoNowPayments")}</option>
                     </select>
                   </div>
                   <div>
                     <label for={`email-${plan.$id}`} class="mb-1 block text-sm text-foreground-muted">
-                      Email (crypto subscriptions)
+                      {t("account.emailCrypto")}
                     </label>
                     <input
                       type="email"
@@ -65,7 +68,7 @@ const subscriptions = await fetchSubscriptions(user.$id);
                     type="submit"
                     class="rounded-sm bg-primary px-4 py-2 font-semibold text-primary-foreground transition hover:opacity-90"
                   >
-                    Subscribe
+                    {t("account.subscribe")}
                   </button>
                 </form>
               </div>
@@ -76,10 +79,10 @@ const subscriptions = await fetchSubscriptions(user.$id);
     </section>
 
     <section class="mt-10">
-      <h2 class="text-xl font-semibold">Your subscriptions</h2>
+      <h2 class="text-xl font-semibold">{t("account.yourSubscriptions")}</h2>
       {
         subscriptions.length === 0 ? (
-          <p class="mt-2 text-sm text-foreground-muted">You have no subscriptions yet.</p>
+          <p class="mt-2 text-sm text-foreground-muted">{t("account.noSubscriptions")}</p>
         ) : (
           <ul class="mt-4 space-y-3">
             {subscriptions.map((sub) => (
@@ -100,7 +103,7 @@ const subscriptions = await fetchSubscriptions(user.$id);
                           type="submit"
                           class="rounded-sm border border-border px-3 py-1.5 text-sm transition hover:opacity-90"
                         >
-                          Pause
+                          {t("account.pause")}
                         </button>
                       </form>
                     )}
@@ -111,7 +114,7 @@ const subscriptions = await fetchSubscriptions(user.$id);
                           type="submit"
                           class="rounded-sm border border-border px-3 py-1.5 text-sm transition hover:opacity-90"
                         >
-                          Resume
+                          {t("account.resume")}
                         </button>
                       </form>
                     )}
@@ -122,7 +125,7 @@ const subscriptions = await fetchSubscriptions(user.$id);
                           type="submit"
                           class="rounded-sm border border-danger px-3 py-1.5 text-sm text-danger transition hover:opacity-90"
                         >
-                          Cancel
+                          {t("account.cancel")}
                         </button>
                       </form>
                     )}

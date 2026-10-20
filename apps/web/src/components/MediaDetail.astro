@@ -5,6 +5,9 @@ import { ImageViewer } from "@storygalore/ui";
 import type { PlaylistItem } from "@storygalore/ui";
 import { fetchSeriesEpisodes, fetchMediaProgress } from "@/lib/gateway";
 import type { PublicationDetail } from "@/lib/gateway";
+import { getTranslations } from "@/i18n";
+
+const { t } = getTranslations(Astro.currentLocale);
 
 interface Props {
   detail: PublicationDetail | null;
@@ -20,8 +23,8 @@ const cover = detail?.coverUrl;
 const rating =
   pub?.contentRating && pub!.contentRating !== "ALL_AGES"
     ? pub!.contentRating === "ADULT_18_PLUS"
-      ? "18+"
-      : "Teen"
+      ? t("studio.editor.rating.adult")
+      : t("studio.editor.rating.teen")
     : null;
 
 // "Continue watching" cards land on ?autoplay=1 to start playback immediately.
@@ -44,7 +47,7 @@ if (kind === "video" && pubId) {
         publicationId: e.publicationId,
         mediaId: e.mediaId,
         episodeId: e.episodeId,
-        label: e.title ?? `Episode ${e.episodeNumber ?? i + 1}`,
+        label: e.title ?? `${t("media.episodeLabel")} ${e.episodeNumber ?? i + 1}`,
         src: e.url!,
       }));
     videoInitialIndex = Math.max(0, videoItems.findIndex((it) => it.publicationId === pubId));
@@ -53,7 +56,7 @@ if (kind === "video" && pubId) {
       id: m.mediaId,
       mediaId: m.mediaId,
       publicationId: pubId,
-      label: m.label ?? `Part ${(m.position ?? i) + 1}`,
+      label: m.label ?? `${t("media.partLabel")} ${(m.position ?? i) + 1}`,
       src: m.url!,
     }));
     if (userId) {
@@ -116,12 +119,12 @@ if (kind === "video" && pubId) {
                 {
                   locked ? (
                     <div class="rounded-md border border-dashed border-border px-6 py-10 text-center">
-                      <p class="text-lg font-semibold">This {kind} requires a subscription or purchase.</p>
+                      <p class="text-lg font-semibold">{t("media.locked")}</p>
                       <a
                         href="/account/billing"
                         class="mt-4 inline-block rounded-sm bg-primary px-4 py-2 text-primary-foreground"
                       >
-                        View plans
+                        {t("media.viewPlans")}
                       </a>
                     </div>
                   ) : allowed.length > 0 ? (
@@ -158,7 +161,7 @@ if (kind === "video" && pubId) {
                     )
                   ) : (
                     <p class="rounded-md border border-dashed border-border px-6 py-8 text-sm text-foreground-muted">
-                      Media unavailable.
+                      {t("media.unavailable")}
                     </p>
                   )
                 }
@@ -169,8 +172,8 @@ if (kind === "video" && pubId) {
       </main>
     ) : (
       <main class="mx-auto max-w-3xl px-6 py-24 text-center">
-        <h1 class="text-3xl font-bold">Not found</h1>
-        <a href="/" class="mt-6 inline-block text-link">Back home</a>
+        <h1 class="text-3xl font-bold">{t("media.notFound")}</h1>
+        <a href="/" class="mt-6 inline-block text-link">{t("story.backHome")}</a>
       </main>
     )
   }
