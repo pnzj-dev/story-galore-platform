@@ -1,0 +1,48 @@
+---
+import AdminLayout from "@/layouts/AdminLayout.astro";
+import AdminDetail from "@/components/AdminDetail.astro";
+import { fetchAdminUser, fetchAdminSupportTickets } from "@/lib/gateway";
+import { getTranslations } from "@/i18n";
+
+const { t } = getTranslations(Astro.currentLocale);
+const admin = Astro.locals.user;
+const userId = Astro.params.userId ?? "";
+const detail = admin ? await fetchAdminUser(admin.$id, userId) : null;
+if (!detail) Astro.response.status = 404;
+const tickets = admin
+  ? (await fetchAdminSupportTickets(admin.$id)).filter((tk) => tk.userId === userId)
+  : [];
+---
+
+<AdminLayout title={`${t("admin.label")} — ${t("admin.user")}`}>
+  <main class="mx-auto max-w-[1600px] px-6 py-10">
+    <a href="/admin/support" class="text-sm text-foreground-muted transition hover:text-foreground">{t("admin.backToAdmin")}</a>
+    {
+      detail ? (
+        <>
+          <h1 class="mt-4 text-3xl font-bold">{detail.name ?? detail.email ?? t("admin.user")}</h1>
+          <div class="mt-6 max-w-2xl">
+            <AdminDetail data={detail as unknown as Record<string, unknown>} />
+          </div>
+          <section class="mt-10">
+            <h2 class="text-xl font-semibold">{t("admin.supportTickets")}</h2>
+            {tickets.length > 0 ? (
+              <ul class="mt-4 space-y-2">
+                {tickets.map((tk) => (
+                  <li class="flex items-center justify-between rounded-md border border-border bg-surface p-3">
+                    <a href={`/admin/support/tickets/${tk.$id}`} class="font-semibold">{tk.subject}</a>
+                    <span class="text-xs uppercase text-foreground-muted">{tk.status}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p class="mt-4 text-sm text-foreground-muted">{t("admin.noTickets")}</p>
+            )}
+          </section>
+        </>
+      ) : (
+        <p class="mt-8 text-foreground-muted">{t("admin.notFound.user")}</p>
+      )
+    }
+  </main>
+</AdminLayout>

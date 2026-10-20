@@ -1,0 +1,53 @@
+---
+import MinimalLayout from "@/layouts/MinimalLayout.astro";
+import { createServerClient } from "@storygalore/appwrite-client";
+import { getTranslations } from "@/i18n";
+import { getRelativeLocaleUrl } from "astro:i18n";
+
+const { t } = getTranslations(Astro.currentLocale);
+const endpoint = import.meta.env.PUBLIC_APPWRITE_ENDPOINT;
+const projectId = import.meta.env.PUBLIC_APPWRITE_PROJECT_ID;
+
+const userId = Astro.url.searchParams.get("userId") ?? "";
+const secret = Astro.url.searchParams.get("secret") ?? "";
+
+let status: "idle" | "success" | "error" = "idle";
+if (userId && secret) {
+  try {
+    const { account } = createServerClient({ endpoint, projectId });
+    await account.updateVerification(userId, secret);
+    status = "success";
+  } catch {
+    status = "error";
+  }
+}
+---
+
+<MinimalLayout title={`${t("auth.verifyEmail")} — StoryGalore`}>
+  <div class="flex min-h-screen items-center justify-center px-4">
+    <main class="w-full max-w-sm rounded-md border border-border bg-surface/60 p-8 text-center shadow-xl">
+      <h1 class="font-serif text-2xl font-bold">{t("auth.verifyEmail")}</h1>
+      {status === "success" ? (
+        <>
+          <p class="mt-3 text-sm text-foreground-muted">{t("auth.verifyEmailSuccess")}</p>
+          <a
+            href={getRelativeLocaleUrl(Astro.currentLocale!, "auth/login")}
+            class="mt-6 inline-block rounded-sm bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
+          >
+            {t("nav.signIn")}
+          </a>
+        </>
+      ) : (
+        <>
+          <p class="mt-3 text-sm text-danger">{t("auth.verifyEmailError")}</p>
+          <a
+            href={getRelativeLocaleUrl(Astro.currentLocale!, "auth/login")}
+            class="mt-6 inline-block text-link hover:text-link"
+          >
+            {t("auth.backToSignIn")}
+          </a>
+        </>
+      )}
+    </main>
+  </div>
+</MinimalLayout>

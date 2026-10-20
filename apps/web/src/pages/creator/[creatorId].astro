@@ -1,0 +1,79 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { fetchCreator, fetchProjects } from "@/lib/gateway";
+
+const user = Astro.locals.user;
+if (!user) {
+  return Astro.redirect("/auth/login");
+}
+
+const creatorId = Astro.params.creatorId ?? "";
+const creator = creatorId ? await fetchCreator(creatorId) : null;
+if (!creator) {
+  Astro.response.status = 404;
+}
+
+// Authoritative workspace access: the actor must be the creator identity being
+// addressed (creator membership is the sole V1 grant; teams are not yet wired).
+const authorized = Boolean(creator && creator.actorId === user.$id);
+const projects = authorized ? await fetchProjects(user.$id) : [];
+---
+
+<Layout title={creator ? `${creator.displayName} — Creator workspace` : "Creator workspace"}>
+  {
+    !creator ? (
+      <main class="mx-auto max-w-3xl px-6 py-24 text-center">
+        <h1 class="text-3xl font-bold">Creator not found</h1>
+        <a href="/" class="mt-6 inline-block text-link">Back home</a>
+      </main>
+    ) : !authorized ? (
+      <main class="mx-auto max-w-3xl px-6 py-24 text-center">
+        <h1 class="text-3xl font-bold">Not authorized</h1>
+        <p class="mt-2 text-foreground-muted">You do not have access to this creator workspace.</p>
+        <a href="/" class="mt-6 inline-block text-link">Back home</a>
+      </main>
+    ) : (
+      <main class="mx-auto max-w-5xl px-6 py-12">
+        <div class="flex items-center gap-4">
+          <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-surface-elevated text-2xl font-bold text-foreground-muted">
+            {creator.displayName.charAt(0)}
+          </div>
+          <div>
+            <h1 class="font-serif text-3xl font-bold">{creator.displayName}</h1>
+            <p class="text-foreground-muted">@{creator.handle}</p>
+          </div>
+          <a
+            href="/studio"
+            class="ml-auto rounded-sm bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
+          >
+            Open Studio
+          </a>
+        </div>
+
+        <h2 class="mt-10 text-xl font-semibold">Projects</h2>
+        {projects.length > 0 ? (
+          <ul class="mt-4 space-y-2">
+            {projects.map((p) => (
+              <li>
+                <a
+                  href={`/studio/projects/${p.$id}`}
+                  class="block rounded-md border border-border bg-surface p-4 transition hover:border-foreground-muted"
+                >
+                  <div class="flex items-center justify-between">
+                    <p class="font-semibold">{p.name}</p>
+                    {p.status && <span class="text-xs text-foreground-muted">{p.status}</span>}
+                  </div>
+                  {p.description && <p class="mt-1 text-sm text-foreground-muted">{p.description}</p>}
+                </a>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p class="mt-4 rounded-md border border-dashed border-border px-6 py-8 text-sm text-foreground-muted">
+            No projects yet.
+          </p>
+        )}
+      </main>
+    )
+  }
+</Layout>

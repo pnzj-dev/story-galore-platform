@@ -1,4 +1,5 @@
 import type { MediaType, ContentRating, MediaCardData, CreatorCardData } from "@storygalore/ui";
+import type { MessageKey } from "@/i18n";
 
 export interface GatewayOutput<T = unknown> {
   status: "SUCCESS" | "FAILED";
@@ -1013,4 +1014,292 @@ export async function fetchAiProviders(actorId: string): Promise<AiProviderSumma
   const out = await invokeApi<{ items?: AiProviderSummary[] }>("ai_provider_list", {}, actorId);
   if (out.status !== "SUCCESS" || !out.result?.items) return [];
   return out.result.items;
+}
+
+export interface AdminCategoryMetric {
+  labelKey: MessageKey;
+  value: string | number;
+}
+
+export interface AdminCategorySection {
+  titleKey: MessageKey;
+  entries: Record<string, number>;
+}
+
+export interface AdminCategoryData {
+  metrics: AdminCategoryMetric[];
+  sections: AdminCategorySection[];
+}
+
+function countBy(list: Array<Record<string, unknown>>, field: string): Record<string, number> {
+  const out: Record<string, number> = {};
+  for (const row of list) {
+    const key = String(row[field] ?? "UNKNOWN");
+    out[key] = (out[key] ?? 0) + 1;
+  }
+  return out;
+}
+
+function metric(labelKey: MessageKey, value: string | number): AdminCategoryMetric {
+  return { labelKey, value };
+}
+
+function section(titleKey: MessageKey, entries: Record<string, number>): AdminCategorySection {
+  return { titleKey, entries };
+}
+
+/**
+ * Server-authoritative per-category admin breakdown. Reuses the existing
+ * admin_* gateway reads; categories without a backing data source return an
+ * empty breakdown (rendered as a real empty state, never fabricated data).
+ */
+export async function fetchAdminCategory(actorId: string, category: string): Promise<AdminCategoryData> {
+  const empty: AdminCategoryData = { metrics: [], sections: [] };
+
+  switch (category) {
+    case "advertising": {
+      const campaigns = await fetchAdCampaigns();
+      const placements = await fetchAdPlacements();
+      return {
+        metrics: [
+          metric("admin.metric.campaigns", campaigns.length),
+          metric("admin.metric.placements", placements.length),
+        ],
+        sections: [],
+      };
+    }
+    case "ai": {
+      const cost = await fetchAiCost(actorId);
+      const ops = await fetchAdminOperations(actorId);
+      const sections: AdminCategorySection[] = [];
+      if (ops?.generationsByStatus) sections.push(section("admin.section.generationsByStatus", ops.generationsByStatus));
+      return {
+        metrics: [
+          metric("admin.creditsReserved", cost?.creditsReserved ?? 0),
+          metric("admin.creditsSettled", cost?.creditsSettled ?? 0),
+          metric("admin.creditsRefunded", cost?.creditsRefunded ?? 0),
+        ],
+        sections,
+      };
+    }
+    case "community": {
+      const comments = await fetchAdminList("admin_comment_list", actorId);
+      const byStatus = countBy(comments, "status");
+      return {
+        metrics: [metric("admin.metric.commentsCount", comments.length)],
+        sections: Object.keys(byStatus).length ? [section("admin.section.contentByStatus", byStatus)] : [],
+      };
+    }
+    case "content": {
+      const a = await fetchAdminAnalytics(actorId);
+      const sections: AdminCategorySection[] = [];
+      if (a?.contentByType) sections.push(section("admin.section.contentByType", a.contentByType));
+      if (a?.contentByStatus) sections.push(section("admin.section.contentByStatus", a.contentByStatus));
+      return { metrics: [], sections };
+    }
+    case "creators": {
+      const a = await fetchAdminAnalytics(actorId);
+      const creators = await fetchAdminList("admin_creator_list", actorId);
+      const sections: AdminCategorySection[] = [];
+      if (a?.creatorsByStatus) sections.push(section("admin.section.creatorsByStatus", a.creatorsByStatus));
+      return {
+        metrics: [metric("admin.metric.creatorsCount", creators.length)],
+        sections,
+      };
+    }
+    case "marketing": {
+      const acquisition = await fetchAdminAcquisition(actorId);
+      const cohorts = await fetchAdminCohorts(actorId);
+      const newActors = acquisition.reduce((sum, p) => sum + (p.newActors ?? 0), 0);
+      return {
+        metrics: [
+          metric("admin.metric.newActors", newActors),
+          metric("admin.metric.cohortsCount", cohorts.length),
+        ],
+        sections: [],
+      };
+    }
+    case "operations": {
+      const ops = await fetchAdminOperations(actorId);
+      const sections: AdminCategorySection[] = [];
+      if (ops?.generationsByStatus) sections.push(section("admin.section.generationsByStatus", ops.generationsByStatus));
+      return {
+        metrics: [
+          metric("admin.domainEvents", ops?.domainEvents ?? 0),
+          metric("admin.analyticsEvents", ops?.analyticsEvents ?? 0),
+          metric("admin.pendingGenerations", ops?.pendingGenerations ?? 0),
+          metric("admin.failedGenerations", ops?.failedGenerations ?? 0),
+        ],
+        sections,
+      };
+    }
+    case "payments": {
+      const a = await fetchAdminAnalytics(actorId);
+      const sections: AdminCategorySection[] = [];
+      if (a?.paymentsByProvider) sections.push(section("admin.section.paymentsByProvider", a.paymentsByProvider));
+      if (a?.paymentsByStatus) sections.push(section("admin.section.paymentsByStatus", a.paymentsByStatus));
+      return { metrics: [], sections };
+    }
+    case "reports": {
+      const a = await fetchAdminAnalytics(actorId);
+      const ops = await fetchAdminOperations(actorId);
+      const sections: AdminCategorySection[] = [];
+      if (a?.contentByStatus) sections.push(section("admin.section.contentByStatus", a.contentByStatus));
+      if (a?.subscriptionsByStatus) sections.push(section("admin.section.subscriptionsByStatus", a.subscriptionsByStatus));
+      if (a?.paymentsByStatus) sections.push(section("admin.section.paymentsByStatus", a.paymentsByStatus));
+      if (a?.creatorsByStatus) sections.push(section("admin.section.creatorsByStatus", a.creatorsByStatus));
+      if (ops?.generationsByStatus) sections.push(section("admin.section.generationsByStatus", ops.generationsByStatus));
+      return { metrics: [], sections };
+    }
+    case "revenue": {
+      const overview = await fetchAdminOverview(actorId);
+      const k = overview?.kpis;
+      return {
+        metrics: [
+          metric("admin.mrr", k ? `$${((k.mrrCents ?? 0) / 100).toFixed(2)}` : "$0.00"),
+          metric("admin.revenue30d", k ? `$${((k.revenue30dCents ?? 0) / 100).toFixed(2)}` : "$0.00"),
+          metric("admin.activePaidSubscribers", k?.activePaidSubscribers ?? 0),
+          metric("admin.churned30d", k?.churned30d ?? 0),
+        ],
+        sections: [],
+      };
+    }
+    case "subscriptions": {
+      const a = await fetchAdminAnalytics(actorId);
+      const sections: AdminCategorySection[] = [];
+      if (a?.subscriptionsByStatus) sections.push(section("admin.section.subscriptionsByStatus", a.subscriptionsByStatus));
+      return { metrics: [], sections };
+    }
+    case "support": {
+      const tickets = await fetchAdminSupportTickets(actorId);
+      const byStatus = countBy(tickets as unknown as Array<Record<string, unknown>>, "status");
+      return {
+        metrics: [metric("admin.metric.ticketsCount", tickets.length)],
+        sections: Object.keys(byStatus).length ? [section("admin.section.contentByStatus", byStatus)] : [],
+      };
+    }
+    case "consumerEconomics":
+    case "consumer-economics": {
+      const overview = await fetchAdminOverview(actorId);
+      const k = overview?.kpis;
+      return {
+        metrics: [
+          metric("admin.mrr", k ? `$${((k.mrrCents ?? 0) / 100).toFixed(2)}` : "$0.00"),
+          metric("admin.revenue30d", k ? `$${((k.revenue30dCents ?? 0) / 100).toFixed(2)}` : "$0.00"),
+          metric("admin.activePaidSubscribers", k?.activePaidSubscribers ?? 0),
+          metric("admin.churned30d", k?.churned30d ?? 0),
+        ],
+        sections: [],
+      };
+    }
+    case "consumption": {
+      const cost = await fetchAiCost(actorId);
+      return {
+        metrics: [
+          metric("admin.creditsReserved", cost?.creditsReserved ?? 0),
+          metric("admin.creditsSettled", cost?.creditsSettled ?? 0),
+          metric("admin.creditsRefunded", cost?.creditsRefunded ?? 0),
+        ],
+        sections: [],
+      };
+    }
+    case "plans":
+    case "pricing": {
+      const plans = await fetchPlanProfitability(actorId);
+      const totalSubs = plans.reduce((sum, p) => sum + (p.activeSubscribers ?? 0), 0);
+      return {
+        metrics: [
+          metric("admin.metric.plansCount", plans.length),
+          metric("admin.metric.totalActiveSubscribers", totalSubs),
+        ],
+        sections: [],
+      };
+    }
+    case "unit-economics":
+    case "unitEconomics": {
+      const overview = await fetchAdminOverview(actorId);
+      const k = overview?.kpis;
+      const subs = k?.activePaidSubscribers ?? 0;
+      const arpu = subs > 0 ? (k?.revenue30dCents ?? 0) / subs / 100 : 0;
+      return {
+        metrics: [
+          metric("admin.mrr", k ? `$${((k.mrrCents ?? 0) / 100).toFixed(2)}` : "$0.00"),
+          metric("admin.metric.arpu30d", `$${arpu.toFixed(2)}`),
+        ],
+        sections: [],
+      };
+    }
+    case "anomalies": {
+      const incidents = await fetchIncidents(actorId);
+      const alerts = await fetchAlerts(actorId);
+      const open = incidents.filter((i) => i.status !== "RESOLVED").length;
+      return {
+        metrics: [
+          metric("admin.metric.openIncidents", open),
+          metric("admin.metric.alertsCount", alerts.length),
+        ],
+        sections: [],
+      };
+    }
+    case "governance":
+    case "audit": {
+      const sec = await fetchAdminSecurity(actorId);
+      return {
+        metrics: [
+          metric("admin.auditEvents", sec?.auditEvents ?? 0),
+          metric("admin.domainEventsOutbox", sec?.domainEvents ?? 0),
+        ],
+        sections: [],
+      };
+    }
+    case "reserves": {
+      const cost = await fetchAiCost(actorId);
+      return {
+        metrics: [metric("admin.creditsReserved", cost?.creditsReserved ?? 0)],
+        sections: [],
+      };
+    }
+    case "tax": {
+      const a = await fetchAdminAnalytics(actorId);
+      const sections: AdminCategorySection[] = [];
+      if (a?.paymentsByProvider) sections.push(section("admin.section.paymentsByProvider", a.paymentsByProvider));
+      return { metrics: [], sections };
+    }
+    case "supportOps": {
+      const tickets = await fetchAdminSupportTickets(actorId);
+      const byStatus = countBy(tickets as unknown as Array<Record<string, unknown>>, "status");
+      return {
+        metrics: [metric("admin.metric.ticketsCount", tickets.length)],
+        sections: Object.keys(byStatus).length ? [section("admin.section.contentByStatus", byStatus)] : [],
+      };
+    }
+    case "inbox":
+    case "escalations": {
+      const tickets = await fetchAdminSupportTickets(actorId);
+      const byStatus = countBy(tickets as unknown as Array<Record<string, unknown>>, "status");
+      return {
+        metrics: [metric("admin.metric.ticketsCount", tickets.length)],
+        sections: Object.keys(byStatus).length ? [section("admin.section.contentByStatus", byStatus)] : [],
+      };
+    }
+    case "modReports": {
+      const comments = await fetchAdminList("admin_comment_list", actorId);
+      const byStatus = countBy(comments, "status");
+      return {
+        metrics: [metric("admin.metric.commentsCount", comments.length)],
+        sections: Object.keys(byStatus).length ? [section("admin.section.contentByStatus", byStatus)] : [],
+      };
+    }
+    case "refunds": {
+      const payments = await fetchAdminList("admin_payment_list", actorId);
+      return {
+        metrics: [metric("admin.metric.paymentsCount", payments.length)],
+        sections: [],
+      };
+    }
+    default:
+      // media, simulator, sla, knowledge, macros, supportSettings, function,
+      // settings, mediaDistribution, pmAccess — no backing data source yet.
+      return empty;
+  }
 }

@@ -1,0 +1,44 @@
+---
+import MinimalLayout from "@/layouts/MinimalLayout.astro";
+import { createServerClient, SESSION_COOKIE } from "@storygalore/appwrite-client";
+import { getTranslations } from "@/i18n";
+import { getRelativeLocaleUrl } from "astro:i18n";
+
+const { t } = getTranslations(Astro.currentLocale);
+const endpoint = import.meta.env.PUBLIC_APPWRITE_ENDPOINT;
+const projectId = import.meta.env.PUBLIC_APPWRITE_PROJECT_ID;
+
+const userId = Astro.url.searchParams.get("userId");
+const secret = Astro.url.searchParams.get("secret");
+
+if (userId && secret) {
+  try {
+    const { account } = createServerClient({ endpoint, projectId });
+    const session = await account.createSession(userId, secret);
+    Astro.cookies.set(SESSION_COOKIE, session.secret, {
+      httpOnly: true,
+      secure: import.meta.env.PROD,
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 30,
+    });
+    return Astro.redirect(getRelativeLocaleUrl(Astro.currentLocale!, "/") || "/");
+  } catch {
+    // fall through to the error state
+  }
+}
+---
+
+<MinimalLayout title={`${t("nav.signIn")} — StoryGalore`}>
+  <div class="flex min-h-screen items-center justify-center px-4">
+    <main class="w-full max-w-sm rounded-md border border-border bg-surface/60 p-8 text-center shadow-xl">
+      <h1 class="font-serif text-2xl font-bold">{t("auth.callbackError")}</h1>
+      <a
+        href={getRelativeLocaleUrl(Astro.currentLocale!, "auth/login")}
+        class="mt-6 inline-block text-link hover:text-link"
+      >
+        {t("auth.backToSignIn")}
+      </a>
+    </main>
+  </div>
+</MinimalLayout>

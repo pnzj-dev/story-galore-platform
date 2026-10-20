@@ -12,6 +12,7 @@ import {
 } from "appwrite";
 
 export { ID } from "appwrite";
+export { OAuthProvider } from "appwrite";
 export type { Models } from "appwrite";
 
 export interface AppwriteConfig {

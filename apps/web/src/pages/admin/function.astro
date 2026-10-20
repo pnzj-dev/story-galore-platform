@@ -1,0 +1,22 @@
+---
+import AdminLayout from "@/layouts/AdminLayout.astro";
+import AdminSection from "@/components/AdminSection.astro";
+import { fetchAdminCategory } from "@/lib/gateway";
+import { getTranslations } from "@/i18n";
+
+const { t } = getTranslations(Astro.currentLocale);
+const user = Astro.locals.user;
+const data = user ? await fetchAdminCategory(user.$id, "function") : null;
+const metrics = (data?.metrics ?? []).map((m) => ({ label: t(m.labelKey), value: m.value }));
+const sections = (data?.sections ?? []).map((s) => ({ title: t(s.titleKey), entries: s.entries }));
+---
+
+<AdminLayout title={`${t("admin.label")} — ${t("admin.cat.function")}`}>
+  <AdminSection
+    title={t("admin.cat.function")}
+    metrics={metrics}
+    sections={sections}
+    empty={Boolean(data && data.metrics.length === 0 && data.sections.length === 0)}
+    emptyText={t("admin.noCategoryData")}
+  />
+</AdminLayout>

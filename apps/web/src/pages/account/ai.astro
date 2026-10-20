@@ -1,0 +1,72 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { fetchCreatorAnalytics, fetchAiProviders } from "@/lib/gateway";
+
+const user = Astro.locals.user;
+if (!user) {
+  return Astro.redirect("/auth/login");
+}
+
+const analytics = await fetchCreatorAnalytics(user.$id);
+const providers = await fetchAiProviders(user.$id);
+const creditProvider = providers.find((p) => p.creditEligible === true);
+const byBilling = analytics?.generationsByBilling ?? {};
+---
+
+<Layout title="AI credits & usage">
+  <main class="mx-auto max-w-4xl px-6 py-12">
+    <h1 class="font-serif text-3xl font-bold">AI credits &amp; usage</h1>
+    <p class="mt-1 text-sm text-foreground-muted">
+      AI generation is metered and entitlement-checked server-side. Credit eligibility depends on the
+      billing mode and execution location of each request.
+    </p>
+
+    <section class="mt-8">
+      <h2 class="text-xl font-semibold">Credit provider</h2>
+      {creditProvider ? (
+        <div class="mt-3 rounded-md border border-border bg-surface p-4">
+          <p class="font-semibold">{creditProvider.displayName ?? creditProvider.providerId}</p>
+          <p class="mt-1 text-sm text-foreground-muted">
+            {creditProvider.creditCost ?? 1} credit(s) per generation
+          </p>
+        </div>
+      ) : (
+        <p class="mt-3 rounded-md border border-dashed border-border px-6 py-6 text-sm text-foreground-muted">
+          No credit-eligible provider is registered yet. BYOK and user-hosted runs never consume platform credits.
+        </p>
+      )}
+    </section>
+
+    <section class="mt-8">
+      <h2 class="text-xl font-semibold">Usage</h2>
+      <div class="mt-3 grid gap-4 sm:grid-cols-3">
+        <div class="rounded-md border border-border bg-surface p-4">
+          <p class="text-2xl font-bold tabular-nums">{analytics?.generationTotal ?? 0}</p>
+          <p class="text-sm text-foreground-muted">Total generations</p>
+        </div>
+        <div class="rounded-md border border-border bg-surface p-4">
+          <p class="text-2xl font-bold tabular-nums">{analytics?.generationCreditEligible ?? 0}</p>
+          <p class="text-sm text-foreground-muted">Credit-eligible generations</p>
+        </div>
+        <div class="rounded-md border border-border bg-surface p-4">
+          <p class="text-2xl font-bold tabular-nums">{analytics?.projects ?? 0}</p>
+          <p class="text-sm text-foreground-muted">Projects</p>
+        </div>
+      </div>
+
+      {Object.keys(byBilling).length > 0 && (
+        <div class="mt-6 max-w-md">
+          <h3 class="text-lg font-semibold">By billing mode</h3>
+          <ul class="mt-3 space-y-2">
+            {Object.entries(byBilling).map(([mode, count]) => (
+              <li class="flex items-center justify-between rounded-md border border-border bg-surface p-3">
+                <span class="text-sm">{mode}</span>
+                <span class="text-sm font-semibold tabular-nums">{count}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </section>
+  </main>
+</Layout>
