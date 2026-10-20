@@ -1,6 +1,7 @@
 ---
 import "@/styles/global.css";
 import { ClientRouter } from "astro:transitions";
+import { getTranslations } from "@/i18n";
 
 interface Props {
   title: string;
@@ -8,12 +9,13 @@ interface Props {
 }
 
 const { title, description } = Astro.props;
+const { locale, dir } = getTranslations(Astro.currentLocale);
 
 const canonicalUrl = Astro.site ? new URL(Astro.url.pathname, Astro.site).toString() : undefined;
 ---
 
 <!doctype html>
-<html lang="en" dir="ltr" data-theme="dark">
+<html lang={locale} dir={dir} data-theme="dark">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />

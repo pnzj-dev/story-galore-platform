@@ -1,0 +1,66 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { actions } from "astro:actions";
+import { getTranslations } from "@/i18n";
+import { getRelativeLocaleUrl } from "astro:i18n";
+
+const { t } = getTranslations(Astro.currentLocale);
+
+const user = Astro.locals.user;
+if (!user) {
+  return Astro.redirect(getRelativeLocaleUrl(Astro.currentLocale!, "auth/login"));
+}
+
+const result = Astro.getActionResult(actions.updateAdultSettings);
+if (result?.data?.ok) {
+  return Astro.redirect(getRelativeLocaleUrl(Astro.currentLocale!, "settings"));
+}
+const error = result?.error?.message;
+---
+
+<Layout title={t("menu.settings")}>
+  <main class="mx-auto max-w-4xl px-6 py-12">
+    <h1 class="font-serif text-3xl font-bold">{t("menu.settings")}</h1>
+
+    <section class="mt-8">
+      <h2 class="text-xl font-semibold">{t("settings.adultContent")}</h2>
+      <p class="mt-1 text-sm text-foreground-muted">{t("settings.adultContentDescription")}</p>
+      <form method="POST" action={actions.updateAdultSettings} class="mt-4 max-w-sm space-y-4">
+        <div>
+          <label for="dateOfBirth" class="mb-1 block text-sm text-foreground-muted">{t("settings.dateOfBirth")}</label>
+          <input
+            id="dateOfBirth"
+            name="dateOfBirth"
+            type="date"
+            required
+            class="w-full rounded-sm border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
+          />
+        </div>
+        <div>
+          <label for="adultContentOptIn" class="mb-1 block text-sm text-foreground-muted">{t("settings.enableAdult")}</label>
+          <select
+            id="adultContentOptIn"
+            name="adultContentOptIn"
+            class="w-full rounded-sm border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
+          >
+            <option value="false">{t("settings.no")}</option>
+            <option value="true">{t("settings.yes")}</option>
+          </select>
+        </div>
+
+        {error && (
+          <p class="rounded-sm border border-danger bg-danger/15 px-3 py-2 text-sm text-danger" role="alert">
+            {error}
+          </p>
+        )}
+
+        <button
+          type="submit"
+          class="rounded-sm bg-primary px-4 py-2 font-semibold text-primary-foreground transition hover:opacity-90"
+        >
+          {t("settings.save")}
+        </button>
+      </form>
+    </section>
+  </main>
+</Layout>

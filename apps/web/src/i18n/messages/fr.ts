@@ -69,6 +69,38 @@ const fr = {
   "support.email": "Assistance par e-mail",
   "support.reply":
     "Nous répondons généralement sous un jour ouvré. Les tickets d'assistance sont suivis dans StoryGalore ; les escalades techniques sont suivies dans les tickets GitHub.",
+
+  // Auth
+  "auth.welcomeBack": "Bon retour",
+  "auth.signInPrompt": "Connectez-vous pour reprendre là où vous vous étiez arrêté.",
+  "auth.email": "E-mail",
+  "auth.password": "Mot de passe",
+  "auth.name": "Nom",
+  "auth.createAccount": "Créer un compte",
+  "auth.newHere": "Nouveau ici ?",
+  "auth.alreadyHaveAccount": "Vous avez déjà un compte ?",
+  "auth.createYourAccount": "Créez votre compte",
+  "auth.startReading": "Commencez à lire, regarder et écouter.",
+  "auth.resetPassword": "Réinitialiser le mot de passe",
+  "auth.enterEmail": "Saisissez votre e-mail et nous vous enverrons un lien de réinitialisation.",
+  "auth.sendResetLink": "Envoyer le lien",
+  "auth.resetLinkSent": "Si un compte existe pour cet e-mail, un lien de réinitialisation est en route.",
+  "auth.backToSignIn": "Retour à la connexion",
+  "auth.setNewPassword": "Définir un nouveau mot de passe",
+  "auth.passwordUpdated": "Mot de passe mis à jour.",
+  "auth.signInNewPassword": "avec votre nouveau mot de passe.",
+  "auth.newPassword": "Nouveau mot de passe",
+  "auth.updatePassword": "Mettre à jour le mot de passe",
+
+  // Settings
+  "settings.adultContent": "Contenu adulte",
+  "settings.adultContentDescription":
+    "Vérifiez votre âge et optez pour l'affichage du contenu 18+. Votre âge est calculé côté serveur ; ce réglage n'est jamais fiable depuis le client.",
+  "settings.dateOfBirth": "Date de naissance",
+  "settings.enableAdult": "Activer le contenu 18+",
+  "settings.no": "Non",
+  "settings.yes": "Oui",
+  "settings.save": "Enregistrer",
 } satisfies Record<keyof typeof en, string>;
 
 export default fr;

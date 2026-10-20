@@ -68,6 +68,38 @@ const ar = {
   "support.email": "الدعم عبر البريد الإلكتروني",
   "support.reply":
     "نرد عادةً خلال يوم عمل واحد. تُتابَع تذاكر الدعم في StoryGalore؛ وتُحال التصعيدات الهندسية إلى تذاكر GitHub.",
+
+  // Auth
+  "auth.welcomeBack": "مرحبًا بعودتك",
+  "auth.signInPrompt": "سجّل الدخول للمتابعة من حيث توقفت.",
+  "auth.email": "البريد الإلكتروني",
+  "auth.password": "كلمة المرور",
+  "auth.name": "الاسم",
+  "auth.createAccount": "إنشاء حساب",
+  "auth.newHere": "جديد هنا؟",
+  "auth.alreadyHaveAccount": "لديك حساب بالفعل؟",
+  "auth.createYourAccount": "أنشئ حسابك",
+  "auth.startReading": "ابدأ القراءة والمشاهدة والاستماع.",
+  "auth.resetPassword": "إعادة تعيين كلمة المرور",
+  "auth.enterEmail": "أدخل بريدك الإلكتروني وسنرسل لك رابط إعادة التعيين.",
+  "auth.sendResetLink": "إرسال الرابط",
+  "auth.resetLinkSent": "إذا كان هناك حساب لهذا البريد الإلكتروني، فسيصلك رابط إعادة التعيين.",
+  "auth.backToSignIn": "العودة إلى تسجيل الدخول",
+  "auth.setNewPassword": "تعيين كلمة مرور جديدة",
+  "auth.passwordUpdated": "تم تحديث كلمة المرور.",
+  "auth.signInNewPassword": "بكلمة مرورك الجديدة.",
+  "auth.newPassword": "كلمة المرور الجديدة",
+  "auth.updatePassword": "تحديث كلمة المرور",
+
+  // Settings
+  "settings.adultContent": "المحتوى للبالغين",
+  "settings.adultContentDescription":
+    "تحقق من عمرك واختر عرض محتوى 18+. يُحسب عمرك على الخادم؛ ولا يُعتمد على هذا الإعداد من جهة العميل أبدًا.",
+  "settings.dateOfBirth": "تاريخ الميلاد",
+  "settings.enableAdult": "تفعيل محتوى 18+",
+  "settings.no": "لا",
+  "settings.yes": "نعم",
+  "settings.save": "حفظ",
 } satisfies Record<keyof typeof en, string>;
 
 export default ar;

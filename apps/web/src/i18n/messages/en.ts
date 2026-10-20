@@ -69,4 +69,36 @@ export default {
   "support.email": "Email support",
   "support.reply":
     "We typically reply within one business day. Support tickets are tracked in StoryGalore; engineering escalations map to GitHub issues.",
+
+  // Auth
+  "auth.welcomeBack": "Welcome back",
+  "auth.signInPrompt": "Sign in to pick up where you left off.",
+  "auth.email": "Email",
+  "auth.password": "Password",
+  "auth.name": "Name",
+  "auth.createAccount": "Create account",
+  "auth.newHere": "New here?",
+  "auth.alreadyHaveAccount": "Already have an account?",
+  "auth.createYourAccount": "Create your account",
+  "auth.startReading": "Start reading, watching and listening.",
+  "auth.resetPassword": "Reset password",
+  "auth.enterEmail": "Enter your email and we'll send a reset link.",
+  "auth.sendResetLink": "Send reset link",
+  "auth.resetLinkSent": "If an account exists for that email, a reset link is on its way.",
+  "auth.backToSignIn": "Back to sign in",
+  "auth.setNewPassword": "Set a new password",
+  "auth.passwordUpdated": "Password updated.",
+  "auth.signInNewPassword": "with your new password.",
+  "auth.newPassword": "New password",
+  "auth.updatePassword": "Update password",
+
+  // Settings
+  "settings.adultContent": "Adult content",
+  "settings.adultContentDescription":
+    "Verify your age and opt in to view 18+ content. Your age is computed server-side; this setting is never trusted from the client.",
+  "settings.dateOfBirth": "Date of birth",
+  "settings.enableAdult": "Enable 18+ content",
+  "settings.no": "No",
+  "settings.yes": "Yes",
+  "settings.save": "Save",
 } as const;

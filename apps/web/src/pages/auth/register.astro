@@ -2,6 +2,10 @@
 import MinimalLayout from "@/layouts/MinimalLayout.astro";
 import { ThemeToggle } from "@storygalore/ui";
 import { actions } from "astro:actions";
+import { getTranslations } from "@/i18n";
+import { getRelativeLocaleUrl } from "astro:i18n";
+
+const { t } = getTranslations(Astro.currentLocale);
 
 const result = Astro.getActionResult(actions.register);
 
@@ -12,7 +16,7 @@ if (result?.data?.ok) {
 const error = result?.error?.message;
 ---
 
-<MinimalLayout title="Create account — StoryGalore">
+<MinimalLayout title={`${t("auth.createAccount")} — StoryGalore`}>
   <div class="fixed end-4 top-4">
     <ThemeToggle client:load />
   </div>
@@ -21,12 +25,12 @@ const error = result?.error?.message;
       <a href="/" class="mb-6 inline-block text-lg font-bold tracking-tight">
         <span class="text-link">Story</span>Galore
       </a>
-      <h1 class="font-serif text-2xl font-bold">Create your account</h1>
-      <p class="mt-1 text-sm text-foreground-muted">Start reading, watching and listening.</p>
+      <h1 class="font-serif text-2xl font-bold">{t("auth.createYourAccount")}</h1>
+      <p class="mt-1 text-sm text-foreground-muted">{t("auth.startReading")}</p>
 
       <form method="POST" action={actions.register} class="mt-6 space-y-4">
         <div>
-          <label for="name" class="mb-1 block text-sm text-foreground-muted">Name</label>
+          <label for="name" class="mb-1 block text-sm text-foreground-muted">{t("auth.name")}</label>
           <input
             id="name"
             name="name"
@@ -38,7 +42,7 @@ const error = result?.error?.message;
           />
         </div>
         <div>
-          <label for="email" class="mb-1 block text-sm text-foreground-muted">Email</label>
+          <label for="email" class="mb-1 block text-sm text-foreground-muted">{t("auth.email")}</label>
           <input
             id="email"
             name="email"
@@ -49,7 +53,7 @@ const error = result?.error?.message;
           />
         </div>
         <div>
-          <label for="password" class="mb-1 block text-sm text-foreground-muted">Password</label>
+          <label for="password" class="mb-1 block text-sm text-foreground-muted">{t("auth.password")}</label>
           <input
             id="password"
             name="password"
@@ -68,12 +72,12 @@ const error = result?.error?.message;
           type="submit"
           class="w-full rounded-sm bg-primary px-4 py-2 font-semibold text-primary-foreground transition hover:opacity-90"
         >
-          Create account
+          {t("auth.createAccount")}
         </button>
       </form>
 
       <p class="mt-6 text-center text-sm text-foreground-muted">
-        Already have an account? <a href="/auth/login" class="text-link hover:text-link">Sign in</a>
+        {t("auth.alreadyHaveAccount")} <a href={getRelativeLocaleUrl(Astro.currentLocale!, "auth/login")} class="text-link hover:text-link">{t("nav.signIn")}</a>
       </p>
     </main>
   </div>
