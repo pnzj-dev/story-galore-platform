@@ -189,6 +189,15 @@ export async function fetchMediaByType(
     });
 }
 
+export interface MediaDeliveryItem {
+  mediaId: string;
+  allowed: boolean;
+  url?: string;
+  position?: number;
+  label?: string;
+  durationMs?: number;
+}
+
 export interface PublicationDetail {
   publication: {
     $id: string;
@@ -199,12 +208,44 @@ export interface PublicationDetail {
     contentRating?: string;
     accessClass?: string;
     creatorId?: string;
+    seriesId?: string;
   };
-  media: Array<{ mediaId: string; allowed: boolean; url?: string }>;
+  media: MediaDeliveryItem[];
   entitled: boolean;
   accessClass?: string;
   coverUrl?: string;
   creatorName?: string;
+}
+
+export interface SeriesEpisode {
+  publicationId?: string;
+  title?: string;
+  episodeId?: string;
+  episodeNumber?: number;
+  mediaId?: string;
+  url?: string;
+  durationMs?: number;
+}
+
+/** Fetch the ordered, authorized episodes of a series for sequential playback. */
+export async function fetchSeriesEpisodes(seriesId: string, actorId = ""): Promise<SeriesEpisode[]> {
+  const out = await invokeApi<{ items?: SeriesEpisode[] }>("series_episodes", { seriesId }, actorId);
+  if (out.status !== "SUCCESS" || !out.result?.items) return [];
+  return out.result.items;
+}
+
+/** Fetch the authenticated user's saved media position for a publication. */
+export async function fetchMediaProgress(
+  actorId: string,
+  publicationId: string,
+): Promise<{ position: number; pageId?: string }> {
+  const out = await invokeApi<{ position?: number; pageId?: string }>(
+    "reading_progress_get",
+    { publicationId },
+    actorId,
+  );
+  if (out.status !== "SUCCESS" || !out.result) return { position: 0 };
+  return { position: out.result.position ?? 0, pageId: out.result.pageId };
 }
 
 /** Fetch a single published publication with its authorized media URLs. */

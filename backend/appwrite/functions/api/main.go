@@ -73,6 +73,7 @@ var knownOperations = map[string]bool{
 	"support_ticket_create": true, "support_ticket_list": true, "support_ticket_get": true,
 	"creator_create": true, "creator_update": true,
 	"reader_manifest_get": true,
+	"series_episodes":     true,
 	"document_create":     true, "document_list": true,
 	"media_upload_initiate": true, "media_upload_complete": true,
 	"media_asset_list": true, "media_asset_get": true,
@@ -364,6 +365,8 @@ func Main(ctx openruntimes.Context) openruntimes.Response {
 		return creatorUpdate(ctx, &in, cl)
 	case "reader_manifest_get":
 		return readerManifestGet(ctx, &in, cl)
+	case "series_episodes":
+		return seriesEpisodes(ctx, &in, cl)
 	case "document_create":
 		return documentCreate(ctx, &in, cl)
 	case "document_list":
@@ -1254,6 +1257,7 @@ type deliveryDecision struct {
 	AccessClass string
 	Reasons     []string
 	URL         string
+	DurationMs  int
 }
 
 // ageFromDOB computes an age from an ISO date string (YYYY-MM-DD).
@@ -1365,6 +1369,7 @@ func authorizeMediaDelivery(cl client.Client, mediaId, action, actorId string, d
 		decision.Reasons = append(decision.Reasons, "MEDIA_UNREADABLE")
 		return decision
 	}
+	decision.DurationMs = toInt(am["durationMs"])
 	if status, _ := am["status"].(string); status != "READY" {
 		decision.Reasons = append(decision.Reasons, "MEDIA_NOT_READY")
 		return decision
@@ -5800,9 +5805,15 @@ func publicationGet(ctx openruntimes.Context, in *GatewayInput, cl client.Client
 		action = "STREAM"
 	}
 	media := make([]map[string]interface{}, 0)
-	for _, assetId := range stringSlice(pm["mediaAssetIds"]) {
+	for i, assetId := range stringSlice(pm["mediaAssetIds"]) {
 		decision := authorizeMediaDelivery(cl, assetId, action, actorId)
-		entry := map[string]interface{}{"mediaId": assetId, "allowed": decision.Allowed}
+		entry := map[string]interface{}{
+			"mediaId":    assetId,
+			"position":   i,
+			"label":      fmt.Sprintf("Part %d", i+1),
+			"durationMs": decision.DurationMs,
+			"allowed":    decision.Allowed,
+		}
 		if decision.Allowed {
 			entry["url"] = decision.URL
 		}
@@ -6111,6 +6122,64 @@ func readerManifestGet(ctx openruntimes.Context, in *GatewayInput, cl client.Cli
 		"publication": pm,
 		"pages":       pages,
 	})
+}
+
+// seriesEpisodes returns the ordered, authorized episodes of a series for
+// sequential playback. Each episode is a publication sharing seriesId, ordered
+// by episodeNumber. The first authorized media URL of each episode is included
+// so the player can auto-advance across episodes.
+func seriesEpisodes(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	var input struct {
+		SeriesId string `json:"seriesId"`
+	}
+	if !decode(ctx, in, &input) || input.SeriesId == "" {
+		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
+	}
+	actorId := actorOrEmpty(in.ActorId)
+	service := tablesdb.New(cl)
+	list, err := service.ListRows(databaseID, "publications", service.WithListRowsQueries([]string{
+		qEqual("seriesId", input.SeriesId),
+		qEqual("status", "PUBLISHED"),
+		`{"method":"orderAsc","attribute":"episodeNumber"}`,
+		`{"method":"limit","values":[200]}`,
+	}))
+	if err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	var raw map[string]interface{}
+	if err := list.Decode(&raw); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	rows, _ := raw["rows"].([]interface{})
+	items := make([]map[string]interface{}, 0, len(rows))
+	for _, r := range rows {
+		row, ok := r.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		episode := map[string]interface{}{
+			"publicationId": row["$id"],
+			"title":         row["title"],
+			"episodeId":     row["episodeId"],
+			"episodeNumber": row["episodeNumber"],
+		}
+		pubType, _ := row["type"].(string)
+		action := "VIEW"
+		if pubType == "VIDEO" || pubType == "AUDIO" {
+			action = "STREAM"
+		}
+		for _, assetId := range stringSlice(row["mediaAssetIds"]) {
+			decision := authorizeMediaDelivery(cl, assetId, action, actorId)
+			if decision.Allowed {
+				episode["mediaId"] = assetId
+				episode["url"] = decision.URL
+				episode["durationMs"] = decision.DurationMs
+				break
+			}
+		}
+		items = append(items, episode)
+	}
+	return success(ctx, in, map[string]interface{}{"items": items})
 }
 
 // --- query helpers ---

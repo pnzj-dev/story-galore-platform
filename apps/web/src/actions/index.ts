@@ -291,13 +291,21 @@ export const server = {
       publicationId: z.string().min(1),
       position: z.number().int().min(0),
       percentComplete: z.number().min(0).max(100),
+      pageId: z.string().optional(),
+      episodeId: z.string().optional(),
     }),
     handler: async (input, context) => {
       const user = context.locals.user;
       if (!user) throw new ActionError({ code: "UNAUTHORIZED", message: "Sign in to save progress." });
       const out = await invokeApi(
         "reading_progress_upsert",
-        { publicationId: input.publicationId, position: input.position, percentComplete: input.percentComplete },
+        {
+          publicationId: input.publicationId,
+          position: input.position,
+          percentComplete: input.percentComplete,
+          pageId: input.pageId,
+          episodeId: input.episodeId,
+        },
         user.$id,
       );
       if (out.status !== "SUCCESS") {

@@ -83,6 +83,15 @@ This roadmap is a product sequencing decision, not a reason to make the schema c
 
 `seriesId` may be null for standalone books. `projectId` may group multiple publication types in the same universe.
 
+## Playable sequence
+
+Video/audio playback is an ordered sequence, never a single opaque file:
+
+- A single publication with several `mediaAssetIds[]` plays its parts in array order (a movie constituted of parts).
+- An episodic series (publications sharing `seriesId`) plays in `episodeNumber` ascending order, auto-advancing across publications.
+
+The player auto-advances to the next authorized item on `ended` (with an Up-Next countdown) and shows a collapsible tracklist. Auto-advance is a client convenience over the server-authoritative `mediaAssetIds`/`episodeNumber` order and per-item `authorizeMediaDelivery`; it never grants access the server would deny. See `contracts/domain/playlist-sequence.schema.yaml`.
+
 ## Game catalog and browser runtime
 
 `Game` is a first-class catalog entity with source attribution, title, developers/publishers, release state, platforms, age/content rating, data-driven category/subcategory/genres, linked media assets and optional approved builds. It does not become a Publication. Game reviews and guides remain publications that reference a game ID.

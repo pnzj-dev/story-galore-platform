@@ -9,6 +9,7 @@
     autoplay = false,
     controls = true,
     guarded = false,
+    onended,
     class: className = '',
   }: {
     src: string;
@@ -19,6 +20,8 @@
     controls?: boolean;
     /** Disable the native download/picture-in-picture affordances and right-click save. */
     guarded?: boolean;
+    /** Fired when the media plays to completion. */
+    onended?: () => void;
     class?: string;
   } = $props();
 
@@ -82,6 +85,7 @@
       preload="metadata"
       controlslist={guarded ? 'nodownload' : undefined}
       oncontextmenu={blockContextMenu}
+      onended={onended}
       bind:currentTime={currentTime}
       bind:duration={duration}
       bind:volume={volume}
@@ -102,6 +106,7 @@
       controlslist={guarded ? 'nodownload' : undefined}
       disablepictureinpicture={guarded}
       oncontextmenu={blockContextMenu}
+      onended={onended}
       bind:currentTime={currentTime}
       bind:duration={duration}
       bind:volume={volume}

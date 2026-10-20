@@ -7,6 +7,7 @@ export { default as ContentRatingBadge } from './domain/ContentRatingBadge.svelt
 export { default as MediaCard } from './domain/MediaCard.svelte';
 export { default as MediaPlayer } from './domain/MediaPlayer.svelte';
 export { default as ImageViewer } from './domain/ImageViewer.svelte';
+export { default as MediaPlaylist } from './domain/MediaPlaylist.svelte';
 export { default as ShortCard } from './domain/ShortCard.svelte';
 export { default as MediaRail } from './composites/MediaRail.svelte';
 export { default as CreatorCard } from './domain/CreatorCard.svelte';
@@ -20,4 +21,4 @@ export { uiTokens, colorTokens } from './tokens/theme';
 export type { ColorToken } from './tokens/theme';
 export { cva, cx } from './lib/cva';
 export type { VariantProps } from './lib/cva';
-export type { MediaCardData, MediaType, ContentRating, ProgressInfo, CardOrientation, CreatorCardData } from './types';
+export type { MediaCardData, MediaType, ContentRating, ProgressInfo, CardOrientation, CreatorCardData, PlaylistItem } from './types';

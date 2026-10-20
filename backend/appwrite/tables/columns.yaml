@@ -259,6 +259,7 @@ tables_with_columns:
       - {key: mediaAssetIds, type: varchar, array: true, required: false}
       - {key: format, type: varchar, size: 255, required: false}
       - {key: episodeId, type: varchar, size: 255, required: false}
+      - {key: episodeNumber, type: integer, required: false}
       - {key: readingFormat, type: enum, elements: [PAGINATED, VERTICAL, HORIZONTAL, WEBTOON, STRIP, MIXED], required: false}
       - {key: pageCount, type: integer, required: false}
       - {key: pageWidth, type: integer, required: false}

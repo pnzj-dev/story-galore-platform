@@ -40,3 +40,18 @@ export type CreatorCardData = {
   avatarUrl?: string;
   followerCount?: number;
 };
+
+export type PlaylistItem = {
+  /** Stable identifier, e.g. media asset ID or episode publication ID. */
+  id?: string;
+  /** Display label, e.g. "Part 1" or an episode title. */
+  label: string;
+  /** Authorized delivery URL for this item. */
+  src: string;
+  /** Publication the item belongs to (for progress persistence). */
+  publicationId?: string;
+  /** Media asset ID of this item (for progress persistence). */
+  mediaId?: string;
+  /** Series episode ID, when the item is an episode. */
+  episodeId?: string;
+};

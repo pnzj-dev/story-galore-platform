@@ -1,6 +1,9 @@
 ---
 import Layout from "@/layouts/Layout.astro";
-import { MediaPlayer, ImageViewer } from "@storygalore/ui";
+import VideoDetail from "@/components/VideoDetail.svelte";
+import { ImageViewer } from "@storygalore/ui";
+import type { PlaylistItem } from "@storygalore/ui";
+import { fetchSeriesEpisodes, fetchMediaProgress } from "@/lib/gateway";
 import type { PublicationDetail } from "@/lib/gateway";
 
 interface Props {
@@ -20,6 +23,44 @@ const rating =
       ? "18+"
       : "Teen"
     : null;
+
+// Build the ordered video playlist: series episodes (cross-publication) or
+// parts within this publication, plus the resume index from saved progress.
+const userId = Astro.locals.user?.$id ?? "";
+const pubId = pub?.$id ?? "";
+let videoItems: PlaylistItem[] = [];
+let videoInitialIndex = 0;
+if (kind === "video" && pubId) {
+  if (pub?.seriesId) {
+    const episodes = await fetchSeriesEpisodes(pub.seriesId, userId);
+    videoItems = episodes
+      .filter((e) => e.url)
+      .map((e, i) => ({
+        id: e.publicationId,
+        publicationId: e.publicationId,
+        mediaId: e.mediaId,
+        episodeId: e.episodeId,
+        label: e.title ?? `Episode ${e.episodeNumber ?? i + 1}`,
+        src: e.url!,
+      }));
+    videoInitialIndex = Math.max(0, videoItems.findIndex((it) => it.publicationId === pubId));
+  } else {
+    videoItems = allowed.map((m, i) => ({
+      id: m.mediaId,
+      mediaId: m.mediaId,
+      publicationId: pubId,
+      label: m.label ?? `Part ${(m.position ?? i) + 1}`,
+      src: m.url!,
+    }));
+    if (userId) {
+      const progress = await fetchMediaProgress(userId, pubId);
+      if (progress.pageId) {
+        const idx = videoItems.findIndex((it) => it.mediaId === progress.pageId);
+        if (idx >= 0) videoInitialIndex = idx;
+      }
+    }
+  }
+}
 ---
 
 <Layout title={pub?.title ?? title}>
@@ -78,12 +119,11 @@ const rating =
                     </div>
                   ) : allowed.length > 0 ? (
                     kind === "video" ? (
-                      <MediaPlayer
+                      <VideoDetail
                         client:load
-                        src={allowed[0].url}
-                        kind="video"
-                        guarded
-                        class="aspect-video w-full rounded-md"
+                        publicationId={pubId}
+                        items={videoItems}
+                        initialIndex={videoInitialIndex}
                       />
                     ) : kind === "audio" ? (
                       <audio

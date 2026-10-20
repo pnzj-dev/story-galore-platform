@@ -1,0 +1,33 @@
+version: 1
+name: playlist-sequence
+description: >
+  Ordered, authorized playback of video/audio publications. A publication is a
+  playable sequence of one or more media parts; an episodic series is an ordered
+  sequence of publications sharing a seriesId.
+fields:
+  PlaylistItem:
+    id: string
+    label: string          # "Part N" or episode title
+    src: string            # authorized delivery URL (short-lived for protected content)
+    publicationId: string
+    mediaId: string
+    episodeId: string|null
+    position: integer
+    durationMs: integer|null
+  SeriesEpisode:
+    publicationId: string
+    title: string
+    episodeId: string|null
+    episodeNumber: integer|null
+    mediaId: string
+    url: string
+    durationMs: integer|null
+rules:
+  - Parts within a publication are ordered by publications.mediaAssetIds array order.
+  - Episodes within a series are ordered by publications.episodeNumber ascending.
+  - Every item URL is resolved through authorizeMediaDelivery; the client can only advance to items the server already authorized.
+  - Auto-advance never bypasses entitlement, age, jurisdiction, moderation, adult-content, or publication-status policy.
+  - Playback progress reuses reading_progress (pageId = media part id, position = seconds, episodeId for episodic).
+operations:
+  publication_get.playlist: ordered parts of a publication (mediaId, url, label, position, durationMs)
+  series_episodes: ordered episodes of a series (publicationId, title, episodeNumber, mediaId, url)
