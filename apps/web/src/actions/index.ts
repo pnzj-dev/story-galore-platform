@@ -869,6 +869,73 @@ export const server = {
     },
   }),
 
+  createComment: defineAction({
+    accept: "form",
+    input: z.object({
+      targetType: z.string().min(1),
+      targetId: z.string().min(1),
+      body: z.string().min(1).max(5000),
+      parentCommentId: z.string().optional(),
+    }),
+    handler: async (input, context) => {
+      const user = context.locals.user;
+      if (!user) throw new ActionError({ code: "UNAUTHORIZED", message: "Sign in to comment." });
+      const out = await invokeApi(
+        "comment_create",
+        {
+          targetType: input.targetType,
+          targetId: input.targetId,
+          body: input.body,
+          parentCommentId: input.parentCommentId || undefined,
+        },
+        user.$id,
+      );
+      if (out.status !== "SUCCESS") {
+        throw new ActionError({ code: "BAD_REQUEST", message: "Could not post the comment." });
+      }
+      return { ok: true };
+    },
+  }),
+
+  listComments: defineAction({
+    accept: "json",
+    input: z.object({
+      targetType: z.string().min(1),
+      targetId: z.string().min(1),
+    }),
+    handler: async (input, context) => {
+      const user = context.locals.user;
+      const out = await invokeApi<{ items?: unknown[] }>(
+        "comment_list",
+        { targetType: input.targetType, targetId: input.targetId },
+        user?.$id ?? "",
+      );
+      if (out.status !== "SUCCESS") return { items: [] };
+      return { items: out.result?.items ?? [] };
+    },
+  }),
+
+  setFeatureFlag: defineAction({
+    accept: "form",
+    input: z.object({
+      key: z.string().min(1),
+      enabled: z.enum(["true", "false"]),
+    }),
+    handler: async (input, context) => {
+      const user = context.locals.user;
+      if (!user) throw new ActionError({ code: "UNAUTHORIZED", message: "Sign in." });
+      const out = await invokeApi(
+        "feature_flag_set",
+        { key: input.key, enabled: input.enabled === "true" },
+        user.$id,
+      );
+      if (out.status !== "SUCCESS") {
+        throw new ActionError({ code: "BAD_REQUEST", message: "Could not update the feature flag." });
+      }
+      return { ok: true };
+    },
+  }),
+
   subscribe: defineAction({
     accept: "form",
     input: z.object({

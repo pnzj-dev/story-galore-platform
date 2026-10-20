@@ -662,6 +662,14 @@ studio_tables:
       - {key: metric, type: varchar, size: 255, required: true}
       - {key: value, type: integer, required: true}
       - {key: recordedAt, type: datetime, required: true}
+  - table: features
+    source: docs/DYNAMIC_CONFIGURATION.md
+    partition_key: key
+    columns:
+      - {key: key, type: varchar, size: 255, required: true}
+      - {key: enabled, type: boolean, required: true}
+      - {key: description, type: varchar, size: 255, required: false}
+      - {key: updatedAt, type: datetime, required: true}
   - table: notifications
     source: docs/OPERATIONS_CENTER.md
     partition_key: userId

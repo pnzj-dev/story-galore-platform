@@ -96,6 +96,12 @@ routes:
   capability: discovery.read
   kind: page
   notes: audio browse
+- path: /search
+  group: public
+  authentication: OPTIONAL
+  capability: discovery.read
+  kind: page
+  notes: full-text search over published publications
 - path: /creators/:creatorId
   group: public
   authentication: OPTIONAL
@@ -512,6 +518,13 @@ routes:
   group: admin
   authentication: REQUIRED
   capability: admin.settings.read
+  kind: page
+  notes: Must satisfy exact admin-rbac entry, role grant, scope, projection, risk
+    and approval policy.
+- path: /admin/flags
+  group: admin
+  authentication: REQUIRED
+  capability: admin.feature_flags.manage
   kind: page
   notes: Must satisfy exact admin-rbac entry, role grant, scope, projection, risk
     and approval policy.

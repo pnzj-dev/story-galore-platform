@@ -70,6 +70,7 @@ var knownOperations = map[string]bool{
 	"reading_progress_upsert": true, "reading_progress_complete": true,
 	"reading_progress_get": true, "continue_list": true,
 	"publication_list": true, "publication_get": true, "creator_list": true, "creator_get": true,
+	"search": true,
 	"support_ticket_create": true, "support_ticket_list": true, "support_ticket_get": true,
 	"creator_create": true, "creator_update": true,
 	"reader_manifest_get":      true,
@@ -116,6 +117,7 @@ var knownOperations = map[string]bool{
 	"admin_plan_profitability": true,
 	"alert_create":             true, "alert_list": true, "alert_update": true,
 	"alert_evaluate": true,
+	"feature_flag_list": true, "feature_flag_set": true,
 	"admin_ai_cost":  true,
 	"metric_ingest":  true,
 }
@@ -242,6 +244,10 @@ func Main(ctx openruntimes.Context) openruntimes.Response {
 		return alertUpdate(ctx, &in, cl)
 	case "alert_evaluate":
 		return alertEvaluate(ctx, &in, cl)
+	case "feature_flag_list":
+		return featureFlagList(ctx, &in, cl)
+	case "feature_flag_set":
+		return featureFlagSet(ctx, &in, cl)
 	case "admin_ai_cost":
 		return adminAiCost(ctx, &in, cl)
 	case "metric_ingest":
@@ -303,9 +309,11 @@ func Main(ctx openruntimes.Context) openruntimes.Response {
 	case "comment_moderate":
 		return commentModerate(ctx, &in, cl)
 	case "comment_list":
-		return listRows(ctx, &in, cl, "comments")
+		return commentList(ctx, &in, cl)
 	case "comment_get":
 		return getRow(ctx, &in, cl, "comments")
+	case "search":
+		return searchPublications(ctx, &in, cl)
 	case "subscription_create":
 		return subscriptionCreate(ctx, &in, cl)
 	case "subscription_cancel":
@@ -4793,6 +4801,181 @@ func commentModerate(ctx openruntimes.Context, in *GatewayInput, cl client.Clien
 	return success(ctx, in, map[string]interface{}{"commentId": input.CommentId})
 }
 
+// commentList returns PUBLISHED comments (plus the actor's own pending/removed)
+// for a target, ordered by creation time, with resolved author names.
+func commentList(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	var input struct {
+		TargetType string `json:"targetType"`
+		TargetId   string `json:"targetId"`
+	}
+	if !decode(ctx, in, &input) || input.TargetId == "" {
+		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
+	}
+	actorId := actorOrEmpty(in.ActorId)
+	all := listRowsByField(cl, "comments", "targetId", input.TargetId)
+	items := make([]map[string]interface{}, 0, len(all))
+	for _, c := range all {
+		if input.TargetType != "" {
+			if tt, _ := c["targetType"].(string); tt != input.TargetType {
+				continue
+			}
+		}
+		status, _ := c["status"].(string)
+		userId, _ := c["userId"].(string)
+		if status != "PUBLISHED" && userId != actorId {
+			continue
+		}
+		c["authorName"] = resolveUserName(cl, userId)
+		items = append(items, c)
+	}
+	return success(ctx, in, map[string]interface{}{"items": items})
+}
+
+// resolveUserName returns the Appwrite user's display name (or empty).
+func resolveUserName(cl client.Client, userId string) string {
+	if userId == "" {
+		return ""
+	}
+	u, err := users.New(cl).Get(userId)
+	if err != nil {
+		return ""
+	}
+	return u.Name
+}
+
+// searchPublications returns PUBLISHED publications whose title or description
+// matches the query (case-insensitive substring; server-authoritative, applies
+// the language filter like publication_list).
+func searchPublications(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	var input struct {
+		Query string `json:"query"`
+		Type  string `json:"type"`
+	}
+	if !decode(ctx, in, &input) || strings.TrimSpace(input.Query) == "" {
+		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
+	}
+	q := strings.ToLower(strings.TrimSpace(input.Query))
+	actorId := actorOrEmpty(in.ActorId)
+	mode, langs := getUserLanguagePrefs(cl, actorId)
+	filterByLanguage := mode == "ONLY_SELECTED" && len(langs) > 0
+
+	service := tablesdb.New(cl)
+	queries := []string{
+		qEqual("status", "PUBLISHED"),
+		`{"method":"orderDesc","attribute":"publishedAt"}`,
+		`{"method":"limit","values":[200]}`,
+	}
+	if input.Type != "" {
+		queries = append(queries, qEqual("type", input.Type))
+	}
+	list, err := service.ListRows(databaseID, "publications", service.WithListRowsQueries(queries))
+	if err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	var raw map[string]interface{}
+	if err := list.Decode(&raw); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	rows, _ := raw["rows"].([]interface{})
+
+	items := make([]map[string]interface{}, 0, 20)
+	for _, r := range rows {
+		m, _ := r.(map[string]interface{})
+		title, _ := m["title"].(string)
+		desc, _ := m["description"].(string)
+		if !strings.Contains(strings.ToLower(title), q) && !strings.Contains(strings.ToLower(desc), q) {
+			continue
+		}
+		id, _ := m["$id"].(string)
+		if id == "" {
+			continue
+		}
+		if filterByLanguage && !stringIntersects(langs, getPublicationLanguages(cl, id)) {
+			continue
+		}
+		item := map[string]interface{}{"publication": m}
+		item["coverUrl"] = resolveCoverURL(cl, id, "")
+		if creatorId, ok := m["creatorId"].(string); ok && creatorId != "" {
+			item["creatorName"] = resolveCreatorName(cl, creatorId)
+		}
+		items = append(items, item)
+		if len(items) >= 20 {
+			break
+		}
+	}
+	return success(ctx, in, map[string]interface{}{"items": items})
+}
+
+// featureFlagList returns all feature flags (hot-reloadable config).
+func featureFlagList(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	service := tablesdb.New(cl)
+	list, err := service.ListRows(databaseID, "features")
+	if err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	var raw map[string]interface{}
+	if err := list.Decode(&raw); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	rows, _ := raw["rows"].([]interface{})
+	return success(ctx, in, map[string]interface{}{"items": rows})
+}
+
+// featureFlagSet upserts a feature flag (admin-only).
+func featureFlagSet(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	var input struct {
+		Key         string `json:"key"`
+		Enabled     bool   `json:"enabled"`
+		Description string `json:"description"`
+	}
+	if !decode(ctx, in, &input) || input.Key == "" {
+		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
+	}
+	if !adminActor(ctx, in, cl) {
+		return respond(ctx, in.OperationId, "FORBIDDEN", false)
+	}
+	existingId := findFeatureFlag(cl, input.Key)
+	data := map[string]interface{}{
+		"key":       input.Key,
+		"enabled":   input.Enabled,
+		"updatedAt": now(),
+	}
+	if input.Description != "" {
+		data["description"] = input.Description
+	}
+	if existingId == "" {
+		existingId = newUUID()
+		if err := createRow(cl, "features", existingId, data); err != nil {
+			return internalFailure(ctx, in, err)
+		}
+	} else if err := updateRow(cl, "features", existingId, data); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	return success(ctx, in, map[string]interface{}{"ok": true, "flagId": existingId})
+}
+
+func findFeatureFlag(cl client.Client, key string) string {
+	service := tablesdb.New(cl)
+	list, err := service.ListRows(databaseID, "features", service.WithListRowsQueries([]string{
+		qEqual("key", key),
+		`{"method":"limit","values":[1]}`,
+	}))
+	if err != nil {
+		return ""
+	}
+	var raw map[string]interface{}
+	if err := list.Decode(&raw); err != nil {
+		return ""
+	}
+	rows, _ := raw["rows"].([]interface{})
+	if len(rows) == 0 {
+		return ""
+	}
+	flag, _ := rows[0].(map[string]interface{})
+	id, _ := flag["$id"].(string)
+	return id
+}
+
 // --- subscription handlers ---
 
 func subscriptionCreate(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
@@ -5453,6 +5636,11 @@ func paymentMarkFailed(ctx openruntimes.Context, in *GatewayInput, cl client.Cli
 func qEqual(attr, value string) string {
 	v, _ := json.Marshal(value)
 	return `{"method":"equal","attribute":"` + attr + `","values":[` + string(v) + `]}`
+}
+
+func qSearch(attr, value string) string {
+	v, _ := json.Marshal(value)
+	return `{"method":"search","attribute":"` + attr + `","values":[` + string(v) + `]}`
 }
 
 func nextVersion(existing map[string]interface{}) int {

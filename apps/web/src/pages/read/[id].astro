@@ -1,7 +1,8 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import Reader from "@/components/Reader.svelte";
-import { fetchReaderManifest, fetchReadingPosition } from "@/lib/gateway";
+import Comments from "@/components/Comments.svelte";
+import { fetchReaderManifest, fetchReadingPosition, fetchComments } from "@/lib/gateway";
 import { getTranslations } from "@/i18n";
 
 const { t } = getTranslations(Astro.currentLocale);
@@ -21,6 +22,21 @@ const pages = (manifest?.pages ?? []).map((p) => ({
   text: p.text,
   position: p.position ?? 0,
 }));
+
+const comments = manifest
+  ? await fetchComments(Astro.locals.user?.$id ?? "", "PUBLICATION", publicationId)
+  : [];
+const commentLabels = {
+  title: t("comments.title"),
+  placeholder: t("comments.placeholder"),
+  post: t("comments.post"),
+  reply: t("comments.reply"),
+  replyTo: t("comments.replyTo"),
+  cancel: t("comments.cancel"),
+  signIn: t("comments.signIn"),
+  empty: t("comments.empty"),
+  pending: t("comments.pending"),
+};
 ---
 
 <Layout title={pub?.title ?? t("media.reader")}>
@@ -46,6 +62,15 @@ const pages = (manifest?.pages ?? []).map((p) => ({
           {t("story.noPages")}
         </p>
       )}
+
+      <Comments
+        client:load
+        targetType="PUBLICATION"
+        targetId={publicationId}
+        initialComments={comments}
+        signedIn={canSync}
+        labels={commentLabels}
+      />
     </main>
   ) : (
     <main class="mx-auto max-w-3xl px-6 py-24 text-center">

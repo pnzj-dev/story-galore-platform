@@ -496,6 +496,17 @@
       "projection": "admin_settings_safe"
     },
     {
+      "route": "/admin/flags",
+      "capability": "admin.feature_flags.manage",
+      "roles": [
+        "PLATFORM_ADMIN"
+      ],
+      "scope": "global",
+      "risk": "MEDIUM",
+      "approval": "NONE",
+      "projection": "admin_flags_safe"
+    },
+    {
       "route": "/admin/state-machine",
       "capability": "admin.state_machine.read",
       "roles": [

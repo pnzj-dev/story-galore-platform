@@ -2,7 +2,8 @@
 import Layout from "@/layouts/Layout.astro";
 import MediaDetail from "@/components/MediaDetail.astro";
 import Reader from "@/components/Reader.svelte";
-import { fetchPublication, fetchReaderManifest, fetchReadingPosition } from "@/lib/gateway";
+import Comments from "@/components/Comments.svelte";
+import { fetchPublication, fetchReaderManifest, fetchReadingPosition, fetchComments } from "@/lib/gateway";
 import { getTranslations } from "@/i18n";
 
 const { t } = getTranslations(Astro.currentLocale);
@@ -28,6 +29,19 @@ const pages = (manifest?.pages ?? []).map((p) => ({
   text: p.text,
   position: p.position ?? 0,
 }));
+
+const comments = manifest ? await fetchComments(actorId, "PUBLICATION", storyId) : [];
+const commentLabels = {
+  title: t("comments.title"),
+  placeholder: t("comments.placeholder"),
+  post: t("comments.post"),
+  reply: t("comments.reply"),
+  replyTo: t("comments.replyTo"),
+  cancel: t("comments.cancel"),
+  signIn: t("comments.signIn"),
+  empty: t("comments.empty"),
+  pending: t("comments.pending"),
+};
 
 function kindFor(t: string): "video" | "audio" | "post" {
   if (t === "VIDEO") return "video";
@@ -61,6 +75,15 @@ function kindFor(t: string): "video" | "audio" | "post" {
                 {t("story.noPages")}
               </p>
             )}
+
+            <Comments
+              client:load
+              targetType="PUBLICATION"
+              targetId={storyId}
+              initialComments={comments}
+              signedIn={Boolean(user)}
+              labels={commentLabels}
+            />
           </main>
         ) : (
           <main class="mx-auto max-w-3xl px-6 py-24 text-center">

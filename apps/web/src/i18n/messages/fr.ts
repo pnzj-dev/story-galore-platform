@@ -201,6 +201,34 @@ const fr = {
   "media.shorts": "Shorts",
   "media.noShorts": "Aucun short pour l'instant",
 
+  // Comments
+  "comments.title": "Commentaires",
+  "comments.add": "Ajouter un commentaire",
+  "comments.placeholder": "Partagez votre avis…",
+  "comments.post": "Publier",
+  "comments.reply": "Répondre",
+  "comments.replyTo": "Répondre à",
+  "comments.cancel": "Annuler",
+  "comments.signIn": "Connectez-vous pour commenter.",
+  "comments.empty": "Aucun commentaire pour l'instant. Soyez le premier à partager votre avis.",
+  "comments.pending": "En attente de modération",
+
+  // Search
+  "search.title": "Recherche",
+  "search.placeholder": "Rechercher des histoires…",
+  "search.resultsFor": "Résultats pour",
+  "search.noResults": "Aucun résultat pour",
+  "search.noQuery": "Saisissez une requête pour rechercher des histoires.",
+
+  // Feature flags
+  "admin.flags": "Feature flags",
+  "admin.flags.desc": "Activez ou désactivez les fonctionnalités de la plateforme à l'exécution, sans redéploiement.",
+  "admin.flags.key": "Clé",
+  "admin.flags.enabled": "Activé",
+  "admin.flags.disabled": "Désactivé",
+  "admin.flags.toggle": "Basculer",
+  "admin.flags.noFlags": "Aucun feature flag configuré pour l'instant.",
+
   // Settings
   "settings.adultContent": "Contenu adulte",
   "settings.adultContentDescription":

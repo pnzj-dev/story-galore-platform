@@ -1,9 +1,10 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import VideoDetail from "@/components/VideoDetail.svelte";
+import Comments from "@/components/Comments.svelte";
 import { ImageViewer } from "@storygalore/ui";
 import type { PlaylistItem } from "@storygalore/ui";
-import { fetchSeriesEpisodes, fetchMediaProgress } from "@/lib/gateway";
+import { fetchSeriesEpisodes, fetchMediaProgress, fetchComments } from "@/lib/gateway";
 import type { PublicationDetail } from "@/lib/gateway";
 import { getTranslations } from "@/i18n";
 
@@ -71,6 +72,19 @@ if (kind === "video" && pubId) {
     }
   }
 }
+
+const comments = pubId ? await fetchComments(userId, "PUBLICATION", pubId) : [];
+const commentLabels = {
+  title: t("comments.title"),
+  placeholder: t("comments.placeholder"),
+  post: t("comments.post"),
+  reply: t("comments.reply"),
+  replyTo: t("comments.replyTo"),
+  cancel: t("comments.cancel"),
+  signIn: t("comments.signIn"),
+  empty: t("comments.empty"),
+  pending: t("comments.pending"),
+};
 ---
 
 <Layout title={pub?.title ?? title}>
@@ -169,6 +183,19 @@ if (kind === "video" && pubId) {
             </div>
           </div>
         </div>
+
+        {pubId && (
+          <div class="mx-auto max-w-[1400px] px-12">
+            <Comments
+              client:load
+              targetType="PUBLICATION"
+              targetId={pubId}
+              initialComments={comments}
+              signedIn={Boolean(userId)}
+              labels={commentLabels}
+            />
+          </div>
+        )}
       </main>
     ) : (
       <main class="mx-auto max-w-3xl px-6 py-24 text-center">

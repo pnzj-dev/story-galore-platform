@@ -201,6 +201,34 @@ export default {
   "media.shorts": "Shorts",
   "media.noShorts": "No shorts yet",
 
+  // Comments
+  "comments.title": "Comments",
+  "comments.add": "Add a comment",
+  "comments.placeholder": "Share your thoughts…",
+  "comments.post": "Post",
+  "comments.reply": "Reply",
+  "comments.replyTo": "Reply to",
+  "comments.cancel": "Cancel",
+  "comments.signIn": "Sign in to comment.",
+  "comments.empty": "No comments yet. Be the first to share your thoughts.",
+  "comments.pending": "Pending review",
+
+  // Search
+  "search.title": "Search",
+  "search.placeholder": "Search stories…",
+  "search.resultsFor": "Results for",
+  "search.noResults": "No results found for",
+  "search.noQuery": "Type a query to search stories.",
+
+  // Feature flags
+  "admin.flags": "Feature flags",
+  "admin.flags.desc": "Toggle platform features at runtime. Changes take effect without a redeploy.",
+  "admin.flags.key": "Key",
+  "admin.flags.enabled": "Enabled",
+  "admin.flags.disabled": "Disabled",
+  "admin.flags.toggle": "Toggle",
+  "admin.flags.noFlags": "No feature flags configured yet.",
+
   // Settings
   "settings.adultContent": "Adult content",
   "settings.adultContentDescription":

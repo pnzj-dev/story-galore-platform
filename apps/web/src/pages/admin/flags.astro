@@ -1,0 +1,60 @@
+---
+import AdminLayout from "@/layouts/AdminLayout.astro";
+import { actions } from "astro:actions";
+import { fetchFeatureFlags } from "@/lib/gateway";
+import { getTranslations } from "@/i18n";
+
+const { t } = getTranslations(Astro.currentLocale);
+const user = Astro.locals.user;
+const flags = user ? await fetchFeatureFlags(user.$id) : [];
+
+const result = Astro.getActionResult(actions.setFeatureFlag);
+if (result?.data?.ok) {
+  return Astro.redirect("/admin/flags");
+}
+const error = result?.error?.message;
+---
+
+<AdminLayout title={`${t("admin.label")} — ${t("admin.flags")}`}>
+  <main class="mx-auto max-w-[1600px] px-6 py-10">
+    <h1 class="text-3xl font-bold">{t("admin.flags")}</h1>
+    <p class="mt-1 text-sm text-foreground-muted">{t("admin.flags.desc")}</p>
+
+    {error && (
+      <p class="mt-4 rounded-sm border border-danger bg-danger/15 px-3 py-2 text-sm text-danger" role="alert">
+        {error}
+      </p>
+    )}
+
+    {flags.length > 0 ? (
+      <ul class="mt-8 space-y-2">
+        {flags.map((f) => (
+          <li class="flex items-center justify-between rounded-md border border-border bg-surface p-4">
+            <div class="min-w-0">
+              <p class="font-mono text-sm font-semibold">{f.key}</p>
+              {f.description && <p class="text-xs text-foreground-muted">{f.description}</p>}
+            </div>
+            <form method="POST" action={actions.setFeatureFlag} class="ml-4 flex shrink-0 items-center gap-2">
+              <input type="hidden" name="key" value={f.key} />
+              <span class="text-xs text-foreground-muted">
+                {f.enabled ? t("admin.flags.enabled") : t("admin.flags.disabled")}
+              </span>
+              <button
+                type="submit"
+                name="enabled"
+                value={f.enabled ? "false" : "true"}
+                class="rounded-sm border border-border px-3 py-1.5 text-xs transition hover:bg-surface"
+              >
+                {t("admin.flags.toggle")}
+              </button>
+            </form>
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <p class="mt-8 rounded-md border border-dashed border-border px-6 py-8 text-sm text-foreground-muted">
+        {t("admin.flags.noFlags")}
+      </p>
+    )}
+  </main>
+</AdminLayout>

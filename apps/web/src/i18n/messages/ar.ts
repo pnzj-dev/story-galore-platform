@@ -200,6 +200,34 @@ const ar = {
   "media.shorts": "المقاطع القصيرة",
   "media.noShorts": "لا توجد مقاطع قصيرة بعد",
 
+  // Comments
+  "comments.title": "التعليقات",
+  "comments.add": "أضف تعليقًا",
+  "comments.placeholder": "شارك رأيك…",
+  "comments.post": "نشر",
+  "comments.reply": "رد",
+  "comments.replyTo": "الرد على",
+  "comments.cancel": "إلغاء",
+  "comments.signIn": "سجّل الدخول للتعليق.",
+  "comments.empty": "لا توجد تعليقات بعد. كن أول من يشارك رأيه.",
+  "comments.pending": "قيد المراجعة",
+
+  // Search
+  "search.title": "البحث",
+  "search.placeholder": "ابحث عن القصص…",
+  "search.resultsFor": "نتائج البحث عن",
+  "search.noResults": "لا توجد نتائج عن",
+  "search.noQuery": "اكتب استعلامًا للبحث عن القصص.",
+
+  // Feature flags
+  "admin.flags": "مفاتيح الميزات",
+  "admin.flags.desc": "بدّل ميزات المنصة في وقت التشغيل دون إعادة نشر.",
+  "admin.flags.key": "المفتاح",
+  "admin.flags.enabled": "مفعّل",
+  "admin.flags.disabled": "معطّل",
+  "admin.flags.toggle": "تبديل",
+  "admin.flags.noFlags": "لا توجد مفاتيح ميزات مكوّنة بعد.",
+
   // Settings
   "settings.adultContent": "المحتوى للبالغين",
   "settings.adultContentDescription":
