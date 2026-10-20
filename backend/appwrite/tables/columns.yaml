@@ -224,7 +224,6 @@ tables_with_columns:
       - {key: updatedAt, type: datetime, required: false}
   - table: publication_language_metadata
     source: contracts/domain/publication-language.schema.yaml
-    note: not_in_desired_schema_manifest
     columns:
       - {key: publicationId, type: varchar, size: 255, required: true}
       - {key: contentLanguageMode, type: enum, elements: [LANGUAGE_BEARING, NOT_APPLICABLE], required: true}
@@ -233,7 +232,6 @@ tables_with_columns:
       - {key: localizations, type: text, array: true, required: false}
   - table: user_language_preferences
     source: contracts/domain/user-language-preferences.schema.yaml
-    note: not_in_desired_schema_manifest
     columns:
       - {key: userId, type: varchar, size: 255, required: true}
       - {key: uiLocale, type: varchar, size: 32, required: true}

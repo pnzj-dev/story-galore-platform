@@ -72,11 +72,13 @@ var knownOperations = map[string]bool{
 	"publication_list": true, "publication_get": true, "creator_list": true, "creator_get": true,
 	"support_ticket_create": true, "support_ticket_list": true, "support_ticket_get": true,
 	"creator_create": true, "creator_update": true,
-	"reader_manifest_get":    true,
-	"series_episodes":        true,
-	"notification_list":      true,
-	"notification_mark_read": true,
-	"document_create":        true, "document_list": true,
+	"reader_manifest_get":      true,
+	"series_episodes":          true,
+	"notification_list":        true,
+	"notification_mark_read":   true,
+	"language_preferences_set": true,
+	"publication_language_set": true,
+	"document_create":          true, "document_list": true,
 	"media_upload_initiate": true, "media_upload_complete": true,
 	"media_asset_list": true, "media_asset_get": true,
 	"media_delivery_authorize": true,
@@ -373,6 +375,10 @@ func Main(ctx openruntimes.Context) openruntimes.Response {
 		return notificationList(ctx, &in, cl)
 	case "notification_mark_read":
 		return notificationMarkRead(ctx, &in, cl)
+	case "language_preferences_set":
+		return languagePreferencesSet(ctx, &in, cl)
+	case "publication_language_set":
+		return publicationLanguageSet(ctx, &in, cl)
 	case "document_create":
 		return documentCreate(ctx, &in, cl)
 	case "document_list":
@@ -5783,7 +5789,7 @@ func publicationList(ctx openruntimes.Context, in *GatewayInput, cl client.Clien
 	}
 	queries = append(queries,
 		`{"method":"orderDesc","attribute":"`+sortAttr+`"}`,
-		`{"method":"limit","values":[20]}`,
+		`{"method":"limit","values":[200]}`,
 	)
 	list, err := service.ListRows(databaseID, "publications", service.WithListRowsQueries(queries))
 	if err != nil {
@@ -5794,17 +5800,32 @@ func publicationList(ctx openruntimes.Context, in *GatewayInput, cl client.Clien
 		return internalFailure(ctx, in, err)
 	}
 	rows, _ := raw["rows"].([]interface{})
+
+	// Content-language filter (server-authoritative, applied before pagination).
+	mode, langs := getUserLanguagePrefs(cl, actorOrEmpty(in.ActorId))
+	filterByLanguage := mode == "ONLY_SELECTED" && len(langs) > 0
+
 	items := make([]map[string]interface{}, 0, len(rows))
 	for _, r := range rows {
 		row, _ := r.(map[string]interface{})
+		pubId, _ := row["$id"].(string)
+		if pubId != "" && filterByLanguage {
+			// UNKNOWN/missing language metadata never matches ONLY_SELECTED.
+			if !stringIntersects(langs, getPublicationLanguages(cl, pubId)) {
+				continue
+			}
+		}
 		item := map[string]interface{}{"publication": row}
-		if pubId, ok := row["$id"].(string); ok && pubId != "" {
+		if pubId != "" {
 			item["coverUrl"] = resolveCoverURL(cl, pubId, "") // list view: keep permanent low-res thumbnail
 			if creatorId, ok := row["creatorId"].(string); ok && creatorId != "" {
 				item["creatorName"] = resolveCreatorName(cl, creatorId)
 			}
 		}
 		items = append(items, item)
+		if len(items) >= 20 {
+			break
+		}
 	}
 	return success(ctx, in, map[string]interface{}{"items": items})
 }
@@ -6291,6 +6312,205 @@ func notificationMarkRead(ctx openruntimes.Context, in *GatewayInput, cl client.
 		}
 	}
 	return success(ctx, in, map[string]interface{}{"ok": true})
+}
+
+// getUserLanguagePrefs returns the user's content-language mode and selected
+// languages (ALL + empty when no preferences are stored).
+func getUserLanguagePrefs(cl client.Client, userId string) (string, []string) {
+	if userId == "" {
+		return "ALL", nil
+	}
+	service := tablesdb.New(cl)
+	list, err := service.ListRows(databaseID, "user_language_preferences", service.WithListRowsQueries([]string{
+		qEqual("userId", userId),
+		`{"method":"limit","values":[1]}`,
+	}))
+	if err != nil {
+		return "ALL", nil
+	}
+	var raw map[string]interface{}
+	if err := list.Decode(&raw); err != nil {
+		return "ALL", nil
+	}
+	rows, _ := raw["rows"].([]interface{})
+	if len(rows) == 0 {
+		return "ALL", nil
+	}
+	pref, _ := rows[0].(map[string]interface{})
+	mode, _ := pref["contentLanguageMode"].(string)
+	if mode == "" {
+		mode = "ALL"
+	}
+	return mode, stringSlice(pref["contentLanguages"])
+}
+
+// getPublicationLanguages returns the declared content languages of a
+// publication (empty when no language metadata is stored).
+func getPublicationLanguages(cl client.Client, publicationId string) []string {
+	service := tablesdb.New(cl)
+	list, err := service.ListRows(databaseID, "publication_language_metadata", service.WithListRowsQueries([]string{
+		qEqual("publicationId", publicationId),
+		`{"method":"limit","values":[1]}`,
+	}))
+	if err != nil {
+		return nil
+	}
+	var raw map[string]interface{}
+	if err := list.Decode(&raw); err != nil {
+		return nil
+	}
+	rows, _ := raw["rows"].([]interface{})
+	if len(rows) == 0 {
+		return nil
+	}
+	meta, _ := rows[0].(map[string]interface{})
+	return stringSlice(meta["contentLanguages"])
+}
+
+func stringIntersects(a, b []string) bool {
+	set := make(map[string]bool, len(a))
+	for _, x := range a {
+		set[x] = true
+	}
+	for _, y := range b {
+		if set[y] {
+			return true
+		}
+	}
+	return false
+}
+
+// languagePreferencesSet upserts the authenticated user's UI locale and content
+// language preferences. ONLY_SELECTED requires a non-empty selection.
+func languagePreferencesSet(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	var input struct {
+		UiLocale            string   `json:"uiLocale"`
+		ContentLanguages    []string `json:"contentLanguages"`
+		ContentLanguageMode string   `json:"contentLanguageMode"`
+	}
+	if !decode(ctx, in, &input) || input.ContentLanguageMode == "" {
+		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
+	}
+	userId := actorOrEmpty(in.ActorId)
+	if userId == "" {
+		return respond(ctx, in.OperationId, "UNAUTHORIZED", false)
+	}
+	if input.ContentLanguageMode != "ALL" && input.ContentLanguageMode != "ONLY_SELECTED" {
+		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
+	}
+	if input.ContentLanguageMode == "ONLY_SELECTED" && len(input.ContentLanguages) == 0 {
+		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
+	}
+
+	existingId := findLanguagePrefs(cl, userId)
+	data := map[string]interface{}{
+		"userId":              userId,
+		"uiLocale":            input.UiLocale,
+		"contentLanguages":    input.ContentLanguages,
+		"contentLanguageMode": input.ContentLanguageMode,
+		"updatedAt":           now(),
+	}
+	if existingId == "" {
+		existingId = newUUID()
+		if err := createRow(cl, "user_language_preferences", existingId, data); err != nil {
+			return internalFailure(ctx, in, err)
+		}
+	} else if err := updateRow(cl, "user_language_preferences", existingId, data); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	return success(ctx, in, map[string]interface{}{"ok": true})
+}
+
+func findLanguagePrefs(cl client.Client, userId string) string {
+	service := tablesdb.New(cl)
+	list, err := service.ListRows(databaseID, "user_language_preferences", service.WithListRowsQueries([]string{
+		qEqual("userId", userId),
+		`{"method":"limit","values":[1]}`,
+	}))
+	if err != nil {
+		return ""
+	}
+	var raw map[string]interface{}
+	if err := list.Decode(&raw); err != nil {
+		return ""
+	}
+	rows, _ := raw["rows"].([]interface{})
+	if len(rows) == 0 {
+		return ""
+	}
+	pref, _ := rows[0].(map[string]interface{})
+	id, _ := pref["$id"].(string)
+	return id
+}
+
+// publicationLanguageSet upserts a publication's language metadata. Only the
+// publication's creator or an admin may write it.
+func publicationLanguageSet(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	var input struct {
+		PublicationId       string   `json:"publicationId"`
+		ContentLanguageMode string   `json:"contentLanguageMode"`
+		PrimaryLanguage     string   `json:"primaryLanguage"`
+		ContentLanguages    []string `json:"contentLanguages"`
+	}
+	if !decode(ctx, in, &input) || input.PublicationId == "" || len(input.ContentLanguages) == 0 {
+		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
+	}
+	if input.ContentLanguageMode == "" {
+		input.ContentLanguageMode = "LANGUAGE_BEARING"
+	}
+
+	service := tablesdb.New(cl)
+	pub, err := service.GetRow(databaseID, "publications", input.PublicationId)
+	if err != nil {
+		return respond(ctx, in.OperationId, "RESOURCE_NOT_FOUND", false)
+	}
+	var pm map[string]interface{}
+	if pub.Decode(&pm) != nil {
+		return respond(ctx, in.OperationId, "RESOURCE_NOT_FOUND", false)
+	}
+	creatorId, _ := pm["creatorId"].(string)
+	if creatorId != actorOrEmpty(in.ActorId) && !adminActor(ctx, in, cl) {
+		return respond(ctx, in.OperationId, "FORBIDDEN", false)
+	}
+
+	existingId := findPublicationLanguageMeta(cl, input.PublicationId)
+	data := map[string]interface{}{
+		"publicationId":       input.PublicationId,
+		"contentLanguageMode": input.ContentLanguageMode,
+		"primaryLanguage":     input.PrimaryLanguage,
+		"contentLanguages":    input.ContentLanguages,
+	}
+	if existingId == "" {
+		existingId = newUUID()
+		if err := createRow(cl, "publication_language_metadata", existingId, data); err != nil {
+			return internalFailure(ctx, in, err)
+		}
+	} else if err := updateRow(cl, "publication_language_metadata", existingId, data); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	return success(ctx, in, map[string]interface{}{"ok": true})
+}
+
+func findPublicationLanguageMeta(cl client.Client, publicationId string) string {
+	service := tablesdb.New(cl)
+	list, err := service.ListRows(databaseID, "publication_language_metadata", service.WithListRowsQueries([]string{
+		qEqual("publicationId", publicationId),
+		`{"method":"limit","values":[1]}`,
+	}))
+	if err != nil {
+		return ""
+	}
+	var raw map[string]interface{}
+	if err := list.Decode(&raw); err != nil {
+		return ""
+	}
+	rows, _ := raw["rows"].([]interface{})
+	if len(rows) == 0 {
+		return ""
+	}
+	meta, _ := rows[0].(map[string]interface{})
+	id, _ := meta["$id"].(string)
+	return id
 }
 
 // --- query helpers ---
