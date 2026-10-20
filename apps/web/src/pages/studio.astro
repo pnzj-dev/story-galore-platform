@@ -2,6 +2,9 @@
 import Layout from "@/layouts/Layout.astro";
 import { actions } from "astro:actions";
 import { fetchCreator, fetchProjects, fetchMediaAssets } from "@/lib/gateway";
+import { getTranslations } from "@/i18n";
+
+const { t } = getTranslations(Astro.currentLocale);
 
 const user = Astro.locals.user;
 const creator = user ? await fetchCreator(user.$id) : null;
@@ -25,24 +28,24 @@ const projectError = projectResult?.error?.message;
 const profileError = profileResult?.error?.message;
 ---
 
-<Layout title="Creator Studio">
+<Layout title={t("studio.title")}>
   <main class="mx-auto max-w-4xl px-6 py-12">
     {creator ? (
       <>
-        <h1 class="text-3xl font-bold">Creator Studio</h1>
+        <h1 class="text-3xl font-bold">{t("studio.title")}</h1>
         <p class="mt-2 text-foreground-muted">@{creator.handle}</p>
 
         <section class="mt-8">
-          <h2 class="text-xl font-semibold">Profile image</h2>
+          <h2 class="text-xl font-semibold">{t("studio.profileImage")}</h2>
           <form method="POST" action={actions.updateCreatorProfile} class="mt-4 max-w-sm space-y-4">
             <div>
-              <label for="avatarMediaAssetId" class="mb-1 block text-sm text-foreground-muted">Avatar</label>
+              <label for="avatarMediaAssetId" class="mb-1 block text-sm text-foreground-muted">{t("studio.avatar")}</label>
               <select
                 id="avatarMediaAssetId"
                 name="avatarMediaAssetId"
                 class="w-full rounded-sm border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
               >
-                <option value="">— none —</option>
+                <option value="">{t("studio.none")}</option>
                 {mediaAssets.map((a) => (
                   <option value={a.$id} selected={a.$id === creator.avatarMediaAssetId}>
                     {a.mimeType}
@@ -60,16 +63,16 @@ const profileError = profileResult?.error?.message;
               type="submit"
               class="rounded-sm bg-primary px-4 py-2 font-semibold text-primary-foreground transition hover:opacity-90"
             >
-              Set avatar
+              {t("studio.setAvatar")}
             </button>
           </form>
         </section>
 
         <section class="mt-8">
-          <h2 class="text-xl font-semibold">New project</h2>
+          <h2 class="text-xl font-semibold">{t("studio.newProject")}</h2>
           <form method="POST" action={actions.createProject} class="mt-4 max-w-sm space-y-4">
             <div>
-              <label for="name" class="mb-1 block text-sm text-foreground-muted">Name</label>
+              <label for="name" class="mb-1 block text-sm text-foreground-muted">{t("studio.name")}</label>
               <input
                 id="name"
                 name="name"
@@ -80,7 +83,7 @@ const profileError = profileResult?.error?.message;
               />
             </div>
             <div>
-              <label for="description" class="mb-1 block text-sm text-foreground-muted">Description</label>
+              <label for="description" class="mb-1 block text-sm text-foreground-muted">{t("studio.description")}</label>
               <textarea
                 id="description"
                 name="description"
@@ -96,13 +99,13 @@ const profileError = profileResult?.error?.message;
               type="submit"
               class="w-full rounded-sm bg-primary px-4 py-2 font-semibold text-primary-foreground transition hover:opacity-90"
             >
-              Create project
+              {t("studio.createProject")}
             </button>
           </form>
         </section>
 
         <section class="mt-10">
-          <h2 class="text-xl font-semibold">Your projects</h2>
+          <h2 class="text-xl font-semibold">{t("studio.yourProjects")}</h2>
           {projects.length > 0 ? (
             <ul class="mt-4 space-y-2">
               {projects.map((p) => (
@@ -117,19 +120,19 @@ const profileError = profileResult?.error?.message;
             </ul>
           ) : (
             <p class="mt-4 rounded-md border border-dashed border-border px-6 py-8 text-sm text-foreground-muted">
-              No projects yet.
+              {t("studio.noProjects")}
             </p>
           )}
         </section>
       </>
     ) : (
       <>
-        <h1 class="text-3xl font-bold">Become a creator</h1>
-        <p class="mt-2 text-foreground-muted">Create your creator profile to start publishing stories.</p>
+        <h1 class="text-3xl font-bold">{t("studio.becomeCreator")}</h1>
+        <p class="mt-2 text-foreground-muted">{t("studio.becomeCreatorDesc")}</p>
 
         <form method="POST" action={actions.becomeCreator} class="mt-6 max-w-sm space-y-4">
           <div>
-            <label for="handle" class="mb-1 block text-sm text-foreground-muted">Handle</label>
+            <label for="handle" class="mb-1 block text-sm text-foreground-muted">{t("studio.handle")}</label>
             <input
               id="handle"
               name="handle"
@@ -140,7 +143,7 @@ const profileError = profileResult?.error?.message;
             />
           </div>
           <div>
-            <label for="displayName" class="mb-1 block text-sm text-foreground-muted">Display name</label>
+            <label for="displayName" class="mb-1 block text-sm text-foreground-muted">{t("studio.displayName")}</label>
             <input
               id="displayName"
               name="displayName"
@@ -151,7 +154,7 @@ const profileError = profileResult?.error?.message;
             />
           </div>
           <div>
-            <label for="bio" class="mb-1 block text-sm text-foreground-muted">Bio</label>
+            <label for="bio" class="mb-1 block text-sm text-foreground-muted">{t("studio.bio")}</label>
             <textarea
               id="bio"
               name="bio"
@@ -169,7 +172,7 @@ const profileError = profileResult?.error?.message;
             type="submit"
             class="w-full rounded-sm bg-primary px-4 py-2 font-semibold text-primary-foreground transition hover:opacity-90"
           >
-            Become a creator
+            {t("studio.becomeCreator")}
           </button>
         </form>
       </>

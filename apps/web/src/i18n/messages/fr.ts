@@ -101,6 +101,42 @@ const fr = {
   "settings.no": "Non",
   "settings.yes": "Oui",
   "settings.save": "Enregistrer",
+
+  // Admin navigation
+  "admin.label": "Admin",
+  "admin.overview": "Vue d'ensemble",
+  "admin.analytics": "Analyses",
+  "admin.users": "Utilisateurs",
+  "admin.creators": "Créateurs",
+  "admin.content": "Contenu",
+  "admin.moderation": "Modération",
+  "admin.payments": "Paiements",
+  "admin.subscriptions": "Abonnements",
+  "admin.ads": "Publicité",
+  "admin.comingSoon": "Bientôt",
+  "admin.aiOperations": "Opérations IA",
+  "admin.storage": "Stockage",
+  "admin.messaging": "Messagerie",
+  "admin.system": "Système",
+  "admin.settings": "Paramètres",
+
+  // Studio
+  "studio.title": "Studio créateur",
+  "studio.profileImage": "Image de profil",
+  "studio.avatar": "Avatar",
+  "studio.none": "— aucun —",
+  "studio.setAvatar": "Définir l'avatar",
+  "studio.newProject": "Nouveau projet",
+  "studio.name": "Nom",
+  "studio.description": "Description",
+  "studio.createProject": "Créer le projet",
+  "studio.yourProjects": "Vos projets",
+  "studio.noProjects": "Aucun projet pour le moment.",
+  "studio.becomeCreator": "Devenir créateur",
+  "studio.becomeCreatorDesc": "Créez votre profil de créateur pour commencer à publier des histoires.",
+  "studio.handle": "Identifiant",
+  "studio.displayName": "Nom d'affichage",
+  "studio.bio": "Bio",
 } satisfies Record<keyof typeof en, string>;
 
 export default fr;

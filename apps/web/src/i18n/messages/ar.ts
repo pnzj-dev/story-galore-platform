@@ -100,6 +100,42 @@ const ar = {
   "settings.no": "لا",
   "settings.yes": "نعم",
   "settings.save": "حفظ",
+
+  // Admin navigation
+  "admin.label": "الإدارة",
+  "admin.overview": "نظرة عامة",
+  "admin.analytics": "التحليلات",
+  "admin.users": "المستخدمون",
+  "admin.creators": "المبدعون",
+  "admin.content": "المحتوى",
+  "admin.moderation": "الإشراف",
+  "admin.payments": "المدفوعات",
+  "admin.subscriptions": "الاشتراكات",
+  "admin.ads": "الإعلانات",
+  "admin.comingSoon": "قريبًا",
+  "admin.aiOperations": "عمليات الذكاء الاصطناعي",
+  "admin.storage": "التخزين",
+  "admin.messaging": "المراسلة",
+  "admin.system": "النظام",
+  "admin.settings": "الإعدادات",
+
+  // Studio
+  "studio.title": "استوديو المبدعين",
+  "studio.profileImage": "صورة الملف الشخصي",
+  "studio.avatar": "الصورة الرمزية",
+  "studio.none": "— بلا —",
+  "studio.setAvatar": "تعيين الصورة الرمزية",
+  "studio.newProject": "مشروع جديد",
+  "studio.name": "الاسم",
+  "studio.description": "الوصف",
+  "studio.createProject": "إنشاء المشروع",
+  "studio.yourProjects": "مشاريعك",
+  "studio.noProjects": "لا توجد مشاريع بعد.",
+  "studio.becomeCreator": "كن مبدعًا",
+  "studio.becomeCreatorDesc": "أنشئ ملفك الشخصي كمبدع لبدء نشر القصص.",
+  "studio.handle": "المعرّف",
+  "studio.displayName": "اسم العرض",
+  "studio.bio": "نبذة",
 } satisfies Record<keyof typeof en, string>;
 
 export default ar;

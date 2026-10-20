@@ -28,3 +28,14 @@ export function getTranslations(locale: string | undefined | null): Translations
     t: (key) => dict[key] ?? en[key] ?? key,
   };
 }
+
+/** Strip a leading non-default locale prefix (e.g. /fr/settings -> /settings). */
+export function stripLocalePrefix(pathname: string): string {
+  const parts = pathname.split("/");
+  const candidate = parts[1] ?? "";
+  if (candidate !== DEFAULT_LOCALE && LANGUAGES[candidate]) {
+    const rest = parts.slice(2).join("/");
+    return rest ? `/${rest}` : "/";
+  }
+  return pathname || "/";
+}

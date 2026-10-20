@@ -1,6 +1,7 @@
 ---
 import "@/styles/global.css";
 import { ClientRouter } from "astro:transitions";
+import { getTranslations } from "@/i18n";
 
 interface Props {
   title: string;
@@ -8,6 +9,7 @@ interface Props {
 }
 
 const { title, description } = Astro.props;
+const { locale, dir, t } = getTranslations(Astro.currentLocale);
 const user = Astro.locals.user;
 if (!user || !(user.labels ?? []).includes("admin")) {
   return Astro.redirect("/");
@@ -16,30 +18,30 @@ if (!user || !(user.labels ?? []).includes("admin")) {
 const canonicalUrl = Astro.site ? new URL(Astro.url.pathname, Astro.site).toString() : undefined;
 
 const NAV = [
-  { href: "/admin", label: "Overview" },
-  { href: "/admin/analytics", label: "Analytics" },
-  { href: "/admin/users", label: "Users" },
-  { href: "/admin/creators", label: "Creators" },
-  { href: "/admin/content", label: "Content" },
-  { href: "/admin/moderation", label: "Moderation" },
-  { href: "/admin/payments", label: "Payments" },
-  { href: "/admin/subscriptions", label: "Subscriptions" },
-  { href: "/admin/ads", label: "Ads & Monetization" },
+  { href: "/admin", label: t("admin.overview") },
+  { href: "/admin/analytics", label: t("admin.analytics") },
+  { href: "/admin/users", label: t("admin.users") },
+  { href: "/admin/creators", label: t("admin.creators") },
+  { href: "/admin/content", label: t("admin.content") },
+  { href: "/admin/moderation", label: t("admin.moderation") },
+  { href: "/admin/payments", label: t("admin.payments") },
+  { href: "/admin/subscriptions", label: t("admin.subscriptions") },
+  { href: "/admin/ads", label: t("admin.ads") },
 ];
 
 const COMING_SOON = [
-  "AI Operations",
-  "Storage",
-  "Messaging",
-  "System",
-  "Settings",
+  t("admin.aiOperations"),
+  t("admin.storage"),
+  t("admin.messaging"),
+  t("admin.system"),
+  t("admin.settings"),
 ];
 
 const active = Astro.url.pathname;
 ---
 
 <!doctype html>
-<html lang="en" dir="ltr" data-theme="dark">
+<html lang={locale} dir={dir} data-theme="dark">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -71,7 +73,7 @@ const active = Astro.url.pathname;
             SG
           </span>
           StoryGalore
-          <span class="text-xs font-normal text-foreground-muted">Admin</span>
+          <span class="text-xs font-normal text-foreground-muted">{t("admin.label")}</span>
         </a>
         <nav class="mt-6 space-y-0.5">
           {NAV.map((item) => (
@@ -88,7 +90,7 @@ const active = Astro.url.pathname;
             </a>
           ))}
         </nav>
-        <p class="mt-6 px-3 text-xs uppercase tracking-widest text-foreground-muted/60">Coming soon</p>
+        <p class="mt-6 px-3 text-xs uppercase tracking-widest text-foreground-muted/60">{t("admin.comingSoon")}</p>
         <nav class="mt-1 space-y-0.5">
           {COMING_SOON.map((label) => (
             <span class="block rounded-sm px-3 py-1.5 text-sm text-foreground-muted/40">{label}</span>

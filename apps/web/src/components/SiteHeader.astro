@@ -2,6 +2,7 @@
 import { ThemeToggle } from "@storygalore/ui";
 import NotificationCenter from "@/components/NotificationCenter.svelte";
 import UserMenu from "@/components/UserMenu.svelte";
+import LocaleSwitcher from "@/components/LocaleSwitcher.astro";
 import { fetchNotifications, fetchCreator } from "@/lib/gateway";
 import type { MessageKey } from "@/i18n";
 
@@ -89,6 +90,8 @@ const initial = (user?.name ?? user?.email ?? "A").trim().charAt(0).toUpperCase(
           preferencesLabel={t("notif.preferences")}
         />
       )}
+
+      <LocaleSwitcher />
 
       <ThemeToggle client:load />
 
