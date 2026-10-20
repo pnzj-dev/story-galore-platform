@@ -20,7 +20,7 @@
   {#each shorts as short (short.id)}
     <section data-id={short.id} class="relative h-[100dvh] snap-start overflow-hidden bg-black">
       {#if short.coverUrl}
-        <img src={short.coverUrl} alt={short.title} class="h-full w-full object-cover" />
+        <img src={short.coverUrl} alt={short.title} draggable="false" class="h-full w-full select-none object-cover" style="-webkit-user-drag: none;" />
       {/if}
 
       <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30"></div>

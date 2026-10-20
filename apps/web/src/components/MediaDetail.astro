@@ -1,5 +1,6 @@
 ---
 import Layout from "@/layouts/Layout.astro";
+import { MediaPlayer, ImageViewer } from "@storygalore/ui";
 import type { PublicationDetail } from "@/lib/gateway";
 
 interface Props {
@@ -26,7 +27,7 @@ const rating =
     detail ? (
       <main>
         <div class="relative h-[340px] overflow-hidden">
-          {cover && <img src={cover} alt="" class="h-full w-full object-cover" />}
+          {cover && <img src={cover} alt="" draggable="false" class="h-full w-full select-none object-cover" style="-webkit-user-drag: none;" />}
           <div class="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent"></div>
         </div>
 
@@ -34,7 +35,7 @@ const rating =
           <div class="-mt-24 grid gap-6 md:grid-cols-[200px_1fr]">
             <div class="hidden aspect-[2/3] overflow-hidden rounded-md border border-border shadow-lg md:block">
               {cover ? (
-                <img src={cover} alt={pub!.title ?? ""} class="h-full w-full object-cover" />
+                <img src={cover} alt={pub!.title ?? ""} draggable="false" class="h-full w-full select-none object-cover" style="-webkit-user-drag: none;" />
               ) : (
                 <div class="flex h-full items-center justify-center bg-surface text-3xl font-bold text-foreground-muted">
                   {(pub!.title ?? "?").charAt(0)}
@@ -77,18 +78,31 @@ const rating =
                     </div>
                   ) : allowed.length > 0 ? (
                     kind === "video" ? (
-                      <video
-                        controls
-                        preload="metadata"
+                      <MediaPlayer
+                        client:load
                         src={allowed[0].url}
-                        class="aspect-video w-full rounded-md bg-black"
+                        kind="video"
+                        guarded
+                        class="aspect-video w-full rounded-md"
                       />
                     ) : kind === "audio" ? (
-                      <audio controls preload="metadata" src={allowed[0].url} class="w-full" />
+                      <audio
+                        controls
+                        controlslist="nodownload"
+                        preload="metadata"
+                        src={allowed[0].url}
+                        class="w-full"
+                      />
                     ) : (
                       <div class="grid gap-4 sm:grid-cols-2">
                         {allowed.map((m) => (
-                          <img src={m.url} alt={pub!.title ?? ""} class="w-full rounded-md" loading="lazy" />
+                          <ImageViewer
+                            client:load
+                            src={m.url}
+                            alt={pub!.title ?? ""}
+                            guarded
+                            class="w-full rounded-md"
+                          />
                         ))}
                       </div>
                     )

@@ -71,6 +71,23 @@ Protected delivery uses:
 
 Original/source assets are never downloadable through the reader's publication download path.
 
+## Client-side playback & display deterrence
+
+The player, image viewer, and reader render authorized media behind best-effort
+client hardening, not DRM:
+
+- `MediaPlayer` and `ImageViewer` accept a `guarded` prop that disables the
+  native download control, picture-in-picture, right-click/long-press save, and
+  drag-to-save.
+- The reader renders image pages through `ImageViewer` (guarded).
+- Cover thumbnails are marked non-draggable and non-selectable.
+
+This deterrence stops casual save-as but does not prevent a determined user from
+reading the delivered bytes (DevTools, network capture). The authoritative
+control is the short-lived signed delivery URL for protected content; covers of
+non-public publications are served through tokenized URLs too. Low-resolution
+list-view cover thumbnails remain permanent by design.
+
 ## Export files
 
 For PDF/CBZ/EPUB:

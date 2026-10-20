@@ -15,8 +15,10 @@
       src={publication.coverUrl}
       alt=""
       loading="lazy"
+      draggable="false"
       onerror={() => (imgFailed = true)}
-      class="h-full w-full object-cover"
+      class="h-full w-full select-none object-cover"
+      style="-webkit-user-drag: none;"
     />
   {:else}
     <div

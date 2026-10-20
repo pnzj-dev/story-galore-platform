@@ -101,8 +101,10 @@
         src={publication.coverUrl}
         alt=""
         loading="lazy"
+        draggable="false"
         onerror={() => (imgFailed = true)}
-        class="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+        class="h-full w-full select-none object-cover transition duration-300 group-hover:scale-105"
+        style="-webkit-user-drag: none;"
       />
     {:else}
       <div

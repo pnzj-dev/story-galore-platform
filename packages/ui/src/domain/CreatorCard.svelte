@@ -14,7 +14,9 @@
         src={creator.avatarUrl}
         alt=""
         loading="lazy"
-        class="h-full w-full object-cover"
+        draggable="false"
+        class="h-full w-full select-none object-cover"
+        style="-webkit-user-drag: none;"
       />
     {:else}
       <div class="flex h-full w-full items-center justify-center text-sm font-bold text-foreground-muted">

@@ -1,5 +1,6 @@
 <script lang="ts">
   import { actions } from 'astro:actions';
+  import { ImageViewer } from '@storygalore/ui';
 
   interface ReaderPage {
     url?: string;
@@ -86,11 +87,11 @@
       {:else}
         <div data-position={page.position} class="flex justify-center">
           {#if page.url}
-            <img
+            <ImageViewer
               src={page.url}
               alt={`Page ${page.position + 1}`}
+              guarded
               class="max-h-[60vh] w-auto rounded-sm border border-border"
-              loading="lazy"
             />
           {:else}
             <div

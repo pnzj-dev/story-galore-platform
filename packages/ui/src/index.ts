@@ -6,6 +6,7 @@ export { default as DraftStatus } from './domain/DraftStatus.svelte';
 export { default as ContentRatingBadge } from './domain/ContentRatingBadge.svelte';
 export { default as MediaCard } from './domain/MediaCard.svelte';
 export { default as MediaPlayer } from './domain/MediaPlayer.svelte';
+export { default as ImageViewer } from './domain/ImageViewer.svelte';
 export { default as ShortCard } from './domain/ShortCard.svelte';
 export { default as MediaRail } from './composites/MediaRail.svelte';
 export { default as CreatorCard } from './domain/CreatorCard.svelte';

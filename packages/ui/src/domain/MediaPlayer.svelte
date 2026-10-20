@@ -8,6 +8,7 @@
     captions,
     autoplay = false,
     controls = true,
+    guarded = false,
     class: className = '',
   }: {
     src: string;
@@ -16,6 +17,8 @@
     captions?: string;
     autoplay?: boolean;
     controls?: boolean;
+    /** Disable the native download/picture-in-picture affordances and right-click save. */
+    guarded?: boolean;
     class?: string;
   } = $props();
 
@@ -61,6 +64,10 @@
   function onDurationChange() {
     duration = mediaEl?.duration ?? 0;
   }
+
+  function blockContextMenu(e: MouseEvent) {
+    if (guarded) e.preventDefault();
+  }
 </script>
 
 <div
@@ -73,6 +80,8 @@
       {src}
       {autoplay}
       preload="metadata"
+      controlslist={guarded ? 'nodownload' : undefined}
+      oncontextmenu={blockContextMenu}
       bind:currentTime={currentTime}
       bind:duration={duration}
       bind:volume={volume}
@@ -90,6 +99,9 @@
       {autoplay}
       preload="metadata"
       playsinline
+      controlslist={guarded ? 'nodownload' : undefined}
+      disablepictureinpicture={guarded}
+      oncontextmenu={blockContextMenu}
       bind:currentTime={currentTime}
       bind:duration={duration}
       bind:volume={volume}

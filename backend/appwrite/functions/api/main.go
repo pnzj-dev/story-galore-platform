@@ -5568,7 +5568,12 @@ func readingProgressGet(ctx openruntimes.Context, in *GatewayInput, cl client.Cl
 	return success(ctx, in, row)
 }
 
-func resolveCoverURL(cl client.Client, publicationId string) string {
+// resolveCoverURL resolves a publication's cover thumbnail. For public
+// publications (or an empty access class, used by bulk list views to avoid one
+// CreateFileToken per card) it returns a permanent preview URL; for protected
+// access classes it returns a short-lived tokenized URL so the cover file is
+// never exposed as a permanent public URL.
+func resolveCoverURL(cl client.Client, publicationId, accessClass string) string {
 	service := tablesdb.New(cl)
 	list, err := service.ListRows(databaseID, "media_assets", service.WithListRowsQueries([]string{
 		qEqual("publicationId", publicationId),
@@ -5591,7 +5596,10 @@ func resolveCoverURL(cl client.Client, publicationId string) string {
 	if bucket == "" || fileId == "" {
 		return ""
 	}
-	return buildPreviewURL(bucket, fileId, 400)
+	if accessClass == "" || accessClass == "PUBLIC" {
+		return buildPreviewURL(bucket, fileId, 400)
+	}
+	return resolveDeliveryURL(cl, bucket, fileId, time.Hour, 400)
 }
 
 // publicMediaEndpoint resolves the browser-facing origin for media URLs. It
@@ -5699,7 +5707,7 @@ func continueList(ctx openruntimes.Context, in *GatewayInput, cl client.Client) 
 					}
 				}
 			}
-			item["coverUrl"] = resolveCoverURL(cl, pubId)
+			item["coverUrl"] = resolveCoverURL(cl, pubId, "") // list view: keep permanent low-res thumbnail
 		}
 		items = append(items, item)
 	}
@@ -5749,7 +5757,7 @@ func publicationList(ctx openruntimes.Context, in *GatewayInput, cl client.Clien
 		row, _ := r.(map[string]interface{})
 		item := map[string]interface{}{"publication": row}
 		if pubId, ok := row["$id"].(string); ok && pubId != "" {
-			item["coverUrl"] = resolveCoverURL(cl, pubId)
+			item["coverUrl"] = resolveCoverURL(cl, pubId, "") // list view: keep permanent low-res thumbnail
 			if creatorId, ok := row["creatorId"].(string); ok && creatorId != "" {
 				item["creatorName"] = resolveCreatorName(cl, creatorId)
 			}
@@ -5805,7 +5813,7 @@ func publicationGet(ctx openruntimes.Context, in *GatewayInput, cl client.Client
 		"media":       media,
 		"entitled":    entitled,
 		"accessClass": accessClass,
-		"coverUrl":    resolveCoverURL(cl, input.PublicationId),
+		"coverUrl":    resolveCoverURL(cl, input.PublicationId, accessClass),
 	}
 	if creatorId, ok := pm["creatorId"].(string); ok && creatorId != "" {
 		out["creatorName"] = resolveCreatorName(cl, creatorId)
