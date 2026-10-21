@@ -47,12 +47,17 @@ export class PolicyEngine {
     }
   }
 
-  /** Deny delegation to an agent outside the manifest's allowlist. */
+  /**
+   * Deny delegation to an agent outside the manifest's allowlist. A `*` entry
+   * permits delegation to any agent (used by the orchestrator).
+   */
   assertDelegation(targetSlug: string): void {
-    if (!this.manifest.delegation.allowed_agents.includes(targetSlug)) {
-      throw new PolicyDeniedError(
-        `POLICY_DENIED: ${this.manifest.id} may not delegate to "${targetSlug}"`,
-      );
+    const allowed = this.manifest.delegation.allowed_agents;
+    if (allowed.includes('*') || allowed.includes(targetSlug)) {
+      return;
     }
+    throw new PolicyDeniedError(
+      `POLICY_DENIED: ${this.manifest.id} may not delegate to "${targetSlug}"`,
+    );
   }
 }

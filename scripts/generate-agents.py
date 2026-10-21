@@ -196,6 +196,56 @@ def render_agent(slug, d, tool_caps, gateway_ops):
     return "\n".join(lines)
 
 
+def render_agent_test(slug, d):
+    const = slug_to_const(slug)
+    lines = [
+        "import { test } from 'node:test';",
+        "import assert from 'node:assert/strict';",
+        "import { PolicyEngine, PolicyDeniedError } from '../policy';",
+        f"import {{ {const}_MANIFEST }} from '../manifests';",
+        "",
+        f"test('{slug}: manifest contract is well-formed', () => {{",
+        f"  assert.equal({const}_MANIFEST.slug, '{slug}');",
+        f"  assert.ok({const}_MANIFEST.capabilities.allowed.length > 0);",
+        f"  assert.ok({const}_MANIFEST.capabilities.forbidden.length > 0);",
+        "});",
+        "",
+        f"test('{slug}: allowed capabilities are accepted', () => {{",
+        f"  const policy = new PolicyEngine({const}_MANIFEST);",
+        f"  for (const cap of {const}_MANIFEST.capabilities.allowed) {{",
+        "    assert.doesNotThrow(() => policy.assertCapability(cap), cap);",
+        "  }",
+        "});",
+        "",
+        f"test('{slug}: forbidden capabilities are denied', () => {{",
+        f"  const policy = new PolicyEngine({const}_MANIFEST);",
+        f"  for (const cap of {const}_MANIFEST.capabilities.forbidden) {{",
+        "    assert.throws(() => policy.assertCapability(cap), PolicyDeniedError);",
+        "  }",
+        "});",
+        "",
+        f"test('{slug}: unknown capability is denied', () => {{",
+        f"  const policy = new PolicyEngine({const}_MANIFEST);",
+        "  assert.throws(() => policy.assertCapability('__unknown__.capability'), PolicyDeniedError);",
+        "});",
+        "",
+        f"test('{slug}: delegation is enforced', () => {{",
+        f"  const policy = new PolicyEngine({const}_MANIFEST);",
+        f"  const allowed = {const}_MANIFEST.delegation.allowed_agents;",
+        "  if (allowed.includes('*')) {",
+        "    assert.doesNotThrow(() => policy.assertDelegation('any-agent'));",
+        "  } else {",
+        "    for (const target of allowed) {",
+        "      assert.doesNotThrow(() => policy.assertDelegation(target), target);",
+        "    }",
+        "    assert.throws(() => policy.assertDelegation('__unknown__'), PolicyDeniedError);",
+        "  }",
+        "});",
+        "",
+    ]
+    return "\n".join(lines)
+
+
 def render_env(manifests):
     lines = [
         "import type { AgentNamespace } from 'agents';",
@@ -305,6 +355,7 @@ def main():
         (OUT_DIR / "src" / "agents" / f"{slug}.ts").write_text(
             render_agent(slug, d, tool_caps, gateway_ops)
         )
+        (OUT_DIR / "src" / "agents" / f"{slug}.test.ts").write_text(render_agent_test(slug, d))
 
     # Go agent allowlist consumed by the `api` gateway function.
     (API_DIR / "agent_auth.go").write_text(render_agent_auth(manifests, tool_caps, gateway_ops))

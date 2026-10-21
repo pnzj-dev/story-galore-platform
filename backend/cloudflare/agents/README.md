@@ -19,7 +19,15 @@ The generator (`scripts/generate-agents.py`) emits:
 
 - `src/manifests.ts` — simplified manifests (capabilities + delegation) for the Policy Engine.
 - `src/agents/{slug}.ts` — one Durable Object agent class per agent.
+- `src/agents/{slug}.test.ts` — per-agent authorization/contract tests.
 - `src/env.ts`, `src/index.ts`, `wrangler.jsonc` — DO bindings + migrations.
+- `backend/appwrite/functions/api/agent_auth.go` — the per-agent gateway allowlist.
+
+Run the agent runtime tests (92 tests: per-agent authorization/contract + policy):
+
+```bash
+cd backend/cloudflare/agents && npm test
+```
 
 Validate the reconciliation invariants (capability-registry completeness,
 tool→manifest consistency, delegation targets, source paths):
