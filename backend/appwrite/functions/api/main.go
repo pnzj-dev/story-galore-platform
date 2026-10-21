@@ -181,8 +181,8 @@ func Main(ctx openruntimes.Context) openruntimes.Response {
 
 	cl := newClient(ctx)
 
-	// Agent actors (Appwrite users labelled `agent:{slug}`) may only call the
-	// operations their tools are wired to. This is the primary agent->gateway
+	// Agent actors (Appwrite users carrying a generated agent label) may only call
+	// the operations their tools are wired to. This is the primary agent->gateway
 	// authorization boundary: a buggy or misconfigured agent cannot escalate to
 	// admin operations because it runs as a non-admin actor and is allowlisted
 	// here. Non-agent actors (users, admin) skip this and are authorized by the
@@ -1639,9 +1639,10 @@ func strEq(m map[string]interface{}, key, want string) bool {
 	return s != "" && s == want
 }
 
-// agentSlug returns the agent slug if the actor is a trusted platform agent
-// (an Appwrite user labelled `agent:{slug}`), or "" otherwise.
-func agentSlug(cl client.Client, actorId string) string {
+// agentLabel returns the agent's canonical label if the actor is a trusted
+// platform agent (an Appwrite user carrying one of the generated alphanumeric
+// agent labels, e.g. `agentstoryproducer`), or "" otherwise.
+func agentLabel(cl client.Client, actorId string) string {
 	if actorId == "" {
 		return ""
 	}
@@ -1650,8 +1651,8 @@ func agentSlug(cl client.Client, actorId string) string {
 		return ""
 	}
 	for _, l := range user.Labels {
-		if strings.HasPrefix(l, "agent:") {
-			return strings.TrimPrefix(l, "agent:")
+		if agentAllowedOperations[l] != nil {
+			return l
 		}
 	}
 	return ""
@@ -1659,14 +1660,14 @@ func agentSlug(cl client.Client, actorId string) string {
 
 // isAgentActor reports whether the actor is a trusted platform agent.
 func isAgentActor(cl client.Client, actorId string) bool {
-	return agentSlug(cl, actorId) != ""
+	return agentLabel(cl, actorId) != ""
 }
 
 // agentAuthorizedForOperation reports whether the agent actor is allowlisted
 // for the operation (defense-in-depth; the dispatch enforces this).
 func agentAuthorizedForOperation(cl client.Client, actorId, op string) bool {
-	slug := agentSlug(cl, actorId)
-	return slug != "" && agentAllowedOperations[slug][op]
+	label := agentLabel(cl, actorId)
+	return label != "" && agentAllowedOperations[label][op]
 }
 
 func stringSlice(v interface{}) []string {

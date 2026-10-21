@@ -36,10 +36,11 @@ export abstract class StoryGaloreAgent<
   }
 
   /**
-   * The agent's gateway actor identity: an Appwrite user id `agent-{slug}`,
-   * labelled `agent:{slug}`. The `api` gateway resolves this actor's labels to
-   * enforce the per-agent operation allowlist (generated agent_auth.go). Agents
-   * must never act as the admin service account.
+   * The agent's gateway actor identity: an Appwrite user id `agent-{slug}`
+   * carrying the alphanumeric label `agent` + slug-with-hyphens-stripped (e.g.
+   * `agentstoryproducer`). The `api` gateway resolves that label to enforce the
+   * per-agent operation allowlist (generated agent_auth.go). Agents must never
+   * act as the admin service account.
    */
   protected get actorId(): string {
     return `agent-${this.manifest.slug}`;

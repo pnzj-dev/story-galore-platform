@@ -79,12 +79,13 @@ capability → gateway operation lives in
 mapped there fail closed (the generated method carries a `// fail-closed`
 comment).
 
-Each agent runs as its own Appwrite user id `agent-{slug}` (labelled
-`agent:{slug}`), never the admin service account. The gateway resolves the
-actor's `agent:` label and enforces the per-agent operation allowlist (generated
-`backend/appwrite/functions/api/agent_auth.go`) at dispatch, before any handler
-runs. Ownership checks in the read/mutate handlers are skipped for agent actors
-because the allowlist is the authoritative boundary.
+Each agent runs as its own Appwrite user id `agent-{slug}` (labelled `agent` +
+slug-with-hyphens-stripped, e.g. `agentstoryproducer`), never the admin service
+account. The gateway resolves the actor's agent label and enforces the per-agent
+operation allowlist (generated `backend/appwrite/functions/api/agent_auth.go`) at
+dispatch, before any handler runs. Ownership checks in the read/mutate handlers
+are skipped for agent actors because the allowlist is the authoritative
+boundary.
 
 The gateway derives the authoritative actor from the server-set
 `x-appwrite-user-id` header (present when the function is invoked via a user
@@ -95,7 +96,7 @@ Provision the agent actors before deploying:
 
 ```text
 for each agent slug:
-  1. an Appwrite user with id `agent-{slug}` and label `agent:{slug}`
+  1. an Appwrite user with id `agent-{slug}` and label `agent` + slug-with-hyphens-stripped
   2. a session for that user (users.createSession)
   3. a session JWT (users.createJWT), stored as the Worker secret AGENT_SESSION_JWT
 ```

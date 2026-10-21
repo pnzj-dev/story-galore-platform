@@ -23,16 +23,16 @@ func TestAgentAllowlistEnforcesScope(t *testing.T) {
 		}
 	}
 
-	if !agentAllowedOperations["support"]["admin_support_ticket_update"] {
+	if !agentAllowedOperations["agentsupport"]["admin_support_ticket_update"] {
 		t.Error("support agent must be allowlisted for admin_support_ticket_update")
 	}
-	if !agentAllowedOperations["support"]["support_ticket_get"] {
+	if !agentAllowedOperations["agentsupport"]["support_ticket_get"] {
 		t.Error("support agent must be allowlisted for support_ticket_get")
 	}
-	if agentAllowedOperations["story-producer"]["admin_analytics_get"] {
+	if agentAllowedOperations["agentstoryproducer"]["admin_analytics_get"] {
 		t.Error("story-producer must NOT be allowlisted for admin_analytics_get")
 	}
-	if !agentAllowedOperations["story-producer"]["project_get"] {
+	if !agentAllowedOperations["agentstoryproducer"]["project_get"] {
 		t.Error("story-producer must be allowlisted for project_get")
 	}
 }
