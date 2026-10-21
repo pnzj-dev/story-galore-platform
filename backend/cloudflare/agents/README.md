@@ -63,6 +63,17 @@ Policy Engine before any side effect, records provenance and a
 `allowed`/`forbidden` sets. Unknown capabilities and out-of-allowlist delegation
 are denied. Trust never substitutes for authorization.
 
+## Gateway wiring
+
+Read/mutate tools delegate to the `api` gateway function. The mapping of
+capability → gateway operation lives in
+`contracts/agents/tools/gateway-operations.yaml`; tools whose capability is not
+mapped there fail closed (the generated method carries a `// fail-closed`
+comment). Scope-sensitive admin/financial reads (`analytics.read`,
+`cost.read`, `revenue.read`, `usage.read`, …) are intentionally unmapped until
+per-agent credentials + gateway-side authorization exist, because agents
+currently run as the admin service account.
+
 > The `contracts/agents/manifests/*.yaml` `implementation.source_path` /
 > `tests_path` point at `backend/cloudflare/agents/src/agents/{slug}.ts` /
 > `{slug}.test.ts`, matching this Worker. The capability registry

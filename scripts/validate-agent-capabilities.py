@@ -9,9 +9,12 @@ Checks:
      capability is in the manifest's allowed set.
   4. Every `delegation.allowed_agents` target (except `*`) is a known agent slug.
   5. Every manifest `implementation.source_path` points at the generated runtime.
+  6. Every capability in tools/gateway-operations.yaml is registered and its
+     operation matches a real `api` gateway operation.
 
 Exit 1 on any violation.
 """
+import re
 import sys
 from pathlib import Path
 
@@ -19,6 +22,7 @@ import yaml
 
 ROOT = Path(__file__).resolve().parent.parent
 CONTRACTS = ROOT / "contracts" / "agents"
+API_MAIN_GO = ROOT / "backend" / "appwrite" / "functions" / "api" / "main.go"
 
 failures = []
 
@@ -33,6 +37,11 @@ def load_manifests():
     for p in sorted((CONTRACTS / "manifests").glob("*.yaml")):
         out[p.stem] = yaml.safe_load(open(p))
     return out
+
+
+def real_gateway_ops():
+    text = API_MAIN_GO.read_text()
+    return set(re.findall(r'case "([a-z0-9_]+)":', text))
 
 
 def main():
@@ -77,11 +86,21 @@ def main():
         if not sp.startswith("backend/cloudflare/agents/src/agents/"):
             fail(f"{slug}: source_path '{sp}' should be under backend/cloudflare/agents/src/agents/")
 
+    # 6. gateway operations reference registered capabilities + real gateway ops
+    gw_ops = yaml.safe_load(open(CONTRACTS / "tools" / "gateway-operations.yaml")).get("operations", {})
+    real_ops = real_gateway_ops()
+    for cap, op in gw_ops.items():
+        if cap not in registered:
+            fail(f"gateway-operations: capability '{cap}' not in capability-registry.yaml")
+        if op not in real_ops:
+            fail(f"gateway-operations: '{op}' (for {cap}) is not a real api gateway operation")
+
     if failures:
         print(f"\nagent-capability reconciliation FAILED: {len(failures)} violation(s)")
         sys.exit(1)
     print(f"agent-capability reconciliation PASS: {len(registered)} capabilities, "
-          f"{len(tools)} tools, {len(manifests)} manifests")
+          f"{len(tools)} tools, {len(manifests)} manifests, "
+          f"{len(gw_ops)} gateway operations")
 
 
 if __name__ == "__main__":

@@ -26,7 +26,7 @@ export class ArtDirectorAgent extends StoryGaloreAgent<Env, ArtDirectorAgentStat
   async characterRead(input: unknown): Promise<unknown> {
     this.assertCapability("character.read");
     this.record("character.read");
-    return this.invokeGateway("character_get", input);
+    return this.invokeGateway("character_list", input);
   }
 
   @callable()
@@ -40,6 +40,7 @@ export class ArtDirectorAgent extends StoryGaloreAgent<Env, ArtDirectorAgentStat
   async styleRead(input: unknown): Promise<unknown> {
     this.assertCapability("style.read");
     this.record("style.read");
+    // fail-closed: no gateway operation wired for "style.read" yet.
     return this.invokeGateway("style_get", input);
   }
 

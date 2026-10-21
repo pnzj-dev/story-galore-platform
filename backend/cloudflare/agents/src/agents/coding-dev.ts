@@ -19,6 +19,7 @@ export class CodingDevAgent extends StoryGaloreAgent<Env, CodingDevAgentState> {
   async githubIssueRead(input: unknown): Promise<unknown> {
     this.assertCapability("github.issue.read");
     this.record("github.issue.read");
+    // fail-closed: no gateway operation wired for "github.issue.read" yet.
     return this.invokeGateway("github_issue_get", input);
   }
 
@@ -26,6 +27,7 @@ export class CodingDevAgent extends StoryGaloreAgent<Env, CodingDevAgentState> {
   async repositoryRead(input: unknown): Promise<unknown> {
     this.assertCapability("repository.read");
     this.record("repository.read");
+    // fail-closed: no gateway operation wired for "repository.read" yet.
     return this.invokeGateway("repository_get", input);
   }
 
@@ -33,6 +35,7 @@ export class CodingDevAgent extends StoryGaloreAgent<Env, CodingDevAgentState> {
   async repositoryBranchCreate(input: unknown): Promise<unknown> {
     this.assertCapability("repository.branch.create");
     this.record("repository.branch.create");
+    // fail-closed: no gateway operation wired for "repository.branch.create" yet.
     return this.invokeGateway("repository_branch_create", input);
   }
 
@@ -40,6 +43,7 @@ export class CodingDevAgent extends StoryGaloreAgent<Env, CodingDevAgentState> {
   async repositoryCodeWrite(input: unknown): Promise<unknown> {
     this.assertCapability("repository.code.write");
     this.record("repository.code.write");
+    // fail-closed: no gateway operation wired for "repository.code.write" yet.
     return this.invokeGateway("repository_code_write", input);
   }
 
@@ -47,6 +51,7 @@ export class CodingDevAgent extends StoryGaloreAgent<Env, CodingDevAgentState> {
   async repositoryCommit(input: unknown): Promise<unknown> {
     this.assertCapability("repository.commit");
     this.record("repository.commit");
+    // fail-closed: no gateway operation wired for "repository.commit" yet.
     return this.invokeGateway("repository_commit", input);
   }
 
@@ -54,6 +59,7 @@ export class CodingDevAgent extends StoryGaloreAgent<Env, CodingDevAgentState> {
   async githubPrCreate(input: unknown): Promise<unknown> {
     this.assertCapability("github.pr.create");
     this.record("github.pr.create");
+    // fail-closed: no gateway operation wired for "github.pr.create" yet.
     return this.invokeGateway("github_pr_create", input);
   }
 
@@ -61,6 +67,7 @@ export class CodingDevAgent extends StoryGaloreAgent<Env, CodingDevAgentState> {
   async ciRun(input: unknown): Promise<unknown> {
     this.assertCapability("ci.run");
     this.record("ci.run");
+    // fail-closed: no gateway operation wired for "ci.run" yet.
     return this.invokeGateway("ci_run", input);
   }
 
@@ -92,6 +99,7 @@ export class CodingDevAgent extends StoryGaloreAgent<Env, CodingDevAgentState> {
   async deploymentPrepare(input: unknown): Promise<unknown> {
     this.assertCapability("deployment.prepare");
     this.record("deployment.prepare");
+    // fail-closed: no gateway operation wired for "deployment.prepare" yet.
     return this.invokeGateway("deployment_prepare", input);
   }
 

@@ -19,6 +19,7 @@ export class OrchestratorAgent extends StoryGaloreAgent<Env, OrchestratorAgentSt
   async agentTaskRead(input: unknown): Promise<unknown> {
     this.assertCapability("agent.task.read");
     this.record("agent.task.read");
+    // fail-closed: no gateway operation wired for "agent.task.read" yet.
     return this.invokeGateway("agent_task_get", input);
   }
 
@@ -62,6 +63,7 @@ export class OrchestratorAgent extends StoryGaloreAgent<Env, OrchestratorAgentSt
   async costRead(input: unknown): Promise<unknown> {
     this.assertCapability("cost.read");
     this.record("cost.read");
+    // fail-closed: no gateway operation wired for "cost.read" yet.
     return this.invokeGateway("cost_get", input);
   }
 

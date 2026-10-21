@@ -19,6 +19,7 @@ export class CeoAgent extends StoryGaloreAgent<Env, CeoAgentState> {
   async economicsSummaryRead(input: unknown): Promise<unknown> {
     this.assertCapability("economics.consumer.read");
     this.record("economics.consumer.read");
+    // fail-closed: no gateway operation wired for "economics.consumer.read" yet.
     return this.invokeGateway("economics_summary_get", input);
   }
 
@@ -26,6 +27,7 @@ export class CeoAgent extends StoryGaloreAgent<Env, CeoAgentState> {
   async analyticsRead(input: unknown): Promise<unknown> {
     this.assertCapability("analytics.read");
     this.record("analytics.read");
+    // fail-closed: no gateway operation wired for "analytics.read" yet.
     return this.invokeGateway("analytics_get", input);
   }
 
@@ -33,6 +35,7 @@ export class CeoAgent extends StoryGaloreAgent<Env, CeoAgentState> {
   async costRead(input: unknown): Promise<unknown> {
     this.assertCapability("cost.read");
     this.record("cost.read");
+    // fail-closed: no gateway operation wired for "cost.read" yet.
     return this.invokeGateway("cost_get", input);
   }
 
@@ -40,6 +43,7 @@ export class CeoAgent extends StoryGaloreAgent<Env, CeoAgentState> {
   async revenueRead(input: unknown): Promise<unknown> {
     this.assertCapability("revenue.read");
     this.record("revenue.read");
+    // fail-closed: no gateway operation wired for "revenue.read" yet.
     return this.invokeGateway("revenue_get", input);
   }
 
@@ -47,6 +51,7 @@ export class CeoAgent extends StoryGaloreAgent<Env, CeoAgentState> {
   async supportRead(input: unknown): Promise<unknown> {
     this.assertCapability("support.read");
     this.record("support.read");
+    // fail-closed: no gateway operation wired for "support.read" yet.
     return this.invokeGateway("support_get", input);
   }
 

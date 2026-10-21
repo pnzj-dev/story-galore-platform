@@ -19,6 +19,7 @@ export class ReaderCompanionAgent extends StoryGaloreAgent<Env, ReaderCompanionA
   async readerRead(input: unknown): Promise<unknown> {
     this.assertCapability("reader.read");
     this.record("reader.read");
+    // fail-closed: no gateway operation wired for "reader.read" yet.
     return this.invokeGateway("reader_get", input);
   }
 
@@ -33,6 +34,7 @@ export class ReaderCompanionAgent extends StoryGaloreAgent<Env, ReaderCompanionA
   async entitlementRead(input: unknown): Promise<unknown> {
     this.assertCapability("entitlement.read");
     this.record("entitlement.read");
+    // fail-closed: no gateway operation wired for "entitlement.read" yet.
     return this.invokeGateway("entitlement_get", input);
   }
 

@@ -19,6 +19,7 @@ export class MediaOperationsAgent extends StoryGaloreAgent<Env, MediaOperationsA
   async deliveryEconomicsRead(input: unknown): Promise<unknown> {
     this.assertCapability("economics.media-cost.read");
     this.record("economics.media-cost.read");
+    // fail-closed: no gateway operation wired for "economics.media-cost.read" yet.
     return this.invokeGateway("delivery_economics_get", input);
   }
 
@@ -26,13 +27,14 @@ export class MediaOperationsAgent extends StoryGaloreAgent<Env, MediaOperationsA
   async mediaRead(input: unknown): Promise<unknown> {
     this.assertCapability("media.read");
     this.record("media.read");
-    return this.invokeGateway("media_get", input);
+    return this.invokeGateway("media_asset_list", input);
   }
 
   @callable()
   async mediaMutate(input: unknown): Promise<unknown> {
     this.assertCapability("media.mutate");
     this.record("media.mutate");
+    // fail-closed: no gateway operation wired for "media.mutate" yet.
     return this.invokeGateway("media_mutate", input);
   }
 
@@ -40,6 +42,7 @@ export class MediaOperationsAgent extends StoryGaloreAgent<Env, MediaOperationsA
   async distributionRead(input: unknown): Promise<unknown> {
     this.assertCapability("distribution.read");
     this.record("distribution.read");
+    // fail-closed: no gateway operation wired for "distribution.read" yet.
     return this.invokeGateway("distribution_get", input);
   }
 
@@ -47,6 +50,7 @@ export class MediaOperationsAgent extends StoryGaloreAgent<Env, MediaOperationsA
   async distributionRepair(input: unknown): Promise<unknown> {
     this.assertCapability("distribution.repair");
     this.record("distribution.repair");
+    // fail-closed: no gateway operation wired for "distribution.repair" yet.
     return this.invokeGateway("distribution_repair", input);
   }
 
@@ -54,6 +58,7 @@ export class MediaOperationsAgent extends StoryGaloreAgent<Env, MediaOperationsA
   async metadataNormalize(input: unknown): Promise<unknown> {
     this.assertCapability("metadata.normalize");
     this.record("metadata.normalize");
+    // fail-closed: no gateway operation wired for "metadata.normalize" yet.
     return this.invokeGateway("metadata_normalize", input);
   }
 

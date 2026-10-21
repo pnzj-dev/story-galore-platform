@@ -19,6 +19,7 @@ export class InfrastructureAgent extends StoryGaloreAgent<Env, InfrastructureAge
   async infrastructureRead(input: unknown): Promise<unknown> {
     this.assertCapability("infrastructure.read");
     this.record("infrastructure.read");
+    // fail-closed: no gateway operation wired for "infrastructure.read" yet.
     return this.invokeGateway("infrastructure_get", input);
   }
 
@@ -26,6 +27,7 @@ export class InfrastructureAgent extends StoryGaloreAgent<Env, InfrastructureAge
   async infrastructureMutate(input: unknown): Promise<unknown> {
     this.assertCapability("infrastructure.mutate");
     this.record("infrastructure.mutate");
+    // fail-closed: no gateway operation wired for "infrastructure.mutate" yet.
     return this.invokeGateway("infrastructure_mutate", input);
   }
 
@@ -33,6 +35,7 @@ export class InfrastructureAgent extends StoryGaloreAgent<Env, InfrastructureAge
   async deploymentPrepare(input: unknown): Promise<unknown> {
     this.assertCapability("deployment.prepare");
     this.record("deployment.prepare");
+    // fail-closed: no gateway operation wired for "deployment.prepare" yet.
     return this.invokeGateway("deployment_prepare", input);
   }
 
@@ -40,6 +43,7 @@ export class InfrastructureAgent extends StoryGaloreAgent<Env, InfrastructureAge
   async deploymentStaging(input: unknown): Promise<unknown> {
     this.assertCapability("deployment.staging");
     this.record("deployment.staging");
+    // fail-closed: no gateway operation wired for "deployment.staging" yet.
     return this.invokeGateway("deployment_staging", input);
   }
 
@@ -47,6 +51,7 @@ export class InfrastructureAgent extends StoryGaloreAgent<Env, InfrastructureAge
   async observabilityRead(input: unknown): Promise<unknown> {
     this.assertCapability("observability.read");
     this.record("observability.read");
+    // fail-closed: no gateway operation wired for "observability.read" yet.
     return this.invokeGateway("observability_get", input);
   }
 
@@ -54,6 +59,7 @@ export class InfrastructureAgent extends StoryGaloreAgent<Env, InfrastructureAge
   async migrationExecute(input: unknown): Promise<unknown> {
     this.assertCapability("migration.execute");
     this.record("migration.execute");
+    // fail-closed: no gateway operation wired for "migration.execute" yet.
     return this.invokeGateway("migration_execute", input);
   }
 

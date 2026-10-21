@@ -26,6 +26,7 @@ export class DiscoveryCuratorAgent extends StoryGaloreAgent<Env, DiscoveryCurato
   async profileRead(input: unknown): Promise<unknown> {
     this.assertCapability("profile.read");
     this.record("profile.read");
+    // fail-closed: no gateway operation wired for "profile.read" yet.
     return this.invokeGateway("profile_get", input);
   }
 
@@ -33,6 +34,7 @@ export class DiscoveryCuratorAgent extends StoryGaloreAgent<Env, DiscoveryCurato
   async analyticsRead(input: unknown): Promise<unknown> {
     this.assertCapability("analytics.read");
     this.record("analytics.read");
+    // fail-closed: no gateway operation wired for "analytics.read" yet.
     return this.invokeGateway("analytics_get", input);
   }
 

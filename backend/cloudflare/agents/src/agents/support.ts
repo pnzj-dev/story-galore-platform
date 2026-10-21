@@ -26,13 +26,14 @@ export class SupportAgent extends StoryGaloreAgent<Env, SupportAgentState> {
   async supportTicketUpdate(input: unknown): Promise<unknown> {
     this.assertCapability("support.ticket.update");
     this.record("support.ticket.update");
-    return this.invokeGateway("support_ticket_update", input);
+    return this.invokeGateway("admin_support_ticket_update", input);
   }
 
   @callable()
   async knowledgeRead(input: unknown): Promise<unknown> {
     this.assertCapability("knowledge.read");
     this.record("knowledge.read");
+    // fail-closed: no gateway operation wired for "knowledge.read" yet.
     return this.invokeGateway("knowledge_get", input);
   }
 

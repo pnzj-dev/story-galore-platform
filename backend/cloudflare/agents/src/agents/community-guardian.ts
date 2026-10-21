@@ -26,6 +26,7 @@ export class CommunityGuardianAgent extends StoryGaloreAgent<Env, CommunityGuard
   async reportRead(input: unknown): Promise<unknown> {
     this.assertCapability("report.read");
     this.record("report.read");
+    // fail-closed: no gateway operation wired for "report.read" yet.
     return this.invokeGateway("report_get", input);
   }
 
@@ -33,6 +34,7 @@ export class CommunityGuardianAgent extends StoryGaloreAgent<Env, CommunityGuard
   async blockRead(input: unknown): Promise<unknown> {
     this.assertCapability("block.read");
     this.record("block.read");
+    // fail-closed: no gateway operation wired for "block.read" yet.
     return this.invokeGateway("block_get", input);
   }
 

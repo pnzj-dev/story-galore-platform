@@ -26,6 +26,7 @@ export class CreatorBusinessAgent extends StoryGaloreAgent<Env, CreatorBusinessA
   async analyticsRead(input: unknown): Promise<unknown> {
     this.assertCapability("analytics.read");
     this.record("analytics.read");
+    // fail-closed: no gateway operation wired for "analytics.read" yet.
     return this.invokeGateway("analytics_get", input);
   }
 
@@ -40,6 +41,7 @@ export class CreatorBusinessAgent extends StoryGaloreAgent<Env, CreatorBusinessA
   async revenueRead(input: unknown): Promise<unknown> {
     this.assertCapability("revenue.read");
     this.record("revenue.read");
+    // fail-closed: no gateway operation wired for "revenue.read" yet.
     return this.invokeGateway("revenue_get", input);
   }
 

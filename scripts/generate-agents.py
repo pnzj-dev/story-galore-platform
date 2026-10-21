@@ -28,6 +28,7 @@ import yaml
 ROOT = Path(__file__).resolve().parent.parent
 MANIFEST_DIR = ROOT / "contracts" / "agents" / "manifests"
 TOOLS_REGISTRY = ROOT / "contracts" / "agents" / "tools" / "registry.yaml"
+GATEWAY_OPS = ROOT / "contracts" / "agents" / "tools" / "gateway-operations.yaml"
 OUT_DIR = ROOT / "backend" / "cloudflare" / "agents"
 
 # Tool verbs that produce the agent's own computation (a structured result),
@@ -76,6 +77,10 @@ def load_tool_caps():
     return {t["id"]: t.get("capability", "") for t in tools}
 
 
+def load_gateway_ops():
+    return yaml.safe_load(open(GATEWAY_OPS)).get("operations", {})
+
+
 def ts_str(value: str) -> str:
     return json.dumps(value, ensure_ascii=False)
 
@@ -120,7 +125,7 @@ def render_manifests(manifests):
     return "\n".join(lines)
 
 
-def render_agent(slug, d, tool_caps):
+def render_agent(slug, d, tool_caps, gateway_ops):
     class_name = d["runtime"]["class_name"]
     const = slug_to_const(slug)
     state_name = f"{class_name}State"
@@ -163,7 +168,11 @@ def render_agent(slug, d, tool_caps):
             lines.append("    };")
         else:
             lines.append(f"    this.record({ts_str(capability)});")
-            lines.append(f"    return this.invokeGateway({ts_str(op_name(tool_name))}, input);")
+            if capability in gateway_ops:
+                lines.append(f"    return this.invokeGateway({ts_str(gateway_ops[capability])}, input);")
+            else:
+                lines.append(f"    // fail-closed: no gateway operation wired for {ts_str(capability)} yet.")
+                lines.append(f"    return this.invokeGateway({ts_str(op_name(tool_name))}, input);")
         lines.append("  }")
         lines.append("")
     lines.append("}")
@@ -246,6 +255,7 @@ def render_wrangler(manifests):
 def main():
     manifests = load_manifests()
     tool_caps = load_tool_caps()
+    gateway_ops = load_gateway_ops()
 
     (OUT_DIR / "src").mkdir(parents=True, exist_ok=True)
     (OUT_DIR / "src" / "agents").mkdir(parents=True, exist_ok=True)
@@ -256,9 +266,11 @@ def main():
     (OUT_DIR / "wrangler.jsonc").write_text(render_wrangler(manifests))
 
     for slug, d in manifests.items():
-        (OUT_DIR / "src" / "agents" / f"{slug}.ts").write_text(render_agent(slug, d, tool_caps))
+        (OUT_DIR / "src" / "agents" / f"{slug}.ts").write_text(
+            render_agent(slug, d, tool_caps, gateway_ops)
+        )
 
-    print(f"generated {len(manifests)} agents -> {OUT_DIR}")
+    print(f"generated {len(manifests)} agents ({len(gateway_ops)} gateway ops wired) -> {OUT_DIR}")
 
 
 if __name__ == "__main__":

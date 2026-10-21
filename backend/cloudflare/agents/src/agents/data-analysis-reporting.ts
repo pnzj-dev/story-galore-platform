@@ -19,6 +19,7 @@ export class DataAnalysisReportingAgent extends StoryGaloreAgent<Env, DataAnalys
   async consumerEconomicsRead(input: unknown): Promise<unknown> {
     this.assertCapability("economics.consumer.read");
     this.record("economics.consumer.read");
+    // fail-closed: no gateway operation wired for "economics.consumer.read" yet.
     return this.invokeGateway("consumer_economics_get", input);
   }
 
@@ -26,6 +27,7 @@ export class DataAnalysisReportingAgent extends StoryGaloreAgent<Env, DataAnalys
   async unitEconomicsRead(input: unknown): Promise<unknown> {
     this.assertCapability("economics.unit-economics.read");
     this.record("economics.unit-economics.read");
+    // fail-closed: no gateway operation wired for "economics.unit-economics.read" yet.
     return this.invokeGateway("unit_economics_get", input);
   }
 
@@ -33,6 +35,7 @@ export class DataAnalysisReportingAgent extends StoryGaloreAgent<Env, DataAnalys
   async analyticsRead(input: unknown): Promise<unknown> {
     this.assertCapability("analytics.read");
     this.record("analytics.read");
+    // fail-closed: no gateway operation wired for "analytics.read" yet.
     return this.invokeGateway("analytics_get", input);
   }
 
@@ -40,6 +43,7 @@ export class DataAnalysisReportingAgent extends StoryGaloreAgent<Env, DataAnalys
   async analyticsReportCreate(input: unknown): Promise<unknown> {
     this.assertCapability("analytics.report.create");
     this.record("analytics.report.create");
+    // fail-closed: no gateway operation wired for "analytics.report.create" yet.
     return this.invokeGateway("analytics_report_create", input);
   }
 
@@ -47,6 +51,7 @@ export class DataAnalysisReportingAgent extends StoryGaloreAgent<Env, DataAnalys
   async costRead(input: unknown): Promise<unknown> {
     this.assertCapability("cost.read");
     this.record("cost.read");
+    // fail-closed: no gateway operation wired for "cost.read" yet.
     return this.invokeGateway("cost_get", input);
   }
 

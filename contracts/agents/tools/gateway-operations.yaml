@@ -1,0 +1,25 @@
+schema: storygalore.agent-gateway-operations/v1
+version: 1.0.0
+policy: deterministic
+# Maps an agent capability to the authoritative `api` gateway operation it
+# delegates to. Read/mutate capabilities NOT listed here are not yet wired to a
+# gateway operation and fail closed at runtime.
+#
+# Scope-sensitive admin/financial reads (analytics.read, cost.read,
+# revenue.read, usage.read, …) are deliberately absent until per-agent
+# credentials and gateway-side authorization exist — mapping them to admin
+# operations today would escalate privilege because agents currently run as the
+# admin service account.
+operations:
+  project.read: project_get
+  story-bible.read: story_bible_get
+  character.read: character_list
+  world.read: world_get
+  publication.read: publication_get
+  creator.read: creator_get
+  subscription.read: subscription_get
+  comment.read: comment_get
+  support.ticket.read: support_ticket_get
+  support.ticket.update: admin_support_ticket_update
+  media.read: media_asset_list
+  generation.execute: generation_create

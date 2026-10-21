@@ -19,6 +19,7 @@ export class ProductionAgent extends StoryGaloreAgent<Env, ProductionAgentState>
   async productionPlanRead(input: unknown): Promise<unknown> {
     this.assertCapability("production-plan.read");
     this.record("production-plan.read");
+    // fail-closed: no gateway operation wired for "production-plan.read" yet.
     return this.invokeGateway("production_plan_get", input);
   }
 
@@ -26,6 +27,7 @@ export class ProductionAgent extends StoryGaloreAgent<Env, ProductionAgentState>
   async draftRead(input: unknown): Promise<unknown> {
     this.assertCapability("draft.read");
     this.record("draft.read");
+    // fail-closed: no gateway operation wired for "draft.read" yet.
     return this.invokeGateway("draft_get", input);
   }
 
@@ -33,20 +35,21 @@ export class ProductionAgent extends StoryGaloreAgent<Env, ProductionAgentState>
   async mediaRead(input: unknown): Promise<unknown> {
     this.assertCapability("media.read");
     this.record("media.read");
-    return this.invokeGateway("media_get", input);
+    return this.invokeGateway("media_asset_list", input);
   }
 
   @callable()
   async generationExecute(input: unknown): Promise<unknown> {
     this.assertCapability("generation.execute");
     this.record("generation.execute");
-    return this.invokeGateway("generation_execute", input);
+    return this.invokeGateway("generation_create", input);
   }
 
   @callable()
   async draftMutate(input: unknown): Promise<unknown> {
     this.assertCapability("draft.mutate");
     this.record("draft.mutate");
+    // fail-closed: no gateway operation wired for "draft.mutate" yet.
     return this.invokeGateway("draft_mutate", input);
   }
 

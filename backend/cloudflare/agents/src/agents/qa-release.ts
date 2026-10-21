@@ -19,6 +19,7 @@ export class QaReleaseAgent extends StoryGaloreAgent<Env, QaReleaseAgentState> {
   async repositoryRead(input: unknown): Promise<unknown> {
     this.assertCapability("repository.read");
     this.record("repository.read");
+    // fail-closed: no gateway operation wired for "repository.read" yet.
     return this.invokeGateway("repository_get", input);
   }
 
@@ -26,6 +27,7 @@ export class QaReleaseAgent extends StoryGaloreAgent<Env, QaReleaseAgentState> {
   async ciRun(input: unknown): Promise<unknown> {
     this.assertCapability("ci.run");
     this.record("ci.run");
+    // fail-closed: no gateway operation wired for "ci.run" yet.
     return this.invokeGateway("ci_run", input);
   }
 
