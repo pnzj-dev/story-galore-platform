@@ -3,25 +3,12 @@ import { StoryGaloreAgent, type AgentTaskState } from '../base-agent';
 import { STORY_PRODUCER_MANIFEST } from '../manifests';
 import type { Env } from '../env';
 
-interface StoryProducerState extends AgentTaskState {}
+interface StoryProducerAgentState extends AgentTaskState {}
 
-interface ProposalResult {
-  kind: string;
-  proposal: unknown;
-  provenance: string[];
-  policyDecisionId: string;
-}
-
-/**
- * Story Producer (vertical slice). Front door for story intake; converts
- * creator input into structured, reviewable proposals for the story bible,
- * characters, world and the production plan. Deterministic: it proposes — the
- * authoritative system authorizes.
- */
-export class StoryProducerAgent extends StoryGaloreAgent<Env, StoryProducerState> {
+export class StoryProducerAgent extends StoryGaloreAgent<Env, StoryProducerAgentState> {
   protected manifest = STORY_PRODUCER_MANIFEST;
 
-  initialState: StoryProducerState = {
+  initialState: StoryProducerAgentState = {
     taskId: '',
     status: 'IDLE',
     provenance: [],
@@ -29,73 +16,77 @@ export class StoryProducerAgent extends StoryGaloreAgent<Env, StoryProducerState
   };
 
   @callable()
-  async readStoryBible(projectId: string): Promise<unknown> {
-    this.assertCapability('story-bible.read');
-    this.record('story-bible.read');
-    const out = await this.invokeGateway('story_bible_get', { projectId });
-    return out;
+  async projectRead(input: unknown): Promise<unknown> {
+    this.assertCapability("project.read");
+    this.record("project.read");
+    return this.invokeGateway("project_get", input);
   }
 
   @callable()
-  async proposeStoryBible(input: {
-    projectId: string;
-    premise: string;
-    themes: string;
-    tone: string;
-  }): Promise<ProposalResult> {
-    this.assertCapability('story-bible.propose');
-    this.record('story-bible.propose');
+  async storyBibleRead(input: unknown): Promise<unknown> {
+    this.assertCapability("story-bible.read");
+    this.record("story-bible.read");
+    return this.invokeGateway("story_bible_get", input);
+  }
+
+  @callable()
+  async storyBiblePropose(input: unknown): Promise<unknown> {
+    this.assertCapability("story-bible.propose");
+    const { provenance, policyDecisionId } = this.record("story-bible.propose");
     return {
-      kind: 'story-bible-proposal',
-      proposal: { ...input, status: 'PROPOSED' },
-      provenance: this.state.provenance,
-      policyDecisionId: this.state.policyDecisionId,
+      kind: "story-bible.propose",
+      result: input,
+      provenance,
+      policyDecisionId,
     };
   }
 
   @callable()
-  async proposeCharacter(input: {
-    projectId: string;
-    name: string;
-    description: string;
-  }): Promise<ProposalResult> {
-    this.assertCapability('character.propose');
-    this.record('character.propose');
+  async characterPropose(input: unknown): Promise<unknown> {
+    this.assertCapability("character.propose");
+    const { provenance, policyDecisionId } = this.record("character.propose");
     return {
-      kind: 'character-proposal',
-      proposal: { ...input, status: 'PROPOSED' },
-      provenance: this.state.provenance,
-      policyDecisionId: this.state.policyDecisionId,
+      kind: "character.propose",
+      result: input,
+      provenance,
+      policyDecisionId,
     };
   }
 
   @callable()
-  async proposeWorld(input: {
-    projectId: string;
-    name: string;
-    description: string;
-    locations: string;
-    rules: string;
-  }): Promise<ProposalResult> {
-    this.assertCapability('world.propose');
-    this.record('world.propose');
+  async worldPropose(input: unknown): Promise<unknown> {
+    this.assertCapability("world.propose");
+    const { provenance, policyDecisionId } = this.record("world.propose");
     return {
-      kind: 'world-proposal',
-      proposal: { ...input, status: 'PROPOSED' },
-      provenance: this.state.provenance,
-      policyDecisionId: this.state.policyDecisionId,
+      kind: "world.propose",
+      result: input,
+      provenance,
+      policyDecisionId,
     };
   }
 
   @callable()
-  async proposeProductionPlan(input: { projectId: string; steps: string[] }): Promise<ProposalResult> {
-    this.assertCapability('production-plan.propose');
-    this.record('production-plan.propose');
+  async productionPlanPropose(input: unknown): Promise<unknown> {
+    this.assertCapability("production-plan.propose");
+    const { provenance, policyDecisionId } = this.record("production-plan.propose");
     return {
-      kind: 'production-plan-proposal',
-      proposal: { ...input, status: 'PROPOSED' },
-      provenance: this.state.provenance,
-      policyDecisionId: this.state.policyDecisionId,
+      kind: "production-plan.propose",
+      result: input,
+      provenance,
+      policyDecisionId,
     };
   }
+
+  @callable()
+  async agentTaskDelegate(input: unknown): Promise<unknown> {
+    this.assertCapability("agent.task.delegate");
+    const { provenance, policyDecisionId } = this.record("agent.task.delegate");
+    return {
+      kind: "agent.task.delegate",
+      result: input,
+      provenance,
+      policyDecisionId,
+    };
+  }
+
 }

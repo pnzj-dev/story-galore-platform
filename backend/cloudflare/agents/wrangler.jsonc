@@ -2,15 +2,111 @@
   "name": "storygalore-agents",
   "main": "src/index.ts",
   "compatibility_date": "2026-10-21",
-  "compatibility_flags": ["nodejs_compat"],
-  "observability": { "enabled": true },
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "observability": {
+    "enabled": true
+  },
   "durable_objects": {
     "bindings": [
-      { "name": "StoryProducerAgent", "class_name": "StoryProducerAgent" },
-      { "name": "SupportAgent", "class_name": "SupportAgent" }
+      {
+        "name": "ArtDirectorAgent",
+        "class_name": "ArtDirectorAgent"
+      },
+      {
+        "name": "CeoAgent",
+        "class_name": "CeoAgent"
+      },
+      {
+        "name": "CodingDevAgent",
+        "class_name": "CodingDevAgent"
+      },
+      {
+        "name": "CommunityGuardianAgent",
+        "class_name": "CommunityGuardianAgent"
+      },
+      {
+        "name": "CreatorBusinessAgent",
+        "class_name": "CreatorBusinessAgent"
+      },
+      {
+        "name": "DataAnalysisReportingAgent",
+        "class_name": "DataAnalysisReportingAgent"
+      },
+      {
+        "name": "DiscoveryCuratorAgent",
+        "class_name": "DiscoveryCuratorAgent"
+      },
+      {
+        "name": "InfrastructureAgent",
+        "class_name": "InfrastructureAgent"
+      },
+      {
+        "name": "Keep2ShareImportAgent",
+        "class_name": "Keep2ShareImportAgent"
+      },
+      {
+        "name": "MediaOperationsAgent",
+        "class_name": "MediaOperationsAgent"
+      },
+      {
+        "name": "OrchestratorAgent",
+        "class_name": "OrchestratorAgent"
+      },
+      {
+        "name": "ProductionAgent",
+        "class_name": "ProductionAgent"
+      },
+      {
+        "name": "QaReleaseAgent",
+        "class_name": "QaReleaseAgent"
+      },
+      {
+        "name": "ReaderCompanionAgent",
+        "class_name": "ReaderCompanionAgent"
+      },
+      {
+        "name": "StoryGuardianAgent",
+        "class_name": "StoryGuardianAgent"
+      },
+      {
+        "name": "StoryProducerAgent",
+        "class_name": "StoryProducerAgent"
+      },
+      {
+        "name": "SupportAgent",
+        "class_name": "SupportAgent"
+      }
     ]
   },
   "migrations": [
-    { "tag": "v1", "new_sqlite_classes": ["StoryProducerAgent", "SupportAgent"] }
+    {
+      "tag": "v1",
+      "new_sqlite_classes": [
+        "StoryProducerAgent",
+        "SupportAgent"
+      ]
+    },
+    {
+      "tag": "v2",
+      "new_sqlite_classes": [
+        "ArtDirectorAgent",
+        "CeoAgent",
+        "CodingDevAgent",
+        "CommunityGuardianAgent",
+        "CreatorBusinessAgent",
+        "DataAnalysisReportingAgent",
+        "DiscoveryCuratorAgent",
+        "InfrastructureAgent",
+        "Keep2ShareImportAgent",
+        "MediaOperationsAgent",
+        "OrchestratorAgent",
+        "ProductionAgent",
+        "QaReleaseAgent",
+        "ReaderCompanionAgent",
+        "StoryGuardianAgent"
+      ]
+    }
   ]
 }

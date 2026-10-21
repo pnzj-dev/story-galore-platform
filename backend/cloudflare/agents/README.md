@@ -1,24 +1,46 @@
 # StoryGalore Native Agents (Cloudflare Agents SDK)
 
-V1 vertical slice of the StoryGalore agent family. This Worker hosts two native
-agents — **Story Producer** and **Support** — on the Cloudflare Agents SDK to
-prove the runtime, the in-process Policy Engine, and capability enforcement end
-to end. The remaining 15 agents (`docs/AGENT_FAMILY_V1.md`) follow the same
-`StoryGaloreAgent` base + manifest shape.
+The V1 agent family runs as a single Cloudflare Worker hosting **17 native
+agents** as Durable Objects on the Cloudflare Agents SDK. Each agent is
+capability-guarded by the in-process Policy Engine and records provenance +
+a `policyDecisionId` on every tool call.
+
+## Generation
+
+The runtime is generated deterministically from the agent contracts. Regenerate
+after any change to `contracts/agents/manifests/*.yaml` or
+`contracts/agents/tools/registry.yaml`:
+
+```bash
+pnpm generate:agents
+```
+
+The generator (`scripts/generate-agents.py`) emits:
+
+- `src/manifests.ts` — simplified manifests (capabilities + delegation) for the Policy Engine.
+- `src/agents/{slug}.ts` — one Durable Object agent class per agent.
+- `src/env.ts`, `src/index.ts`, `wrangler.jsonc` — DO bindings + migrations.
+
+Validate the reconciliation invariants (capability-registry completeness,
+tool→manifest consistency, delegation targets, source paths):
+
+```bash
+pnpm validate:agent-capabilities
+```
 
 ## Layout
 
 - `src/index.ts` — `routeAgentRequest` entrypoint.
 - `src/env.ts` — Worker `Env` (DO bindings + optional Appwrite gateway config).
 - `src/policy.ts` — deterministic, fail-closed Policy Engine.
-- `src/manifests.ts` — agent manifests (allowed/forbidden capabilities + delegation).
+- `src/manifests.ts` — all 17 agent manifests (generated).
 - `src/base-agent.ts` — `StoryGaloreAgent` base: capability assertion, provenance, gateway delegation.
-- `src/agents/story-producer.ts`, `src/agents/support.ts` — the two agents.
+- `src/agents/{slug}.ts` — the 17 agents (generated).
 
 ## Routing
 
 `/agents/{kebab-class-name}/{instance-id}` — e.g. `/agents/story-producer/creator-1`,
-`/agents/support/ticket-1`.
+`/agents/coding-dev/pr-1234`.
 
 ## Local dev
 
@@ -27,10 +49,11 @@ npm install
 npm run dev
 ```
 
-Runs without production Appwrite credentials; gateway-backed tools
-(`support.ticket.read`/`update`, `story-bible.read`) fail closed with
-`GATEWAY_NOT_CONFIGURED` until `APPWRITE_ENDPOINT`, `APPWRITE_PROJECT_ID`,
-`APPWRITE_API_KEY` and `ADMIN_ACTOR_ID` are set (via `wrangler secret put`).
+Runs without production Appwrite credentials; gateway-backed tools (reads and
+mutations) fail closed with `GATEWAY_NOT_CONFIGURED` until `APPWRITE_ENDPOINT`,
+`APPWRITE_PROJECT_ID`, `APPWRITE_API_KEY` and `ADMIN_ACTOR_ID` are set (via
+`wrangler secret put`). Compute tools (propose/review/advise/validate/…)
+return a structured result with provenance + `policyDecisionId`.
 
 ## Policy model
 

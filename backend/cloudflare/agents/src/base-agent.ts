@@ -35,13 +35,19 @@ export abstract class StoryGaloreAgent<
     this.policyEngine().assertCapability(capability);
   }
 
-  /** Append a provenance entry + fresh policy decision id. */
-  protected record(capability: string): void {
-    this.setState({
-      ...this.state,
-      provenance: [...(this.state.provenance ?? []), `${new Date().toISOString()} ${capability}`],
-      policyDecisionId: crypto.randomUUID(),
-    } as State);
+  /**
+   * Append a provenance entry + fresh policy decision id, persist it, and
+   * return the recorded values (the Durable Object state snapshot may not
+   * reflect `setState` synchronously, so callers use the return value).
+   */
+  protected record(capability: string): { provenance: string[]; policyDecisionId: string } {
+    const provenance = [
+      ...(this.state.provenance ?? []),
+      `${new Date().toISOString()} ${capability}`,
+    ];
+    const policyDecisionId = crypto.randomUUID();
+    this.setState({ ...this.state, provenance, policyDecisionId } as State);
+    return { provenance, policyDecisionId };
   }
 
   /**

@@ -3,17 +3,12 @@ import { StoryGaloreAgent, type AgentTaskState } from '../base-agent';
 import { SUPPORT_MANIFEST } from '../manifests';
 import type { Env } from '../env';
 
-interface SupportState extends AgentTaskState {}
+interface SupportAgentState extends AgentTaskState {}
 
-/**
- * Support Agent (vertical slice). Handles support triage, ticket reads/updates
- * and escalation. Reads/updates go through the authorized gateway; escalation
- * is deterministic until the GitHub-issue escalation path is wired.
- */
-export class SupportAgent extends StoryGaloreAgent<Env, SupportState> {
+export class SupportAgent extends StoryGaloreAgent<Env, SupportAgentState> {
   protected manifest = SUPPORT_MANIFEST;
 
-  initialState: SupportState = {
+  initialState: SupportAgentState = {
     taskId: '',
     status: 'IDLE',
     provenance: [],
@@ -21,30 +16,36 @@ export class SupportAgent extends StoryGaloreAgent<Env, SupportState> {
   };
 
   @callable()
-  async readTicket(ticketId: string): Promise<unknown> {
-    this.assertCapability('support.ticket.read');
-    this.record('support.ticket.read');
-    const out = await this.invokeGateway('support_ticket_get', { ticketId });
-    return out;
+  async supportTicketRead(input: unknown): Promise<unknown> {
+    this.assertCapability("support.ticket.read");
+    this.record("support.ticket.read");
+    return this.invokeGateway("support_ticket_get", input);
   }
 
   @callable()
-  async updateTicket(ticketId: string, status: string): Promise<unknown> {
-    this.assertCapability('support.ticket.update');
-    this.record('support.ticket.update');
-    const out = await this.invokeGateway('admin_support_ticket_update', { ticketId, status });
-    return out;
+  async supportTicketUpdate(input: unknown): Promise<unknown> {
+    this.assertCapability("support.ticket.update");
+    this.record("support.ticket.update");
+    return this.invokeGateway("support_ticket_update", input);
   }
 
   @callable()
-  async escalate(ticketId: string, reason: string): Promise<unknown> {
-    this.assertCapability('ticket.escalate');
-    this.record('ticket.escalate');
+  async knowledgeRead(input: unknown): Promise<unknown> {
+    this.assertCapability("knowledge.read");
+    this.record("knowledge.read");
+    return this.invokeGateway("knowledge_get", input);
+  }
+
+  @callable()
+  async ticketEscalate(input: unknown): Promise<unknown> {
+    this.assertCapability("ticket.escalate");
+    const { provenance, policyDecisionId } = this.record("ticket.escalate");
     return {
-      kind: 'support-escalation',
-      escalation: { ticketId, reason, status: 'PROPOSED' },
-      provenance: this.state.provenance,
-      policyDecisionId: this.state.policyDecisionId,
+      kind: "ticket.escalate",
+      result: input,
+      provenance,
+      policyDecisionId,
     };
   }
+
 }
