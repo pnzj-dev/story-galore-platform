@@ -51,9 +51,9 @@ npm run dev
 
 Runs without production Appwrite credentials; gateway-backed tools (reads and
 mutations) fail closed with `GATEWAY_NOT_CONFIGURED` until `APPWRITE_ENDPOINT`,
-`APPWRITE_PROJECT_ID`, `APPWRITE_API_KEY` and `ADMIN_ACTOR_ID` are set (via
-`wrangler secret put`). Compute tools (propose/review/advise/validate/…)
-return a structured result with provenance + `policyDecisionId`.
+`APPWRITE_PROJECT_ID` and `APPWRITE_API_KEY` are set (via `wrangler secret
+put`). Compute tools (propose/review/advise/validate/…) return a structured
+result with provenance + `policyDecisionId`.
 
 ## Policy model
 
@@ -63,16 +63,31 @@ Policy Engine before any side effect, records provenance and a
 `allowed`/`forbidden` sets. Unknown capabilities and out-of-allowlist delegation
 are denied. Trust never substitutes for authorization.
 
-## Gateway wiring
+## Gateway wiring + per-agent authorization
 
 Read/mutate tools delegate to the `api` gateway function. The mapping of
 capability → gateway operation lives in
 `contracts/agents/tools/gateway-operations.yaml`; tools whose capability is not
 mapped there fail closed (the generated method carries a `// fail-closed`
-comment). Scope-sensitive admin/financial reads (`analytics.read`,
-`cost.read`, `revenue.read`, `usage.read`, …) are intentionally unmapped until
-per-agent credentials + gateway-side authorization exist, because agents
-currently run as the admin service account.
+comment).
+
+Each agent runs as its own Appwrite user id `agent-{slug}` (labelled
+`agent:{slug}`), never the admin service account. The gateway resolves the
+actor's `agent:` label and enforces the per-agent operation allowlist (generated
+`backend/appwrite/functions/api/agent_auth.go`) at dispatch, before any handler
+runs. Ownership checks in the read/mutate handlers are skipped for agent actors
+because the allowlist is the authoritative boundary.
+
+Provision the agent actors before deploying:
+
+```text
+for each agent slug: an Appwrite user with id `agent-{slug}` and label `agent:{slug}`
+```
+
+The shared `APPWRITE_API_KEY` must be scoped narrowly (invoke the `api`
+function only). Per-agent API keys that bind each Worker to its own actor are a
+follow-up; until then the actor is passed as a claim and the allowlist is the
+defense-in-depth boundary.
 
 > The `contracts/agents/manifests/*.yaml` `implementation.source_path` /
 > `tests_path` point at `backend/cloudflare/agents/src/agents/{slug}.ts` /

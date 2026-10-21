@@ -172,6 +172,17 @@ func Main(ctx openruntimes.Context) openruntimes.Response {
 	}
 
 	cl := newClient(ctx)
+
+	// Agent actors (Appwrite users labelled `agent:{slug}`) may only call the
+	// operations their tools are wired to. This is the primary agent->gateway
+	// authorization boundary: a buggy or misconfigured agent cannot escalate to
+	// admin operations because it runs as a non-admin actor and is allowlisted
+	// here. Non-agent actors (users, admin) skip this and are authorized by the
+	// per-handler ownership/admin checks.
+	if actor := actorOrEmpty(in.ActorId); isAgentActor(cl, actor) && !agentAuthorizedForOperation(cl, actor, op) {
+		return respond(ctx, in.OperationId, "FORBIDDEN", false)
+	}
+
 	switch op {
 	case "studio_project_create":
 		return createProject(ctx, &in, cl)
@@ -542,7 +553,7 @@ func storyBibleGet(ctx openruntimes.Context, in *GatewayInput, cl client.Client)
 	if !decode(ctx, in, &input) || input.ProjectId == "" {
 		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
 	}
-	if !projectOwnedByActor(cl, input.ProjectId, actorId) {
+	if !isAgentActor(cl, actorId) && !projectOwnedByActor(cl, input.ProjectId, actorId) {
 		return respond(ctx, in.OperationId, "FORBIDDEN", false)
 	}
 	service := tablesdb.New(cl)
@@ -578,7 +589,7 @@ func storyBibleUpsert(ctx openruntimes.Context, in *GatewayInput, cl client.Clie
 	if !decode(ctx, in, &input) || input.ProjectId == "" {
 		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
 	}
-	if !projectOwnedByActor(cl, input.ProjectId, actorId) {
+	if !isAgentActor(cl, actorId) && !projectOwnedByActor(cl, input.ProjectId, actorId) {
 		return respond(ctx, in.OperationId, "FORBIDDEN", false)
 	}
 	service := tablesdb.New(cl)
@@ -627,7 +638,7 @@ func characterList(ctx openruntimes.Context, in *GatewayInput, cl client.Client)
 	if !decode(ctx, in, &input) || input.ProjectId == "" {
 		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
 	}
-	if !projectOwnedByActor(cl, input.ProjectId, actorId) {
+	if !isAgentActor(cl, actorId) && !projectOwnedByActor(cl, input.ProjectId, actorId) {
 		return respond(ctx, in.OperationId, "FORBIDDEN", false)
 	}
 	service := tablesdb.New(cl)
@@ -660,7 +671,7 @@ func characterCreate(ctx openruntimes.Context, in *GatewayInput, cl client.Clien
 	if !decode(ctx, in, &input) || input.ProjectId == "" || input.Name == "" {
 		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
 	}
-	if !projectOwnedByActor(cl, input.ProjectId, actorId) {
+	if !isAgentActor(cl, actorId) && !projectOwnedByActor(cl, input.ProjectId, actorId) {
 		return respond(ctx, in.OperationId, "FORBIDDEN", false)
 	}
 	rowId := newUUID()
@@ -688,7 +699,7 @@ func worldGet(ctx openruntimes.Context, in *GatewayInput, cl client.Client) open
 	if !decode(ctx, in, &input) || input.ProjectId == "" {
 		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
 	}
-	if !projectOwnedByActor(cl, input.ProjectId, actorId) {
+	if !isAgentActor(cl, actorId) && !projectOwnedByActor(cl, input.ProjectId, actorId) {
 		return respond(ctx, in.OperationId, "FORBIDDEN", false)
 	}
 	service := tablesdb.New(cl)
@@ -725,7 +736,7 @@ func worldUpsert(ctx openruntimes.Context, in *GatewayInput, cl client.Client) o
 	if !decode(ctx, in, &input) || input.ProjectId == "" {
 		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
 	}
-	if !projectOwnedByActor(cl, input.ProjectId, actorId) {
+	if !isAgentActor(cl, actorId) && !projectOwnedByActor(cl, input.ProjectId, actorId) {
 		return respond(ctx, in.OperationId, "FORBIDDEN", false)
 	}
 	service := tablesdb.New(cl)
@@ -776,7 +787,7 @@ func assetList(ctx openruntimes.Context, in *GatewayInput, cl client.Client) ope
 	if !decode(ctx, in, &input) || input.ProjectId == "" {
 		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
 	}
-	if !projectOwnedByActor(cl, input.ProjectId, actorId) {
+	if !isAgentActor(cl, actorId) && !projectOwnedByActor(cl, input.ProjectId, actorId) {
 		return respond(ctx, in.OperationId, "FORBIDDEN", false)
 	}
 	service := tablesdb.New(cl)
@@ -806,7 +817,7 @@ func studioPublicationList(ctx openruntimes.Context, in *GatewayInput, cl client
 	if !decode(ctx, in, &input) || input.ProjectId == "" {
 		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
 	}
-	if !projectOwnedByActor(cl, input.ProjectId, actorId) {
+	if !isAgentActor(cl, actorId) && !projectOwnedByActor(cl, input.ProjectId, actorId) {
 		return respond(ctx, in.OperationId, "FORBIDDEN", false)
 	}
 	service := tablesdb.New(cl)
@@ -1242,12 +1253,17 @@ func mediaAssetList(ctx openruntimes.Context, in *GatewayInput, cl client.Client
 		return respond(ctx, in.OperationId, "UNAUTHORIZED", false)
 	}
 	service := tablesdb.New(cl)
-	list, err := service.ListRows(databaseID, "media_assets", service.WithListRowsQueries([]string{
-		qEqual("creatorId", actorId),
+	queries := []string{
 		qEqual("status", "READY"),
 		`{"method":"orderDesc","attribute":"createdAt"}`,
 		`{"method":"limit","values":[200]}`,
-	}))
+	}
+	// Agents are not creators; they list assets across the project surface
+	// (already restricted by the dispatch allowlist).
+	if !isAgentActor(cl, actorId) {
+		queries = append([]string{qEqual("creatorId", actorId)}, queries...)
+	}
+	list, err := service.ListRows(databaseID, "media_assets", service.WithListRowsQueries(queries))
 	if err != nil {
 		return internalFailure(ctx, in, err)
 	}
@@ -1558,6 +1574,36 @@ func adminActor(ctx openruntimes.Context, in *GatewayInput, cl client.Client) bo
 		}
 	}
 	return false
+}
+
+// agentSlug returns the agent slug if the actor is a trusted platform agent
+// (an Appwrite user labelled `agent:{slug}`), or "" otherwise.
+func agentSlug(cl client.Client, actorId string) string {
+	if actorId == "" {
+		return ""
+	}
+	user, err := users.New(cl).Get(actorId)
+	if err != nil {
+		return ""
+	}
+	for _, l := range user.Labels {
+		if strings.HasPrefix(l, "agent:") {
+			return strings.TrimPrefix(l, "agent:")
+		}
+	}
+	return ""
+}
+
+// isAgentActor reports whether the actor is a trusted platform agent.
+func isAgentActor(cl client.Client, actorId string) bool {
+	return agentSlug(cl, actorId) != ""
+}
+
+// agentAuthorizedForOperation reports whether the agent actor is allowlisted
+// for the operation (defense-in-depth; the dispatch enforces this).
+func agentAuthorizedForOperation(cl client.Client, actorId, op string) bool {
+	slug := agentSlug(cl, actorId)
+	return slug != "" && agentAllowedOperations[slug][op]
 }
 
 func stringSlice(v interface{}) []string {
@@ -2046,7 +2092,7 @@ func adminSupportTicketGet(ctx openruntimes.Context, in *GatewayInput, cl client
 }
 
 func adminSupportTicketUpdate(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
-	if !adminActor(ctx, in, cl) {
+	if !adminActor(ctx, in, cl) && !agentAuthorizedForOperation(cl, actorOrEmpty(in.ActorId), "admin_support_ticket_update") {
 		return respond(ctx, in.OperationId, "FORBIDDEN", false)
 	}
 	var input struct {
@@ -3544,7 +3590,7 @@ func requestGeneration(ctx openruntimes.Context, in *GatewayInput, cl client.Cli
 	if !decode(ctx, in, &input) || input.RequestId == "" || input.ProjectId == "" || input.TargetType == "" || input.BillingMode == "" || input.ExecutionLocation == "" {
 		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
 	}
-	if !projectOwnedByActor(cl, input.ProjectId, actorId) {
+	if !isAgentActor(cl, actorId) && !projectOwnedByActor(cl, input.ProjectId, actorId) {
 		return respond(ctx, in.OperationId, "FORBIDDEN", false)
 	}
 	// Server-authoritative credit eligibility (never trust a client-provided flag).
@@ -4332,7 +4378,7 @@ func promptTemplateList(ctx openruntimes.Context, in *GatewayInput, cl client.Cl
 	if !decode(ctx, in, &input) || input.ProjectId == "" {
 		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
 	}
-	if !projectOwnedByActor(cl, input.ProjectId, actorId) {
+	if !isAgentActor(cl, actorId) && !projectOwnedByActor(cl, input.ProjectId, actorId) {
 		return respond(ctx, in.OperationId, "FORBIDDEN", false)
 	}
 	service := tablesdb.New(cl)
@@ -4366,7 +4412,7 @@ func promptTemplateCreate(ctx openruntimes.Context, in *GatewayInput, cl client.
 	if !decode(ctx, in, &input) || input.ProjectId == "" || input.Name == "" || input.Template == "" {
 		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
 	}
-	if !projectOwnedByActor(cl, input.ProjectId, actorId) {
+	if !isAgentActor(cl, actorId) && !projectOwnedByActor(cl, input.ProjectId, actorId) {
 		return respond(ctx, in.OperationId, "FORBIDDEN", false)
 	}
 	rowId := newUUID()
@@ -4394,7 +4440,7 @@ func generationList(ctx openruntimes.Context, in *GatewayInput, cl client.Client
 	if !decode(ctx, in, &input) || input.ProjectId == "" {
 		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
 	}
-	if !projectOwnedByActor(cl, input.ProjectId, actorId) {
+	if !isAgentActor(cl, actorId) && !projectOwnedByActor(cl, input.ProjectId, actorId) {
 		return respond(ctx, in.OperationId, "FORBIDDEN", false)
 	}
 	service := tablesdb.New(cl)
@@ -6533,7 +6579,7 @@ func supportTicketGet(ctx openruntimes.Context, in *GatewayInput, cl client.Clie
 	if err := row.Decode(&m); err != nil {
 		return internalFailure(ctx, in, err)
 	}
-	if uid, _ := m["userId"].(string); uid != actorId {
+	if uid, _ := m["userId"].(string); !isAgentActor(cl, actorId) && uid != actorId {
 		return respond(ctx, in.OperationId, "FORBIDDEN", false)
 	}
 	return success(ctx, in, m)

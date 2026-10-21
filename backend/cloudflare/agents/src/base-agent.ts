@@ -36,6 +36,16 @@ export abstract class StoryGaloreAgent<
   }
 
   /**
+   * The agent's gateway actor identity: an Appwrite user id `agent-{slug}`,
+   * labelled `agent:{slug}`. The `api` gateway resolves this actor's labels to
+   * enforce the per-agent operation allowlist (generated agent_auth.go). Agents
+   * must never act as the admin service account.
+   */
+  protected get actorId(): string {
+    return `agent-${this.manifest.slug}`;
+  }
+
+  /**
    * Append a provenance entry + fresh policy decision id, persist it, and
    * return the recorded values (the Durable Object state snapshot may not
    * reflect `setState` synchronously, so callers use the return value).
@@ -52,8 +62,8 @@ export abstract class StoryGaloreAgent<
 
   /**
    * Delegate to the `api` gateway function (authorized domain operation) using
-   * the admin service-account actor. Fails closed when the gateway credentials
-   * are not configured.
+   * the agent's own narrowly-scoped actor (`agent-{slug}`), never the admin
+   * account. Fails closed when the gateway credentials are not configured.
    */
   protected async invokeGateway<T>(
     operation: string,
@@ -63,14 +73,13 @@ export abstract class StoryGaloreAgent<
     const endpoint = env.APPWRITE_ENDPOINT;
     const projectId = env.APPWRITE_PROJECT_ID;
     const apiKey = env.APPWRITE_API_KEY;
-    const adminActor = env.ADMIN_ACTOR_ID;
-    if (!endpoint || !projectId || !apiKey || !adminActor) {
+    if (!endpoint || !projectId || !apiKey) {
       return { status: 'FAILED', errorCode: 'GATEWAY_NOT_CONFIGURED' };
     }
     const gw = {
       requestId: crypto.randomUUID(),
       correlationId: crypto.randomUUID(),
-      actorId: adminActor,
+      actorId: this.actorId,
       payload: { operation, input },
     };
     const res = await fetch(`${endpoint}/functions/api/executions`, {
