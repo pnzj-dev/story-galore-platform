@@ -244,6 +244,10 @@ export default {
   "admin.moderation.pending": "Pending",
   "admin.moderation.by": "by",
 
+  // Impersonation
+  "admin.impersonate": "Impersonate",
+  "admin.impersonateDesc": "Sign in as this user for support. Every impersonation is audited.",
+
   // Settings
   "settings.adultContent": "Adult content",
   "settings.adultContentDescription":

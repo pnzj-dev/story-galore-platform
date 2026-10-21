@@ -1,6 +1,7 @@
 ---
 import AdminLayout from "@/layouts/AdminLayout.astro";
 import AdminDetail from "@/components/AdminDetail.astro";
+import { actions } from "astro:actions";
 import { fetchAdminUser } from "@/lib/gateway";
 import { getTranslations } from "@/i18n";
 
@@ -9,6 +10,12 @@ const admin = Astro.locals.user;
 const userId = Astro.params.userId ?? "";
 const detail = admin ? await fetchAdminUser(admin.$id, userId) : null;
 if (!detail) Astro.response.status = 404;
+
+const result = Astro.getActionResult(actions.impersonateUser);
+if (result?.data?.ok) {
+  return Astro.redirect("/");
+}
+const error = result?.error?.message;
 ---
 
 <AdminLayout title={`${t("admin.label")} — ${t("admin.user")}`}>
@@ -16,7 +23,26 @@ if (!detail) Astro.response.status = 404;
     <a href="/admin/users" class="text-sm text-foreground-muted transition hover:text-foreground">{t("admin.backToUsers")}</a>
     {detail ? (
       <>
-        <h1 class="mt-4 text-3xl font-bold">{detail.name ?? detail.email ?? t("admin.user")}</h1>
+        <div class="mt-4 flex items-start justify-between gap-3">
+          <h1 class="text-3xl font-bold">{detail.name ?? detail.email ?? t("admin.user")}</h1>
+          <form method="POST" action={actions.impersonateUser} class="shrink-0">
+            <input type="hidden" name="userId" value={userId} />
+            <button
+              type="submit"
+              class="rounded-sm border border-warning px-4 py-2 text-sm font-semibold text-warning transition hover:bg-warning/10"
+            >
+              {t("admin.impersonate")}
+            </button>
+            <p class="mt-1 max-w-[240px] text-right text-xs text-foreground-muted">{t("admin.impersonateDesc")}</p>
+          </form>
+        </div>
+
+        {error && (
+          <p class="mt-4 rounded-sm border border-danger bg-danger/15 px-3 py-2 text-sm text-danger" role="alert">
+            {error}
+          </p>
+        )}
+
         <div class="mt-6 max-w-2xl">
           <AdminDetail data={detail as unknown as Record<string, unknown>} />
         </div>

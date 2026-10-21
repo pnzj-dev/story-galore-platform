@@ -244,6 +244,10 @@ const fr = {
   "admin.moderation.pending": "En attente",
   "admin.moderation.by": "par",
 
+  // Impersonation
+  "admin.impersonate": "Usurper l'identité",
+  "admin.impersonateDesc": "Connectez-vous en tant que cet utilisateur pour l'assistance. Chaque usurpation est auditée.",
+
   // Settings
   "settings.adultContent": "Contenu adulte",
   "settings.adultContentDescription":

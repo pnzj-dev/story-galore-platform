@@ -243,6 +243,10 @@ const ar = {
   "admin.moderation.pending": "قيد الانتظار",
   "admin.moderation.by": "بواسطة",
 
+  // Impersonation
+  "admin.impersonate": "انتحال الهوية",
+  "admin.impersonateDesc": "سجّل الدخول كمستخدم هذا المستخدم للدعم. تُسجَّل كل عملية انتحال هوية.",
+
   // Settings
   "settings.adultContent": "المحتوى للبالغين",
   "settings.adultContentDescription":

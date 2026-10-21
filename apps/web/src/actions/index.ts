@@ -968,6 +968,25 @@ export const server = {
     },
   }),
 
+  impersonateUser: defineAction({
+    accept: "form",
+    input: z.object({ userId: z.string().min(1) }),
+    handler: async (input, context) => {
+      const user = context.locals.user;
+      if (!user) throw new ActionError({ code: "UNAUTHORIZED", message: "Sign in." });
+      const out = await invokeApi<{ sessionSecret?: string }>(
+        "admin_impersonate",
+        { userId: input.userId },
+        user.$id,
+      );
+      if (out.status !== "SUCCESS" || !out.result?.sessionSecret) {
+        throw new ActionError({ code: "FORBIDDEN", message: "Could not impersonate this user." });
+      }
+      context.cookies.set(SESSION_COOKIE, out.result.sessionSecret, sessionCookieOptions());
+      return { ok: true };
+    },
+  }),
+
   listGenerations: defineAction({
     accept: "json",
     input: z.object({ projectId: z.string().min(1) }),

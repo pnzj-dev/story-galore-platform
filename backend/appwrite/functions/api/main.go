@@ -102,6 +102,7 @@ var knownOperations = map[string]bool{
 	"admin_destructive_request": true, "admin_destructive_approve": true,
 	"admin_destructive_execute": true, "admin_destructive_list": true,
 	"admin_user_get": true, "admin_publication_get": true, "admin_creator_get": true,
+	"admin_impersonate": true, "admin_stop_impersonation": true,
 	"admin_support_ticket_list": true, "admin_support_ticket_get": true, "admin_support_ticket_update": true,
 	"admin_analytics_get":         true,
 	"admin_analytics_events_list": true,
@@ -458,6 +459,10 @@ func Main(ctx openruntimes.Context) openruntimes.Response {
 		return adminDestructiveList(ctx, &in, cl)
 	case "admin_user_get":
 		return adminUserGet(ctx, &in, cl)
+	case "admin_impersonate":
+		return adminImpersonate(ctx, &in, cl)
+	case "admin_stop_impersonation":
+		return adminStopImpersonation(ctx, &in, cl)
 	case "admin_publication_get":
 		return adminPublicationGet(ctx, &in, cl)
 	case "admin_creator_get":
@@ -2356,6 +2361,45 @@ func adminUserGet(ctx openruntimes.Context, in *GatewayInput, cl client.Client) 
 		"emailVerified": u.EmailVerification,
 		"phoneVerified": u.PhoneVerification,
 	})
+}
+
+// adminImpersonate creates a session for a target user (support/debugging) and
+// returns its secret. Admin-only; records a security audit event.
+func adminImpersonate(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	if !adminActor(ctx, in, cl) {
+		return respond(ctx, in.OperationId, "FORBIDDEN", false)
+	}
+	var input struct {
+		UserId string `json:"userId"`
+	}
+	if !decode(ctx, in, &input) || input.UserId == "" {
+		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
+	}
+	session, err := users.New(cl).CreateSession(input.UserId)
+	if err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	emit(ctx, cl, "security.impersonation_start.v1", input.UserId, actorOrEmpty(in.ActorId),
+		map[string]interface{}{"targetUserId": input.UserId, "sessionId": session.Id}, in.CorrelationId)
+	return success(ctx, in, map[string]interface{}{"sessionId": session.Id, "sessionSecret": session.Secret})
+}
+
+// adminStopImpersonation deletes an impersonation session and records the stop.
+func adminStopImpersonation(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	if !adminActor(ctx, in, cl) {
+		return respond(ctx, in.OperationId, "FORBIDDEN", false)
+	}
+	var input struct {
+		UserId    string `json:"userId"`
+		SessionId string `json:"sessionId"`
+	}
+	_ = json.Unmarshal(in.Payload.Input, &input)
+	if input.UserId != "" && input.SessionId != "" {
+		_, _ = users.New(cl).DeleteSession(input.UserId, input.SessionId)
+	}
+	emit(ctx, cl, "security.impersonation_stop.v1", input.UserId, actorOrEmpty(in.ActorId),
+		map[string]interface{}{"targetUserId": input.UserId, "sessionId": input.SessionId}, in.CorrelationId)
+	return success(ctx, in, map[string]interface{}{"ok": true})
 }
 
 func adminPublicationGet(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
