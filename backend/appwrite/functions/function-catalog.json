@@ -7,47 +7,58 @@
     },
     {
       "id": "authorization",
-      "purpose": "entitlement and access decisions"
+      "purpose": "entitlement and access decisions",
+      "implementation_status": "CONSOLIDATED_INTO_API_GATEWAY"
     },
     {
       "id": "uploads",
-      "purpose": "authorize uploads and return Storage upload instructions"
+      "purpose": "authorize uploads and return Storage upload instructions",
+      "implementation_status": "CONSOLIDATED_INTO_API_GATEWAY"
     },
     {
       "id": "image-processing",
-      "purpose": "process uploaded comic pages/assets"
+      "purpose": "process uploaded comic pages/assets",
+      "implementation_status": "CONSOLIDATED_INTO_API_GATEWAY"
     },
     {
       "id": "ai-comic-generation",
-      "purpose": "queue and execute AI generation jobs"
+      "purpose": "queue and execute AI generation jobs",
+      "implementation_status": "CONSOLIDATED_INTO_API_GATEWAY"
     },
     {
       "id": "ai-usage",
-      "purpose": "reserve/settle AI credits and usage"
+      "purpose": "reserve/settle AI credits and usage",
+      "implementation_status": "CONSOLIDATED_INTO_API_GATEWAY"
     },
     {
       "id": "moderation",
-      "purpose": "automated classification/moderation orchestration"
+      "purpose": "automated classification/moderation orchestration",
+      "implementation_status": "CONSOLIDATED_INTO_API_GATEWAY"
     },
     {
       "id": "search-index",
-      "purpose": "synchronize search/vector representations"
+      "purpose": "synchronize search/vector representations",
+      "implementation_status": "CONSOLIDATED_INTO_API_GATEWAY"
     },
     {
       "id": "recommendations",
-      "purpose": "build recommendation candidates"
+      "purpose": "build recommendation candidates",
+      "implementation_status": "CONSOLIDATED_INTO_API_GATEWAY"
     },
     {
       "id": "payments",
-      "purpose": "payment orchestration and normalized provider operations"
+      "purpose": "payment orchestration and normalized provider operations",
+      "implementation_status": "CONSOLIDATED_INTO_API_GATEWAY"
     },
     {
       "id": "payment-webhooks",
-      "purpose": "provider webhook ingestion and idempotency"
+      "purpose": "provider webhook ingestion and idempotency",
+      "implementation_status": "CONSOLIDATED_INTO_API_GATEWAY"
     },
     {
       "id": "payment-reconciliation",
-      "purpose": "scheduled provider reconciliation"
+      "purpose": "scheduled provider reconciliation",
+      "implementation_status": "CONSOLIDATED_INTO_API_GATEWAY"
     },
     {
       "id": "nowpayments",
@@ -56,11 +67,13 @@
     },
     {
       "id": "subscription-lifecycle",
-      "purpose": "renewal/cancellation/entitlement lifecycle"
+      "purpose": "renewal/cancellation/entitlement lifecycle",
+      "implementation_status": "CONSOLIDATED_INTO_API_GATEWAY"
     },
     {
       "id": "notifications",
-      "purpose": "authorized notification commands and canonical inbox persistence; external delivery starts only registered Cloudflare Workflows through verified provider adapters"
+      "purpose": "authorized notification commands and canonical inbox persistence; external delivery starts only registered Cloudflare Workflows through verified provider adapters",
+      "implementation_status": "CONSOLIDATED_INTO_API_GATEWAY"
     },
     {
       "id": "analytics",
@@ -69,60 +82,72 @@
     },
     {
       "id": "audit",
-      "purpose": "centralized high-risk audit event writer"
+      "purpose": "centralized high-risk audit event writer",
+      "implementation_status": "CONSOLIDATED_INTO_API_GATEWAY"
     },
     {
       "id": "cleanup",
-      "purpose": "scheduled retention/cache/orphan cleanup"
+      "purpose": "scheduled retention/cache/orphan cleanup",
+      "implementation_status": "CONSOLIDATED_INTO_API_GATEWAY"
     },
     {
       "id": "mcp",
-      "purpose": "application MCP endpoint, subject to same auth/entitlement controls"
+      "purpose": "application MCP endpoint, subject to same auth/entitlement controls",
+      "implementation_status": "CONSOLIDATED_INTO_API_GATEWAY"
     },
     {
       "id": "ad-serve",
       "runtime": "go",
-      "purpose": "server-side ad eligibility, campaign selection and creative response"
+      "purpose": "server-side ad eligibility, campaign selection and creative response",
+      "implementation_status": "CONSOLIDATED_INTO_API_GATEWAY"
     },
     {
       "id": "ad-event-ingest",
       "runtime": "go",
-      "purpose": "idempotent ad impression/click event ingestion"
+      "purpose": "idempotent ad impression/click event ingestion",
+      "implementation_status": "CONSOLIDATED_INTO_API_GATEWAY"
     },
     {
       "id": "ad-campaign-scheduler",
       "runtime": "go",
-      "purpose": "activate, pause and complete campaigns on schedule"
+      "purpose": "activate, pause and complete campaigns on schedule",
+      "implementation_status": "CONSOLIDATED_INTO_API_GATEWAY"
     },
     {
       "id": "ad-metrics-aggregate",
       "runtime": "go",
-      "purpose": "aggregate daily advertising metrics"
+      "purpose": "aggregate daily advertising metrics",
+      "implementation_status": "CONSOLIDATED_INTO_API_GATEWAY"
     },
     {
       "id": "ad-provider-health",
       "runtime": "go",
-      "purpose": "check configured advertising provider health"
+      "purpose": "check configured advertising provider health",
+      "implementation_status": "CONSOLIDATED_INTO_API_GATEWAY"
     },
     {
       "id": "media-processing",
       "runtime": "go",
-      "purpose": "process images/audio/video, create previews/posters and update media processing state"
+      "purpose": "process images/audio/video, create previews/posters and update media processing state",
+      "implementation_status": "CONSOLIDATED_INTO_API_GATEWAY"
     },
     {
       "id": "video-playback",
       "runtime": "go",
-      "purpose": "authorize video playback and return entitlement-checked playback instructions"
+      "purpose": "authorize video playback and return entitlement-checked playback instructions",
+      "implementation_status": "CONSOLIDATED_INTO_API_GATEWAY"
     },
     {
       "id": "media-manifest",
       "runtime": "go",
-      "purpose": "build publication/media manifests for clients and offline-capable experiences"
+      "purpose": "build publication/media manifests for clients and offline-capable experiences",
+      "implementation_status": "CONSOLIDATED_INTO_API_GATEWAY"
     },
     {
       "id": "media-analytics",
       "runtime": "go",
-      "purpose": "ingest and normalize media playback/progress analytics"
+      "purpose": "ingest and normalize media playback/progress analytics",
+      "implementation_status": "CONSOLIDATED_INTO_API_GATEWAY"
     },
     {
       "id": "central-agent-gateway",

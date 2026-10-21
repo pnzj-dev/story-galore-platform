@@ -58,3 +58,19 @@ appwrite functions update --function-id api --name api \
   --scopes 'targets.read' --scopes 'targets.write' \
   --scopes 'tokens.read' --scopes 'tokens.write'
 ```
+
+## Function consolidation (V1 runtime-simplicity)
+
+The `api` function is the single gateway implementation: it carries every
+domain command/query inline (entitlement, payments + webhooks, moderation,
+notifications, ads, media, recommendations, audit, cleanup, etc.) rather than
+delegating to per-domain functions. The catalog therefore marks the other
+domain functions `CONSOLIDATED_INTO_API_GATEWAY` — their declared
+responsibilities are implemented inside the `api` gateway, and the scaffold
+functions must not be treated as a separate runtime path.
+
+Exceptions (implemented as their own deployables):
+
+- `analytics` — scheduled daily aggregation + dashboard query contract.
+- `nowpayments` — TypeScript/Node; the NOWPayments SDK has no Go equivalent.
+
