@@ -5146,8 +5146,10 @@ func publicationExportRequest(ctx openruntimes.Context, in *GatewayInput, cl cli
 	}
 	policy, canExport, reason := resolveDownloadPolicy(cl, pm, actorId)
 	if !canExport {
+		emit(ctx, cl, "media.download_denied.v1", input.PublicationId, actorId, map[string]interface{}{"format": input.Format, "reason": reason}, in.CorrelationId)
 		return success(ctx, in, map[string]interface{}{"denied": true, "reason": reason, "downloadPolicy": policy})
 	}
+	emit(ctx, cl, "media.download_authorized.v1", input.PublicationId, actorId, map[string]interface{}{"format": input.Format}, in.CorrelationId)
 
 	pagesList, err := service.ListRows(databaseID, "book_pages", service.WithListRowsQueries([]string{
 		qEqual("publicationId", input.PublicationId),
@@ -5206,6 +5208,7 @@ func publicationExportRequest(ctx openruntimes.Context, in *GatewayInput, cl cli
 		return internalFailure(ctx, in, err)
 	}
 	url := resolveDownloadURL(cl, "exports", exportId, time.Hour)
+	emit(ctx, cl, "media.export_requested.v1", input.PublicationId, actorId, map[string]interface{}{"format": input.Format}, in.CorrelationId)
 	emit(ctx, cl, "media.export_ready.v1", exportId, actorId, map[string]interface{}{"publicationId": input.PublicationId, "format": input.Format}, in.CorrelationId)
 	return success(ctx, in, map[string]interface{}{"denied": false, "exportId": exportId, "url": url})
 }
