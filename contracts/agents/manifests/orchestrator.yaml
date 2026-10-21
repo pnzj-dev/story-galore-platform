@@ -88,6 +88,6 @@ tests:
   - audit
 implementation:
   source_owner: agent:orchestrator
-  source_path: packages/agents/orchestrator
-  tests_path: packages/agents/orchestrator/tests
+  source_path: backend/cloudflare/agents/src/agents/orchestrator.ts
+  tests_path: backend/cloudflare/agents/src/agents/orchestrator.test.ts
   route: /agents/orchestrator/:instanceId

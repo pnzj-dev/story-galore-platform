@@ -88,6 +88,6 @@ tests:
   - audit
 implementation:
   source_owner: agent:reader-companion
-  source_path: packages/agents/reader-companion
-  tests_path: packages/agents/reader-companion/tests
+  source_path: backend/cloudflare/agents/src/agents/reader-companion.ts
+  tests_path: backend/cloudflare/agents/src/agents/reader-companion.test.ts
   route: /agents/reader-companion/:instanceId

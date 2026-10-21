@@ -96,6 +96,6 @@ tests:
   - audit
 implementation:
   source_owner: agent:data-analysis-reporting
-  source_path: packages/agents/data-analysis-reporting
-  tests_path: packages/agents/data-analysis-reporting/tests
+  source_path: backend/cloudflare/agents/src/agents/data-analysis-reporting.ts
+  tests_path: backend/cloudflare/agents/src/agents/data-analysis-reporting.test.ts
   route: /agents/data-analysis-reporting/:instanceId

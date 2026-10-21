@@ -89,6 +89,6 @@ tests:
   - audit
 implementation:
   source_owner: agent:story-guardian
-  source_path: packages/agents/story-guardian
-  tests_path: packages/agents/story-guardian/tests
+  source_path: backend/cloudflare/agents/src/agents/story-guardian.ts
+  tests_path: backend/cloudflare/agents/src/agents/story-guardian.test.ts
   route: /agents/story-guardian/:instanceId

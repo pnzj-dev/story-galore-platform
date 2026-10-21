@@ -1,55 +1,155 @@
-version: 1.0.0
+# StoryGalore agent capability registry.
+#
+# v1.1.0 - reconciled 2026-10-21. This is the complete, canonical capability
+# set: every capability referenced by contracts/agents/tools/registry.yaml and
+# the agent manifests is registered here with risk + scope.
+#
+# Changes from v1.0.0:
+#   * Added 70 capabilities that were referenced by tools/manifests but missing.
+#   * Removed 3 naming-duplicate entries superseded by the canonical names used
+#     in tools/registry.yaml:
+#         repository.pull_request.create -> github.pr.create
+#         repository.pull_request.review -> github.pr.review
+#         cost.budget.propose            -> budget.propose
+#   * Reserved capabilities (registered for the risk model, not granted to any
+#     V1 agent): agent.task.propose, deployment.production,
+#     github.issue.create, github.issue.update, production.read,
+#     production.mutate, economics.consumption.read,
+#     economics.plan-profitability.read.
+#   * Deny-by-default capabilities (scope: security) are the manifest
+#     `capabilities.forbidden` set; no agent may ever hold them.
+#
+# risk:  LOW | MEDIUM | HIGH | CRITICAL
+# scope: task | repository | deployment | support | github | analytics | cost |
+#        economics | production | creative | trust | growth | user | business |
+#        operations | executive | engineering | media-import | security
+version: 1.1.0
 capabilities:
-- id: agent.task.read
-  risk: LOW
+- id: admin.arbitrary-db-write
+  risk: CRITICAL
+  scope: security
+- id: age-policy.bypass
+  risk: CRITICAL
+  scope: security
+- id: agent.approval.request
+  risk: MEDIUM
   scope: task
-- id: agent.task.propose
-  risk: LOW
+- id: agent.result.synthesize
+  risk: MEDIUM
   scope: task
 - id: agent.task.delegate
   risk: MEDIUM
   scope: task
-- id: repository.read
+- id: agent.task.propose
   risk: LOW
-  scope: repository
-- id: repository.branch.create
+  scope: task
+- id: agent.task.read
+  risk: LOW
+  scope: task
+- id: analytics.read
+  risk: LOW
+  scope: analytics
+- id: analytics.report.create
   risk: MEDIUM
-  scope: repository
-- id: repository.code.write
-  risk: HIGH
-  scope: repository
-- id: repository.commit
-  risk: HIGH
-  scope: repository
-- id: repository.pull_request.create
+  scope: analytics
+- id: archive.normalize
   risk: MEDIUM
-  scope: repository
-- id: repository.pull_request.review
-  risk: HIGH
-  scope: repository
+  scope: media-import
+- id: block.read
+  risk: LOW
+  scope: trust
+- id: budget.propose
+  risk: MEDIUM
+  scope: cost
+- id: business.propose
+  risk: MEDIUM
+  scope: business
+- id: canon.propose
+  risk: MEDIUM
+  scope: creative
+- id: character.propose
+  risk: MEDIUM
+  scope: creative
+- id: character.read
+  risk: LOW
+  scope: creative
 - id: ci.run
   risk: LOW
   scope: repository
+- id: comment.read
+  risk: LOW
+  scope: trust
+- id: continuity.review
+  risk: MEDIUM
+  scope: creative
+- id: contract.validate
+  risk: LOW
+  scope: repository
+- id: cost.read
+  risk: LOW
+  scope: cost
+- id: creator.read
+  risk: LOW
+  scope: business
 - id: deployment.prepare
-  risk: HIGH
-  scope: deployment
-- id: deployment.staging
   risk: HIGH
   scope: deployment
 - id: deployment.production
   risk: CRITICAL
   scope: deployment
-- id: support.ticket.read
-  risk: LOW
-  scope: support
-- id: support.ticket.update
+- id: deployment.staging
+  risk: HIGH
+  scope: deployment
+- id: discovery.propose
   risk: MEDIUM
-  scope: support
-- id: github.issue.read
+  scope: growth
+- id: distribution.read
   risk: LOW
-  scope: github
+  scope: operations
+- id: distribution.repair
+  risk: HIGH
+  scope: operations
+- id: draft.mutate
+  risk: HIGH
+  scope: production
+- id: draft.read
+  risk: LOW
+  scope: production
+- id: economics.anomaly.read
+  risk: LOW
+  scope: economics
+- id: economics.consumer.read
+  risk: LOW
+  scope: economics
+- id: economics.consumption.read
+  risk: LOW
+  scope: economics
+- id: economics.media-cost.read
+  risk: LOW
+  scope: economics
+- id: economics.plan-profitability.read
+  risk: LOW
+  scope: economics
+- id: economics.unit-economics.read
+  risk: LOW
+  scope: economics
+- id: entitlement.bypass
+  risk: CRITICAL
+  scope: security
+- id: entitlement.read
+  risk: LOW
+  scope: user
+- id: executive.propose
+  risk: MEDIUM
+  scope: executive
+- id: generation.execute
+  risk: HIGH
+  scope: production
 - id: github.issue.create
   risk: MEDIUM
+  scope: github
+- id: github.issue.read
+  risk: LOW
   scope: github
 - id: github.issue.update
   risk: MEDIUM
@@ -60,39 +160,165 @@ capabilities:
 - id: github.pr.review
   risk: HIGH
   scope: github
-- id: analytics.read
-  risk: LOW
-  scope: analytics
-- id: analytics.report.create
+- id: growth.propose
   risk: MEDIUM
-  scope: analytics
-- id: cost.read
+  scope: business
+- id: import.request.read
   risk: LOW
-  scope: cost
-- id: cost.budget.propose
+  scope: media-import
+- id: infrastructure.mutate
+  risk: CRITICAL
+  scope: engineering
+- id: infrastructure.read
+  risk: LOW
+  scope: engineering
+- id: keep2share.authenticate
   risk: MEDIUM
-  scope: cost
-- id: production.read
+  scope: media-import
+- id: keep2share.download
+  risk: MEDIUM
+  scope: media-import
+- id: keep2share.inspect
+  risk: LOW
+  scope: media-import
+- id: knowledge.read
+  risk: LOW
+  scope: support
+- id: media.metadata.normalize
+  risk: MEDIUM
+  scope: media-import
+- id: media.mutate
+  risk: HIGH
+  scope: operations
+- id: media.read
+  risk: LOW
+  scope: operations
+- id: media.register
+  risk: MEDIUM
+  scope: media-import
+- id: media.upload
+  risk: MEDIUM
+  scope: media-import
+- id: metadata.normalize
+  risk: MEDIUM
+  scope: operations
+- id: migration.execute
+  risk: CRITICAL
+  scope: engineering
+- id: moderation.bypass
+  risk: CRITICAL
+  scope: security
+- id: moderation.propose
+  risk: MEDIUM
+  scope: trust
+- id: moderation.review
+  risk: MEDIUM
+  scope: trust
+- id: moderation.submit
+  risk: MEDIUM
+  scope: media-import
+- id: observability.read
+  risk: LOW
+  scope: engineering
+- id: policy.bypass
+  risk: CRITICAL
+  scope: security
+- id: production-plan.propose
+  risk: MEDIUM
+  scope: creative
+- id: production-plan.read
   risk: LOW
   scope: production
+- id: production.deploy_without_approval
+  risk: CRITICAL
+  scope: security
 - id: production.mutate
   risk: CRITICAL
   scope: production
-- id: economics.consumer.read
+- id: production.read
   risk: LOW
-  scope: economics
-- id: economics.consumption.read
+  scope: production
+- id: profile.read
   risk: LOW
-  scope: economics
-- id: economics.media-cost.read
+  scope: growth
+- id: project.read
   risk: LOW
-  scope: economics
-- id: economics.unit-economics.read
+  scope: creative
+- id: provider-health.read
   risk: LOW
-  scope: economics
-- id: economics.plan-profitability.read
+  scope: analytics
+- id: publication.read
   risk: LOW
-  scope: economics
-- id: economics.anomaly.read
+  scope: creative
+- id: reader.assist
+  risk: MEDIUM
+  scope: user
+- id: reader.read
   risk: LOW
-  scope: economics
+  scope: user
+- id: release.verify
+  risk: MEDIUM
+  scope: engineering
+- id: report.read
+  risk: LOW
+  scope: trust
+- id: report.schedule.propose
+  risk: MEDIUM
+  scope: analytics
+- id: repository.branch.create
+  risk: MEDIUM
+  scope: repository
+- id: repository.code.write
+  risk: HIGH
+  scope: repository
+- id: repository.commit
+  risk: HIGH
+  scope: repository
+- id: repository.read
+  risk: LOW
+  scope: repository
+- id: revenue.read
+  risk: LOW
+  scope: business
+- id: secret.read.plaintext
+  risk: CRITICAL
+  scope: security
+- id: security.validate
+  risk: LOW
+  scope: repository
+- id: story-bible.propose
+  risk: MEDIUM
+  scope: creative
+- id: story-bible.read
+  risk: LOW
+  scope: creative
+- id: style.read
+  risk: LOW
+  scope: creative
+- id: subscription.read
+  risk: LOW
+  scope: business
+- id: support.read
+  risk: LOW
+  scope: executive
+- id: support.ticket.read
+  risk: LOW
+  scope: support
+- id: support.ticket.update
+  risk: MEDIUM
+  scope: support
+- id: ticket.escalate
+  risk: MEDIUM
+  scope: support
+- id: usage.read
+  risk: LOW
+  scope: analytics
+- id: visual-plan.propose
+  risk: MEDIUM
+  scope: creative
+- id: world.propose
+  risk: MEDIUM
+  scope: creative
+- id: world.read
+  risk: LOW
+  scope: creative

@@ -101,6 +101,6 @@ tests:
   - audit
 implementation:
   source_owner: agent:coding-dev
-  source_path: packages/agents/coding-dev
-  tests_path: packages/agents/coding-dev/tests
+  source_path: backend/cloudflare/agents/src/agents/coding-dev.ts
+  tests_path: backend/cloudflare/agents/src/agents/coding-dev.test.ts
   route: /agents/coding-dev/:instanceId

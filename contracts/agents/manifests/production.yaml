@@ -90,6 +90,6 @@ tests:
   - audit
 implementation:
   source_owner: agent:production
-  source_path: packages/agents/production
-  tests_path: packages/agents/production/tests
+  source_path: backend/cloudflare/agents/src/agents/production.ts
+  tests_path: backend/cloudflare/agents/src/agents/production.test.ts
   route: /agents/production/:instanceId

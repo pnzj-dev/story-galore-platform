@@ -100,6 +100,6 @@ tests:
   - audit
 implementation:
   source_owner: agent:keep2share-import
-  source_path: packages/agents/keep2share-import
-  tests_path: packages/agents/keep2share-import/tests
+  source_path: backend/cloudflare/agents/src/agents/keep2share-import.ts
+  tests_path: backend/cloudflare/agents/src/agents/keep2share-import.test.ts
   route: /agents/keep2share-import/:instanceId

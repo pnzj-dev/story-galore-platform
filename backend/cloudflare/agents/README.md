@@ -40,7 +40,8 @@ Policy Engine before any side effect, records provenance and a
 `allowed`/`forbidden` sets. Unknown capabilities and out-of-allowlist delegation
 are denied. Trust never substitutes for authorization.
 
-> Note: `contracts/agents/manifests/*.yaml` record `source_path:
-> packages/agents/*`, but the Cloudflare Workers live under
-> `backend/cloudflare/agents/` alongside the workflow Workers. The manifest
-> `source_path` needs reconciling to match the actual runtime location.
+> The `contracts/agents/manifests/*.yaml` `implementation.source_path` /
+> `tests_path` point at `backend/cloudflare/agents/src/agents/{slug}.ts` /
+> `{slug}.test.ts`, matching this Worker. The capability registry
+> (`contracts/agents/capability-registry.yaml`) is the complete canonical
+> capability set (risk + scope) that the Policy Engine enforces.

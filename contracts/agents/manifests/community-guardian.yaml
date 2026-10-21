@@ -88,6 +88,6 @@ tests:
   - audit
 implementation:
   source_owner: agent:community-guardian
-  source_path: packages/agents/community-guardian
-  tests_path: packages/agents/community-guardian/tests
+  source_path: backend/cloudflare/agents/src/agents/community-guardian.ts
+  tests_path: backend/cloudflare/agents/src/agents/community-guardian.test.ts
   route: /agents/community-guardian/:instanceId

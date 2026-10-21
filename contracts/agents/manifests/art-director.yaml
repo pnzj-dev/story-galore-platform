@@ -89,6 +89,6 @@ tests:
   - audit
 implementation:
   source_owner: agent:art-director
-  source_path: packages/agents/art-director
-  tests_path: packages/agents/art-director/tests
+  source_path: backend/cloudflare/agents/src/agents/art-director.ts
+  tests_path: backend/cloudflare/agents/src/agents/art-director.test.ts
   route: /agents/art-director/:instanceId

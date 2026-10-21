@@ -92,6 +92,6 @@ tests:
   - audit
 implementation:
   source_owner: agent:qa-release
-  source_path: packages/agents/qa-release
-  tests_path: packages/agents/qa-release/tests
+  source_path: backend/cloudflare/agents/src/agents/qa-release.ts
+  tests_path: backend/cloudflare/agents/src/agents/qa-release.test.ts
   route: /agents/qa-release/:instanceId

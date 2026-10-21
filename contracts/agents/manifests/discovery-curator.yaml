@@ -87,6 +87,6 @@ tests:
   - audit
 implementation:
   source_owner: agent:discovery-curator
-  source_path: packages/agents/discovery-curator
-  tests_path: packages/agents/discovery-curator/tests
+  source_path: backend/cloudflare/agents/src/agents/discovery-curator.ts
+  tests_path: backend/cloudflare/agents/src/agents/discovery-curator.test.ts
   route: /agents/discovery-curator/:instanceId

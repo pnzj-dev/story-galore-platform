@@ -91,6 +91,6 @@ tests:
   - audit
 implementation:
   source_owner: agent:infrastructure
-  source_path: packages/agents/infrastructure
-  tests_path: packages/agents/infrastructure/tests
+  source_path: backend/cloudflare/agents/src/agents/infrastructure.ts
+  tests_path: backend/cloudflare/agents/src/agents/infrastructure.test.ts
   route: /agents/infrastructure/:instanceId

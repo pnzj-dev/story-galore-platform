@@ -91,6 +91,6 @@ tests:
   - audit
 implementation:
   source_owner: agent:media-operations
-  source_path: packages/agents/media-operations
-  tests_path: packages/agents/media-operations/tests
+  source_path: backend/cloudflare/agents/src/agents/media-operations.ts
+  tests_path: backend/cloudflare/agents/src/agents/media-operations.test.ts
   route: /agents/media-operations/:instanceId

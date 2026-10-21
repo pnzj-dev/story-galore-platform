@@ -93,6 +93,6 @@ tests:
   - audit
 implementation:
   source_owner: agent:ceo
-  source_path: packages/agents/ceo
-  tests_path: packages/agents/ceo/tests
+  source_path: backend/cloudflare/agents/src/agents/ceo.ts
+  tests_path: backend/cloudflare/agents/src/agents/ceo.test.ts
   route: /agents/ceo/:instanceId
