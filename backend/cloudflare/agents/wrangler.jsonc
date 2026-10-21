@@ -1,5 +1,5 @@
 {
-  "name": "storygalore-agents",
+  "name": "storygalore-agents-dev",
   "main": "src/index.ts",
   "compatibility_date": "2026-10-21",
   "compatibility_flags": [

@@ -18,6 +18,7 @@ Regenerate after any change to the agent contracts:
     python3 scripts/generate-agents.py
 """
 import json
+import os
 import re
 import subprocess
 import sys
@@ -31,6 +32,10 @@ TOOLS_REGISTRY = ROOT / "contracts" / "agents" / "tools" / "registry.yaml"
 GATEWAY_OPS = ROOT / "contracts" / "agents" / "tools" / "gateway-operations.yaml"
 OUT_DIR = ROOT / "backend" / "cloudflare" / "agents"
 API_DIR = ROOT / "backend" / "appwrite" / "functions" / "api"
+
+# Worker name. Defaults to the dev instance; override for other environments via
+# the AGENTS_WORKER_NAME env var (e.g. storygalore-agents for production).
+WORKER_NAME = os.environ.get("AGENTS_WORKER_NAME", "storygalore-agents-dev")
 
 # Tool verbs that produce the agent's own computation (a structured result),
 # versus verbs that mutate/read Appwrite or external state via the gateway.
@@ -335,7 +340,7 @@ def render_wrangler(manifests):
     if v2:
         migrations.append({"tag": "v2", "new_sqlite_classes": v2})
     doc = {
-        "name": "storygalore-agents",
+        "name": WORKER_NAME,
         "main": "src/index.ts",
         "compatibility_date": "2026-10-21",
         "compatibility_flags": ["nodejs_compat"],

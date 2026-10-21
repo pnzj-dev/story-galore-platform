@@ -1,5 +1,5 @@
 {
-  "name": "storygalore-outbox-delivery",
+  "name": "storygalore-outbox-delivery-dev",
   "main": "src/index.ts",
   "compatibility_date": "2026-10-01",
   "compatibility_flags": ["enable_ctx_exports"],
