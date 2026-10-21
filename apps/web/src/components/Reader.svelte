@@ -1,6 +1,7 @@
 <script lang="ts">
   import { actions } from 'astro:actions';
   import { ImageViewer } from '@storygalore/ui';
+  import { cachePage, getCachedPage } from '@/lib/reader-cache';
 
   interface ReaderPage {
     url?: string;
@@ -23,6 +24,46 @@
   let container = $state<HTMLDivElement | undefined>(undefined);
   let currentPosition = $state(initialPosition);
   let timer: ReturnType<typeof setTimeout> | undefined;
+  let cachedSrc = $state<Record<number, string>>({}); // position -> blob: URL (offline)
+
+  async function prefetchPage(page: ReaderPage) {
+    if (!page.url) return;
+    const cached = await getCachedPage(publicationId, page.position);
+    if (cached) return;
+    try {
+      const res = await fetch(page.url);
+      if (res.ok) {
+        const blob = await res.blob();
+        await cachePage(publicationId, page.position, blob);
+      }
+    } catch {
+      /* best-effort */
+    }
+  }
+
+  async function hydrateOffline() {
+    const map: Record<number, string> = {};
+    for (const page of pages) {
+      const blob = await getCachedPage(publicationId, page.position);
+      if (blob) map[page.position] = URL.createObjectURL(blob);
+    }
+    cachedSrc = map;
+  }
+
+  // Prefetch the current + next pages online, or hydrate cached pages offline.
+  $effect(() => {
+    if (!pages.length) return;
+    if (typeof navigator === 'undefined') return;
+    if (navigator.onLine) {
+      for (const page of pages.slice(currentPosition, currentPosition + 3)) void prefetchPage(page);
+    } else {
+      void hydrateOffline();
+    }
+  });
+
+  function srcFor(page: ReaderPage): string | undefined {
+    return cachedSrc[page.position] ?? page.url;
+  }
 
   function saveProgress(position: number) {
     if (!canSync || pages.length === 0) return;
@@ -88,7 +129,7 @@
         <div data-position={page.position} class="flex justify-center">
           {#if page.url}
             <ImageViewer
-              src={page.url}
+              src={srcFor(page)}
               alt={`Page ${page.position + 1}`}
               guarded
               class="max-h-[60vh] w-auto rounded-sm border border-border"
