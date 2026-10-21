@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"archive/zip"
+	"bytes"
 	"context"
 	"crypto/rand"
 	"crypto/sha256"
@@ -15,7 +17,9 @@ import (
 
 	"github.com/appwrite/sdk-for-go/appwrite"
 	"github.com/appwrite/sdk-for-go/client"
+	"github.com/appwrite/sdk-for-go/file"
 	"github.com/appwrite/sdk-for-go/functions"
+	"github.com/appwrite/sdk-for-go/storage"
 	"github.com/appwrite/sdk-for-go/tablesdb"
 	"github.com/appwrite/sdk-for-go/tokens"
 	"github.com/appwrite/sdk-for-go/users"
@@ -70,6 +74,7 @@ var knownOperations = map[string]bool{
 	"reading_progress_upsert": true, "reading_progress_complete": true,
 	"reading_progress_get": true, "continue_list": true,
 	"publication_list": true, "publication_get": true, "creator_list": true, "creator_get": true,
+	"publication_download_policy_get": true, "publication_export_request": true,
 	"search": true,
 	"support_ticket_create": true, "support_ticket_list": true, "support_ticket_get": true,
 	"creator_create": true, "creator_update": true,
@@ -314,6 +319,10 @@ func Main(ctx openruntimes.Context) openruntimes.Response {
 		return getRow(ctx, &in, cl, "comments")
 	case "search":
 		return searchPublications(ctx, &in, cl)
+	case "publication_download_policy_get":
+		return publicationDownloadPolicyGet(ctx, &in, cl)
+	case "publication_export_request":
+		return publicationExportRequest(ctx, &in, cl)
 	case "subscription_create":
 		return subscriptionCreate(ctx, &in, cl)
 	case "subscription_cancel":
@@ -5003,6 +5012,241 @@ func findFeatureFlag(cl client.Client, key string) string {
 	flag, _ := rows[0].(map[string]interface{})
 	id, _ := flag["$id"].(string)
 	return id
+}
+
+// resolveDownloadPolicy evaluates the publication's download policy for the
+// actor. File export (CBZ/PDF) is only available for published books whose
+// policy allows downloads and whose entitlement is satisfied.
+func resolveDownloadPolicy(cl client.Client, pm map[string]interface{}, actorId string) (policy string, canExport bool, reason string) {
+	if pubType, _ := pm["type"].(string); pubType != "BOOK" {
+		return "NONE", false, "BOOKS_ONLY"
+	}
+	if status, _ := pm["status"].(string); status != "PUBLISHED" {
+		return "NONE", false, "NOT_PUBLISHED"
+	}
+	policy, _ = pm["downloadPolicy"].(string)
+	if policy == "" {
+		policy = "NONE"
+	}
+	if policy != "DOWNLOAD_ALLOWED" && policy != "DOWNLOAD_ALLOWED_WITH_WATERMARK" {
+		return policy, false, "DOWNLOAD_DISABLED"
+	}
+	accessClass, _ := pm["accessClass"].(string)
+	if accessClass == "SUBSCRIPTION" || accessClass == "PURCHASE" {
+		var pd deliveryDecision
+		if !entitlementSatisfied(cl, actorId, pm, &pd) {
+			return policy, false, "ENTITLEMENT_REQUIRED"
+		}
+	}
+	return policy, true, ""
+}
+
+// publicationDownloadPolicyGet returns the resolved download policy + whether a
+// CBZ/PDF export is currently allowed for the actor.
+func publicationDownloadPolicyGet(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	var input struct {
+		PublicationId string `json:"publicationId"`
+	}
+	if !decode(ctx, in, &input) || input.PublicationId == "" {
+		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
+	}
+	service := tablesdb.New(cl)
+	pub, err := service.GetRow(databaseID, "publications", input.PublicationId)
+	if err != nil {
+		return respond(ctx, in.OperationId, "RESOURCE_NOT_FOUND", false)
+	}
+	var pm map[string]interface{}
+	if pub.Decode(&pm) != nil {
+		return internalFailure(ctx, in, err)
+	}
+	policy, canExport, reason := resolveDownloadPolicy(cl, pm, actorOrEmpty(in.ActorId))
+	formats := []string{}
+	if canExport {
+		formats = []string{"CBZ", "PDF"}
+	}
+	return success(ctx, in, map[string]interface{}{
+		"downloadPolicy": policy,
+		"canDownload":    canExport,
+		"reason":         reason,
+		"formats":        formats,
+	})
+}
+
+type exportPage struct {
+	data   []byte
+	width  int
+	height int
+}
+
+// publicationExportRequest authorizes and generates a CBZ/PDF export for a book.
+func publicationExportRequest(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	var input struct {
+		PublicationId string `json:"publicationId"`
+		Format        string `json:"format"`
+	}
+	if !decode(ctx, in, &input) || input.PublicationId == "" || (input.Format != "CBZ" && input.Format != "PDF") {
+		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
+	}
+	actorId := actorOrEmpty(in.ActorId)
+	service := tablesdb.New(cl)
+	pub, err := service.GetRow(databaseID, "publications", input.PublicationId)
+	if err != nil {
+		return respond(ctx, in.OperationId, "RESOURCE_NOT_FOUND", false)
+	}
+	var pm map[string]interface{}
+	if pub.Decode(&pm) != nil {
+		return internalFailure(ctx, in, err)
+	}
+	policy, canExport, reason := resolveDownloadPolicy(cl, pm, actorId)
+	if !canExport {
+		return success(ctx, in, map[string]interface{}{"denied": true, "reason": reason, "downloadPolicy": policy})
+	}
+
+	pagesList, err := service.ListRows(databaseID, "book_pages", service.WithListRowsQueries([]string{
+		qEqual("publicationId", input.PublicationId),
+		`{"method":"orderAsc","attribute":"position"}`,
+		`{"method":"limit","values":[200]}`,
+	}))
+	if err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	var praw map[string]interface{}
+	if pagesList.Decode(&praw) != nil {
+		return internalFailure(ctx, in, err)
+	}
+	pages, _ := praw["rows"].([]interface{})
+	store := storage.New(cl)
+	imgs := make([]exportPage, 0, len(pages))
+	for _, p := range pages {
+		page, _ := p.(map[string]interface{})
+		assetId, _ := page["mediaAssetId"].(string)
+		if assetId == "" {
+			continue
+		}
+		bucket, fileId, width, height := mediaAssetFile(cl, assetId)
+		if bucket == "" || fileId == "" {
+			continue
+		}
+		data, err := store.GetFileDownload(bucket, fileId)
+		if err != nil || data == nil {
+			continue
+		}
+		imgs = append(imgs, exportPage{data: *data, width: width, height: height})
+	}
+	if len(imgs) == 0 {
+		return success(ctx, in, map[string]interface{}{"denied": true, "reason": "NO_PAGES"})
+	}
+
+	var outBytes []byte
+	if input.Format == "CBZ" {
+		outBytes, err = buildCBZ(imgs)
+	} else {
+		outBytes, err = buildPDF(imgs)
+	}
+	if err != nil {
+		return internalFailure(ctx, in, err)
+	}
+
+	exportId := newUUID()
+	fileName := exportId + "." + strings.ToLower(input.Format)
+	tmpPath := os.TempDir() + "/" + fileName
+	if err := os.WriteFile(tmpPath, outBytes, 0o644); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	defer os.Remove(tmpPath)
+	fileData := file.NewInputFile(tmpPath, fileName)
+	if _, err := store.CreateFile("exports", exportId, fileData); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	url := resolveDownloadURL(cl, "exports", exportId, time.Hour)
+	emit(ctx, cl, "media.export_ready.v1", exportId, actorId, map[string]interface{}{"publicationId": input.PublicationId, "format": input.Format}, in.CorrelationId)
+	return success(ctx, in, map[string]interface{}{"denied": false, "exportId": exportId, "url": url})
+}
+
+// mediaAssetFile returns the origin bucket/file and pixel dimensions of a media asset.
+func mediaAssetFile(cl client.Client, assetId string) (bucket, fileId string, width, height int) {
+	service := tablesdb.New(cl)
+	row, err := service.GetRow(databaseID, "media_assets", assetId)
+	if err != nil {
+		return "", "", 0, 0
+	}
+	var am map[string]interface{}
+	if row.Decode(&am) != nil {
+		return "", "", 0, 0
+	}
+	bucket, _ = am["originBucketKey"].(string)
+	fileId, _ = am["originFileId"].(string)
+	width = toInt(am["width"])
+	height = toInt(am["height"])
+	return bucket, fileId, width, height
+}
+
+func buildCBZ(imgs []exportPage) ([]byte, error) {
+	var buf bytes.Buffer
+	zw := zip.NewWriter(&buf)
+	for i, img := range imgs {
+		w, err := zw.Create(fmt.Sprintf("page-%03d.jpg", i+1))
+		if err != nil {
+			return nil, err
+		}
+		if _, err := w.Write(img.data); err != nil {
+			return nil, err
+		}
+	}
+	if err := zw.Close(); err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
+}
+
+// buildPDF produces a minimal valid PDF with one JPEG image per page.
+func buildPDF(imgs []exportPage) ([]byte, error) {
+	n := len(imgs)
+	total := 2 + 3*n // 1=catalog, 2=pages; per page: page, image, content
+	var b bytes.Buffer
+	b.WriteString("%PDF-1.4\n")
+	offsets := make([]int, total+1)
+	writeObj := func(id int, body string) {
+		offsets[id] = b.Len()
+		fmt.Fprintf(&b, "%d 0 obj\n%s\nendobj\n", id, body)
+	}
+	writeStreamObj := func(id int, dict string, data []byte) {
+		offsets[id] = b.Len()
+		fmt.Fprintf(&b, "%d 0 obj\n%s\nstream\n", id, dict)
+		b.Write(data)
+		b.WriteString("\nendstream\nendobj\n")
+	}
+	kids := make([]string, n)
+	for i := range imgs {
+		kids[i] = fmt.Sprintf("%d 0 R", 3+3*i)
+	}
+	writeObj(1, "<< /Type /Catalog /Pages 2 0 R >>")
+	writeObj(2, fmt.Sprintf("<< /Type /Pages /Kids [%s] /Count %d >>", strings.Join(kids, " "), n))
+	for i, img := range imgs {
+		pageId := 3 + 3*i
+		imgId := 4 + 3*i
+		contentId := 5 + 3*i
+		w, h := img.width, img.height
+		if w <= 0 {
+			w = 800
+		}
+		if h <= 0 {
+			h = 1200
+		}
+		writeObj(pageId, fmt.Sprintf("<< /Type /Page /Parent 2 0 R /MediaBox [0 0 %d %d] /Resources << /XObject << /Im0 %d 0 R >> >> /Contents %d 0 R >>", w, h, imgId, contentId))
+		writeStreamObj(imgId, fmt.Sprintf("<< /Type /XObject /Subtype /Image /Width %d /Height %d /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length %d >>", w, h, len(img.data)), img.data)
+		content := fmt.Sprintf("q %d 0 0 %d 0 0 cm /Im0 Do Q", w, h)
+		writeStreamObj(contentId, fmt.Sprintf("<< /Length %d >>", len(content)), []byte(content))
+	}
+	xrefOffset := b.Len()
+	b.WriteString("xref\n")
+	fmt.Fprintf(&b, "0 %d\n", total+1)
+	b.WriteString("0000000000 65535 f \n")
+	for id := 1; id <= total; id++ {
+		fmt.Fprintf(&b, "%010d 00000 n \n", offsets[id])
+	}
+	fmt.Fprintf(&b, "trailer\n<< /Size %d /Root 1 0 R >>\nstartxref\n%d\n%%%%EOF\n", total+1, xrefOffset)
+	return b.Bytes(), nil
 }
 
 // --- subscription handlers ---

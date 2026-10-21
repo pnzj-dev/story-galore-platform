@@ -102,6 +102,12 @@ routes:
   capability: discovery.read
   kind: page
   notes: full-text search over published publications
+- path: /export/:publicationId/:format
+  group: public
+  authentication: OPTIONAL
+  capability: story.download
+  kind: endpoint
+  notes: authorized CBZ/PDF export (server-authoritative download policy)
 - path: /creators/:creatorId
   group: public
   authentication: OPTIONAL

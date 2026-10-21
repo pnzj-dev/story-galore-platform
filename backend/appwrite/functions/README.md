@@ -55,5 +55,6 @@ appwrite functions update --function-id api --name api \
   --scopes 'topics.read' --scopes 'topics.write' \
   --scopes 'messages.read' --scopes 'messages.write' \
   --scopes 'subscribers.read' --scopes 'subscribers.write' \
-  --scopes 'targets.read' --scopes 'targets.write'
+  --scopes 'targets.read' --scopes 'targets.write' \
+  --scopes 'tokens.read' --scopes 'tokens.write'
 ```

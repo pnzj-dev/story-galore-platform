@@ -213,6 +213,12 @@ const fr = {
   "comments.empty": "Aucun commentaire pour l'instant. Soyez le premier à partager votre avis.",
   "comments.pending": "En attente de modération",
 
+  // Download / export
+  "download.title": "Télécharger",
+  "download.desc": "Obtenez une copie de lecture personnelle hors ligne.",
+  "download.cbz": "Télécharger en CBZ",
+  "download.pdf": "Télécharger en PDF",
+
   // Search
   "search.title": "Recherche",
   "search.placeholder": "Rechercher des histoires…",

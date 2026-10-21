@@ -166,6 +166,20 @@ export async function searchPublications(query: string, type?: string): Promise<
     });
 }
 
+export interface DownloadPolicy {
+  downloadPolicy?: string;
+  canDownload?: boolean;
+  reason?: string;
+  formats?: string[];
+}
+
+/** Resolve a publication's download policy for the actor (server-authoritative). */
+export async function fetchDownloadPolicy(actorId: string, publicationId: string): Promise<DownloadPolicy> {
+  const out = await invokeApi<DownloadPolicy>("publication_download_policy_get", { publicationId }, actorId);
+  if (out.status !== "SUCCESS" || !out.result) return { canDownload: false };
+  return out.result;
+}
+
 export interface FeatureFlag {
   key?: string;
   enabled?: boolean;

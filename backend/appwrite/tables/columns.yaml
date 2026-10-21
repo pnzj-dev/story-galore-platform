@@ -263,6 +263,7 @@ tables_with_columns:
       - {key: pageWidth, type: integer, required: false}
       - {key: pageHeight, type: integer, required: false}
       - {key: publishedAt, type: datetime, required: false}
+      - {key: downloadPolicy, type: varchar, size: 64, required: false}
       - {key: createdAt, type: datetime, required: true}
       - {key: updatedAt, type: datetime, required: true}
   - table: reading_progress

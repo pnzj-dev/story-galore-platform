@@ -212,6 +212,12 @@ const ar = {
   "comments.empty": "لا توجد تعليقات بعد. كن أول من يشارك رأيه.",
   "comments.pending": "قيد المراجعة",
 
+  // Download / export
+  "download.title": "تنزيل",
+  "download.desc": "احصل على نسخة قراءة شخصية للاستخدام دون اتصال.",
+  "download.cbz": "تنزيل CBZ",
+  "download.pdf": "تنزيل PDF",
+
   // Search
   "search.title": "البحث",
   "search.placeholder": "ابحث عن القصص…",

@@ -2,7 +2,7 @@
 import Layout from "@/layouts/Layout.astro";
 import Reader from "@/components/Reader.svelte";
 import Comments from "@/components/Comments.svelte";
-import { fetchReaderManifest, fetchReadingPosition, fetchComments } from "@/lib/gateway";
+import { fetchReaderManifest, fetchReadingPosition, fetchComments, fetchDownloadPolicy } from "@/lib/gateway";
 import { getTranslations } from "@/i18n";
 
 const { t } = getTranslations(Astro.currentLocale);
@@ -26,6 +26,9 @@ const pages = (manifest?.pages ?? []).map((p) => ({
 const comments = manifest
   ? await fetchComments(Astro.locals.user?.$id ?? "", "PUBLICATION", publicationId)
   : [];
+const downloadPolicy = manifest
+  ? await fetchDownloadPolicy(Astro.locals.user?.$id ?? "", publicationId)
+  : null;
 const commentLabels = {
   title: t("comments.title"),
   placeholder: t("comments.placeholder"),
@@ -61,6 +64,31 @@ const commentLabels = {
         <p class="mt-8 rounded-xl border border-dashed border-border px-6 py-8 text-sm text-foreground-muted">
           {t("story.noPages")}
         </p>
+      )}
+
+      {downloadPolicy?.canDownload && (
+        <section class="mt-10">
+          <h2 class="text-xl font-semibold">{t("download.title")}</h2>
+          <p class="mt-1 text-sm text-foreground-muted">{t("download.desc")}</p>
+          <div class="mt-4 flex flex-wrap gap-2">
+            {downloadPolicy.formats?.includes("CBZ") && (
+              <a
+                href={`/export/${publicationId}/CBZ`}
+                class="rounded-sm border border-border px-4 py-2 text-sm font-semibold transition hover:bg-surface"
+              >
+                {t("download.cbz")}
+              </a>
+            )}
+            {downloadPolicy.formats?.includes("PDF") && (
+              <a
+                href={`/export/${publicationId}/PDF`}
+                class="rounded-sm border border-border px-4 py-2 text-sm font-semibold transition hover:bg-surface"
+              >
+                {t("download.pdf")}
+              </a>
+            )}
+          </div>
+        </section>
       )}
 
       <Comments

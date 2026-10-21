@@ -213,6 +213,12 @@ export default {
   "comments.empty": "No comments yet. Be the first to share your thoughts.",
   "comments.pending": "Pending review",
 
+  // Download / export
+  "download.title": "Download",
+  "download.desc": "Get a personal reading copy for offline use.",
+  "download.cbz": "Download CBZ",
+  "download.pdf": "Download PDF",
+
   // Search
   "search.title": "Search",
   "search.placeholder": "Search stories…",
