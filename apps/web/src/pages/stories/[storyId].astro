@@ -69,6 +69,7 @@ function kindFor(t: string): "video" | "audio" | "post" {
                   pages={pages}
                   initialPosition={initialPosition}
                   canSync={Boolean(user)}
+                  title={pub?.title ?? ""}
                 />
               </div>
             ) : (

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { actions } from 'astro:actions';
   import { ImageViewer } from '@storygalore/ui';
-  import { cachePage, getCachedPage } from '@/lib/reader-cache';
+  import { cachePage, getCachedPage, recordPublicationMeta } from '@/lib/reader-cache';
 
   interface ReaderPage {
     url?: string;
@@ -14,11 +14,13 @@
     pages,
     initialPosition = 0,
     canSync = false,
+    title = '',
   }: {
     publicationId: string;
     pages: ReaderPage[];
     initialPosition?: number;
     canSync?: boolean;
+    title?: string;
   } = $props();
 
   let container = $state<HTMLDivElement | undefined>(undefined);
@@ -55,6 +57,7 @@
     if (!pages.length) return;
     if (typeof navigator === 'undefined') return;
     if (navigator.onLine) {
+      void recordPublicationMeta(publicationId, title, pages.length);
       for (const page of pages.slice(currentPosition, currentPosition + 3)) void prefetchPage(page);
     } else {
       void hydrateOffline();

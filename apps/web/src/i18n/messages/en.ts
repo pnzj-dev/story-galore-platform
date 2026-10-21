@@ -187,6 +187,10 @@ export default {
   "library.continue": "Continue",
   "library.emptyHint": "Nothing in progress yet. Start reading, watching, or listening.",
   "library.comingSoon": "Saved titles and collections are coming soon.",
+  "library.downloads": "Downloads & offline",
+  "library.downloadsDesc": "Titles cached on this device for offline reading.",
+  "library.noDownloads": "No offline titles yet. Open a book to cache it for offline reading.",
+  "library.remove": "Remove",
 
   // Media detail / reader / shorts
   "media.locked": "This title requires a subscription or purchase.",

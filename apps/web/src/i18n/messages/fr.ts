@@ -187,6 +187,10 @@ const fr = {
   "library.continue": "Continuer",
   "library.emptyHint": "Rien en cours pour l'instant. Commencez à lire, regarder ou écouter.",
   "library.comingSoon": "Les titres et collections enregistrés arrivent bientôt.",
+  "library.downloads": "Téléchargements et hors ligne",
+  "library.downloadsDesc": "Titres mis en cache sur cet appareil pour la lecture hors ligne.",
+  "library.noDownloads": "Aucun titre hors ligne pour l'instant. Ouvrez un livre pour le mettre en cache.",
+  "library.remove": "Supprimer",
 
   // Media detail / reader / shorts
   "media.locked": "Ce titre nécessite un abonnement ou un achat.",

@@ -219,6 +219,12 @@ export async function fetchFeatureFlags(actorId: string): Promise<FeatureFlag[]>
   return out.result.items;
 }
 
+/** Return the set of enabled feature-flag keys (hot-reloadable config). */
+export async function fetchEnabledFlagKeys(actorId = ""): Promise<Set<string>> {
+  const flags = await fetchFeatureFlags(actorId);
+  return new Set(flags.filter((f) => f.enabled).map((f) => f.key ?? "").filter(Boolean));
+}
+
 /** Fetch the authenticated user's in-progress items for the Continue rail. */
 export async function fetchContinueItems(actorId: string): Promise<MediaCardData[]> {
   const out = await invokeApi<{ items?: ContinueItem[] }>("continue_list", {}, actorId);

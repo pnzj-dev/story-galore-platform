@@ -1,7 +1,7 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import { MediaRail, ShortCard } from "@storygalore/ui";
-import { fetchContinueItems, fetchMediaByType, fetchAd, fetchRecommendations } from "@/lib/gateway";
+import { fetchContinueItems, fetchMediaByType, fetchAd, fetchRecommendations, fetchEnabledFlagKeys } from "@/lib/gateway";
 import { getTranslations } from "@/i18n";
 
 const title = "StoryGalore";
@@ -17,6 +17,8 @@ const videoItems = (await fetchMediaByType("VIDEO")).filter((i) => i.format !== 
 const bookItems = await fetchMediaByType("BOOK");
 const shortItems = await fetchMediaByType("VIDEO", "SHORT_FILM");
 const recommendedItems = await fetchRecommendations();
+const enabledFlags = await fetchEnabledFlagKeys(user?.$id ?? "");
+const showShorts = enabledFlags.has("video.shorts");
 const homeAd = await fetchAd("HOME_FEED_BETWEEN_RAILS", user?.$id ?? "");
 
 function hrefFor(item: { id: string; type: string }): string {
@@ -158,7 +160,7 @@ const featuredRating =
         <MediaRail client:load title={t("home.recommended")} items={recommendedItems} />
       )}
 
-      {shortItems.length > 0 && (
+      {showShorts && shortItems.length > 0 && (
         <section class="space-y-4">
           <div class="flex items-baseline justify-between">
             <h3 class="text-lg font-bold tracking-tight">{t("home.shorts")}</h3>

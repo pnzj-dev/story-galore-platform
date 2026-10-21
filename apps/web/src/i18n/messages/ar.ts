@@ -186,6 +186,10 @@ const ar = {
   "library.continue": "متابعة",
   "library.emptyHint": "لا شيء قيد التقدم بعد. ابدأ بالقراءة أو المشاهدة أو الاستماع.",
   "library.comingSoon": "العناوين والمجموعات المحفوظة قادمة قريبًا.",
+  "library.downloads": "التنزيلات ودون اتصال",
+  "library.downloadsDesc": "العناوين المخزّنة مؤقتًا على هذا الجهاز للقراءة دون اتصال.",
+  "library.noDownloads": "لا توجد عناوين دون اتصال بعد. افتح كتابًا لتخزينه مؤقتًا.",
+  "library.remove": "إزالة",
 
   // Media detail / reader / shorts
   "media.locked": "يتطلب هذا العنوان اشتراكًا أو شراءً.",
