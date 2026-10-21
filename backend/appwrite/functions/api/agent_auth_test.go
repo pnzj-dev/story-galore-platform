@@ -44,3 +44,21 @@ func TestAgentAllowlistNonEmpty(t *testing.T) {
 		t.Errorf("expected allowlist to cover many agents, got %d", len(agentAllowedOperations))
 	}
 }
+
+// TestResolveActorPreferSessionUser verifies the authoritative-actor rule: the
+// server-set session user id (x-appwrite-user-id) always wins over the body
+// claim, closing the actor-impersonation gap for session-based invocations.
+func TestResolveActorPreferSessionUser(t *testing.T) {
+	admin := "admin-service-account"
+	agent := "agent-story-producer"
+
+	if got := resolveActor(agent, &admin); got != agent {
+		t.Errorf("resolveActor should prefer the session user, got %q want %q", got, agent)
+	}
+	if got := resolveActor("", &admin); got != admin {
+		t.Errorf("resolveActor should fall back to the body claim, got %q want %q", got, admin)
+	}
+	if got := resolveActor("", nil); got != "" {
+		t.Errorf("resolveActor with no user and no body should be empty, got %q", got)
+	}
+}

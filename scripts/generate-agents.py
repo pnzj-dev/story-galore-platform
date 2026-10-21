@@ -267,6 +267,7 @@ def render_env(manifests):
     lines.append("  APPWRITE_ENDPOINT?: string;")
     lines.append("  APPWRITE_PROJECT_ID?: string;")
     lines.append("  APPWRITE_API_KEY?: string;")
+    lines.append("  AGENT_SESSION_JWT?: string;")
     lines.append("};")
     lines.append("")
     return "\n".join(lines)

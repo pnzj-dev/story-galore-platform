@@ -63,7 +63,10 @@ export abstract class StoryGaloreAgent<
   /**
    * Delegate to the `api` gateway function (authorized domain operation) using
    * the agent's own narrowly-scoped actor (`agent-{slug}`), never the admin
-   * account. Fails closed when the gateway credentials are not configured.
+   * account. When a per-agent session JWT is configured it is passed so the
+   * gateway derives the actor from the server-set `x-appwrite-user-id` (not the
+   * body claim); otherwise it falls back to the API key + body actor claim.
+   * Fails closed when neither is configured.
    */
   protected async invokeGateway<T>(
     operation: string,
@@ -73,7 +76,8 @@ export abstract class StoryGaloreAgent<
     const endpoint = env.APPWRITE_ENDPOINT;
     const projectId = env.APPWRITE_PROJECT_ID;
     const apiKey = env.APPWRITE_API_KEY;
-    if (!endpoint || !projectId || !apiKey) {
+    const jwt = env.AGENT_SESSION_JWT;
+    if (!endpoint || !projectId || (!apiKey && !jwt)) {
       return { status: 'FAILED', errorCode: 'GATEWAY_NOT_CONFIGURED' };
     }
     const gw = {
@@ -82,13 +86,18 @@ export abstract class StoryGaloreAgent<
       actorId: this.actorId,
       payload: { operation, input },
     };
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'X-Appwrite-Project': projectId,
+    };
+    if (jwt) {
+      headers['Authorization'] = `Bearer ${jwt}`;
+    } else {
+      headers['X-Appwrite-Key'] = apiKey!;
+    }
     const res = await fetch(`${endpoint}/functions/api/executions`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Appwrite-Project': projectId,
-        'X-Appwrite-Key': apiKey,
-      },
+      headers,
       body: JSON.stringify({ body: JSON.stringify(gw), async: false }),
     });
     if (!res.ok) return { status: 'FAILED', errorCode: `GATEWAY_HTTP_${res.status}` };

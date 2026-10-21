@@ -86,16 +86,24 @@ actor's `agent:` label and enforces the per-agent operation allowlist (generated
 runs. Ownership checks in the read/mutate handlers are skipped for agent actors
 because the allowlist is the authoritative boundary.
 
+The gateway derives the authoritative actor from the server-set
+`x-appwrite-user-id` header (present when the function is invoked via a user
+session JWT), overriding the body `actorId` claim. So a compromised agent cannot
+impersonate another actor by changing its body claim.
+
 Provision the agent actors before deploying:
 
 ```text
-for each agent slug: an Appwrite user with id `agent-{slug}` and label `agent:{slug}`
+for each agent slug:
+  1. an Appwrite user with id `agent-{slug}` and label `agent:{slug}`
+  2. a session for that user (users.createSession)
+  3. a session JWT (users.createJWT), stored as the Worker secret AGENT_SESSION_JWT
 ```
 
-The shared `APPWRITE_API_KEY` must be scoped narrowly (invoke the `api`
-function only). Per-agent API keys that bind each Worker to its own actor are a
-follow-up; until then the actor is passed as a claim and the allowlist is the
-defense-in-depth boundary.
+When `AGENT_SESSION_JWT` is set the agent sends `Authorization: Bearer <jwt>`;
+otherwise it falls back to the shared `APPWRITE_API_KEY` (local dev). The JWT
+expires (max 1h via `users.createJWT`), so a refresh path is a follow-up
+operational concern.
 
 > The `contracts/agents/manifests/*.yaml` `implementation.source_path` /
 > `tests_path` point at `backend/cloudflare/agents/src/agents/{slug}.ts` /

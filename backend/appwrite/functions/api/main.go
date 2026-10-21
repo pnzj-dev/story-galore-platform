@@ -167,6 +167,14 @@ func Main(ctx openruntimes.Context) openruntimes.Response {
 	}
 	ctx.Log("api: dispatch", "operation="+op, "correlationId="+in.CorrelationId)
 
+	// Authoritative actor. When the function is invoked via a user session (JWT),
+	// Appwrite sets x-appwrite-user-id server-side and it cannot be forged by the
+	// caller; trust it over the body actorId claim so a compromised agent cannot
+	// impersonate another actor (e.g. the admin service account). API-key
+	// invocations (the trusted web SSR and the Cloudflare workflows) have no user
+	// header and keep the body claim.
+	in.ActorId = stringPtr(resolveActor(ctx.Req.Headers["x-appwrite-user-id"], in.ActorId))
+
 	if !knownOperations[op] {
 		return respond(ctx, in.OperationId, "RESOURCE_NOT_FOUND", false)
 	}
@@ -7354,4 +7362,17 @@ func actorOrEmpty(actorId *string) string {
 		return ""
 	}
 	return *actorId
+}
+
+// resolveActor returns the authoritative actor id: the server-set user id from
+// a session JWT (x-appwrite-user-id) when present, else the body claim.
+func resolveActor(userHeader string, bodyActor *string) string {
+	if userHeader != "" {
+		return userHeader
+	}
+	return actorOrEmpty(bodyActor)
+}
+
+func stringPtr(s string) *string {
+	return &s
 }
