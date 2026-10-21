@@ -17,6 +17,9 @@ dist/
 build/
 .svelte-kit/
 
+# Cloudflare local state
+.wrangler/
+
 # OS / editor
 .DS_Store
 

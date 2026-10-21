@@ -1,0 +1,16 @@
+{
+  "name": "storygalore-agents",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-21",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": { "enabled": true },
+  "durable_objects": {
+    "bindings": [
+      { "name": "StoryProducerAgent", "class_name": "StoryProducerAgent" },
+      { "name": "SupportAgent", "class_name": "SupportAgent" }
+    ]
+  },
+  "migrations": [
+    { "tag": "v1", "new_sqlite_classes": ["StoryProducerAgent", "SupportAgent"] }
+  ]
+}
