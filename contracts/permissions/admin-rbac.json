@@ -6,6 +6,7 @@
   "roles": {
     "PLATFORM_ADMIN": [
       "admin.dashboard.read",
+      "admin.feature_flags.manage",
       "admin.functions.read",
       "admin.settings.read",
       "admin.state_machine.read",

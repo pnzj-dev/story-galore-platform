@@ -9,7 +9,7 @@ const authText = readText('contracts/security/authentication-session-runtime.yam
 const matrixText = readText('contracts/security/authorization-acceptance-matrix.yaml');
 const routePattern = /^\s*- path: (.+)$/gm;
 const inventoryPaths = [...invText.matchAll(routePattern)].map(m => m[1].replace(/^['"]|['"]$/g,''));
-if (inventoryPaths.length !== 99) throw new Error(`AUTHZ_BLOCKER planned route count changed without manifest update: expected 99, found ${inventoryPaths.length}`);
+if (inventoryPaths.length !== 111) throw new Error(`AUTHZ_BLOCKER planned route count changed without manifest update: expected 111, found ${inventoryPaths.length}`);
 if (new Set(inventoryPaths).size !== inventoryPaths.length) throw new Error('AUTHZ_BLOCKER duplicate planned route');
 const adminInventory = inventoryPaths.filter(p => p === '/admin' || p.startsWith('/admin/')).sort();
 const adminRegistry = rbac.routes.map(r=>r.route).sort();
