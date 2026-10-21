@@ -41,6 +41,7 @@ const ar = {
   "home.continueWatching": "متابعة المشاهدة",
   "home.trendingMovies": "الأفلام الرائجة",
   "home.trendingBooks": "الكتب الرائجة",
+  "home.recommended": "مقترح لك",
   "home.shorts": "مقاطع قصيرة — جديدة اليوم",
   "home.seeAll": "عرض الكل ←",
   "home.featuredFilm": "فيلم مميز",

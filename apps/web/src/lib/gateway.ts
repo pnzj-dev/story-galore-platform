@@ -180,6 +180,31 @@ export async function fetchDownloadPolicy(actorId: string, publicationId: string
   return out.result;
 }
 
+/** Fetch related/recommended publications (same type), ordered by recency. */
+export async function fetchRecommendations(publicationId?: string): Promise<MediaCardData[]> {
+  const out = await invokeApi<{ items?: PublicationItem[] }>(
+    "recommendations_get",
+    publicationId ? { publicationId } : {},
+    "",
+  );
+  if (out.status !== "SUCCESS" || !out.result?.items) return [];
+  return out.result.items
+    .filter((item) => Boolean(item.publication?.$id))
+    .map((item) => {
+      const pub = item.publication!;
+      const t = VALID_TYPES.includes(pub.type as MediaType) ? (pub.type as MediaType) : "BOOK";
+      return {
+        id: pub.$id!,
+        title: pub.title ?? "Untitled",
+        type: t,
+        format: pub.format,
+        contentRating: pub.contentRating as ContentRating | undefined,
+        coverUrl: item.coverUrl,
+        creatorName: item.creatorName,
+      } satisfies MediaCardData;
+    });
+}
+
 export interface FeatureFlag {
   key?: string;
   enabled?: boolean;

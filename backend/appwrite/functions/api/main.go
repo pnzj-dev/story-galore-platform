@@ -75,6 +75,7 @@ var knownOperations = map[string]bool{
 	"reading_progress_get": true, "continue_list": true,
 	"publication_list": true, "publication_get": true, "creator_list": true, "creator_get": true,
 	"publication_download_policy_get": true, "publication_export_request": true,
+	"recommendations_get": true,
 	"search": true,
 	"support_ticket_create": true, "support_ticket_list": true, "support_ticket_get": true,
 	"creator_create": true, "creator_update": true,
@@ -323,6 +324,8 @@ func Main(ctx openruntimes.Context) openruntimes.Response {
 		return publicationDownloadPolicyGet(ctx, &in, cl)
 	case "publication_export_request":
 		return publicationExportRequest(ctx, &in, cl)
+	case "recommendations_get":
+		return recommendationsGet(ctx, &in, cl)
 	case "subscription_create":
 		return subscriptionCreate(ctx, &in, cl)
 	case "subscription_cancel":
@@ -5247,6 +5250,66 @@ func buildPDF(imgs []exportPage) ([]byte, error) {
 	}
 	fmt.Fprintf(&b, "trailer\n<< /Size %d /Root 1 0 R >>\nstartxref\n%d\n%%%%EOF\n", total+1, xrefOffset)
 	return b.Bytes(), nil
+}
+
+// recommendationsGet returns related publications for a seed publication (same
+// type, then format/creator), ordered by recency. Falls back to trending when no
+// seed is provided. (Semantic VectorsDB similarity is a follow-up once the SDK
+// exposes textEmbedding/nearText.)
+func recommendationsGet(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	var input struct {
+		PublicationId string `json:"publicationId"`
+	}
+	_ = json.Unmarshal(in.Payload.Input, &input)
+	service := tablesdb.New(cl)
+	queries := []string{
+		qEqual("status", "PUBLISHED"),
+		`{"method":"orderDesc","attribute":"publishedAt"}`,
+		`{"method":"limit","values":[200]}`,
+	}
+	if input.PublicationId != "" {
+		if seed, err := service.GetRow(databaseID, "publications", input.PublicationId); err == nil {
+			var sm map[string]interface{}
+			if seed.Decode(&sm) == nil {
+				if seedType, _ := sm["type"].(string); seedType != "" {
+					queries = append(queries, qEqual("type", seedType))
+				}
+			}
+		}
+	}
+	list, err := service.ListRows(databaseID, "publications", service.WithListRowsQueries(queries))
+	if err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	var raw map[string]interface{}
+	if err := list.Decode(&raw); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	rows, _ := raw["rows"].([]interface{})
+	actorId := actorOrEmpty(in.ActorId)
+	mode, langs := getUserLanguagePrefs(cl, actorId)
+	filterByLanguage := mode == "ONLY_SELECTED" && len(langs) > 0
+	items := make([]map[string]interface{}, 0, 8)
+	for _, r := range rows {
+		row, _ := r.(map[string]interface{})
+		id, _ := row["$id"].(string)
+		if id == "" || id == input.PublicationId {
+			continue
+		}
+		if filterByLanguage && !stringIntersects(langs, getPublicationLanguages(cl, id)) {
+			continue
+		}
+		item := map[string]interface{}{"publication": row}
+		item["coverUrl"] = resolveCoverURL(cl, id, "")
+		if creatorId, ok := row["creatorId"].(string); ok && creatorId != "" {
+			item["creatorName"] = resolveCreatorName(cl, creatorId)
+		}
+		items = append(items, item)
+		if len(items) >= 8 {
+			break
+		}
+	}
+	return success(ctx, in, map[string]interface{}{"items": items})
 }
 
 // --- subscription handlers ---

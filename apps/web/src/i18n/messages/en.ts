@@ -42,6 +42,7 @@ export default {
   "home.continueWatching": "Continue Watching",
   "home.trendingMovies": "Trending in Movies",
   "home.trendingBooks": "Trending in Books",
+  "home.recommended": "Recommended for you",
   "home.shorts": "Shorts — Fresh Today",
   "home.seeAll": "See all →",
   "home.featuredFilm": "Featured Film",

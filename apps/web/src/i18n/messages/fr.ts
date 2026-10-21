@@ -41,6 +41,7 @@ const fr = {
   "home.continueWatching": "Continuer le visionnage",
   "home.trendingMovies": "Films tendance",
   "home.trendingBooks": "Livres tendance",
+  "home.recommended": "Recommandés pour vous",
   "home.shorts": "Courts — frais du jour",
   "home.seeAll": "Tout voir →",
   "home.featuredFilm": "Film à l'affiche",
