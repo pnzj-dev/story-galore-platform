@@ -8,7 +8,7 @@ runtime:
   class_name: SupportAgent
   state: PERSISTENT
 execution:
-  mode: EXECUTE
+  mode: ASSIST
   decision_policy: AGENT_DECIDES_DETERMINISTIC_SYSTEM_AUTHORIZES
   unknown_requirement: BLOCKED
   provider_failure: BLOCKED_OR_RETRY_PER_CONTRACT

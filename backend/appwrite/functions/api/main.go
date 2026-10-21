@@ -1568,7 +1568,11 @@ func mediaDeliveryAuthorize(ctx openruntimes.Context, in *GatewayInput, cl clien
 // an early, fail-closed authorization gate; the Policy Engine and route-level
 // capability checks enforce authorization independently at each boundary.
 func adminActor(ctx openruntimes.Context, in *GatewayInput, cl client.Client) bool {
-	actorId := actorOrEmpty(in.ActorId)
+	return isAdminActor(cl, actorOrEmpty(in.ActorId))
+}
+
+// isAdminActor reports whether the actor has the admin label.
+func isAdminActor(cl client.Client, actorId string) bool {
 	if actorId == "" {
 		return false
 	}
@@ -1582,6 +1586,57 @@ func adminActor(ctx openruntimes.Context, in *GatewayInput, cl client.Client) bo
 		}
 	}
 	return false
+}
+
+// rowAccessible reports whether the actor may read a row of `table` (already
+// decoded into `m`). Admin + trusted agents bypass (agents are allowlisted at
+// dispatch). Direct-owner tables use a column match; project- and
+// document-scoped tables join through studio_projects/studio_documents.
+func rowAccessible(cl client.Client, actorId, table string, m map[string]interface{}) bool {
+	if actorId == "" {
+		return false
+	}
+	if isAdminActor(cl, actorId) || isAgentActor(cl, actorId) {
+		return true
+	}
+	switch table {
+	case "plans", "studio_projects", "media_assets", "subscriptions", "payments", "comments":
+		return rowOwnedByActor(table, m, actorId)
+	case "studio_generation_requests":
+		pid, _ := m["projectId"].(string)
+		return projectOwnedByActor(cl, pid, actorId)
+	case "studio_pages", "studio_editor_revisions", "studio_editor_operations", "studio_publication_validation_runs":
+		did, _ := m["documentId"].(string)
+		return documentOwnedByActor(cl, did, actorId)
+	default:
+		return false
+	}
+}
+
+// rowOwnedByActor reports whether the actor directly owns the row (or the row
+// is public). Pure (no DB); join-scoped tables are handled by rowAccessible.
+func rowOwnedByActor(table string, m map[string]interface{}, actorId string) bool {
+	switch table {
+	case "plans":
+		return true
+	case "studio_projects", "media_assets":
+		return strEq(m, "creatorId", actorId)
+	case "subscriptions", "payments":
+		return strEq(m, "userId", actorId)
+	case "comments":
+		if strEq(m, "userId", actorId) {
+			return true
+		}
+		status, _ := m["status"].(string)
+		return status == "VISIBLE"
+	default:
+		return false
+	}
+}
+
+func strEq(m map[string]interface{}, key, want string) bool {
+	s, _ := m[key].(string)
+	return s != "" && s == want
 }
 
 // agentSlug returns the agent slug if the actor is a trusted platform agent
@@ -6505,6 +6560,10 @@ func publicationGet(ctx openruntimes.Context, in *GatewayInput, cl client.Client
 		}
 		media = append(media, entry)
 	}
+	// Do not leak internal fields (raw asset ids + project id) in the public
+	// metadata; delivery authorization is already represented by media[].allowed.
+	delete(pm, "mediaAssetIds")
+	delete(pm, "projectId")
 	out := map[string]interface{}{
 		"publication": pm,
 		"media":       media,
@@ -7206,10 +7265,19 @@ func getRow(ctx openruntimes.Context, in *GatewayInput, cl client.Client, table 
 	if err := row.Decode(&m); err != nil {
 		return internalFailure(ctx, in, err)
 	}
+	if !rowAccessible(cl, actorOrEmpty(in.ActorId), table, m) {
+		return respond(ctx, in.OperationId, "FORBIDDEN", false)
+	}
 	return success(ctx, in, m)
 }
 
 func listRows(ctx openruntimes.Context, in *GatewayInput, cl client.Client, table string) openruntimes.Response {
+	// Unfiltered list is public only for the plans catalog; every other table
+	// is admin/agent-only (regular users must use a scoped list handler).
+	actorId := actorOrEmpty(in.ActorId)
+	if table != "plans" && !isAdminActor(cl, actorId) && !isAgentActor(cl, actorId) {
+		return respond(ctx, in.OperationId, "FORBIDDEN", false)
+	}
 	service := tablesdb.New(cl)
 	list, err := service.ListRows(databaseID, table)
 	if err != nil {

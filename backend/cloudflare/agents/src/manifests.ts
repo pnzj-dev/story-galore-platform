@@ -73,7 +73,7 @@ export const CREATOR_BUSINESS_MANIFEST: AgentManifest = {
   slug: "creator-business",
   name: "Creator Business Agent",
   class_name: "CreatorBusinessAgent",
-  mode: "ADVISE",
+  mode: "ANALYZE",
   mission: "Analyzes creator business performance, monetization, growth and operational opportunities without executing financial mutations.",
   capabilities: {
     allowed: ["creator.read", "analytics.read", "subscription.read", "revenue.read", "business.propose", "growth.propose"],
@@ -265,7 +265,7 @@ export const SUPPORT_MANIFEST: AgentManifest = {
   slug: "support",
   name: "Support Agent",
   class_name: "SupportAgent",
-  mode: "EXECUTE",
+  mode: "ASSIST",
   mission: "Handles support triage, knowledge retrieval, safe ticket updates and escalation to engineering.",
   capabilities: {
     allowed: ["support.ticket.read", "support.ticket.update", "knowledge.read", "ticket.escalate"],

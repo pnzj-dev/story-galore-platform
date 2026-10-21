@@ -95,6 +95,13 @@ def main():
         if op not in real_ops:
             fail(f"gateway-operations: '{op}' (for {cap}) is not a real api gateway operation")
 
+    # 7. manifest execution.mode agrees with registry.yaml mode
+    agent_registry = yaml.safe_load(open(CONTRACTS / "registry.yaml"))["agents"]
+    registry_modes = {a["slug"]: a["mode"] for a in agent_registry}
+    for slug, d in manifests.items():
+        if slug in registry_modes and d["execution"]["mode"] != registry_modes[slug]:
+            fail(f"{slug}: execution.mode '{d['execution']['mode']}' != registry.yaml mode '{registry_modes[slug]}'")
+
     if failures:
         print(f"\nagent-capability reconciliation FAILED: {len(failures)} violation(s)")
         sys.exit(1)

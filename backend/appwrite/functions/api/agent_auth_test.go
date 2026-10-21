@@ -62,3 +62,35 @@ func TestResolveActorPreferSessionUser(t *testing.T) {
 		t.Errorf("resolveActor with no user and no body should be empty, got %q", got)
 	}
 }
+
+// TestRowOwnedByActor verifies the direct-owner/public/comment-visibility
+// policy (the pure, DB-free part of getRow authorization).
+func TestRowOwnedByActor(t *testing.T) {
+	cases := []struct {
+		table string
+		m     map[string]interface{}
+		actor string
+		want  bool
+	}{
+		{"plans", map[string]interface{}{"id": "p1"}, "u1", true}, // public
+		{"studio_projects", map[string]interface{}{"creatorId": "u1"}, "u1", true},
+		{"studio_projects", map[string]interface{}{"creatorId": "u2"}, "u1", false},
+		{"media_assets", map[string]interface{}{"creatorId": "u1"}, "u1", true},
+		{"subscriptions", map[string]interface{}{"userId": "u1"}, "u1", true},
+		{"subscriptions", map[string]interface{}{"userId": "u2"}, "u1", false},
+		{"payments", map[string]interface{}{"userId": "u1"}, "u1", true},
+		{"comments", map[string]interface{}{"userId": "u1"}, "u1", true},
+		{"comments", map[string]interface{}{"userId": "u2", "status": "VISIBLE"}, "u1", true},
+		{"comments", map[string]interface{}{"userId": "u2", "status": "HIDDEN"}, "u1", false},
+		{"comments", map[string]interface{}{"userId": "u2", "status": "REMOVED"}, "u1", false},
+		// join-scoped tables are denied here (handled by rowAccessible's joins)
+		{"studio_generation_requests", map[string]interface{}{"projectId": "pr1"}, "u1", false},
+		// unknown tables are deny-by-default
+		{"unknown_table", map[string]interface{}{"userId": "u1"}, "u1", false},
+	}
+	for _, c := range cases {
+		if got := rowOwnedByActor(c.table, c.m, c.actor); got != c.want {
+			t.Errorf("rowOwnedByActor(%q, %v, %q) = %v, want %v", c.table, c.m, c.actor, got, c.want)
+		}
+	}
+}
