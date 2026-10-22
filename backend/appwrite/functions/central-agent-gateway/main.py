@@ -32,7 +32,7 @@ async def main(context):
     body = _parse_body(context)
     headers = context.req.headers or {}
 
-    missing = [f for f in REQUIRED_FIELDS if not body.get(f)]
+    missing = [f for f in REQUIRED_FIELDS if f not in body or (f != "input" and not body.get(f))]
     if missing:
         return context.res.json(_denied("INVALID_INPUT"))
 
