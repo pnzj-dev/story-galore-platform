@@ -31,4 +31,5 @@ resources:
   - domain_events
   - media_assets
   - book_pages
+  - agent_tasks
 undeclared_resource_access: BLOCK
