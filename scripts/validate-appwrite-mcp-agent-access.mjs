@@ -33,12 +33,12 @@ const functionCatalog = JSON.parse(read('backend/appwrite/functions/function-cat
 const gatewayEntries = functionCatalog.functions.filter(f => f.id === 'central-agent-gateway');
 if (gatewayEntries.length !== 1) errors.push('function catalog must contain exactly one central-agent-gateway');
 const gateway = read('contracts/functions/definitions/central-agent-gateway.yaml');
-for (const token of ['language: GO_LATEST_STABLE_EXACT_PIN_REQUIRED','authorization: IN_PROCESS_POLICY_ENGINE','OFFICIAL_APPWRITE_CLI_ONLY','BLOCKED_PENDING_RESOURCE_MAP_AND_RUNTIME_PIN']) if (!gateway.includes(token)) errors.push(`gateway function contract missing ${token}`);
+for (const token of ['language: GO_LATEST_STABLE_EXACT_PIN_REQUIRED','authorization: IN_PROCESS_POLICY_ENGINE','OFFICIAL_APPWRITE_CLI_ONLY','implementation_status: IMPLEMENTED']) if (!gateway.includes(token)) errors.push(`gateway function contract missing ${token}`);
 const connectionPolicy = read(required[0]);
 for (const token of ['gateway_platform: APPWRITE_FUNCTIONS','gateway_function_id: central-agent-gateway','policy_engine_form: IN_PROCESS_MODULE','separate_policy_engine_deployment: PROHIBITED_UNLESS_APPROVED_ADR']) if (!connectionPolicy.includes(token)) errors.push(`connection contract missing gateway decision ${token}`);
 const gatewayTests = read('contracts/functions/test-matrix/central-agent-gateway.yaml');
 for (const id of Array.from({length:19},(_,i)=>`GATEWAY-${String(i+1).padStart(3,'0')}`)) if (!gatewayTests.includes(`id: ${id}`)) errors.push(`gateway security test missing ${id}`);
 const gatewayResourceMap = read('contracts/functions/resource-maps/central-agent-gateway.yaml');
-if (!gatewayResourceMap.includes('BLOCKED_PENDING_CANONICAL_RESOURCE_ID_REGISTRATION')) errors.push('gateway resource map must remain blocked until exact resource IDs are registered');
+if (!gatewayResourceMap.includes('status: REGISTERED') || !gatewayResourceMap.includes('undeclared_resource_access: BLOCK')) errors.push('gateway resource map must register exact resources and block undeclared access');
 if (errors.length) { console.error('Appwrite MCP agent access validation FAILED:\n' + errors.map(x=>'- '+x).join('\n')); process.exit(1); }
-console.log('Appwrite MCP agent access validation PASS: 17 allowlists, deny-by-default, single Appwrite Function gateway, in-process policy engine, 19 gateway security cases, self-hosted API-key auth verified, catalog captured, resource-map/runtime-pin blockers explicit.');
+console.log('Appwrite MCP agent access validation PASS: 17 allowlists, deny-by-default, single Appwrite Function gateway, in-process policy engine, 19 gateway security cases, self-hosted API-key auth verified, catalog captured, resource map registered, gateway implemented.');

@@ -54,7 +54,7 @@ tests:
 implementation:
   source_owner: infrastructure-appwrite
   source_path: backend/appwrite/functions/central-agent-gateway
-  implementation_status: BLOCKED_PENDING_RESOURCE_MAP_AND_RUNTIME_PIN
+  implementation_status: IMPLEMENTED
   scaffold_source: OFFICIAL_APPWRITE_CLI_ONLY
   policy_engine_deployment: IN_PROCESS_MODULE
   separate_policy_engine_service: PROHIBITED_UNLESS_APPROVED_ADR

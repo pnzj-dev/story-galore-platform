@@ -1,12 +1,34 @@
 schema: storygalore.function-resource-map/v1
-version: 1
+version: 2
 function: central-agent-gateway
 policy: explicit_only
-status: BLOCKED_PENDING_CANONICAL_RESOURCE_ID_REGISTRATION
+status: REGISTERED
 resources:
-  - NONE_UNTIL_CANONICAL_RESOURCE_IDS_ARE_REGISTERED
-undeployed_resources: BLOCKED_UNTIL_REGISTERED
+  - domain_events
+  - analytics_events
+  - publications
+  - studio_projects
+  - studio_story_bibles
+  - studio_characters
+  - studio_worlds
+  - studio_documents
+  - studio_pages
+  - studio_generation_requests
+  - studio_publication_validation_runs
+  - creators
+  - comments
+  - reports
+  - media_assets
+  - subscriptions
+  - plans
+  - payments
+  - support_tickets
+  - agent_tasks
+  - reading_progress
+undeployed_resources: NONE
 undeclared_resource_access: BLOCK
 notes:
-  - Do not invent resource IDs or add broad administrative access to make the gateway work.
-  - Register exact policy, approval, idempotency, audit, and domain authorization resource IDs before implementation.
+  - The gateway reaches these resources only through the registered self-hosted
+    mcp-server-appwrite tools; it holds no direct SDK access of its own.
+  - The exact StoryGalore-tool-id -> native-tool mapping is recorded in
+    contracts/integrations/appwrite-mcp-tool-registry.yaml at implementation time.
