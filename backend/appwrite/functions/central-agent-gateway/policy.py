@@ -49,6 +49,7 @@ TOOL_TO_API = {
     "agent_tasks.read": "agent_task_list",
     "agent_tasks.create": "agent_task_create",
     "agent_tasks.delegate_approved": "agent_task_update",
+    "collections.create_draft": "collection_create",
 }
 
 

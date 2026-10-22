@@ -129,6 +129,8 @@ var knownOperations = map[string]bool{
 	"metric_ingest":  true,
 	"agent_task_create": true, "agent_task_list": true,
 	"agent_task_get": true, "agent_task_update": true,
+	"collection_create": true, "collection_list": true,
+	"collection_get": true, "collection_update": true,
 }
 
 const databaseID = "main"
@@ -288,6 +290,14 @@ func Main(ctx openruntimes.Context) openruntimes.Response {
 		return agentTaskGet(ctx, &in, cl)
 	case "agent_task_update":
 		return agentTaskUpdate(ctx, &in, cl)
+	case "collection_create":
+		return collectionCreate(ctx, &in, cl)
+	case "collection_list":
+		return collectionList(ctx, &in, cl)
+	case "collection_get":
+		return collectionGet(ctx, &in, cl)
+	case "collection_update":
+		return collectionUpdate(ctx, &in, cl)
 	case "creator_analytics_get":
 		return creatorAnalyticsGet(ctx, &in, cl)
 	case "publication_validate":
@@ -6834,6 +6844,214 @@ func listAllRowsMaps(cl client.Client, table string) []map[string]interface{} {
 		}
 	}
 	return out
+}
+
+// --- collections (discovery-curator domain) ---
+
+var collectionStatuses = map[string]bool{"DRAFT": true, "PUBLISHED": true, "ARCHIVED": true}
+var collectionVisibilities = map[string]bool{"PUBLIC": true, "PRIVATE": true}
+
+// dedupeStrings preserves order and removes duplicate string values.
+func dedupeStrings(in []string) []string {
+	seen := map[string]bool{}
+	out := make([]string, 0, len(in))
+	for _, s := range in {
+		if s == "" || seen[s] {
+			continue
+		}
+		seen[s] = true
+		out = append(out, s)
+	}
+	return out
+}
+
+// listPublicCollections returns PUBLISHED + PUBLIC collections (the discovery
+// surface).
+func listPublicCollections(cl client.Client) []map[string]interface{} {
+	service := tablesdb.New(cl)
+	list, err := service.ListRows(databaseID, "collections", service.WithListRowsQueries([]string{
+		qEqual("visibility", "PUBLIC"),
+		qEqual("status", "PUBLISHED"),
+		`{"method":"limit","values":[1000]}`,
+	}))
+	if err != nil {
+		return nil
+	}
+	var raw map[string]interface{}
+	if list.Decode(&raw) != nil {
+		return nil
+	}
+	rows, _ := raw["rows"].([]interface{})
+	out := make([]map[string]interface{}, 0, len(rows))
+	for _, r := range rows {
+		if m, ok := r.(map[string]interface{}); ok {
+			out = append(out, m)
+		}
+	}
+	return out
+}
+
+// collectionCreate creates a DRAFT collection (curator = actor). Idempotent on
+// the provided idempotencyKey.
+func collectionCreate(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	var input struct {
+		Title              string   `json:"title"`
+		Description        string   `json:"description"`
+		Visibility         string   `json:"visibility"`
+		PublicationIds     []string `json:"publicationIds"`
+		CoverPublicationId string   `json:"coverPublicationId"`
+		IdempotencyKey     string   `json:"idempotencyKey"`
+	}
+	if !decode(ctx, in, &input) {
+		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
+	}
+	actorId := actorOrEmpty(in.ActorId)
+	if actorId == "" {
+		return respond(ctx, in.OperationId, "UNAUTHORIZED", false)
+	}
+	if input.Title == "" || input.IdempotencyKey == "" {
+		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
+	}
+	visibility := input.Visibility
+	if visibility == "" {
+		visibility = "PRIVATE"
+	}
+	if !collectionVisibilities[visibility] {
+		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
+	}
+	collectionId := idOrUUID(&input.IdempotencyKey)
+	if _, ok := fetchRowMap(cl, "collections", collectionId); ok {
+		return success(ctx, in, map[string]interface{}{"collectionId": collectionId, "idempotent": true})
+	}
+	nowStr := now()
+	row := map[string]interface{}{
+		"collectionId":       collectionId,
+		"title":              input.Title,
+		"description":        input.Description,
+		"curatorId":          actorId,
+		"status":             "DRAFT",
+		"visibility":         visibility,
+		"publicationIds":     dedupeStrings(input.PublicationIds),
+		"coverPublicationId": input.CoverPublicationId,
+		"createdAt":          nowStr,
+	}
+	if err := createRow(cl, "collections", collectionId, row); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	emit(ctx, cl, "collection.created.v1", collectionId, actorId, map[string]interface{}{"collectionId": collectionId, "curatorId": actorId}, in.CorrelationId)
+	return success(ctx, in, map[string]interface{}{"collectionId": collectionId, "status": "DRAFT"})
+}
+
+// collectionList returns the actor's own collections plus PUBLISHED + PUBLIC
+// collections; admins see all.
+func collectionList(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	actorId := actorOrEmpty(in.ActorId)
+	if actorId == "" {
+		return respond(ctx, in.OperationId, "UNAUTHORIZED", false)
+	}
+	if isAdminActor(cl, actorId) {
+		return success(ctx, in, map[string]interface{}{"items": listAllRowsMaps(cl, "collections")})
+	}
+	own := listRowsByField(cl, "collections", "curatorId", actorId)
+	public := listPublicCollections(cl)
+	return success(ctx, in, map[string]interface{}{"items": mergeAgentTaskLists(own, public)})
+}
+
+// collectionGet returns a collection if it is public+published or the actor is
+// its curator/admin.
+func collectionGet(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	var input struct {
+		CollectionId string `json:"collectionId"`
+	}
+	if !decode(ctx, in, &input) || input.CollectionId == "" {
+		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
+	}
+	actorId := actorOrEmpty(in.ActorId)
+	if actorId == "" {
+		return respond(ctx, in.OperationId, "UNAUTHORIZED", false)
+	}
+	m, ok := fetchRowMap(cl, "collections", input.CollectionId)
+	if !ok {
+		return respond(ctx, in.OperationId, "RESOURCE_NOT_FOUND", false)
+	}
+	if isAdminActor(cl, actorId) || strEq(m, "curatorId", actorId) {
+		return success(ctx, in, m)
+	}
+	if strEq(m, "visibility", "PUBLIC") && strEq(m, "status", "PUBLISHED") {
+		return success(ctx, in, m)
+	}
+	return respond(ctx, in.OperationId, "FORBIDDEN", false)
+}
+
+// collectionUpdate transitions a collection (publish/archive/edit). Only the
+// curator or an admin may update it.
+func collectionUpdate(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	var input struct {
+		CollectionId       string   `json:"collectionId"`
+		Title              string   `json:"title"`
+		Description        string   `json:"description"`
+		Status             string   `json:"status"`
+		Visibility         string   `json:"visibility"`
+		PublicationIds     []string `json:"publicationIds"`
+		CoverPublicationId string   `json:"coverPublicationId"`
+	}
+	if !decode(ctx, in, &input) || input.CollectionId == "" {
+		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
+	}
+	actorId := actorOrEmpty(in.ActorId)
+	if actorId == "" {
+		return respond(ctx, in.OperationId, "UNAUTHORIZED", false)
+	}
+	m, ok := fetchRowMap(cl, "collections", input.CollectionId)
+	if !ok {
+		return respond(ctx, in.OperationId, "RESOURCE_NOT_FOUND", false)
+	}
+	if !isAdminActor(cl, actorId) && !strEq(m, "curatorId", actorId) {
+		return respond(ctx, in.OperationId, "FORBIDDEN", false)
+	}
+	if input.Status != "" && !collectionStatuses[input.Status] {
+		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
+	}
+	if input.Visibility != "" && !collectionVisibilities[input.Visibility] {
+		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
+	}
+	// Publishing requires at least one member publication.
+	targetStatus := input.Status
+	if targetStatus == "" {
+		targetStatus, _ = m["status"].(string)
+	}
+	memberCount := len(stringSlice(m["publicationIds"]))
+	if input.PublicationIds != nil {
+		input.PublicationIds = dedupeStrings(input.PublicationIds)
+		memberCount = len(input.PublicationIds)
+	}
+	if targetStatus == "PUBLISHED" && memberCount == 0 {
+		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
+	}
+
+	updates := map[string]interface{}{"updatedAt": now()}
+	if input.Title != "" {
+		updates["title"] = input.Title
+	}
+	if input.Description != "" {
+		updates["description"] = input.Description
+	}
+	if input.Status != "" {
+		updates["status"] = input.Status
+	}
+	if input.Visibility != "" {
+		updates["visibility"] = input.Visibility
+	}
+	if input.PublicationIds != nil {
+		updates["publicationIds"] = input.PublicationIds
+	}
+	if input.CoverPublicationId != "" {
+		updates["coverPublicationId"] = input.CoverPublicationId
+	}
+	if err := updateRow(cl, "collections", input.CollectionId, updates); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	return success(ctx, in, map[string]interface{}{"collectionId": input.CollectionId, "updated": true})
 }
 
 func supportTicketList(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {

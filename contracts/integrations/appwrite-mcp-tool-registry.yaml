@@ -67,6 +67,8 @@ mappings:
     api_operation: agent_task_create
   - storygalore_tool_id: agent_tasks.delegate_approved
     api_operation: agent_task_update
+  - storygalore_tool_id: collections.create_draft
+    api_operation: collection_create
 mapping_rule: A StoryGalore tool id is mapped to a native Appwrite MCP tool only
   after its native name, schema, scopes, side effects, permissions and tests are
   registered in this file. Never infer native tool names from labels or examples;
@@ -85,7 +87,6 @@ runtime_note: The self-hosted mcp-server-appwrite is a Python process spawned by
   operator pattern (appwrite_call_tool). Mutations delegate to the api function.
 unmapped_mutation_tools:
   art_briefs.create_draft: art-brief domain
-  collections.create_draft: collections domain
   recommendations.propose: curation domain
   business_reports.create: business-reports domain
   reports.create: reports domain

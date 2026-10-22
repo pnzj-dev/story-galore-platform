@@ -32,4 +32,5 @@ resources:
   - media_assets
   - book_pages
   - agent_tasks
+  - collections
 undeclared_resource_access: BLOCK

@@ -55,6 +55,12 @@ def test_resolves_agent_task_delegate():
     assert op == "agent_task_update"
 
 
+def test_resolves_collection_create():
+    kind, op, _ = evaluate_policy("discovery-curator", "collections.create_draft")
+    assert kind == "api"
+    assert op == "collection_create"
+
+
 def test_allowlist_covers_all_agents():
     expected = [
         "story-producer", "story-guardian", "art-director", "production",

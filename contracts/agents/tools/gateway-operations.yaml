@@ -28,3 +28,4 @@ operations:
   # operation the native agent RPC method delegates to.
   agent.task.read: [agent_task_list, agent_task_get]
   agent.task.delegate: [agent_task_create, agent_task_update]
+  discovery.propose: [collection_create]

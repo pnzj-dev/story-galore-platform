@@ -725,6 +725,21 @@ studio_tables:
       - {key: createdAt, type: datetime, required: true}
       - {key: updatedAt, type: datetime, required: false}
       - {key: expiresAt, type: datetime, required: false}
+  - table: collections
+    source: contracts/domain/collection.schema.yaml
+    partition_key: curatorId
+    indexes: [status]
+    columns:
+      - {key: collectionId, type: varchar, size: 255, required: true}
+      - {key: title, type: varchar, size: 255, required: true}
+      - {key: description, type: text, required: false}
+      - {key: curatorId, type: varchar, size: 255, required: true}
+      - {key: status, type: enum, elements: [DRAFT, PUBLISHED, ARCHIVED], required: true}
+      - {key: visibility, type: enum, elements: [PUBLIC, PRIVATE], required: true}
+      - {key: publicationIds, type: varchar, array: true, required: false}
+      - {key: coverPublicationId, type: varchar, size: 255, required: false}
+      - {key: createdAt, type: datetime, required: true}
+      - {key: updatedAt, type: datetime, required: false}
 pending_columns_note: "desired-schema tables with NO schema source found; columns are BLOCKED until a schema contract exists."
 pending_columns:
   - table: profiles

@@ -219,6 +219,11 @@
       "id": "agent_tasks",
       "purpose": "agent task records (orchestrator coordination domain)",
       "security": "row-level"
+    },
+    {
+      "id": "collections",
+      "purpose": "curated publication collections (discovery surface)",
+      "security": "row-level"
     }
   ]
 }

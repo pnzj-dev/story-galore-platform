@@ -1,0 +1,27 @@
+version: 1
+name: collection
+description: >
+  A curated, ordered set of publications assembled by a curator (creator or
+  discovery agent) for the discovery surface. Collections are content-only:
+  they reference publications by id and never copy assets, and surfacing a
+  collection never bypasses entitlement, age, jurisdiction, adult-content,
+  moderation, or publication-status policy.
+fields:
+  collectionId: string        # row $id (idempotency key for create)
+  title: string
+  description: string
+  curatorId: string           # creator or agent actor id
+  status: enum[DRAFT, PUBLISHED, ARCHIVED]
+  visibility: enum[PUBLIC, PRIVATE]
+  publicationIds: string[]    # ordered, deduplicated member publication ids
+  coverPublicationId: string  # member publication used as the collection cover
+  createdAt: datetime
+  updatedAt: datetime
+rules:
+  - A collection references publications by id only; it does not copy media.
+  - Membership is deduplicated and ordered by array index.
+  - A published collection must contain at least one published publication.
+  - Only the curator (or an admin) may mutate a collection.
+  - Membership must reference existing publications.
+  - Surfacing a collection never bypasses entitlement, age, jurisdiction,
+    adult-content, moderation, or publication-status policy.

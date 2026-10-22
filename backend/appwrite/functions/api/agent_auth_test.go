@@ -157,3 +157,44 @@ func TestMergeAgentTaskLists(t *testing.T) {
 		}
 	}
 }
+
+// TestCollectionEnumsAndAllowlist guards the collection enum allowlists and the
+// discovery-curator's collection_create grant.
+func TestCollectionEnumsAndAllowlist(t *testing.T) {
+	for _, s := range []string{"DRAFT", "PUBLISHED", "ARCHIVED"} {
+		if !collectionStatuses[s] {
+			t.Errorf("expected collection status %q to be valid", s)
+		}
+	}
+	if collectionStatuses["BOGUS"] {
+		t.Error("unknown collection status must be rejected")
+	}
+	for _, v := range []string{"PUBLIC", "PRIVATE"} {
+		if !collectionVisibilities[v] {
+			t.Errorf("expected collection visibility %q to be valid", v)
+		}
+	}
+	if collectionVisibilities["BOGUS"] {
+		t.Error("unknown collection visibility must be rejected")
+	}
+	if !agentAllowedOperations["agentdiscoverycurator"]["collection_create"] {
+		t.Error("discovery-curator must be allowlisted for collection_create")
+	}
+	if !knownOperations["collection_create"] || !knownOperations["collection_list"] || !knownOperations["collection_get"] || !knownOperations["collection_update"] {
+		t.Error("collection operations must be registered gateway operations")
+	}
+}
+
+// TestDedupeStrings verifies ordered de-duplication of collection membership.
+func TestDedupeStrings(t *testing.T) {
+	got := dedupeStrings([]string{"a", "b", "a", "", "c", "b"})
+	want := []string{"a", "b", "c"}
+	if len(got) != len(want) {
+		t.Fatalf("dedupeStrings = %v, want %v", got, want)
+	}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Fatalf("dedupeStrings = %v, want %v", got, want)
+		}
+	}
+}
