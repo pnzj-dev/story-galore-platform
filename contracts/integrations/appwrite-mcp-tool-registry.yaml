@@ -77,8 +77,22 @@ mutation_mapping_rule: Mutation StoryGalore tools (create/update/approve/delegat
   domain-operation adapters that delegate to the canonical `api` function
   operations and stay fail-closed (UNREGISTERED_TOOL_MAPPING) until each adapter
   is registered with its idempotency, approval, and audit requirements.
-runtime_note: The self-hosted mcp-server-appwrite is a Python stdio process spawned
-  by the Go gateway via `uvx`; this requires Python/uv in the gateway's Appwrite
-  function runtime. If the Go runtime lacks it, the MCP server must run as a
-  separately deployed process/service (or the gateway must delegate to the `api`
-  function directly) - pending an architecture decision.
+runtime_note: The self-hosted mcp-server-appwrite is a Python process spawned by
+  the Python gateway via `python -m mcp_server_appwrite` over stdio (mcp 2.x
+  operator pattern: appwrite_call_tool). Mutations delegate to the api function.
+unmapped_mutation_tools: The remaining allowlisted mutation tools have no canonical
+  `api` operation yet and stay fail-closed until their domain is built:
+    art_briefs.create_draft        -> art-brief domain
+    collections.create_draft       -> collections domain
+    recommendations.propose        -> curation domain
+    business_reports.create        -> business-reports domain
+    reports.create                 -> reports domain
+    media_jobs.retry_approved      -> media-retry domain
+    support_escalations.create     -> GitHub issue escalation
+    contract_validation.run        -> deterministic validation (no side effect)
+    release_readiness.report       -> deterministic report (no side effect)
+    staging_operation.execute_approved -> Cloudflare staging
+    staging_resources.mutate_approved -> Cloudflare staging
+    agent_tasks.create             -> agent-task domain
+    agent_tasks.delegate_approved  -> agent-task delegation
+    imports.create                 -> Keep2Share import domain
