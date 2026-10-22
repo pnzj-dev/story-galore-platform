@@ -2,8 +2,13 @@
 access to registered Appwrite MCP tools."""
 
 import json
+import os
+import sys
 import uuid
 from datetime import datetime, timezone
+
+# Ensure sibling modules are importable regardless of the runtime working dir.
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from policy import PolicyDenied, evaluate_policy
 from mcp_client import call_tool
@@ -60,7 +65,8 @@ async def main(context):
     args["database_id"] = "main"
     args["table_id"] = table
     try:
-        result = await call_tool(native_tool, args)
+        project_id = os.environ.get("APPWRITE_FUNCTION_PROJECT_ID", "")
+        result = await call_tool(native_tool, args, headers.get("x-appwrite-key", ""), project_id)
     except Exception as exc:
         _audit(context, body, agent_slug, native_tool, False, "MCP_TOOL_FAILURE")
         return context.res.json(_denied("MCP_TOOL_FAILURE"))
@@ -112,7 +118,7 @@ def _emit_domain_event(context, body, payload):
     try:
         import os
         from appwrite.client import Client
-        from appwrite.services.tables_db import TablesDb
+        from appwrite.services.tables_db import TablesDB
 
         endpoint = os.environ.get("APPWRITE_ENDPOINT") or os.environ.get("APPWRITE_FUNCTION_API_ENDPOINT", "")
         key = os.environ.get("APPWRITE_FUNCTION_API_KEY") or context.req.headers.get("x-appwrite-key", "")
@@ -121,7 +127,7 @@ def _emit_domain_event(context, body, payload):
         client = Client()
         client.set_endpoint(endpoint).set_project(project).set_key(key)
         row_id = str(uuid.uuid4())
-        TablesDb(client).create_row(
+        TablesDB(client).create_row(
             database_id="main",
             table_id="domain_events",
             row_id=row_id,
