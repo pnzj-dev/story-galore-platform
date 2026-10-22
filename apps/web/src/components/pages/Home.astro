@@ -109,15 +109,30 @@ const featuredRating =
                   </svg>
                   {t("home.play")}
                 </a>
-                <a
-                  href="/library"
-                  class="inline-flex items-center gap-2 rounded-sm border border-border-strong bg-surface-raised px-5 py-3 text-[13px] font-semibold text-foreground transition hover:bg-surface"
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M12 5v14M5 12h14"></path>
-                  </svg>
-                  {t("home.myList")}
-                </a>
+                {
+                  user ? (
+                    <a
+                      href="/library"
+                      class="inline-flex items-center gap-2 rounded-sm border border-border-strong bg-surface-raised px-5 py-3 text-[13px] font-semibold text-foreground transition hover:bg-surface"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 5v14M5 12h14"></path>
+                      </svg>
+                      {t("home.myList")}
+                    </a>
+                  ) : (
+                    <button
+                      type="button"
+                      data-auth="signin"
+                      class="inline-flex items-center gap-2 rounded-sm border border-border-strong bg-surface-raised px-5 py-3 text-[13px] font-semibold text-foreground transition hover:bg-surface"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 5v14M5 12h14"></path>
+                      </svg>
+                      {t("home.myList")}
+                    </button>
+                  )
+                }
               </div>
             </div>
           </div>
