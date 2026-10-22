@@ -94,3 +94,66 @@ func TestRowOwnedByActor(t *testing.T) {
 		}
 	}
 }
+
+// TestAgentTaskAllowlist verifies the orchestrator (and any agent granted
+// agent.task.delegate) is allowlisted for the agent_task domain operations, and
+// that no agent is allowlisted for a task operation that is not implemented.
+func TestAgentTaskAllowlist(t *testing.T) {
+	want := []string{"agent_task_create", "agent_task_list", "agent_task_get", "agent_task_update"}
+	for _, op := range want {
+		if !agentAllowedOperations["agentorchestrator"][op] {
+			t.Errorf("orchestrator must be allowlisted for %s", op)
+		}
+		if !knownOperations[op] {
+			t.Errorf("%s must be a registered gateway operation", op)
+		}
+	}
+	// story-producer holds agent.task.delegate, so it may create + update tasks.
+	if !agentAllowedOperations["agentstoryproducer"]["agent_task_create"] {
+		t.Error("story-producer (agent.task.delegate) must be allowlisted for agent_task_create")
+	}
+	if !agentAllowedOperations["agentstoryproducer"]["agent_task_update"] {
+		t.Error("story-producer (agent.task.delegate) must be allowlisted for agent_task_update")
+	}
+}
+
+// TestAgentTaskTypesAndStates guards the enum allowlists against accidental
+// drift from contracts/agents/task.yaml.
+func TestAgentTaskTypesAndStates(t *testing.T) {
+	for _, typ := range []string{"BUG_FIX", "FEATURE", "ANALYSIS", "REPORT", "CREATIVE", "OPERATIONS", "REVIEW", "SUPPORT_ESCALATION"} {
+		if !agentTaskTypes[typ] {
+			t.Errorf("expected task type %q to be valid", typ)
+		}
+	}
+	if agentTaskTypes["BOGUS"] {
+		t.Error("unknown task type must be rejected")
+	}
+	for _, st := range []string{"CREATED", "AUTHORIZED", "QUEUED", "RUNNING", "WAITING_APPROVAL", "WAITING_DEPENDENCY", "SUCCEEDED", "FAILED", "CANCELLED", "EXPIRED"} {
+		if !agentTaskStates[st] {
+			t.Errorf("expected task state %q to be valid", st)
+		}
+	}
+	if agentTaskStates["BOGUS"] {
+		t.Error("unknown task state must be rejected")
+	}
+}
+
+// TestMergeAgentTaskLists verifies the scoped list de-duplicates rows by $id
+// (an agent that both requested and owns a task sees it once).
+func TestMergeAgentTaskLists(t *testing.T) {
+	a := []map[string]interface{}{{"$id": "t1"}, {"$id": "t2"}}
+	b := []map[string]interface{}{{"$id": "t2"}, {"$id": "t3"}}
+	merged := mergeAgentTaskLists(a, b)
+	ids := map[string]int{}
+	for _, m := range merged {
+		ids[m["$id"].(string)]++
+	}
+	if len(merged) != 3 {
+		t.Errorf("expected 3 unique tasks, got %d", len(merged))
+	}
+	for id, n := range ids {
+		if n != 1 {
+			t.Errorf("task %q appeared %d times, want 1", id, n)
+		}
+	}
+}

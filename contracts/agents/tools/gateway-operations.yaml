@@ -23,3 +23,8 @@ operations:
   support.ticket.update: admin_support_ticket_update
   media.read: media_asset_list
   generation.execute: generation_create
+  # A capability may map to a list of operations (read = list + get;
+  # delegate = create sub-task + assign owner). The first entry is the primary
+  # operation the native agent RPC method delegates to.
+  agent.task.read: [agent_task_list, agent_task_get]
+  agent.task.delegate: [agent_task_create, agent_task_update]

@@ -49,9 +49,6 @@ mappings:
   - storygalore_tool_id: support_cases.read_scoped
     native_tool: tables_db_list_rows
     table: support_tickets
-  - storygalore_tool_id: agent_tasks.read
-    native_tool: tables_db_list_rows
-    table: agent_tasks
   - storygalore_tool_id: stories.create_draft
     api_operation: document_create
   - storygalore_tool_id: story_plans.create
@@ -64,6 +61,12 @@ mappings:
     api_operation: generation_create
   - storygalore_tool_id: media_upload.initiate_approved
     api_operation: media_upload_initiate
+  - storygalore_tool_id: agent_tasks.read
+    api_operation: agent_task_list
+  - storygalore_tool_id: agent_tasks.create
+    api_operation: agent_task_create
+  - storygalore_tool_id: agent_tasks.delegate_approved
+    api_operation: agent_task_update
 mapping_rule: A StoryGalore tool id is mapped to a native Appwrite MCP tool only
   after its native name, schema, scopes, side effects, permissions and tests are
   registered in this file. Never infer native tool names from labels or examples;
@@ -92,6 +95,4 @@ unmapped_mutation_tools:
   release_readiness.report: deterministic report (no side effect)
   staging_operation.execute_approved: Cloudflare staging
   staging_resources.mutate_approved: Cloudflare staging
-  agent_tasks.create: agent-task domain
-  agent_tasks.delegate_approved: agent-task delegation
   imports.create: Keep2Share import domain

@@ -13,9 +13,10 @@ var agentAllowedOperations = map[string]map[string]bool{
 	"agentcreatorbusiness": {"creator_get": true, "subscription_get": true},
 	"agentdiscoverycurator": {"publication_get": true},
 	"agentmediaoperations": {"media_asset_list": true},
+	"agentorchestrator": {"agent_task_create": true, "agent_task_get": true, "agent_task_list": true, "agent_task_update": true},
 	"agentproduction": {"generation_create": true, "media_asset_list": true},
 	"agentreadercompanion": {"publication_get": true},
 	"agentstoryguardian": {"project_get": true, "publication_get": true, "story_bible_get": true},
-	"agentstoryproducer": {"project_get": true, "story_bible_get": true},
+	"agentstoryproducer": {"agent_task_create": true, "agent_task_update": true, "project_get": true, "story_bible_get": true},
 	"agentsupport": {"admin_support_ticket_update": true, "support_ticket_get": true},
 }

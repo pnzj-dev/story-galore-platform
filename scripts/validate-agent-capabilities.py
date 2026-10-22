@@ -92,8 +92,10 @@ def main():
     for cap, op in gw_ops.items():
         if cap not in registered:
             fail(f"gateway-operations: capability '{cap}' not in capability-registry.yaml")
-        if op not in real_ops:
-            fail(f"gateway-operations: '{op}' (for {cap}) is not a real api gateway operation")
+        op_list = op if isinstance(op, list) else [op]
+        for o in op_list:
+            if o not in real_ops:
+                fail(f"gateway-operations: '{o}' (for {cap}) is not a real api gateway operation")
 
     # 7. manifest execution.mode agrees with registry.yaml mode
     agent_registry = yaml.safe_load(open(CONTRACTS / "registry.yaml"))["agents"]

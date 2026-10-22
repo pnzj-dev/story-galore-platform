@@ -702,6 +702,29 @@ studio_tables:
       - {key: lastKnownRevisionId, type: varchar, size: 255, required: false}
       - {key: openedAt, type: datetime, required: true}
       - {key: lastSeenAt, type: datetime, required: false}
+  - table: agent_tasks
+    source: contracts/agents/task.yaml
+    partition_key: ownerAgentId
+    indexes: [requesterAgentId, status]
+    columns:
+      - {key: taskId, type: varchar, size: 255, required: true}
+      - {key: type, type: enum, elements: [BUG_FIX, FEATURE, ANALYSIS, REPORT, CREATIVE, OPERATIONS, REVIEW, SUPPORT_ESCALATION], required: true}
+      - {key: title, type: varchar, size: 255, required: true}
+      - {key: objective, type: text, required: true}
+      - {key: requesterAgentId, type: varchar, size: 255, required: true}
+      - {key: ownerAgentId, type: varchar, size: 255, required: true}
+      - {key: priority, type: varchar, size: 16, required: false}
+      - {key: scope, type: text, required: false}
+      - {key: capabilities, type: varchar, array: true, required: true}
+      - {key: inputs, type: text, required: false}
+      - {key: constraints, type: text, required: false}
+      - {key: acceptanceCriteria, type: text, required: false}
+      - {key: requiredEvidence, type: text, required: false}
+      - {key: status, type: enum, elements: [CREATED, AUTHORIZED, QUEUED, RUNNING, WAITING_APPROVAL, WAITING_DEPENDENCY, SUCCEEDED, FAILED, CANCELLED, EXPIRED], required: true}
+      - {key: idempotencyKey, type: varchar, size: 255, required: true}
+      - {key: createdAt, type: datetime, required: true}
+      - {key: updatedAt, type: datetime, required: false}
+      - {key: expiresAt, type: datetime, required: false}
 pending_columns_note: "desired-schema tables with NO schema source found; columns are BLOCKED until a schema contract exists."
 pending_columns:
   - table: profiles

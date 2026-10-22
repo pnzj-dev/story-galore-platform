@@ -127,6 +127,8 @@ var knownOperations = map[string]bool{
 	"feature_flag_list": true, "feature_flag_set": true,
 	"admin_ai_cost":  true,
 	"metric_ingest":  true,
+	"agent_task_create": true, "agent_task_list": true,
+	"agent_task_get": true, "agent_task_update": true,
 }
 
 const databaseID = "main"
@@ -278,6 +280,14 @@ func Main(ctx openruntimes.Context) openruntimes.Response {
 		return adminAiCost(ctx, &in, cl)
 	case "metric_ingest":
 		return metricIngest(ctx, &in, cl)
+	case "agent_task_create":
+		return agentTaskCreate(ctx, &in, cl)
+	case "agent_task_list":
+		return agentTaskList(ctx, &in, cl)
+	case "agent_task_get":
+		return agentTaskGet(ctx, &in, cl)
+	case "agent_task_update":
+		return agentTaskUpdate(ctx, &in, cl)
 	case "creator_analytics_get":
 		return creatorAnalyticsGet(ctx, &in, cl)
 	case "publication_validate":
@@ -6605,6 +6615,225 @@ func supportTicketCreate(ctx openruntimes.Context, in *GatewayInput, cl client.C
 		return internalFailure(ctx, in, err)
 	}
 	return success(ctx, in, map[string]interface{}{"ticketId": rowId})
+}
+
+// --- agent tasks (orchestrator domain) ---
+
+var agentTaskTypes = map[string]bool{
+	"BUG_FIX": true, "FEATURE": true, "ANALYSIS": true, "REPORT": true,
+	"CREATIVE": true, "OPERATIONS": true, "REVIEW": true, "SUPPORT_ESCALATION": true,
+}
+
+var agentTaskStates = map[string]bool{
+	"CREATED": true, "AUTHORIZED": true, "QUEUED": true, "RUNNING": true,
+	"WAITING_APPROVAL": true, "WAITING_DEPENDENCY": true, "SUCCEEDED": true,
+	"FAILED": true, "CANCELLED": true, "EXPIRED": true,
+}
+
+// fetchRowMap returns the decoded row for `id` in `table`, or ok=false.
+func fetchRowMap(cl client.Client, table, id string) (map[string]interface{}, bool) {
+	row, err := tablesdb.New(cl).GetRow(databaseID, table, id)
+	if err != nil {
+		return nil, false
+	}
+	var m map[string]interface{}
+	if row.Decode(&m) != nil {
+		return nil, false
+	}
+	return m, true
+}
+
+// agentTaskCreate creates an agent task (status CREATED). The requester is the
+// authenticated actor; the owner is the delegated agent. Idempotent on the
+// provided idempotencyKey.
+func agentTaskCreate(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	var input struct {
+		Type               string   `json:"type"`
+		Title              string   `json:"title"`
+		Objective          string   `json:"objective"`
+		OwnerAgentId       string   `json:"ownerAgentId"`
+		Priority           string   `json:"priority"`
+		Scope              string   `json:"scope"`
+		Capabilities       []string `json:"capabilities"`
+		Inputs             string   `json:"inputs"`
+		Constraints        string   `json:"constraints"`
+		AcceptanceCriteria string   `json:"acceptanceCriteria"`
+		RequiredEvidence   string   `json:"requiredEvidence"`
+		ExpiresAt          string   `json:"expiresAt"`
+		IdempotencyKey     string   `json:"idempotencyKey"`
+	}
+	if !decode(ctx, in, &input) {
+		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
+	}
+	actorId := actorOrEmpty(in.ActorId)
+	if actorId == "" {
+		return respond(ctx, in.OperationId, "UNAUTHORIZED", false)
+	}
+	if input.Type == "" || input.Title == "" || input.Objective == "" || input.IdempotencyKey == "" {
+		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
+	}
+	if !agentTaskTypes[input.Type] {
+		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
+	}
+	ownerId := input.OwnerAgentId
+	if ownerId == "" {
+		ownerId = actorId
+	}
+	taskId := idOrUUID(&input.IdempotencyKey)
+	if _, ok := fetchRowMap(cl, "agent_tasks", taskId); ok {
+		return success(ctx, in, map[string]interface{}{"taskId": taskId, "idempotent": true})
+	}
+	nowStr := now()
+	row := map[string]interface{}{
+		"taskId":             taskId,
+		"type":               input.Type,
+		"title":              input.Title,
+		"objective":          input.Objective,
+		"requesterAgentId":   actorId,
+		"ownerAgentId":       ownerId,
+		"priority":           input.Priority,
+		"scope":              input.Scope,
+		"capabilities":       input.Capabilities,
+		"inputs":             input.Inputs,
+		"constraints":        input.Constraints,
+		"acceptanceCriteria": input.AcceptanceCriteria,
+		"requiredEvidence":   input.RequiredEvidence,
+		"status":             "CREATED",
+		"idempotencyKey":     input.IdempotencyKey,
+		"createdAt":          nowStr,
+	}
+	if input.ExpiresAt != "" {
+		row["expiresAt"] = input.ExpiresAt
+	}
+	if err := createRow(cl, "agent_tasks", taskId, row); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	emit(ctx, cl, "agent.task.created.v1", taskId, actorId, map[string]interface{}{"taskId": taskId, "type": input.Type, "ownerAgentId": ownerId}, in.CorrelationId)
+	return success(ctx, in, map[string]interface{}{"taskId": taskId, "status": "CREATED"})
+}
+
+// agentTaskList returns tasks scoped to the actor (requester or owner); admins
+// see all tasks.
+func agentTaskList(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	actorId := actorOrEmpty(in.ActorId)
+	if actorId == "" {
+		return respond(ctx, in.OperationId, "UNAUTHORIZED", false)
+	}
+	if isAdminActor(cl, actorId) {
+		return success(ctx, in, map[string]interface{}{"items": listAllRowsMaps(cl, "agent_tasks")})
+	}
+	asRequester := listRowsByField(cl, "agent_tasks", "requesterAgentId", actorId)
+	asOwner := listRowsByField(cl, "agent_tasks", "ownerAgentId", actorId)
+	return success(ctx, in, map[string]interface{}{"items": mergeAgentTaskLists(asRequester, asOwner)})
+}
+
+// agentTaskGet returns a single task if the actor is its requester, owner, or
+// an admin.
+func agentTaskGet(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	var input struct {
+		TaskId string `json:"taskId"`
+	}
+	if !decode(ctx, in, &input) || input.TaskId == "" {
+		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
+	}
+	actorId := actorOrEmpty(in.ActorId)
+	if actorId == "" {
+		return respond(ctx, in.OperationId, "UNAUTHORIZED", false)
+	}
+	m, ok := fetchRowMap(cl, "agent_tasks", input.TaskId)
+	if !ok {
+		return respond(ctx, in.OperationId, "RESOURCE_NOT_FOUND", false)
+	}
+	if !isAdminActor(cl, actorId) && !strEq(m, "requesterAgentId", actorId) && !strEq(m, "ownerAgentId", actorId) {
+		return respond(ctx, in.OperationId, "FORBIDDEN", false)
+	}
+	return success(ctx, in, m)
+}
+
+// agentTaskUpdate transitions an agent task (delegation/status). Only the
+// requester, owner, or an admin may update it.
+func agentTaskUpdate(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	var input struct {
+		TaskId       string `json:"taskId"`
+		OwnerAgentId string `json:"ownerAgentId"`
+		Status       string `json:"status"`
+		Priority     string `json:"priority"`
+	}
+	if !decode(ctx, in, &input) || input.TaskId == "" {
+		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
+	}
+	actorId := actorOrEmpty(in.ActorId)
+	if actorId == "" {
+		return respond(ctx, in.OperationId, "UNAUTHORIZED", false)
+	}
+	m, ok := fetchRowMap(cl, "agent_tasks", input.TaskId)
+	if !ok {
+		return respond(ctx, in.OperationId, "RESOURCE_NOT_FOUND", false)
+	}
+	if !isAdminActor(cl, actorId) && !strEq(m, "requesterAgentId", actorId) && !strEq(m, "ownerAgentId", actorId) {
+		return respond(ctx, in.OperationId, "FORBIDDEN", false)
+	}
+	if input.Status != "" && !agentTaskStates[input.Status] {
+		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
+	}
+	updates := map[string]interface{}{"updatedAt": now()}
+	if input.OwnerAgentId != "" {
+		updates["ownerAgentId"] = input.OwnerAgentId
+	}
+	if input.Status != "" {
+		updates["status"] = input.Status
+	}
+	if input.Priority != "" {
+		updates["priority"] = input.Priority
+	}
+	if err := updateRow(cl, "agent_tasks", input.TaskId, updates); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	return success(ctx, in, map[string]interface{}{"taskId": input.TaskId, "updated": true})
+}
+
+// mergeAgentTaskLists de-duplicates two task lists by row $id.
+func mergeAgentTaskLists(a, b []map[string]interface{}) []map[string]interface{} {
+	seen := map[string]bool{}
+	out := make([]map[string]interface{}, 0, len(a)+len(b))
+	for _, rows := range [][]map[string]interface{}{a, b} {
+		for _, m := range rows {
+			id, _ := m["$id"].(string)
+			if id == "" {
+				continue
+			}
+			if seen[id] {
+				continue
+			}
+			seen[id] = true
+			out = append(out, m)
+		}
+	}
+	return out
+}
+
+// listAllRowsMaps returns every row in `table` as decoded maps (unfiltered;
+// callers must gate this on an admin/agent actor).
+func listAllRowsMaps(cl client.Client, table string) []map[string]interface{} {
+	service := tablesdb.New(cl)
+	list, err := service.ListRows(databaseID, table, service.WithListRowsQueries([]string{
+		`{"method":"limit","values":[1000]}`,
+	}))
+	if err != nil {
+		return nil
+	}
+	var raw map[string]interface{}
+	if list.Decode(&raw) != nil {
+		return nil
+	}
+	rows, _ := raw["rows"].([]interface{})
+	out := make([]map[string]interface{}, 0, len(rows))
+	for _, r := range rows {
+		if m, ok := r.(map[string]interface{}); ok {
+			out = append(out, m)
+		}
+	}
+	return out
 }
 
 func supportTicketList(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {

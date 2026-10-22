@@ -214,6 +214,11 @@
       "id": "notification_delivery_attempts",
       "purpose": "append-oriented per-notification/per-channel delivery attempt history with provider-neutral status and redacted failure metadata",
       "security": "privileged-server-only"
+    },
+    {
+      "id": "agent_tasks",
+      "purpose": "agent task records (orchestrator coordination domain)",
+      "security": "row-level"
     }
   ]
 }

@@ -70,7 +70,9 @@ async def main(context):
             args["table_id"] = table
             result = await call_tool(native_or_op, args, api_key, project_id)
         else:
-            # Mutation tools delegate to the canonical `api` gateway function.
+            # api-gateway tools (scoped reads + mutations) delegate to the
+            # canonical `api` function, which owns domain validation, scoping
+            # and idempotency.
             result = await _call_api_operation(
                 native_or_op,
                 body.get("input") or {},

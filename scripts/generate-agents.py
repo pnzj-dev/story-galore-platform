@@ -101,11 +101,20 @@ def agent_allowed_ops(manifests, tool_caps, gateway_ops):
         for tool_id in d["tools"]["allowed_tool_ids"]:
             cap = tool_caps.get(tool_id, "")
             op = gateway_ops.get(cap)
-            if op:
+            if not op:
+                continue
+            if isinstance(op, list):
+                ops.update(op)
+            else:
                 ops.add(op)
         if ops:
             out[agent_label(slug)] = sorted(ops)
     return out
+
+
+def primary_op(op):
+    """Resolve a gateway_ops value to its primary operation (list -> first)."""
+    return op[0] if isinstance(op, list) else op
 
 
 def ts_str(value: str) -> str:
@@ -196,7 +205,7 @@ def render_agent(slug, d, tool_caps, gateway_ops):
         else:
             lines.append(f"    this.record({ts_str(capability)});")
             if capability in gateway_ops:
-                lines.append(f"    return this.invokeGateway({ts_str(gateway_ops[capability])}, input);")
+                lines.append(f"    return this.invokeGateway({ts_str(primary_op(gateway_ops[capability]))}, input);")
             else:
                 lines.append(f"    // fail-closed: no gateway operation wired for {ts_str(capability)} yet.")
                 lines.append(f"    return this.invokeGateway({ts_str(op_name(tool_name))}, input);")

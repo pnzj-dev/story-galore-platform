@@ -32,20 +32,23 @@ TOOL_TO_NATIVE = {
     "community_reports.read_scoped": ("tables_db_list_rows", "reports"),
     "published_catalog.read": ("tables_db_list_rows", "publications"),
     "support_cases.read_scoped": ("tables_db_list_rows", "support_tickets"),
-    "agent_tasks.read": ("tables_db_list_rows", "agent_tasks"),
 }
 
-# Stable StoryGalore mutation tool id -> canonical `api` gateway operation.
-# Mutations delegate to the `api` function (which owns domain validation +
-# idempotency), never to raw tables_db writes. Tools without a mapping here stay
-# fail-closed (UNREGISTERED_TOOL_MAPPING).
-TOOL_TO_MUTATION = {
+# Stable StoryGalore tool id -> canonical `api` gateway operation. These tools
+# (reads that need domain scoping AND mutations) delegate to the `api` function,
+# which owns domain validation, scoping and idempotency. They never use raw
+# tables_db writes. Tools without a mapping here stay fail-closed
+# (UNREGISTERED_TOOL_MAPPING).
+TOOL_TO_API = {
     "stories.create_draft": "document_create",
     "story_plans.create": "story_bible_upsert",
     "support_cases.update_scoped": "admin_support_ticket_update",
     "moderation.propose": "comment_moderate",
     "production_jobs.create_approved": "generation_create",
     "media_upload.initiate_approved": "media_upload_initiate",
+    "agent_tasks.read": "agent_task_list",
+    "agent_tasks.create": "agent_task_create",
+    "agent_tasks.delegate_approved": "agent_task_update",
 }
 
 
@@ -58,7 +61,8 @@ class PolicyDenied(Exception):
 def evaluate_policy(agent_slug, tool_id):
     """Return (kind, native_tool_or_operation, table_or_none) or raise PolicyDenied.
 
-    kind is "read" (MCP tool) or "mutation" (api gateway operation). Fail-closed.
+    kind is "read" (native MCP tool) or "api" (canonical api gateway operation).
+    Fail-closed.
     """
     allowed = AGENT_ALLOWLIST.get(agent_slug)
     if allowed is None:
@@ -68,7 +72,7 @@ def evaluate_policy(agent_slug, tool_id):
     read = TOOL_TO_NATIVE.get(tool_id)
     if read:
         return ("read", read[0], read[1])
-    mutation = TOOL_TO_MUTATION.get(tool_id)
-    if mutation:
-        return ("mutation", mutation, None)
+    operation = TOOL_TO_API.get(tool_id)
+    if operation:
+        return ("api", operation, None)
     raise PolicyDenied("UNREGISTERED_TOOL_MAPPING")

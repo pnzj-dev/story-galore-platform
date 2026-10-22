@@ -31,9 +31,28 @@ def test_resolves_read_mapping():
 
 def test_resolves_mutation_mapping():
     kind, op, table = evaluate_policy("support", "support_cases.update_scoped")
-    assert kind == "mutation"
+    assert kind == "api"
     assert op == "admin_support_ticket_update"
     assert table is None
+
+
+def test_resolves_agent_task_api_read():
+    kind, op, table = evaluate_policy("orchestrator", "agent_tasks.read")
+    assert kind == "api"
+    assert op == "agent_task_list"
+    assert table is None
+
+
+def test_resolves_agent_task_create():
+    kind, op, _ = evaluate_policy("orchestrator", "agent_tasks.create")
+    assert kind == "api"
+    assert op == "agent_task_create"
+
+
+def test_resolves_agent_task_delegate():
+    kind, op, _ = evaluate_policy("orchestrator", "agent_tasks.delegate_approved")
+    assert kind == "api"
+    assert op == "agent_task_update"
 
 
 def test_allowlist_covers_all_agents():
