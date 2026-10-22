@@ -1,7 +1,6 @@
 ---
 import Layout from "@/layouts/Layout.astro";
-import { MediaCard } from "@storygalore/ui";
-import type { MediaCardData } from "@storygalore/ui";
+import { MediaCard, mediaHref } from "@storygalore/ui";
 import { fetchCreator, fetchPublications } from "@/lib/gateway";
 import { getTranslations } from "@/i18n";
 
@@ -13,19 +12,6 @@ if (!creator) {
   Astro.response.status = 404;
 }
 const publications = creator ? await fetchPublications("new", creator.actorId) : [];
-
-function hrefFor(item: MediaCardData): string {
-  switch (item.type) {
-    case "VIDEO":
-      return `/watch/${item.id}`;
-    case "AUDIO":
-      return `/listen/${item.id}`;
-    case "POST":
-      return `/posts/${item.id}`;
-    default:
-      return `/read/${item.id}`;
-  }
-}
 ---
 
 <Layout title={creator ? creator.displayName : t("creators.notFound")}>
@@ -48,7 +34,7 @@ function hrefFor(item: MediaCardData): string {
       {publications.length > 0 ? (
         <div class="mt-4 flex flex-wrap gap-4">
           {publications.map((item) => (
-            <MediaCard publication={item} href={hrefFor(item)} />
+            <MediaCard publication={item} href={mediaHref(item)} />
           ))}
         </div>
       ) : (

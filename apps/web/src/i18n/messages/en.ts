@@ -200,6 +200,7 @@ export default {
   "media.episodeLabel": "Episode",
   "media.partLabel": "Part",
   "media.reader": "Reader",
+  "media.readNow": "Read now",
   "media.watch": "Watch",
   "media.listen": "Listen",
   "media.post": "Post",

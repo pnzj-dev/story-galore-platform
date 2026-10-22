@@ -1,7 +1,6 @@
 ---
 import Layout from "@/layouts/Layout.astro";
-import { MediaCard } from "@storygalore/ui";
-import type { MediaCardData } from "@storygalore/ui";
+import { MediaCard, mediaHref } from "@storygalore/ui";
 import { fetchMediaByType } from "@/lib/gateway";
 
 interface Props {
@@ -13,19 +12,6 @@ interface Props {
 
 const { title, description, type, format } = Astro.props;
 const items = await fetchMediaByType(type, format);
-
-function hrefFor(item: MediaCardData): string {
-  switch (item.type) {
-    case "VIDEO":
-      return `/watch/${item.id}`;
-    case "AUDIO":
-      return `/listen/${item.id}`;
-    case "POST":
-      return `/posts/${item.id}`;
-    default:
-      return `/read/${item.id}`;
-  }
-}
 ---
 
 <Layout title={title}>
@@ -37,7 +23,7 @@ function hrefFor(item: MediaCardData): string {
       items.length > 0 ? (
         <div class="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
           {items.map((item) => (
-            <MediaCard publication={item} href={hrefFor(item)} />
+            <MediaCard publication={item} href={mediaHref(item)} />
           ))}
         </div>
       ) : (

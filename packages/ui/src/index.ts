@@ -21,4 +21,6 @@ export { uiTokens, colorTokens } from './tokens/theme';
 export type { ColorToken } from './tokens/theme';
 export { cva, cx } from './lib/cva';
 export type { VariantProps } from './lib/cva';
+export { mediaHref } from './lib/media-href';
+export type { MediaHrefTarget, MediaHrefOptions } from './lib/media-href';
 export type { MediaCardData, MediaType, ContentRating, ProgressInfo, CardOrientation, CreatorCardData, PlaylistItem } from './types';

@@ -1,6 +1,6 @@
 ---
 import Layout from "@/layouts/Layout.astro";
-import { MediaRail, ShortCard } from "@storygalore/ui";
+import { MediaRail, ShortCard, mediaHref } from "@storygalore/ui";
 import { fetchContinueItems, fetchMediaByType, fetchAd, fetchRecommendations, fetchEnabledFlagKeys } from "@/lib/gateway";
 import { getTranslations } from "@/i18n";
 
@@ -21,35 +21,8 @@ const enabledFlags = await fetchEnabledFlagKeys(user?.$id ?? "");
 const showShorts = enabledFlags.has("video.shorts");
 const homeAd = await fetchAd("HOME_FEED_BETWEEN_RAILS", user?.$id ?? "");
 
-function hrefFor(item: { id: string; type: string }): string {
-  switch (item.type) {
-    case "VIDEO":
-      return `/watch/${item.id}`;
-    case "AUDIO":
-      return `/listen/${item.id}`;
-    case "POST":
-      return `/posts/${item.id}`;
-    default:
-      return `/read/${item.id}`;
-  }
-}
-
-// Continue-watching cards go straight to the player (auto-play + resume).
-function playHrefFor(item: { id: string; type: string }): string {
-  switch (item.type) {
-    case "VIDEO":
-      return `/watch/${item.id}?autoplay=1`;
-    case "AUDIO":
-      return `/listen/${item.id}?autoplay=1`;
-    case "POST":
-      return `/posts/${item.id}?autoplay=1`;
-    default:
-      return `/read/${item.id}`;
-  }
-}
-
 const featured = videoItems[0] ?? bookItems[0];
-const featuredHref = featured ? hrefFor(featured) : "/discover";
+const featuredHref = featured ? mediaHref(featured) : "/discover";
 const featuredRating =
   featured && featured.contentRating && featured.contentRating !== "ALL_AGES"
     ? featured.contentRating
@@ -154,7 +127,7 @@ const featuredRating =
             client:load
             title={t("home.continueWatching")}
             items={continueItems}
-            getHref={playHrefFor}
+            getHref={(item: { id: string; type: string }) => mediaHref(item, { resume: true })}
           />
         )
       }

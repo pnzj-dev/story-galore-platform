@@ -200,6 +200,7 @@ const fr = {
   "media.episodeLabel": "Épisode",
   "media.partLabel": "Partie",
   "media.reader": "Lecteur",
+  "media.readNow": "Lire maintenant",
   "media.watch": "Regarder",
   "media.listen": "Écouter",
   "media.post": "Publication",

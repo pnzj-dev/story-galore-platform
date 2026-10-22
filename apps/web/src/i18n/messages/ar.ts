@@ -199,6 +199,7 @@ const ar = {
   "media.episodeLabel": "الحلقة",
   "media.partLabel": "الجزء",
   "media.reader": "القارئ",
+  "media.readNow": "اقرأ الآن",
   "media.watch": "مشاهدة",
   "media.listen": "استماع",
   "media.post": "منشور",

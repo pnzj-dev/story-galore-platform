@@ -1,26 +1,12 @@
 ---
 import Layout from "@/layouts/Layout.astro";
-import { MediaCard } from "@storygalore/ui";
-import type { MediaCardData } from "@storygalore/ui";
+import { MediaCard, mediaHref } from "@storygalore/ui";
 import { searchPublications } from "@/lib/gateway";
 import { getTranslations } from "@/i18n";
 
 const { t } = getTranslations(Astro.currentLocale);
 const query = (Astro.url.searchParams.get("q") ?? "").trim();
 const results = query ? await searchPublications(query) : [];
-
-function hrefFor(item: MediaCardData): string {
-  switch (item.type) {
-    case "VIDEO":
-      return `/watch/${item.id}`;
-    case "AUDIO":
-      return `/listen/${item.id}`;
-    case "POST":
-      return `/posts/${item.id}`;
-    default:
-      return `/read/${item.id}`;
-  }
-}
 ---
 
 <Layout title={`${t("search.title")} — StoryGalore`}>
@@ -43,7 +29,7 @@ function hrefFor(item: MediaCardData): string {
             <p class="mt-6 text-sm text-foreground-muted">{t("search.resultsFor")} “{query}”.</p>
             <div class="mt-4 flex flex-wrap gap-4">
               {results.map((item) => (
-                <MediaCard publication={item} href={hrefFor(item)} />
+                <MediaCard publication={item} href={mediaHref(item)} />
               ))}
             </div>
           </>

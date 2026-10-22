@@ -1,5 +1,6 @@
 <script lang="ts">
   import MediaCard from '../domain/MediaCard.svelte';
+  import { mediaHref } from '../lib/media-href';
   import type { MediaCardData } from '../types';
 
   let {
@@ -16,18 +17,7 @@
     emptyHint?: string;
   } = $props();
 
-  const defaultHref = (item: MediaCardData) => {
-    switch (item.type) {
-      case 'VIDEO':
-        return `/watch/${item.id}`;
-      case 'AUDIO':
-        return `/listen/${item.id}`;
-      case 'POST':
-        return `/posts/${item.id}`;
-      default:
-        return `/read/${item.id}`;
-    }
-  };
+  const defaultHref = (item: MediaCardData) => mediaHref(item);
   const hrefFor = (item: MediaCardData) => (getHref ?? defaultHref)(item);
 </script>
 
