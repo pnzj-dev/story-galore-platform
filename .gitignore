@@ -25,3 +25,7 @@ build/
 
 # Playwright MCP artifacts
 .playwright-mcp/
+
+# Python
+__pycache__/
+*.pyc
