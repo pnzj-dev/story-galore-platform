@@ -33,7 +33,7 @@ const functionCatalog = JSON.parse(read('backend/appwrite/functions/function-cat
 const gatewayEntries = functionCatalog.functions.filter(f => f.id === 'central-agent-gateway');
 if (gatewayEntries.length !== 1) errors.push('function catalog must contain exactly one central-agent-gateway');
 const gateway = read('contracts/functions/definitions/central-agent-gateway.yaml');
-for (const token of ['language: GO_LATEST_STABLE_EXACT_PIN_REQUIRED','authorization: IN_PROCESS_POLICY_ENGINE','OFFICIAL_APPWRITE_CLI_ONLY','implementation_status: IMPLEMENTED']) if (!gateway.includes(token)) errors.push(`gateway function contract missing ${token}`);
+for (const token of ['language: PYTHON_LATEST_STABLE_EXACT_PIN_REQUIRED','authorization: IN_PROCESS_POLICY_ENGINE','OFFICIAL_APPWRITE_CLI_ONLY','implementation_status: IMPLEMENTED']) if (!gateway.includes(token)) errors.push(`gateway function contract missing ${token}`);
 const connectionPolicy = read(required[0]);
 for (const token of ['gateway_platform: APPWRITE_FUNCTIONS','gateway_function_id: central-agent-gateway','policy_engine_form: IN_PROCESS_MODULE','separate_policy_engine_deployment: PROHIBITED_UNLESS_APPROVED_ADR']) if (!connectionPolicy.includes(token)) errors.push(`connection contract missing gateway decision ${token}`);
 const gatewayTests = read('contracts/functions/test-matrix/central-agent-gateway.yaml');

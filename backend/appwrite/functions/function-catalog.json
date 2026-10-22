@@ -151,11 +151,11 @@
     },
     {
       "id": "central-agent-gateway",
-      "runtime": "go",
+      "runtime": "python",
       "purpose": "single enforcement entry point for autonomous-agent Appwrite MCP calls; policy engine is an in-process module, not a separately deployed service",
       "implementation_status": "IMPLEMENTED",
       "source_path": "backend/appwrite/functions/central-agent-gateway",
-      "runtime_pin": "go1.23.0 + sdk-for-go v1.0.0 + open-runtimes v4.0.7"
+      "runtime_pin": "python-3.12 + mcp/mcp-server-appwrite + appwrite (pinned in requirements.txt)"
     }
   ]
 }

@@ -1,0 +1,3 @@
+mcp>=1.0.0
+mcp-server-appwrite>=0.1.0
+appwrite>=13.0.0

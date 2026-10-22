@@ -2,7 +2,7 @@ schema: storygalore.appwrite-function/v1
 id: central-agent-gateway
 runtime:
   platform: APPWRITE_FUNCTIONS
-  language: GO_LATEST_STABLE_EXACT_PIN_REQUIRED
+  language: PYTHON_LATEST_STABLE_EXACT_PIN_REQUIRED
   state: STATELESS
 class: REQUEST_HANDLER
 purpose: Enforce one authorization path for autonomous-agent access to registered Appwrite MCP tools.
