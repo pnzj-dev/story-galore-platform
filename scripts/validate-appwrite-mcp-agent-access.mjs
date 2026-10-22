@@ -25,15 +25,15 @@ const expected = ['story-producer','story-guardian','art-director','production',
 if (agents.length !== 17 || new Set(agents).size !== 17) errors.push(`expected 17 unique agent allowlists; found ${agents.length}`);
 for (const id of expected) if (!agents.includes(id)) errors.push(`missing allowlist for ${id}`);
 if (!allowlists.includes('default_decision: DENY') || !allowlists.includes('default_decision: DENY')) errors.push('deny-by-default policy missing');
-for (const token of ['BLOCKED_VERIFICATION_REQUIRED','shared_unrestricted_human_oauth_session_allowed: false','backend_authorization_required: true','appwrite_permissions_required: true','DENY_AND_AUDIT']) if (!connection.includes(token)) errors.push(`connection contract missing ${token}`);
-if (!registry.includes('status: BLOCKED_PENDING_OFFICIAL_CATALOG_CAPTURE') || !registry.includes('mappings: []')) errors.push('native tool registry must remain explicitly blocked until verified');
+for (const token of ['VERIFIED_SELF_HOSTED_API_KEY','SELF_HOSTED_MCP_SERVER_WITH_SCOPED_API_KEY','shared_unrestricted_human_oauth_session_allowed: false','backend_authorization_required: true','appwrite_permissions_required: true','DENY_AND_AUDIT']) if (!connection.includes(token)) errors.push(`connection contract missing ${token}`);
+if (!registry.includes('status: CATALOG_CAPTURED') || !registry.includes('mappings: []')) errors.push('native tool registry must be captured with empty deny-by-default mappings until tools are registered');
 if (!read('docs/MCP.md').includes('Appwrite MCP connection')) errors.push('docs/MCP.md not aligned with canonical connection');
 if (!read('docs/V1_MASTER_CONTRACT.md').includes('registered Appwrite MCP connection')) errors.push('master contract not aligned');
 const functionCatalog = JSON.parse(read('backend/appwrite/functions/function-catalog.json'));
 const gatewayEntries = functionCatalog.functions.filter(f => f.id === 'central-agent-gateway');
 if (gatewayEntries.length !== 1) errors.push('function catalog must contain exactly one central-agent-gateway');
 const gateway = read('contracts/functions/definitions/central-agent-gateway.yaml');
-for (const token of ['language: GO_LATEST_STABLE_EXACT_PIN_REQUIRED','authorization: IN_PROCESS_POLICY_ENGINE','OFFICIAL_APPWRITE_CLI_ONLY','BLOCKED_PENDING_AUTH_TOOL_CATALOG_RESOURCE_MAP_AND_RUNTIME_PIN']) if (!gateway.includes(token)) errors.push(`gateway function contract missing ${token}`);
+for (const token of ['language: GO_LATEST_STABLE_EXACT_PIN_REQUIRED','authorization: IN_PROCESS_POLICY_ENGINE','OFFICIAL_APPWRITE_CLI_ONLY','BLOCKED_PENDING_RESOURCE_MAP_AND_RUNTIME_PIN']) if (!gateway.includes(token)) errors.push(`gateway function contract missing ${token}`);
 const connectionPolicy = read(required[0]);
 for (const token of ['gateway_platform: APPWRITE_FUNCTIONS','gateway_function_id: central-agent-gateway','policy_engine_form: IN_PROCESS_MODULE','separate_policy_engine_deployment: PROHIBITED_UNLESS_APPROVED_ADR']) if (!connectionPolicy.includes(token)) errors.push(`connection contract missing gateway decision ${token}`);
 const gatewayTests = read('contracts/functions/test-matrix/central-agent-gateway.yaml');
@@ -41,4 +41,4 @@ for (const id of Array.from({length:19},(_,i)=>`GATEWAY-${String(i+1).padStart(3
 const gatewayResourceMap = read('contracts/functions/resource-maps/central-agent-gateway.yaml');
 if (!gatewayResourceMap.includes('BLOCKED_PENDING_CANONICAL_RESOURCE_ID_REGISTRATION')) errors.push('gateway resource map must remain blocked until exact resource IDs are registered');
 if (errors.length) { console.error('Appwrite MCP agent access validation FAILED:\n' + errors.map(x=>'- '+x).join('\n')); process.exit(1); }
-console.log('Appwrite MCP agent access validation PASS: 17 allowlists, deny-by-default, single Appwrite Function gateway, in-process policy engine, 19 gateway security cases, authentication/catalog/resource blockers explicit.');
+console.log('Appwrite MCP agent access validation PASS: 17 allowlists, deny-by-default, single Appwrite Function gateway, in-process policy engine, 19 gateway security cases, self-hosted API-key auth verified, catalog captured, resource-map/runtime-pin blockers explicit.');

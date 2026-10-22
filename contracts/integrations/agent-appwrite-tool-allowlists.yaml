@@ -1,9 +1,9 @@
-# Stable StoryGalore tool IDs are allowlisted here. Native Appwrite MCP tool names are mapped only after the official catalog is inspected and verified.
+# Stable StoryGalore tool IDs are allowlisted here. Native Appwrite MCP tool names are mapped after the official catalog is inspected and verified.
 contract_id: agent-appwrite-tool-allowlists
 version: 1.0.0
 status: normative
 default_decision: DENY
-native_tool_mapping_status: BLOCKED_UNTIL_VERIFIED_REGISTRY
+native_tool_mapping_status: VERIFIED_CATALOG_READY_FOR_MAPPING
 agents:
   - agent_id: sg.agent.story-producer
     default_decision: DENY

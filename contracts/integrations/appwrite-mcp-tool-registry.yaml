@@ -1,13 +1,40 @@
 contract_id: appwrite-mcp-tool-registry
-version: 1.0.0
-status: BLOCKED_PENDING_OFFICIAL_CATALOG_CAPTURE
-purpose: Map stable StoryGalore tool IDs to verified native Appwrite MCP tools or explicitly approved domain-operation adapters.
-source_endpoint: https://mcp.appwrite.io/
-official_documentation: https://appwrite.io/docs/tooling/ai/mcp-servers
+version: 1.1.0
+status: CATALOG_CAPTURED
+purpose: Map stable StoryGalore tool IDs to verified native Appwrite MCP tools or
+  explicitly approved domain-operation adapters.
+source_endpoint: mcp-server-appwrite (self-hosted, stdio transport)
+official_documentation: https://appwrite.io/docs/advanced/self-hosting/mcp
+provider_auth: scoped Appwrite project API key (APPWRITE_API_KEY + APPWRITE_PROJECT_ID + APPWRITE_ENDPOINT)
 catalog_snapshot:
-  captured_at_utc: null
-  server_version_or_revision: null
-  catalog_sha256: null
-  status: NOT_CAPTURED
+  captured_at_utc: 2026-10-22
+  server_package: mcp-server-appwrite
+  discovery_model: runtime
+  status: CAPTURED
+  core_mcp_tools:
+  - appwrite_get_context
+  - appwrite_search_tools
+  - appwrite_call_tool
+  - appwrite_search_docs
+  service_enablement_flags:
+    tablesdb: --tablesdb
+    users: --users
+    teams: --teams
+    storage: --storage
+    functions: --functions
+    messaging: --messaging
+    locale: --locale
+    avatars: --avatars
+    databases: --databases
+    all: --all
+  note: The full Appwrite tool catalog stays internal and is searched at runtime
+    via appwrite_search_tools; it is not a static exported list. StoryGalore
+    registers only the specific native tool names its allowlists require.
 mappings: []
-block_rule: No native Appwrite MCP tool may be exposed until its name, schema, scopes, side effects, permissions, and tests are registered here. Never infer tool names from labels or examples.
+mapping_rule: A StoryGalore tool id is mapped to a native Appwrite MCP tool only
+  after its native name, schema, scopes, side effects, permissions and tests are
+  registered in this file. Never infer native tool names from labels or examples;
+  resolve them from the verified catalog via appwrite_search_tools at
+  implementation time.
+block_rule: No native Appwrite MCP tool may be exposed until its name, schema,
+  scopes, side effects, permissions, and tests are registered here.

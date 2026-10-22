@@ -15,7 +15,7 @@ input:
 output:
   schema: contracts/functions/schemas/central-agent-gateway-output.yaml
 security:
-  authentication: BLOCKED_UNTIL_UNATTENDED_AGENT_IDENTITY_VERIFIED
+  authentication: VERIFIED_SELF_HOSTED_MCP_API_KEY
   authorization: IN_PROCESS_POLICY_ENGINE
   capability: FUNCTION_CAPABILITY_CENTRAL_AGENT_GATEWAY
   secret_policy: APPROVED_SECRET_STORE_ONLY
@@ -54,7 +54,7 @@ tests:
 implementation:
   source_owner: infrastructure-appwrite
   source_path: backend/appwrite/functions/central-agent-gateway
-  implementation_status: BLOCKED_PENDING_AUTH_TOOL_CATALOG_RESOURCE_MAP_AND_RUNTIME_PIN
+  implementation_status: BLOCKED_PENDING_RESOURCE_MAP_AND_RUNTIME_PIN
   scaffold_source: OFFICIAL_APPWRITE_CLI_ONLY
   policy_engine_deployment: IN_PROCESS_MODULE
   separate_policy_engine_service: PROHIBITED_UNLESS_APPROVED_ADR
