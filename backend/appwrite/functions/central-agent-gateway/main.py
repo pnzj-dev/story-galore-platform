@@ -55,23 +55,35 @@ async def main(context):
 
     # In-process Policy Engine: allowlist + registered tool mapping.
     try:
-        native_tool, table = evaluate_policy(agent_slug, tool_id)
+        kind, native_or_op, table = evaluate_policy(agent_slug, tool_id)
     except PolicyDenied as exc:
         _audit(context, body, agent_slug, "", False, exc.code)
         return context.res.json(_denied(exc.code))
 
-    # Invoke the native tool through the self-hosted MCP server.
-    args = dict(body.get("input") or {})
-    args["database_id"] = "main"
-    args["table_id"] = table
+    project_id = os.environ.get("APPWRITE_FUNCTION_PROJECT_ID", "")
+    api_key = headers.get("x-appwrite-key", "")
     try:
-        project_id = os.environ.get("APPWRITE_FUNCTION_PROJECT_ID", "")
-        result = await call_tool(native_tool, args, headers.get("x-appwrite-key", ""), project_id)
-    except Exception as exc:
-        _audit(context, body, agent_slug, native_tool, False, "MCP_TOOL_FAILURE")
-        return context.res.json(_denied("MCP_TOOL_FAILURE"))
+        if kind == "read":
+            # Read tools go through the self-hosted MCP server.
+            args = dict(body.get("input") or {})
+            args["database_id"] = "main"
+            args["table_id"] = table
+            result = await call_tool(native_or_op, args, api_key, project_id)
+        else:
+            # Mutation tools delegate to the canonical `api` gateway function.
+            result = await _call_api_operation(
+                native_or_op,
+                body.get("input") or {},
+                api_key,
+                os.environ.get("APPWRITE_ENDPOINT", ""),
+                body.get("idempotency_key"),
+                agent_user,
+            )
+    except Exception:
+        _audit(context, body, agent_slug, native_or_op, False, "TOOL_FAILURE")
+        return context.res.json(_denied("TOOL_FAILURE"))
 
-    _audit(context, body, agent_slug, native_tool, True, None)
+    _audit(context, body, agent_slug, native_or_op, True, None)
 
     return context.res.json({
         "status": "SUCCESS",
@@ -94,6 +106,29 @@ def _parse_body(context):
         except Exception:
             return {}
     return {}
+
+
+async def _call_api_operation(operation, input_data, api_key, endpoint, idempotency_key, actor_id):
+    """Delegate a mutation to the canonical `api` gateway function over HTTP."""
+    import httpx
+    gw = {
+        "requestId": str(uuid.uuid4()),
+        "correlationId": str(uuid.uuid4()),
+        "actorId": actor_id,
+        "idempotencyKey": idempotency_key,
+        "payload": {"operation": operation, "input": input_data},
+    }
+    project = os.environ.get("APPWRITE_FUNCTION_PROJECT_ID", "")
+    async with httpx.AsyncClient(timeout=30) as client:
+        resp = await client.post(
+            endpoint.rstrip("/") + "/functions/api/executions",
+            headers={"X-Appwrite-Key": api_key, "X-Appwrite-Project": project},
+            json={"body": json.dumps(gw), "async": False},
+        )
+        resp.raise_for_status()
+        execution = resp.json()
+        raw = execution.get("responseBody", "{}")
+        return json.loads(raw) if isinstance(raw, str) else raw
 
 
 def _audit(context, body, agent_slug, native_tool, allowed, error_code):

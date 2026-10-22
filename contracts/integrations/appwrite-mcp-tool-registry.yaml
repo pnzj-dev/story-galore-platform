@@ -52,6 +52,18 @@ mappings:
   - storygalore_tool_id: agent_tasks.read
     native_tool: tables_db_list_rows
     table: agent_tasks
+  - storygalore_tool_id: stories.create_draft
+    api_operation: document_create
+  - storygalore_tool_id: story_plans.create
+    api_operation: story_bible_upsert
+  - storygalore_tool_id: support_cases.update_scoped
+    api_operation: admin_support_ticket_update
+  - storygalore_tool_id: moderation.propose
+    api_operation: comment_moderate
+  - storygalore_tool_id: production_jobs.create_approved
+    api_operation: generation_create
+  - storygalore_tool_id: media_upload.initiate_approved
+    api_operation: media_upload_initiate
 mapping_rule: A StoryGalore tool id is mapped to a native Appwrite MCP tool only
   after its native name, schema, scopes, side effects, permissions and tests are
   registered in this file. Never infer native tool names from labels or examples;

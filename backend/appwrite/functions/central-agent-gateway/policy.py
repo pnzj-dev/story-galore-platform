@@ -24,8 +24,7 @@ AGENT_ALLOWLIST = {
     "keep2share-import": {"imports.read_own", "imports.create", "imports.status.read_own", "media_upload.initiate_approved"},
 }
 
-# Stable StoryGalore tool id -> (native MCP tool, fixed table). Read tools only;
-# mutation tools require domain adapters and stay fail-closed (unmapped).
+# Stable StoryGalore tool id -> (native MCP tool, fixed table). Read tools only.
 TOOL_TO_NATIVE = {
     "stories.read": ("tables_db_get_row", "publications"),
     "story_plans.read": ("tables_db_get_row", "studio_story_bibles"),
@@ -36,6 +35,19 @@ TOOL_TO_NATIVE = {
     "agent_tasks.read": ("tables_db_list_rows", "agent_tasks"),
 }
 
+# Stable StoryGalore mutation tool id -> canonical `api` gateway operation.
+# Mutations delegate to the `api` function (which owns domain validation +
+# idempotency), never to raw tables_db writes. Tools without a mapping here stay
+# fail-closed (UNREGISTERED_TOOL_MAPPING).
+TOOL_TO_MUTATION = {
+    "stories.create_draft": "document_create",
+    "story_plans.create": "story_bible_upsert",
+    "support_cases.update_scoped": "admin_support_ticket_update",
+    "moderation.propose": "comment_moderate",
+    "production_jobs.create_approved": "generation_create",
+    "media_upload.initiate_approved": "media_upload_initiate",
+}
+
 
 class PolicyDenied(Exception):
     def __init__(self, code):
@@ -44,13 +56,19 @@ class PolicyDenied(Exception):
 
 
 def evaluate_policy(agent_slug, tool_id):
-    """Return (native_tool, table) or raise PolicyDenied (fail-closed)."""
+    """Return (kind, native_tool_or_operation, table_or_none) or raise PolicyDenied.
+
+    kind is "read" (MCP tool) or "mutation" (api gateway operation). Fail-closed.
+    """
     allowed = AGENT_ALLOWLIST.get(agent_slug)
     if allowed is None:
         raise PolicyDenied("UNKNOWN_AGENT")
     if tool_id not in allowed:
         raise PolicyDenied("TOOL_NOT_ALLOWLISTED")
-    mapping = TOOL_TO_NATIVE.get(tool_id)
-    if not mapping or not mapping[0]:
-        raise PolicyDenied("UNREGISTERED_TOOL_MAPPING")
-    return mapping
+    read = TOOL_TO_NATIVE.get(tool_id)
+    if read:
+        return ("read", read[0], read[1])
+    mutation = TOOL_TO_MUTATION.get(tool_id)
+    if mutation:
+        return ("mutation", mutation, None)
+    raise PolicyDenied("UNREGISTERED_TOOL_MAPPING")

@@ -16,15 +16,24 @@ def test_denies_non_allowlisted_tool():
 
 
 def test_fails_closed_on_unregistered_mapping():
+    # art_briefs.create_draft is allowlisted for art-director but not mapped.
     with pytest.raises(PolicyDenied) as exc:
-        evaluate_policy("story-producer", "stories.create_draft")
+        evaluate_policy("art-director", "art_briefs.create_draft")
     assert exc.value.code == "UNREGISTERED_TOOL_MAPPING"
 
 
-def test_resolves_mapping():
-    native, table = evaluate_policy("story-producer", "stories.read")
+def test_resolves_read_mapping():
+    kind, native, table = evaluate_policy("story-producer", "stories.read")
+    assert kind == "read"
     assert native == "tables_db_get_row"
     assert table == "publications"
+
+
+def test_resolves_mutation_mapping():
+    kind, op, table = evaluate_policy("support", "support_cases.update_scoped")
+    assert kind == "mutation"
+    assert op == "admin_support_ticket_update"
+    assert table is None
 
 
 def test_allowlist_covers_all_agents():
