@@ -20,10 +20,21 @@ func TestEvaluatePolicyDeniesNonAllowlistedTool(t *testing.T) {
 
 // An allowlisted tool with no registered native mapping still fails closed.
 func TestEvaluatePolicyFailsClosedOnUnregisteredMapping(t *testing.T) {
-	if _, err := evaluatePolicy("story-producer", "stories.read"); err == nil {
+	if _, err := evaluatePolicy("story-producer", "stories.create_draft"); err == nil {
 		t.Fatal("expected fail-closed for unregistered mapping")
 	} else if err.Error() != "UNREGISTERED_TOOL_MAPPING" {
 		t.Fatalf("expected UNREGISTERED_TOOL_MAPPING, got %q", err.Error())
+	}
+}
+
+// A mapped read tool resolves to its native tool + fixed resource.
+func TestEvaluatePolicyResolvesMapping(t *testing.T) {
+	m, err := evaluatePolicy("story-producer", "stories.read")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if m.native != "tables_db_get_row" || m.table != "publications" {
+		t.Fatalf("unexpected mapping: %+v", m)
 	}
 }
 

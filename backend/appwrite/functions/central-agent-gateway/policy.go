@@ -58,10 +58,28 @@ var agentAllowlist = map[string]map[string]bool{
 	"keep2share-import":    {"imports.read_own": true, "imports.create": true, "imports.status.read_own": true, "media_upload.initiate_approved": true},
 }
 
-// toolToNative maps a stable StoryGalore tool id to the native Appwrite MCP tool
-// name. It is populated from contracts/integrations/appwrite-mcp-tool-registry.yaml
-// at implementation time; empty until a tool is registered (fail-closed).
-var toolToNative = map[string]string{}
+// toolMapping maps a stable StoryGalore tool id to a native Appwrite MCP tool
+// plus the fixed resource (table) it operates on. Mutation/domain-specific
+// tools without a mapping here fail closed (UNREGISTERED_TOOL_MAPPING) until
+// their domain adapter is registered in
+// contracts/integrations/appwrite-mcp-tool-registry.yaml.
+type toolMapping struct {
+	native string
+	table  string
+}
+
+// toolToNative maps a stable StoryGalore tool id to its native tool + table.
+// Read tools are mapped to the generic tables_db read operations; the exact
+// row_id/queries come from the validated tool input at call time.
+var toolToNative = map[string]toolMapping{
+	"stories.read":                   {native: "tables_db_get_row", table: "publications"},
+	"story_plans.read":               {native: "tables_db_get_row", table: "studio_story_bibles"},
+	"media_metadata.read":            {native: "tables_db_list_rows", table: "media_assets"},
+	"community_reports.read_scoped":  {native: "tables_db_list_rows", table: "reports"},
+	"published_catalog.read":         {native: "tables_db_list_rows", table: "publications"},
+	"support_cases.read_scoped":      {native: "tables_db_list_rows", table: "support_tickets"},
+	"agent_tasks.read":               {native: "tables_db_list_rows", table: "agent_tasks"},
+}
 
 // policyDenied is the safe, non-disclosing denial the gateway returns.
 type policyDenied struct {
@@ -73,19 +91,19 @@ func (p policyDenied) Error() string { return p.Code }
 // evaluatePolicy enforces the in-process Policy Engine. It fails closed when the
 // agent is unknown, the tool is not allowlisted for the agent, or the tool has
 // no registered native mapping.
-func evaluatePolicy(agentSlug, toolId string) (nativeTool string, err error) {
+func evaluatePolicy(agentSlug, toolId string) (toolMapping, error) {
 	allowed, ok := agentAllowlist[agentSlug]
 	if !ok {
-		return "", policyDenied{"UNKNOWN_AGENT"}
+		return toolMapping{}, policyDenied{"UNKNOWN_AGENT"}
 	}
 	if !allowed[toolId] {
-		return "", policyDenied{"TOOL_NOT_ALLOWLISTED"}
+		return toolMapping{}, policyDenied{"TOOL_NOT_ALLOWLISTED"}
 	}
-	native, ok := toolToNative[toolId]
-	if !ok || native == "" {
-		return "", policyDenied{"UNREGISTERED_TOOL_MAPPING"}
+	mapping, ok := toolToNative[toolId]
+	if !ok || mapping.native == "" {
+		return toolMapping{}, policyDenied{"UNREGISTERED_TOOL_MAPPING"}
 	}
-	return native, nil
+	return mapping, nil
 }
 
 func denied(code string) GatewayOutput {

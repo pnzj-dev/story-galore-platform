@@ -53,29 +53,35 @@ func Main(ctx openruntimes.Context) openruntimes.Response {
 	}
 
 	// In-process Policy Engine: allowlist + registered tool mapping.
-	nativeTool, err := evaluatePolicy(agentSlug, in.StorygaloreToolId)
+	mapping, err := evaluatePolicy(agentSlug, in.StorygaloreToolId)
 	if err != nil {
-		emitAudit(ctx, in, agentSlug, nativeTool, false, err)
+		emitAudit(ctx, in, agentSlug, "", false, err)
 		return ctx.Res.Json(formatDenied(err))
 	}
 
 	// Invoke the registered native tool through the self-hosted MCP server.
-	client, err := newMcpClient()
+	mc, err := newMcpClient()
 	if err != nil {
-		emitAudit(ctx, in, agentSlug, nativeTool, false, err)
+		emitAudit(ctx, in, agentSlug, mapping.native, false, err)
 		return ctx.Res.Json(denied("MCP_SERVER_UNAVAILABLE"))
 	}
-	defer client.close()
+	defer mc.close()
 
 	var args map[string]interface{}
 	_ = json.Unmarshal(in.Input, &args)
-	result, err := client.call(nativeTool, args)
+	if args == nil {
+		args = map[string]interface{}{}
+	}
+	// Bind the tool to its fixed resource; the validated input supplies row_id/queries.
+	args["database_id"] = "main"
+	args["table_id"] = mapping.table
+	result, err := mc.call(mapping.native, args)
 	if err != nil {
-		emitAudit(ctx, in, agentSlug, nativeTool, false, err)
+		emitAudit(ctx, in, agentSlug, mapping.native, false, err)
 		return ctx.Res.Json(denied("MCP_TOOL_FAILURE"))
 	}
 
-	emitAudit(ctx, in, agentSlug, nativeTool, true, nil)
+	emitAudit(ctx, in, agentSlug, mapping.native, true, nil)
 
 	out := GatewayOutput{
 		Status:              "SUCCESS",

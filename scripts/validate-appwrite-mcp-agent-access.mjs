@@ -26,7 +26,7 @@ if (agents.length !== 17 || new Set(agents).size !== 17) errors.push(`expected 1
 for (const id of expected) if (!agents.includes(id)) errors.push(`missing allowlist for ${id}`);
 if (!allowlists.includes('default_decision: DENY') || !allowlists.includes('default_decision: DENY')) errors.push('deny-by-default policy missing');
 for (const token of ['VERIFIED_SELF_HOSTED_API_KEY','SELF_HOSTED_MCP_SERVER_WITH_SCOPED_API_KEY','shared_unrestricted_human_oauth_session_allowed: false','backend_authorization_required: true','appwrite_permissions_required: true','DENY_AND_AUDIT']) if (!connection.includes(token)) errors.push(`connection contract missing ${token}`);
-if (!registry.includes('status: CATALOG_CAPTURED') || !registry.includes('mappings: []')) errors.push('native tool registry must be captured with empty deny-by-default mappings until tools are registered');
+if (!registry.includes('status: CATALOG_CAPTURED') || !registry.includes('storygalore_tool_id:')) errors.push('native tool registry must be captured with registered storygalore-tool mappings');
 if (!read('docs/MCP.md').includes('Appwrite MCP connection')) errors.push('docs/MCP.md not aligned with canonical connection');
 if (!read('docs/V1_MASTER_CONTRACT.md').includes('registered Appwrite MCP connection')) errors.push('master contract not aligned');
 const functionCatalog = JSON.parse(read('backend/appwrite/functions/function-catalog.json'));

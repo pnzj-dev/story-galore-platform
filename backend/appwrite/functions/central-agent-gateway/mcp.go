@@ -14,12 +14,24 @@ import (
 var mcpServerArgs = []string{"--tablesdb", "--users", "--storage", "--functions", "--messaging"}
 
 // mcpServerEnv returns the environment for the self-hosted MCP server, sourced
-// from the gateway's own (approved secret store) variables.
+// from the gateway's own ephemeral key + endpoint (never the agent's).
 func mcpServerEnv() []string {
+	project := os.Getenv("APPWRITE_FUNCTION_PROJECT_ID")
+	if project == "" {
+		project = os.Getenv("APPWRITE_PROJECT_ID")
+	}
+	key := os.Getenv("APPWRITE_FUNCTION_API_KEY")
+	if key == "" {
+		key = os.Getenv("APPWRITE_API_KEY")
+	}
+	endpoint := os.Getenv("APPWRITE_ENDPOINT")
+	if endpoint == "" {
+		endpoint = os.Getenv("APPWRITE_FUNCTION_API_ENDPOINT")
+	}
 	return append(os.Environ(),
-		"APPWRITE_PROJECT_ID="+os.Getenv("APPWRITE_PROJECT_ID"),
-		"APPWRITE_API_KEY="+os.Getenv("APPWRITE_API_KEY"),
-		"APPWRITE_ENDPOINT="+os.Getenv("APPWRITE_ENDPOINT"),
+		"APPWRITE_PROJECT_ID="+project,
+		"APPWRITE_API_KEY="+key,
+		"APPWRITE_ENDPOINT="+endpoint,
 	)
 }
 

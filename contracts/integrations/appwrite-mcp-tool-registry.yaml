@@ -30,7 +30,28 @@ catalog_snapshot:
   note: The full Appwrite tool catalog stays internal and is searched at runtime
     via appwrite_search_tools; it is not a static exported list. StoryGalore
     registers only the specific native tool names its allowlists require.
-mappings: []
+mappings:
+  - storygalore_tool_id: stories.read
+    native_tool: tables_db_get_row
+    table: publications
+  - storygalore_tool_id: story_plans.read
+    native_tool: tables_db_get_row
+    table: studio_story_bibles
+  - storygalore_tool_id: media_metadata.read
+    native_tool: tables_db_list_rows
+    table: media_assets
+  - storygalore_tool_id: community_reports.read_scoped
+    native_tool: tables_db_list_rows
+    table: reports
+  - storygalore_tool_id: published_catalog.read
+    native_tool: tables_db_list_rows
+    table: publications
+  - storygalore_tool_id: support_cases.read_scoped
+    native_tool: tables_db_list_rows
+    table: support_tickets
+  - storygalore_tool_id: agent_tasks.read
+    native_tool: tables_db_list_rows
+    table: agent_tasks
 mapping_rule: A StoryGalore tool id is mapped to a native Appwrite MCP tool only
   after its native name, schema, scopes, side effects, permissions and tests are
   registered in this file. Never infer native tool names from labels or examples;
