@@ -59,3 +59,14 @@ mapping_rule: A StoryGalore tool id is mapped to a native Appwrite MCP tool only
   implementation time.
 block_rule: No native Appwrite MCP tool may be exposed until its name, schema,
   scopes, side effects, permissions, and tests are registered here.
+mutation_mapping_rule: Mutation StoryGalore tools (create/update/approve/delegate/
+  execute/propose) are NOT mapped to raw tables_db write operations, which would
+  bypass the `api` gateway's domain validation. They require explicitly approved
+  domain-operation adapters that delegate to the canonical `api` function
+  operations and stay fail-closed (UNREGISTERED_TOOL_MAPPING) until each adapter
+  is registered with its idempotency, approval, and audit requirements.
+runtime_note: The self-hosted mcp-server-appwrite is a Python stdio process spawned
+  by the Go gateway via `uvx`; this requires Python/uv in the gateway's Appwrite
+  function runtime. If the Go runtime lacks it, the MCP server must run as a
+  separately deployed process/service (or the gateway must delegate to the `api`
+  function directly) - pending an architecture decision.

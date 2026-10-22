@@ -71,6 +71,11 @@ type toolMapping struct {
 // toolToNative maps a stable StoryGalore tool id to its native tool + table.
 // Read tools are mapped to the generic tables_db read operations; the exact
 // row_id/queries come from the validated tool input at call time.
+//
+// Mutation tools (create/update/approve/delegate/execute/propose) are NOT mapped
+// here: raw tables_db writes would bypass the api gateway's domain validation.
+// They require domain-operation adapters (delegating to the canonical api
+// function) and stay fail-closed until each adapter is registered.
 var toolToNative = map[string]toolMapping{
 	"stories.read":                   {native: "tables_db_get_row", table: "publications"},
 	"story_plans.read":               {native: "tables_db_get_row", table: "studio_story_bibles"},
