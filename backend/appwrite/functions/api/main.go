@@ -5637,8 +5637,9 @@ func cancelNativeSubscription(ctx openruntimes.Context, cl client.Client, subscr
 // the nowpayments function.
 func cancelNowpaymentsSubscription(ctx openruntimes.Context, cl client.Client, providerSubscriptionId string) {
 	npInput := map[string]interface{}{
-		"operation": "cancel_subscription",
-		"input":     map[string]interface{}{"providerSubscriptionId": providerSubscriptionId},
+		"operation":     "cancel_subscription",
+		"serviceSecret": os.Getenv("NP_SERVICE_SECRET"),
+		"input":         map[string]interface{}{"providerSubscriptionId": providerSubscriptionId},
 	}
 	service := functions.New(cl)
 	if _, err := service.CreateExecution("nowpayments",
@@ -5792,7 +5793,8 @@ func paymentCreate(ctx openruntimes.Context, in *GatewayInput, cl client.Client)
 func delegateToNowpayments(ctx openruntimes.Context, in *GatewayInput, cl client.Client, userId string, amountMinor int, currency, payCurrency string) openruntimes.Response {
 	paymentId := idOrUUID(in.IdempotencyKey)
 	npInput := map[string]interface{}{
-		"operation": "create_payment",
+		"operation":     "create_payment",
+		"serviceSecret": os.Getenv("NP_SERVICE_SECRET"),
 		"input": map[string]interface{}{
 			"userId":      userId,
 			"amount":      float64(amountMinor) / 100.0,
@@ -5832,7 +5834,8 @@ func delegateToNowpayments(ctx openruntimes.Context, in *GatewayInput, cl client
 // NOWPayments plan/subscription and updates the row in place.
 func delegateToNowpaymentsSubscription(ctx openruntimes.Context, in *GatewayInput, cl client.Client, subscriptionId, userId, email, planId string, amount int, currency, interval string) openruntimes.Response {
 	npInput := map[string]interface{}{
-		"operation": "create_subscription",
+		"operation":     "create_subscription",
+		"serviceSecret": os.Getenv("NP_SERVICE_SECRET"),
 		"input": map[string]interface{}{
 			"userId":         userId,
 			"subscriptionId": subscriptionId,

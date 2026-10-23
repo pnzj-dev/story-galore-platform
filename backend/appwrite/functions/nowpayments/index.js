@@ -190,7 +190,15 @@ export default async ({ req, res, log, error }) => {
 
 async function handleCommand(req, res, log) {
   const body = req.bodyJson;
-  if (!body || !body.operation) {
+  // Service-to-service authorization: the command path is only reachable from
+  // the `api` gateway, which passes the shared NP_SERVICE_SECRET. Fail closed
+  // when the secret is unset or does not match. The IPN path (webhook) is
+  // instead protected by its NOWPayments signature.
+  const secret = process.env.NP_SERVICE_SECRET;
+  if (!secret || !body || body.serviceSecret !== secret) {
+    return res.json({ error: 'UNAUTHORIZED' }, 401);
+  }
+  if (!body.operation) {
     return res.json({ error: 'INVALID_OPERATION' }, 400);
   }
   switch (body.operation) {
