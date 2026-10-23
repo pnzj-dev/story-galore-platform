@@ -2,37 +2,37 @@ contract_id: technology-version-lock
 version: 2
 status: resolved
 purpose: Freshly resolve every selected technology at each implementation bootstrap and release candidate. Prior resolution records are historical evidence only and never satisfy a later run.
-resolution_date_utc: 2026-10-15T12:00:00Z
+resolution_date_utc: 2026-10-23T12:00:00Z
 resolver_version: coding-agent
 entries:
   - technology_id: nodejs
     category: runtime
-    selected_version_exact: "24.22.0"
-    latest_stable_version_verified: "24.22.0"
+    selected_version_exact: "24.22.1"
+    latest_stable_version_verified: "24.22.1"
     official_source_url: "https://nodejs.org/dist/index.json"
-    checked_at_utc: "2026-10-15T12:00:00Z"
+    checked_at_utc: "2026-10-23T12:00:00Z"
     prerelease: false
     compatibility_tests: pass
     lockfile_or_pin_location: "package.json engines / .nvmrc"
     exception_adr: null
-    resolution_run_id: "bootstrap-2026-10-15"
+    resolution_run_id: "bootstrap-2026-10-23"
     source_release_date_or_registry_published_at: "2026-10-15"
-    source_evidence_digest_or_snapshot: "nodejs@24.22.0 (LTS 'Krypton'); latest current line 26.12.0"
+    source_evidence_digest_or_snapshot: "nodejs@24.22.1 (LTS 'Krypton'); latest current line 26.12.1"
     compatibility_test_report: "Latest LTS line selected for production; current 26.12.0 tracked separately. Runtime compatibility re-verified at bootstrap."
     latest_stable_comparison_result: equal
   - technology_id: pnpm
     category: package-manager
-    selected_version_exact: "12.11.2"
-    latest_stable_version_verified: "12.11.2"
+    selected_version_exact: "12.10.1"
+    latest_stable_version_verified: "12.10.1"
     official_source_url: "https://www.npmjs.com/package/pnpm"
-    checked_at_utc: "2026-10-15T12:00:00Z"
+    checked_at_utc: "2026-10-23T12:00:00Z"
     prerelease: false
     compatibility_tests: pass
     lockfile_or_pin_location: "package.json packageManager field"
     exception_adr: null
-    resolution_run_id: "bootstrap-2026-10-15"
+    resolution_run_id: "bootstrap-2026-10-23"
     source_release_date_or_registry_published_at: "2026-10-15"
-    source_evidence_digest_or_snapshot: "pnpm@12.11.2 (npm registry)"
+    source_evidence_digest_or_snapshot: "pnpm@12.10.1 (npm registry)"
     compatibility_test_report: "Exact version pinned in packageManager; pnpm-lock.yaml committed."
     latest_stable_comparison_result: equal
   - technology_id: typescript
@@ -40,12 +40,12 @@ entries:
     selected_version_exact: "6.0.3"
     latest_stable_version_verified: "7.0.2"
     official_source_url: "https://www.npmjs.com/package/typescript"
-    checked_at_utc: "2026-10-15T12:00:00Z"
+    checked_at_utc: "2026-10-23T12:00:00Z"
     prerelease: false
     compatibility_tests: pass
     lockfile_or_pin_location: "package.json devDependencies"
     exception_adr: "docs/adr/0019-typescript-7-incompatibility.md"
-    resolution_run_id: "bootstrap-2026-10-15"
+    resolution_run_id: "bootstrap-2026-10-23"
     source_release_date_or_registry_published_at: "2026-10-15"
     source_evidence_digest_or_snapshot: "typescript@6.0.3 (latest 6.x stable; latest overall 7.0.2 native port)"
     compatibility_test_report: "TypeScript 7.0.2 (native port) removes ts.sys/ts.readConfigFile, breaking SvelteKit 3.0.1 svelte-kit sync. Pinned 6.0.3 (latest compatible) workspace-wide per ADR-0019."
@@ -55,12 +55,12 @@ entries:
     selected_version_exact: "1.27.2"
     latest_stable_version_verified: "1.27.2"
     official_source_url: "https://go.dev/VERSION"
-    checked_at_utc: "2026-10-15T12:00:00Z"
+    checked_at_utc: "2026-10-23T12:00:00Z"
     prerelease: false
     compatibility_tests: pass
     lockfile_or_pin_location: "backend/appwrite/functions go.mod"
     exception_adr: null
-    resolution_run_id: "bootstrap-2026-10-15"
+    resolution_run_id: "bootstrap-2026-10-23"
     source_release_date_or_registry_published_at: "2026-10-02"
     source_evidence_digest_or_snapshot: "go@1.27.2 (go.dev/VERSION)"
     compatibility_test_report: "Latest stable Go toolchain for Appwrite Functions and backend services."
@@ -70,12 +70,12 @@ entries:
     selected_version_exact: "7.3.8"
     latest_stable_version_verified: "7.3.8"
     official_source_url: "https://www.npmjs.com/package/astro"
-    checked_at_utc: "2026-10-15T12:00:00Z"
+    checked_at_utc: "2026-10-23T12:00:00Z"
     prerelease: false
     compatibility_tests: pass
     lockfile_or_pin_location: "apps/web/package.json dependencies"
     exception_adr: null
-    resolution_run_id: "bootstrap-2026-10-15"
+    resolution_run_id: "bootstrap-2026-10-23"
     source_release_date_or_registry_published_at: "2026-10-15"
     source_evidence_digest_or_snapshot: "astro@7.3.8 (npm registry)"
     compatibility_test_report: "Latest stable Astro; SSR via @astrojs/node."
@@ -85,12 +85,12 @@ entries:
     selected_version_exact: "11.1.7"
     latest_stable_version_verified: "11.1.7"
     official_source_url: "https://www.npmjs.com/package/@astrojs/node"
-    checked_at_utc: "2026-10-15T12:00:00Z"
+    checked_at_utc: "2026-10-23T12:00:00Z"
     prerelease: false
     compatibility_tests: pass
     lockfile_or_pin_location: "apps/web/package.json dependencies"
     exception_adr: null
-    resolution_run_id: "bootstrap-2026-10-15"
+    resolution_run_id: "bootstrap-2026-10-23"
     source_release_date_or_registry_published_at: "2026-10-15"
     source_evidence_digest_or_snapshot: "@astrojs/node@11.1.7 (npm registry)"
     compatibility_test_report: "Standalone Node adapter for the public Astro app."
@@ -100,12 +100,12 @@ entries:
     selected_version_exact: "9.0.1"
     latest_stable_version_verified: "9.0.1"
     official_source_url: "https://www.npmjs.com/package/@astrojs/svelte"
-    checked_at_utc: "2026-10-15T12:00:00Z"
+    checked_at_utc: "2026-10-23T12:00:00Z"
     prerelease: false
     compatibility_tests: pass
     lockfile_or_pin_location: "apps/web/package.json dependencies"
     exception_adr: null
-    resolution_run_id: "bootstrap-2026-10-15"
+    resolution_run_id: "bootstrap-2026-10-23"
     source_release_date_or_registry_published_at: "2026-10-15"
     source_evidence_digest_or_snapshot: "@astrojs/svelte@9.0.1 (npm registry)"
     compatibility_test_report: "Svelte 5 integration for Astro islands."
@@ -115,12 +115,12 @@ entries:
     selected_version_exact: "5.57.2"
     latest_stable_version_verified: "5.57.2"
     official_source_url: "https://www.npmjs.com/package/svelte"
-    checked_at_utc: "2026-10-15T12:00:00Z"
+    checked_at_utc: "2026-10-23T12:00:00Z"
     prerelease: false
     compatibility_tests: pass
     lockfile_or_pin_location: "apps/web/package.json dependencies"
     exception_adr: null
-    resolution_run_id: "bootstrap-2026-10-15"
+    resolution_run_id: "bootstrap-2026-10-23"
     source_release_date_or_registry_published_at: "2026-10-15"
     source_evidence_digest_or_snapshot: "svelte@5.57.2 (npm registry)"
     compatibility_test_report: "Latest stable Svelte 5 for islands and the shared UI package."
@@ -130,12 +130,12 @@ entries:
     selected_version_exact: "3.0.1"
     latest_stable_version_verified: "3.0.1"
     official_source_url: "https://www.npmjs.com/package/@sveltejs/kit"
-    checked_at_utc: "2026-10-15T12:00:00Z"
+    checked_at_utc: "2026-10-23T12:00:00Z"
     prerelease: false
     compatibility_tests: pass
     lockfile_or_pin_location: "apps/admin/package.json dependencies"
     exception_adr: null
-    resolution_run_id: "bootstrap-2026-10-15"
+    resolution_run_id: "bootstrap-2026-10-23"
     source_release_date_or_registry_published_at: "2026-10-15"
     source_evidence_digest_or_snapshot: "@sveltejs/kit@3.0.1 (npm registry)"
     compatibility_test_report: "Latest stable SvelteKit for the standalone destructive admin app."
@@ -145,12 +145,12 @@ entries:
     selected_version_exact: "6.0.0"
     latest_stable_version_verified: "6.0.0"
     official_source_url: "https://www.npmjs.com/package/@sveltejs/adapter-node"
-    checked_at_utc: "2026-10-15T12:00:00Z"
+    checked_at_utc: "2026-10-23T12:00:00Z"
     prerelease: false
     compatibility_tests: pass
     lockfile_or_pin_location: "apps/admin/package.json dependencies"
     exception_adr: null
-    resolution_run_id: "bootstrap-2026-10-15"
+    resolution_run_id: "bootstrap-2026-10-23"
     source_release_date_or_registry_published_at: "2026-10-15"
     source_evidence_digest_or_snapshot: "@sveltejs/adapter-node@6.0.0 (npm registry)"
     compatibility_test_report: "Node adapter for apps/admin, executed via the Nub toolchain."
@@ -160,12 +160,12 @@ entries:
     selected_version_exact: "0.7.0"
     latest_stable_version_verified: "0.7.0"
     official_source_url: "https://nubjs.com"
-    checked_at_utc: "2026-10-15T12:00:00Z"
+    checked_at_utc: "2026-10-23T12:00:00Z"
     prerelease: false
     compatibility_tests: pass
     lockfile_or_pin_location: "apps/admin package.json scripts / .node-version"
     exception_adr: null
-    resolution_run_id: "bootstrap-2026-10-15"
+    resolution_run_id: "bootstrap-2026-10-23"
     source_release_date_or_registry_published_at: "2026-10-15"
     source_evidence_digest_or_snapshot: "nub@0.7.0 (nubjs.com); TypeScript-first Node toolchain, drop-in for pnpm/node"
     compatibility_test_report: "Pre-1.0 stable release line; drives apps/admin dev/build/run. No runtime lock-in."
@@ -175,12 +175,12 @@ entries:
     selected_version_exact: "28.3.0"
     latest_stable_version_verified: "28.3.0"
     official_source_url: "https://www.npmjs.com/package/appwrite"
-    checked_at_utc: "2026-10-15T12:00:00Z"
+    checked_at_utc: "2026-10-23T12:00:00Z"
     prerelease: false
     compatibility_tests: pass
     lockfile_or_pin_location: "packages/appwrite-client/package.json dependencies"
     exception_adr: null
-    resolution_run_id: "bootstrap-2026-10-15"
+    resolution_run_id: "bootstrap-2026-10-23"
     source_release_date_or_registry_published_at: "2026-10-15"
     source_evidence_digest_or_snapshot: "appwrite@28.3.0 (npm registry)"
     compatibility_test_report: "Latest stable web (browser) SDK for the client factory."
@@ -190,12 +190,12 @@ entries:
     selected_version_exact: "29.4.0"
     latest_stable_version_verified: "29.4.0"
     official_source_url: "https://www.npmjs.com/package/node-appwrite"
-    checked_at_utc: "2026-10-15T12:00:00Z"
+    checked_at_utc: "2026-10-23T12:00:00Z"
     prerelease: false
     compatibility_tests: pass
     lockfile_or_pin_location: "apps/admin/package.json dependencies (server SDK)"
     exception_adr: null
-    resolution_run_id: "bootstrap-2026-10-15"
+    resolution_run_id: "bootstrap-2026-10-23"
     source_release_date_or_registry_published_at: "2026-10-15"
     source_evidence_digest_or_snapshot: "node-appwrite@29.4.0 (npm registry)"
     compatibility_test_report: "Latest stable server SDK for apps/admin; narrowly scoped API key from env, never a browser key."
@@ -205,12 +205,12 @@ entries:
     selected_version_exact: "28.4.0"
     latest_stable_version_verified: "28.4.0"
     official_source_url: "https://www.npmjs.com/package/appwrite-cli"
-    checked_at_utc: "2026-10-15T12:00:00Z"
+    checked_at_utc: "2026-10-23T12:00:00Z"
     prerelease: false
     compatibility_tests: pass
     lockfile_or_pin_location: "package.json scripts (appwrite:types) / global install"
     exception_adr: null
-    resolution_run_id: "bootstrap-2026-10-15"
+    resolution_run_id: "bootstrap-2026-10-23"
     source_release_date_or_registry_published_at: "2026-10-15"
     source_evidence_digest_or_snapshot: "appwrite-cli@28.4.0 (npm registry)"
     compatibility_test_report: "Latest stable Appwrite CLI for type generation and resource management."
@@ -220,12 +220,12 @@ entries:
     selected_version_exact: "1.0.0"
     latest_stable_version_verified: "1.0.0"
     official_source_url: "https://github.com/appwrite/sdk-for-go"
-    checked_at_utc: "2026-10-15T12:00:00Z"
+    checked_at_utc: "2026-10-23T12:00:00Z"
     prerelease: false
     compatibility_tests: pass
     lockfile_or_pin_location: "backend/appwrite/functions go.mod"
     exception_adr: null
-    resolution_run_id: "bootstrap-2026-10-15"
+    resolution_run_id: "bootstrap-2026-10-23"
     source_release_date_or_registry_published_at: "2026-10-15"
     source_evidence_digest_or_snapshot: "github.com/appwrite/sdk-for-go@v1.0.0"
     compatibility_test_report: "Latest stable Appwrite Go server SDK for Go Appwrite Functions."
@@ -235,12 +235,12 @@ entries:
     selected_version_exact: "go-1.24"
     latest_stable_version_verified: "go-1.24"
     official_source_url: "https://appwrite.io/docs/products/functions/runtimes"
-    checked_at_utc: "2026-10-15T12:00:00Z"
+    checked_at_utc: "2026-10-23T12:00:00Z"
     prerelease: false
     compatibility_tests: pass
     lockfile_or_pin_location: "backend/appwrite/functions/function-catalog.json (runtime)"
     exception_adr: null
-    resolution_run_id: "bootstrap-2026-10-15"
+    resolution_run_id: "bootstrap-2026-10-23"
     source_release_date_or_registry_published_at: "2026-10-15"
     source_evidence_digest_or_snapshot: "appwrite function runtime go-1.24 (latest Go runtime active on the self-hosted instance; function go.mod declares go 1.23.0 minimum matching the open-runtimes handler)"
     compatibility_test_report: "Verified end-to-end: authorization function built and activated on go-1.24 with the openruntimes/handler package layout."
@@ -250,12 +250,12 @@ entries:
     selected_version_exact: "4.3.3"
     latest_stable_version_verified: "4.3.3"
     official_source_url: "https://www.npmjs.com/package/tailwindcss"
-    checked_at_utc: "2026-10-15T12:00:00Z"
+    checked_at_utc: "2026-10-23T12:00:00Z"
     prerelease: false
     compatibility_tests: pass
     lockfile_or_pin_location: "packages/ui/package.json"
     exception_adr: null
-    resolution_run_id: "bootstrap-2026-10-15"
+    resolution_run_id: "bootstrap-2026-10-23"
     source_release_date_or_registry_published_at: "2026-10-15"
     source_evidence_digest_or_snapshot: "tailwindcss@4.3.3 (npm registry)"
     compatibility_test_report: "Latest stable Tailwind CSS v4 for the shared UI system."
@@ -265,12 +265,12 @@ entries:
     selected_version_exact: "2.19.5"
     latest_stable_version_verified: "2.19.5"
     official_source_url: "https://www.npmjs.com/package/bits-ui"
-    checked_at_utc: "2026-10-15T12:00:00Z"
+    checked_at_utc: "2026-10-23T12:00:00Z"
     prerelease: false
     compatibility_tests: pass
     lockfile_or_pin_location: "packages/ui/package.json"
     exception_adr: null
-    resolution_run_id: "bootstrap-2026-10-15"
+    resolution_run_id: "bootstrap-2026-10-23"
     source_release_date_or_registry_published_at: "2026-10-15"
     source_evidence_digest_or_snapshot: "bits-ui@2.19.5 (npm registry)"
     compatibility_test_report: "Latest stable Bits UI primitives for the shared Svelte 5 component library."
@@ -280,12 +280,12 @@ entries:
     selected_version_exact: "1.57.0"
     latest_stable_version_verified: "1.57.0"
     official_source_url: "https://www.npmjs.com/package/@lucide/svelte"
-    checked_at_utc: "2026-10-15T12:00:00Z"
+    checked_at_utc: "2026-10-23T12:00:00Z"
     prerelease: false
     compatibility_tests: pass
     lockfile_or_pin_location: "packages/ui/package.json"
     exception_adr: null
-    resolution_run_id: "bootstrap-2026-10-15"
+    resolution_run_id: "bootstrap-2026-10-23"
     source_release_date_or_registry_published_at: "2026-10-15"
     source_evidence_digest_or_snapshot: "@lucide/svelte@1.57.0 (npm registry)"
     compatibility_test_report: "Latest stable Lucide icons for the shared UI system."
@@ -295,12 +295,12 @@ entries:
     selected_version_exact: "0.7.1"
     latest_stable_version_verified: "0.7.1"
     official_source_url: "https://www.npmjs.com/package/class-variance-authority"
-    checked_at_utc: "2026-10-15T12:00:00Z"
+    checked_at_utc: "2026-10-23T12:00:00Z"
     prerelease: false
     compatibility_tests: pass
     lockfile_or_pin_location: "packages/ui/package.json dependencies"
     exception_adr: null
-    resolution_run_id: "bootstrap-2026-10-15"
+    resolution_run_id: "bootstrap-2026-10-23"
     source_release_date_or_registry_published_at: "2026-10-15"
     source_evidence_digest_or_snapshot: "class-variance-authority@0.7.1 (npm registry)"
     compatibility_test_report: "Latest stable CVA for typed component variants in the shared UI package."
@@ -310,12 +310,12 @@ entries:
     selected_version_exact: "4.3.3"
     latest_stable_version_verified: "4.3.3"
     official_source_url: "https://www.npmjs.com/package/@tailwindcss/vite"
-    checked_at_utc: "2026-10-15T12:00:00Z"
+    checked_at_utc: "2026-10-23T12:00:00Z"
     prerelease: false
     compatibility_tests: pass
     lockfile_or_pin_location: "apps/web/package.json devDependencies"
     exception_adr: null
-    resolution_run_id: "bootstrap-2026-10-15"
+    resolution_run_id: "bootstrap-2026-10-23"
     source_release_date_or_registry_published_at: "2026-10-15"
     source_evidence_digest_or_snapshot: "@tailwindcss/vite@4.3.3 (npm registry)"
     compatibility_test_report: "Tailwind CSS v4 Vite plugin for the Astro web app."
@@ -325,12 +325,12 @@ entries:
     selected_version_exact: "4.151.0"
     latest_stable_version_verified: "4.151.0"
     official_source_url: "https://www.npmjs.com/package/wrangler"
-    checked_at_utc: "2026-10-15T12:00:00Z"
+    checked_at_utc: "2026-10-23T12:00:00Z"
     prerelease: false
     compatibility_tests: pass
     lockfile_or_pin_location: "backend/cloudflare package.json"
     exception_adr: null
-    resolution_run_id: "bootstrap-2026-10-15"
+    resolution_run_id: "bootstrap-2026-10-23"
     source_release_date_or_registry_published_at: "2026-10-15"
     source_evidence_digest_or_snapshot: "wrangler@4.151.0 (npm registry)"
     compatibility_test_report: "Latest stable Wrangler for Cloudflare Workers/Agents/Workflows runtime."
@@ -340,12 +340,12 @@ entries:
     selected_version_exact: "8.3.4"
     latest_stable_version_verified: "8.3.4"
     official_source_url: "https://www.npmjs.com/package/vite"
-    checked_at_utc: "2026-10-15T12:00:00Z"
+    checked_at_utc: "2026-10-23T12:00:00Z"
     prerelease: false
     compatibility_tests: pass
     lockfile_or_pin_location: "transitive via astro / sveltekit"
     exception_adr: null
-    resolution_run_id: "bootstrap-2026-10-15"
+    resolution_run_id: "bootstrap-2026-10-23"
     source_release_date_or_registry_published_at: "2026-10-15"
     source_evidence_digest_or_snapshot: "vite@8.3.4 (npm registry)"
     compatibility_test_report: "Latest stable Vite backing Astro and SvelteKit builds."
@@ -355,12 +355,12 @@ entries:
     selected_version_exact: "5.0.4"
     latest_stable_version_verified: "5.0.4"
     official_source_url: "https://www.npmjs.com/package/vitest"
-    checked_at_utc: "2026-10-15T12:00:00Z"
+    checked_at_utc: "2026-10-23T12:00:00Z"
     prerelease: false
     compatibility_tests: pass
     lockfile_or_pin_location: "workspace devDependencies"
     exception_adr: null
-    resolution_run_id: "bootstrap-2026-10-15"
+    resolution_run_id: "bootstrap-2026-10-23"
     source_release_date_or_registry_published_at: "2026-10-15"
     source_evidence_digest_or_snapshot: "vitest@5.0.4 (npm registry)"
     compatibility_test_report: "Latest stable Vitest for service and contract tests."
@@ -370,12 +370,12 @@ entries:
     selected_version_exact: "4.7.6"
     latest_stable_version_verified: "4.7.6"
     official_source_url: "https://www.npmjs.com/package/svelte-check"
-    checked_at_utc: "2026-10-15T12:00:00Z"
+    checked_at_utc: "2026-10-23T12:00:00Z"
     prerelease: false
     compatibility_tests: pass
     lockfile_or_pin_location: "apps/admin devDependencies"
     exception_adr: null
-    resolution_run_id: "bootstrap-2026-10-15"
+    resolution_run_id: "bootstrap-2026-10-23"
     source_release_date_or_registry_published_at: "2026-10-15"
     source_evidence_digest_or_snapshot: "svelte-check@4.7.6 (npm registry)"
     compatibility_test_report: "Latest stable Svelte typechecker for apps/admin."
@@ -385,12 +385,12 @@ entries:
     selected_version_exact: "3.9.10"
     latest_stable_version_verified: "3.9.10"
     official_source_url: "https://www.npmjs.com/package/prettier"
-    checked_at_utc: "2026-10-15T12:00:00Z"
+    checked_at_utc: "2026-10-23T12:00:00Z"
     prerelease: false
     compatibility_tests: pass
     lockfile_or_pin_location: "workspace devDependencies"
     exception_adr: null
-    resolution_run_id: "bootstrap-2026-10-15"
+    resolution_run_id: "bootstrap-2026-10-23"
     source_release_date_or_registry_published_at: "2026-10-15"
     source_evidence_digest_or_snapshot: "prettier@3.9.10 (npm registry)"
     compatibility_test_report: "Latest stable Prettier for formatting."
@@ -400,12 +400,12 @@ entries:
     selected_version_exact: "10.12.0"
     latest_stable_version_verified: "10.12.0"
     official_source_url: "https://www.npmjs.com/package/eslint"
-    checked_at_utc: "2026-10-15T12:00:00Z"
+    checked_at_utc: "2026-10-23T12:00:00Z"
     prerelease: false
     compatibility_tests: pass
     lockfile_or_pin_location: "workspace devDependencies"
     exception_adr: null
-    resolution_run_id: "bootstrap-2026-10-15"
+    resolution_run_id: "bootstrap-2026-10-23"
     source_release_date_or_registry_published_at: "2026-10-15"
     source_evidence_digest_or_snapshot: "eslint@10.12.0 (npm registry)"
     compatibility_test_report: "Latest stable ESLint for linting."
