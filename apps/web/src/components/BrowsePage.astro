@@ -1,7 +1,8 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import { MediaCard, mediaHref } from "@storygalore/ui";
-import { fetchMediaByType } from "@/lib/gateway";
+import { fetchMediaByType, fetchAd } from "@/lib/gateway";
+import { getTranslations } from "@/i18n";
 
 interface Props {
   title: string;
@@ -11,13 +12,24 @@ interface Props {
 }
 
 const { title, description, type, format } = Astro.props;
+const { t } = getTranslations(Astro.currentLocale);
 const items = await fetchMediaByType(type, format);
+const ad = await fetchAd("DISCOVERY_FEED_BETWEEN_ITEMS", Astro.locals.user?.$id ?? "");
 ---
 
 <Layout title={title}>
   <main class="mx-auto max-w-[1400px] px-12 py-12">
     <h1 class="text-3xl font-bold">{title}</h1>
     <p class="mt-2 text-foreground-muted">{description}</p>
+
+    {ad?.url && (
+      <div class="mt-6 rounded-md border border-border bg-surface/40 p-4">
+        <span class="block pb-2 text-xs uppercase tracking-widest text-foreground-muted">{t("home.sponsored")}</span>
+        <a href="#" class="block overflow-hidden rounded-sm border border-border">
+          <img src={ad.url} alt={ad.name ?? "Sponsored"} class="h-32 w-full object-cover" />
+        </a>
+      </div>
+    )}
 
     {
       items.length > 0 ? (

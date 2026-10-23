@@ -289,6 +289,7 @@ export default {
   "admin.payments": "Payments",
   "admin.subscriptions": "Subscriptions",
   "admin.ads": "Ads & Monetization",
+  "admin.support": "Support",
   "admin.comingSoon": "Coming soon",
   "admin.aiOperations": "AI Operations",
   "admin.storage": "Storage",

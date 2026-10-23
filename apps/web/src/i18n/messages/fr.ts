@@ -289,6 +289,7 @@ const fr = {
   "admin.payments": "Paiements",
   "admin.subscriptions": "Abonnements",
   "admin.ads": "Publicité",
+  "admin.support": "Support",
   "admin.comingSoon": "Bientôt",
   "admin.aiOperations": "Opérations IA",
   "admin.storage": "Stockage",

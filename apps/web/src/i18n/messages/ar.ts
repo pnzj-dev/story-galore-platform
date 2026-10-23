@@ -288,6 +288,7 @@ const ar = {
   "admin.payments": "المدفوعات",
   "admin.subscriptions": "الاشتراكات",
   "admin.ads": "الإعلانات",
+  "admin.support": "الدعم",
   "admin.comingSoon": "قريبًا",
   "admin.aiOperations": "عمليات الذكاء الاصطناعي",
   "admin.storage": "التخزين",

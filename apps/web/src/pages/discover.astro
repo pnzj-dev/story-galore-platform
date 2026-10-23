@@ -1,7 +1,10 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import { MediaCard, mediaHref } from "@storygalore/ui";
-import { fetchPublications } from "@/lib/gateway";
+import { fetchPublications, fetchAd } from "@/lib/gateway";
+import { getTranslations } from "@/i18n";
+
+const { t } = getTranslations(Astro.currentLocale);
 
 const genre = Astro.url.searchParams.get("genre");
 const heading = genre ? `Browse: ${genre.replace(/-/g, " ")}` : "Discover";
@@ -10,12 +13,22 @@ const heading = genre ? `Browse: ${genre.replace(/-/g, " ")}` : "Discover";
 // taxonomy (contracts/domain/media-catalog-taxonomy.yaml). The `genre` param is
 // surfaced in the heading for now.
 const items = await fetchPublications("trending");
+const ad = await fetchAd("DISCOVERY_FEED_BETWEEN_ITEMS", Astro.locals.user?.$id ?? "");
 ---
 
 <Layout title={heading}>
   <main class="mx-auto max-w-[1400px] px-12 py-12">
     <h1 class="text-3xl font-bold capitalize">{heading}</h1>
     <p class="mt-2 text-foreground-muted">Explore stories across every medium.</p>
+
+    {ad?.url && (
+      <div class="mt-6 rounded-md border border-border bg-surface/40 p-4">
+        <span class="block pb-2 text-xs uppercase tracking-widest text-foreground-muted">{t("home.sponsored")}</span>
+        <a href="#" class="block overflow-hidden rounded-sm border border-border">
+          <img src={ad.url} alt={ad.name ?? "Sponsored"} class="h-32 w-full object-cover" />
+        </a>
+      </div>
+    )}
 
     {items.length > 0 ? (
       <div class="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
