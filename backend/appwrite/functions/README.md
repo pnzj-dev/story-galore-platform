@@ -67,7 +67,9 @@ notifications, ads, media, recommendations, audit, cleanup, etc.) rather than
 delegating to per-domain functions. The catalog therefore marks the other
 domain functions `CONSOLIDATED_INTO_API_GATEWAY` — their declared
 responsibilities are implemented inside the `api` gateway, and the scaffold
-functions must not be treated as a separate runtime path.
+functions must not be treated as a separate runtime path. Those scaffold
+functions are **fail-closed stubs**: they return `POLICY_ENGINE_NOT_IMPLEMENTED`
+and perform no domain work.
 
 Exceptions (implemented as their own deployables):
 

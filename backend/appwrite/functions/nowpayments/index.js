@@ -11,10 +11,10 @@ import { NowPaymentsSDK } from '@nowpaymentsio/nowpayments-sdk-nodejs';
 const DATABASE_ID = 'main';
 const PAYMENTS_TABLE = 'payments';
 const SUBSCRIPTIONS_TABLE = 'subscriptions';
+// APPWRITE_FUNCTION_API_ENDPOINT is always set by the Appwrite runtime; no
+// hardcoded fallback (fail closed if both are unset).
 const APPWRITE_ENDPOINT =
-  process.env.APPWRITE_ENDPOINT ||
-  process.env.APPWRITE_FUNCTION_API_ENDPOINT ||
-  'http://187.126.0.227/v1';
+  process.env.APPWRITE_ENDPOINT || process.env.APPWRITE_FUNCTION_API_ENDPOINT;
 const NP_API_BASE = process.env.NOWPAYMENTS_API_BASE || 'https://api.nowpayments.io/v1';
 const AUTH_TABLE = 'provider_auth_tokens';
 // Conservative TTL for the NOWPayments Bearer JWT (short-lived).

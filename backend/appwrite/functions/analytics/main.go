@@ -23,7 +23,7 @@ func Main(ctx openruntimes.Context) openruntimes.Response {
 	service := tablesdb.New(cl)
 
 	trigger := ctx.Req.Headers["x-appwrite-trigger"]
-	ctx.Log("analytics: processing", "trigger="+trigger, "method="+ctx.Req.Method, "endpoint="+os.Getenv("APPWRITE_FUNCTION_API_ENDPOINT"), "project="+os.Getenv("APPWRITE_FUNCTION_PROJECT_ID"))
+	ctx.Log("analytics: processing", "trigger="+trigger, "method="+ctx.Req.Method)
 
 	now30 := time.Now().UTC().Add(-30 * 24 * time.Hour).Format(time.RFC3339Nano)
 
