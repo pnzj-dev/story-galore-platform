@@ -99,6 +99,7 @@ function kindFor(t: string): "video" | "audio" | "post" {
                       client:load
                       publicationId={storyId}
                       saved={savedIds.has(storyId)}
+                      signedIn={Boolean(actorId)}
                       saveLabel={t("library.save")}
                       savedLabel={t("library.saved")}
                     />

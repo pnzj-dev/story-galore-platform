@@ -223,6 +223,14 @@ export default {
   "media.post": "Post",
   "media.shorts": "Shorts",
   "media.noShorts": "No shorts yet",
+  "media.play": "Play",
+  "media.resumeFrom": "Resume from {time}",
+  "media.share": "Share",
+  "media.related": "Related Stories",
+  "media.episodes": "Episodes",
+  "media.season": "Season {n}",
+  "media.myList": "+ My List",
+  "media.copied": "Link copied",
 
   // Comments
   "comments.title": "Comments",

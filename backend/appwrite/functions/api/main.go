@@ -1794,6 +1794,20 @@ func strTime(v interface{}) *time.Time {
 	return &t
 }
 
+// yearFromPublishedAt extracts the calendar year from an ISO 8601 timestamp
+// (metadata only; returns 0 when unparseable or absent).
+func yearFromPublishedAt(v interface{}) int {
+	s, ok := v.(string)
+	if !ok || s == "" {
+		return 0
+	}
+	t, err := time.Parse(time.RFC3339Nano, s)
+	if err != nil {
+		return 0
+	}
+	return t.Year()
+}
+
 func hasAdFreeSubscription(cl client.Client, userId string) bool {
 	service := tablesdb.New(cl)
 	list, err := service.ListRows(databaseID, "subscriptions", service.WithListRowsQueries([]string{
@@ -6636,6 +6650,7 @@ func publicationGet(ctx openruntimes.Context, in *GatewayInput, cl client.Client
 		action = "STREAM"
 	}
 	media := make([]map[string]interface{}, 0)
+	totalDuration := 0
 	for i, assetId := range stringSlice(pm["mediaAssetIds"]) {
 		decision := authorizeMediaDelivery(cl, assetId, action, actorId)
 		entry := map[string]interface{}{
@@ -6648,6 +6663,7 @@ func publicationGet(ctx openruntimes.Context, in *GatewayInput, cl client.Client
 		if decision.Allowed {
 			entry["url"] = decision.URL
 		}
+		totalDuration += decision.DurationMs
 		media = append(media, entry)
 	}
 	// Do not leak internal fields (raw asset ids + project id) in the public
@@ -6660,6 +6676,8 @@ func publicationGet(ctx openruntimes.Context, in *GatewayInput, cl client.Client
 		"entitled":    entitled,
 		"accessClass": accessClass,
 		"coverUrl":    resolveCoverURL(cl, input.PublicationId, accessClass),
+		"year":        yearFromPublishedAt(pm["publishedAt"]),
+		"durationMs":  totalDuration,
 	}
 	if creatorId, ok := pm["creatorId"].(string); ok && creatorId != "" {
 		out["creatorName"] = resolveCreatorName(cl, creatorId)
@@ -7503,11 +7521,15 @@ func seriesEpisodes(ctx openruntimes.Context, in *GatewayInput, cl client.Client
 		if !ok {
 			continue
 		}
+		episodeId, _ := row["$id"].(string)
+		accessClass, _ := row["accessClass"].(string)
 		episode := map[string]interface{}{
-			"publicationId": row["$id"],
+			"publicationId": episodeId,
 			"title":         row["title"],
 			"episodeId":     row["episodeId"],
 			"episodeNumber": row["episodeNumber"],
+			// Cover thumbnail is metadata; exposed even when delivery is gated.
+			"coverUrl": resolveCoverURL(cl, episodeId, accessClass),
 		}
 		pubType, _ := row["type"].(string)
 		action := "VIEW"
@@ -7516,6 +7538,10 @@ func seriesEpisodes(ctx openruntimes.Context, in *GatewayInput, cl client.Client
 		}
 		for _, assetId := range stringSlice(row["mediaAssetIds"]) {
 			decision := authorizeMediaDelivery(cl, assetId, action, actorId)
+			// Duration is metadata; exposed even when delivery is gated.
+			if decision.DurationMs != 0 {
+				episode["durationMs"] = decision.DurationMs
+			}
 			if decision.Allowed {
 				episode["mediaId"] = assetId
 				episode["url"] = decision.URL

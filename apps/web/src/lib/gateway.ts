@@ -439,12 +439,16 @@ export interface PublicationDetail {
     accessClass?: string;
     creatorId?: string;
     seriesId?: string;
+    rating?: number;
+    genres?: string[];
   };
   media: MediaDeliveryItem[];
   entitled: boolean;
   accessClass?: string;
   coverUrl?: string;
   creatorName?: string;
+  year?: number;
+  durationMs?: number;
 }
 
 export interface SeriesEpisode {
@@ -455,6 +459,8 @@ export interface SeriesEpisode {
   mediaId?: string;
   url?: string;
   durationMs?: number;
+  coverUrl?: string;
+  allowed?: boolean;
 }
 
 /** Fetch the ordered, authorized episodes of a series for sequential playback. */

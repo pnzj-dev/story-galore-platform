@@ -4,10 +4,11 @@ import VideoDetail from "@/components/VideoDetail.svelte";
 import Comments from "@/components/Comments.svelte";
 import SubscribeUpsell from "@/components/SubscribeUpsell.astro";
 import SaveButton from "@/components/SaveButton.svelte";
-import { ImageViewer } from "@storygalore/ui";
+import ShareButton from "@/components/ShareButton.svelte";
+import { ImageViewer, MediaRail } from "@storygalore/ui";
 import type { PlaylistItem } from "@storygalore/ui";
-import { fetchSeriesEpisodes, fetchMediaProgress, fetchComments, fetchSavedPublicationIds } from "@/lib/gateway";
-import type { PublicationDetail } from "@/lib/gateway";
+import { fetchSeriesEpisodes, fetchMediaProgress, fetchComments, fetchSavedPublicationIds, fetchRecommendations } from "@/lib/gateway";
+import type { PublicationDetail, SeriesEpisode } from "@/lib/gateway";
 import { getTranslations } from "@/i18n";
 
 const { t } = getTranslations(Astro.currentLocale);
@@ -20,12 +21,13 @@ interface Props {
 
 const { detail, kind, title } = Astro.props;
 const pub = detail?.publication;
+const pubId = pub?.$id ?? "";
 const allowed = (detail?.media ?? []).filter((m) => m.allowed && m.url);
 const locked = Boolean(detail && !detail.entitled);
 const cover = detail?.coverUrl;
 const rating =
-  pub?.contentRating && pub!.contentRating !== "ALL_AGES"
-    ? pub!.contentRating === "ADULT_18_PLUS"
+  pub?.contentRating && pub.contentRating !== "ALL_AGES"
+    ? pub.contentRating === "ADULT_18_PLUS"
       ? t("studio.editor.rating.adult")
       : t("studio.editor.rating.teen")
     : null;
@@ -33,14 +35,31 @@ const rating =
 // "Continue watching" cards land on ?autoplay=1 to start playback immediately.
 const autoplay = Astro.url.searchParams.get("autoplay") === "1";
 
-// Build the ordered video playlist: series episodes (cross-publication) or
-// parts within this publication, plus the resume index from saved progress.
+/** Format milliseconds as "2h 14m", "48m", or "30s". */
+function formatDuration(ms: number): string {
+  if (!ms || ms <= 0) return "";
+  const s = Math.floor(ms / 1000);
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const rem = s % 60;
+  if (h > 0) return `${h}h ${String(m).padStart(2, "0")}m`;
+  if (m > 0) return `${m}m`;
+  return `${rem}s`;
+}
+
 const userId = Astro.locals.user?.$id ?? "";
-const pubId = pub?.$id ?? "";
 const savedIds = userId ? await fetchSavedPublicationIds(userId) : new Set<string>();
+const progress = userId && pubId ? await fetchMediaProgress(userId, pubId) : { position: 0, pageId: "" };
+const resumeLabel = progress.position > 0 ? formatDuration(progress.position * 1000) : "";
+
+const year = detail?.year;
+const durationLabel = formatDuration(detail?.durationMs ?? 0);
+const qualityRating = pub?.rating;
+const genres = pub?.genres ?? [];
+
+// Build the ordered video playlist (series episodes or parts) for the player.
 let videoItems: PlaylistItem[] = [];
 let videoInitialIndex = 0;
-let videoInitialTime = 0;
 if (kind === "video" && pubId) {
   if (pub?.seriesId) {
     const episodes = await fetchSeriesEpisodes(pub.seriesId, userId);
@@ -63,18 +82,17 @@ if (kind === "video" && pubId) {
       label: m.label ?? `${t("media.partLabel")} ${(m.position ?? i) + 1}`,
       src: m.url!,
     }));
-    if (userId) {
-      const progress = await fetchMediaProgress(userId, pubId);
-      if (progress.pageId) {
-        const idx = videoItems.findIndex((it) => it.mediaId === progress.pageId);
-        if (idx >= 0) {
-          videoInitialIndex = idx;
-          videoInitialTime = progress.position;
-        }
-      }
-    }
   }
 }
+
+// Episode panel (video, series) shows metadata even when delivery is gated.
+let episodes: SeriesEpisode[] = [];
+if (kind === "video" && pub?.seriesId && pubId) {
+  episodes = await fetchSeriesEpisodes(pub.seriesId, userId);
+}
+
+// Related rail below the fold.
+const related = pubId ? await fetchRecommendations(pubId) : [];
 
 const comments = pubId ? await fetchComments(userId, "PUBLICATION", pubId) : [];
 const commentLabels = {
@@ -115,6 +133,9 @@ const commentLabels = {
               <h1 class="font-serif text-4xl font-bold leading-tight tracking-tight">{pub!.title}</h1>
 
               <div class="mt-3 flex flex-wrap items-center gap-2 text-[13px] text-foreground-muted">
+                {qualityRating != null && (
+                  <span class="rounded-full border border-border bg-surface px-2.5 py-0.5 text-[11px] font-semibold text-yellow-500">★ {qualityRating}</span>
+                )}
                 {rating && (
                   <span class="rounded-full border border-success px-2.5 py-0.5 text-[11px] font-semibold text-success">
                     {rating}
@@ -125,72 +146,135 @@ const commentLabels = {
                     {pub!.format.replace(/_/g, " ")}
                   </span>
                 )}
-                {detail.creatorName && <span>{detail.creatorName}</span>}
+                {year ? <span>{year}</span> : null}
+                {durationLabel ? <span>·</span> : null}
+                {durationLabel ? <span>{durationLabel}</span> : null}
+                {genres.length > 0 ? <span>·</span> : null}
+                {genres.length > 0 ? <span>{genres.join(" · ")}</span> : null}
+                {detail.creatorName ? <span>·</span> : null}
+                {detail.creatorName ? <span>{detail.creatorName}</span> : null}
               </div>
 
               {pub!.description && (
                 <p class="mt-4 max-w-2xl text-sm leading-7 text-foreground-muted">{pub!.description}</p>
               )}
 
-              <div class="mt-5">
+              <div class="mt-5 flex flex-wrap items-center gap-3">
+                {
+                  kind === "video" && !autoplay && (
+                    locked ? (
+                      <SubscribeUpsell creatorId={pub?.creatorId} t={t} />
+                    ) : (
+                      <a
+                        href={`/watch/${pubId}?autoplay=1`}
+                        class="inline-flex items-center gap-2 rounded-sm bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M8 5v14l11-7z"></path>
+                        </svg>
+                        {resumeLabel ? t("media.resumeFrom").replace("{time}", resumeLabel) : t("media.play")}
+                      </a>
+                    )
+                  )
+                }
                 <SaveButton
                   client:load
                   publicationId={pubId}
                   saved={savedIds.has(pubId)}
-                  saveLabel={t("library.save")}
+                  signedIn={Boolean(userId)}
+                  saveLabel={t("media.myList")}
                   savedLabel={t("library.saved")}
                 />
+                <ShareButton client:load label={t("media.share")} copiedLabel={t("media.copied")} />
               </div>
 
               <div class="mt-6">
                 {
-                  locked ? (
-                    <SubscribeUpsell creatorId={pub?.creatorId} t={t} />
-                  ) : allowed.length > 0 ? (
-                    kind === "video" ? (
-                      <VideoDetail
-                        client:load
-                        publicationId={pubId}
-                        items={videoItems}
-                        initialIndex={videoInitialIndex}
-                        initialTime={videoInitialTime}
-                        autoplay={autoplay}
-                      />
-                    ) : kind === "audio" ? (
-                      <audio
-                        controls
-                        controlslist="nodownload"
-                        preload="metadata"
-                        src={allowed[0].url}
-                        autoplay={autoplay}
-                        class="w-full"
-                      />
-                    ) : (
-                      <div class="grid gap-4 sm:grid-cols-2">
-                        {allowed.map((m) => (
-                          <ImageViewer
-                            client:load
-                            src={m.url}
-                            alt={pub!.title ?? ""}
-                            guarded
-                            class="w-full rounded-md"
-                          />
-                        ))}
-                      </div>
-                    )
-                  ) : (
+                  autoplay && kind === "video" && !locked && allowed.length > 0 ? (
+                    <VideoDetail
+                      client:load
+                      publicationId={pubId}
+                      items={videoItems}
+                      initialIndex={videoInitialIndex}
+                      initialTime={progress.position}
+                      autoplay={true}
+                    />
+                  ) : kind === "audio" && !locked && allowed.length > 0 ? (
+                    <audio
+                      controls
+                      controlslist="nodownload"
+                      preload="metadata"
+                      src={allowed[0].url}
+                      autoplay={autoplay}
+                      class="w-full"
+                    />
+                  ) : kind === "post" && !locked && allowed.length > 0 ? (
+                    <div class="grid gap-4 sm:grid-cols-2">
+                      {allowed.map((m) => (
+                        <ImageViewer
+                          client:load
+                          src={m.url}
+                          alt={pub!.title ?? ""}
+                          guarded
+                          class="w-full rounded-md"
+                        />
+                      ))}
+                    </div>
+                  ) : kind !== "video" && !locked && allowed.length === 0 ? (
                     <p class="rounded-md border border-dashed border-border px-6 py-8 text-sm text-foreground-muted">
                       {t("media.unavailable")}
                     </p>
-                  )
+                  ) : null
                 }
               </div>
             </div>
           </div>
+
+          {
+            kind === "video" && !autoplay && !locked && episodes.length > 0 && (
+              <div class="mt-10">
+                <h3 class="text-lg font-bold tracking-tight">{t("media.episodes")} · {t("media.season").replace("{n}", "1")}</h3>
+                <ul class="mt-3 grid gap-2">
+                  {episodes.map((e, i) => (
+                    <li>
+                      <a
+                        href={`/watch/${e.publicationId}`}
+                        class="flex items-center gap-3 rounded-md border border-border bg-surface p-2 transition hover:bg-surface-elevated"
+                      >
+                        <div class="h-12 w-20 shrink-0 overflow-hidden rounded">
+                          {e.coverUrl ? (
+                            <img src={e.coverUrl} alt="" class="h-full w-full object-cover" />
+                          ) : (
+                            <div class="flex h-full w-full items-center justify-center bg-surface-elevated text-xs text-foreground-muted">
+                              E{e.episodeNumber ?? i + 1}
+                            </div>
+                          )}
+                        </div>
+                        <div class="min-w-0 flex-1">
+                          <div class="truncate text-sm font-medium">
+                            E{e.episodeNumber ?? i + 1} · {e.title ?? `${t("media.episodeLabel")} ${e.episodeNumber ?? i + 1}`}
+                          </div>
+                          <div class="text-xs text-foreground-muted">{e.durationMs ? formatDuration(e.durationMs) : ""}</div>
+                        </div>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )
+          }
         </div>
 
+        {
+          related.length > 0 && (
+            <div class="mx-auto max-w-[1400px] px-12 py-12">
+              <MediaRail client:load title={t("media.related")} items={related} />
+            </div>
+          )
+        }
+
         {pubId && (
-          <div class="mx-auto max-w-[1400px] px-12">
+          <div class="mx-auto max-w-[1400px] px-12 pb-12">
             <Comments
               client:load
               targetType="PUBLICATION"

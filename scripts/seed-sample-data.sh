@@ -156,6 +156,23 @@ while IFS='|' read -r pid title ptype format creator accessClass rating desc; do
   create_row "publications" "$pid" '{"creatorId":"'"$creator"'","projectId":"seed-project-1","type":"'"$ptype"'","status":"PUBLISHED","accessClass":"'"$accessClass"'","title":"'"$title"'","description":"'"$desc"'","format":"'"$format"'","contentRating":"'"$rating"'","contentOrigin":"HUMAN","readingFormat":"PAGINATED","publishedAt":"'"$NOW"'","createdAt":"'"$NOW"'","updatedAt":"'"$NOW"'"}'
 done <<< "$PUBS"
 
+# --- Rating + genres (media detail meta-row fidelity) ----------------------
+echo "Seeding rating/genres..."
+# id|qualityRating|genre1,genre2,...
+GENRES="
+seed-video-1|4.8|Drama,Mystery,Adventure
+seed-video-2|4.2|Short,Drama
+seed-video-3|4.6|Mystery,Adventure
+seed-video-4|4.4|Drama,Adventure
+seed-video-5|4.1|Drama,SciFi
+seed-video-6|4.0|Documentary,Nature
+seed-video-7|4.5|Drama,Romance
+"
+while IFS='|' read -r pid quality genres; do
+  [ -z "$pid" ] && continue
+  appwrite tablesdb update-row --database-id main --table-id publications --row-id "$pid" --data '{"rating":'"$quality"',"genres":["'"${genres//,/\",\"}"'"]}' >/dev/null
+done <<< "$GENRES"
+
 # --- Prose pages (novels) -------------------------------------------------
 
 echo "Seeding prose..."

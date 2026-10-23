@@ -222,6 +222,14 @@ const ar = {
   "media.post": "منشور",
   "media.shorts": "المقاطع القصيرة",
   "media.noShorts": "لا توجد مقاطع قصيرة بعد",
+  "media.play": "تشغيل",
+  "media.resumeFrom": "استئناف من {time}",
+  "media.share": "مشاركة",
+  "media.related": "قصص ذات صلة",
+  "media.episodes": "الحلقات",
+  "media.season": "الموسم {n}",
+  "media.myList": "+ قائمتي",
+  "media.copied": "تم نسخ الرابط",
 
   // Comments
   "comments.title": "التعليقات",

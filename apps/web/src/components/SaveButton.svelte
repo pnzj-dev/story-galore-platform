@@ -6,11 +6,13 @@
     saved = false,
     saveLabel = 'Save to list',
     savedLabel = 'Saved',
+    signedIn = false,
   }: {
     publicationId: string;
     saved?: boolean;
     saveLabel?: string;
     savedLabel?: string;
+    signedIn?: boolean;
   } = $props();
 
   let isSaved = $state(saved);
@@ -18,6 +20,10 @@
 
   async function toggle() {
     if (busy) return;
+    if (!signedIn) {
+      window.dispatchEvent(new CustomEvent('auth:open', { detail: 'signin' }));
+      return;
+    }
     busy = true;
     try {
       if (isSaved) {

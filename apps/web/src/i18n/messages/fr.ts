@@ -223,6 +223,14 @@ const fr = {
   "media.post": "Publication",
   "media.shorts": "Shorts",
   "media.noShorts": "Aucun short pour l'instant",
+  "media.play": "Lecture",
+  "media.resumeFrom": "Reprendre à {time}",
+  "media.share": "Partager",
+  "media.related": "Histoires liées",
+  "media.episodes": "Épisodes",
+  "media.season": "Saison {n}",
+  "media.myList": "+ Ma liste",
+  "media.copied": "Lien copié",
 
   // Comments
   "comments.title": "Commentaires",
