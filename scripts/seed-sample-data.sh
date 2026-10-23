@@ -45,6 +45,21 @@ create_row "creators" "seed-creator-1" '{"actorId":"seed-creator-1","handle":"el
 create_row "creators" "seed-creator-2" '{"actorId":"seed-creator-2","handle":"kaitonak","displayName":"Kaito Nakamura","bio":"Comics, manga, and visual storytelling.","creatorStatus":"ACTIVE","verificationStatus":"VERIFIED","followerCountProjection":947,"createdAt":"'"$NOW"'","updatedAt":"'"$NOW"'"}'
 create_row "creators" "seed-creator-3" '{"actorId":"seed-creator-3","handle":"miraokafor","displayName":"Mira Okafor","bio":"Illustrator and short-film maker.","creatorStatus":"ACTIVE","verificationStatus":"UNVERIFIED","followerCountProjection":512,"createdAt":"'"$NOW"'","updatedAt":"'"$NOW"'"}'
 
+# --- Plans ---------------------------------------------------------------
+
+echo "Seeding plans..."
+# id|name|scope|amount|interval|adFree|description
+PLANS="
+plan-premium-monthly|StoryGalore Premium|PLATFORM|999|MONTH|true|Ad-free reading, all premium titles, offline downloads
+plan-premium-annual|StoryGalore Premium — Annual|PLATFORM|9900|YEAR|true|Two months free vs monthly
+plan-creator-monthly|Creator Supporter|CREATOR|499|MONTH|false|Unlock this creator's premium + early access
+"
+
+while IFS='|' read -r pid name scope amount interval adFree desc; do
+  [ -z "$pid" ] && continue
+  create_row "plans" "$pid" '{"code":"'"${pid#plan-}"'","name":"'"$name"'","description":"'"$desc"'","status":"ACTIVE","scope":"'"$scope"'","currency":"USD","amount":'"$amount"',"billingInterval":"'"$interval"'","billingIntervalCount":1,"trialDays":0,"adFree":'"$adFree"',"version":1,"createdAt":"'"$NOW"'","updatedAt":"'"$NOW"'"}'
+done <<< "$PLANS"
+
 # --- Covers (download) ---------------------------------------------------
 
 # pid:photoid:w:h
