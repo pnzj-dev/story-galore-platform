@@ -13,7 +13,8 @@ type Env = {
   APPWRITE_ENDPOINT: string;
   APPWRITE_PROJECT_ID: string;
   APPWRITE_API_KEY: string;
-  ADMIN_ACTOR_ID: string;
+  /** Admin session secret (server-derived actor for the api gateway, SEC-03). */
+  ADMIN_SESSION_SECRET: string;
   /** Shared secret the Appwrite cron presents to trigger this workflow over HTTP. */
   TRIGGER_SECRET?: string;
 };
@@ -45,7 +46,7 @@ export class PromptRedactionWorkflow extends WorkflowEntrypoint<Env, Params> {
     const gw = {
       requestId: crypto.randomUUID(),
       correlationId: crypto.randomUUID(),
-      actorId: this.env.ADMIN_ACTOR_ID,
+      session: this.env.ADMIN_SESSION_SECRET,
       payload: { operation, input },
     };
     const res = await fetch(`${this.env.APPWRITE_ENDPOINT}/functions/api/executions`, {

@@ -36,17 +36,6 @@ export abstract class StoryGaloreAgent<
   }
 
   /**
-   * The agent's gateway actor identity: an Appwrite user id `agent-{slug}`
-   * carrying the alphanumeric label `agent` + slug-with-hyphens-stripped (e.g.
-   * `agentstoryproducer`). The `api` gateway resolves that label to enforce the
-   * per-agent operation allowlist (generated agent_auth.go). Agents must never
-   * act as the admin service account.
-   */
-  protected get actorId(): string {
-    return `agent-${this.manifest.slug}`;
-  }
-
-  /**
    * Append a provenance entry + fresh policy decision id, persist it, and
    * return the recorded values (the Durable Object state snapshot may not
    * reflect `setState` synchronously, so callers use the return value).
@@ -64,10 +53,9 @@ export abstract class StoryGaloreAgent<
   /**
    * Delegate to the `api` gateway function (authorized domain operation) using
    * the agent's own narrowly-scoped actor (`agent-{slug}`), never the admin
-   * account. When a per-agent session JWT is configured it is passed so the
-   * gateway derives the actor from the server-set `x-appwrite-user-id` (not the
-   * body claim); otherwise it falls back to the API key + body actor claim.
-   * Fails closed when neither is configured.
+   * account. The agent forwards its own Appwrite session secret so the gateway
+   * derives the actor server-side (SEC-03 full closure) instead of trusting a
+   * body actorId claim. Fails closed when not configured.
    */
   protected async invokeGateway<T>(
     operation: string,
@@ -77,25 +65,36 @@ export abstract class StoryGaloreAgent<
     const endpoint = env.APPWRITE_ENDPOINT;
     const projectId = env.APPWRITE_PROJECT_ID;
     const apiKey = env.APPWRITE_API_KEY;
-    const jwt = env.AGENT_SESSION_JWT;
-    if (!endpoint || !projectId || (!apiKey && !jwt)) {
+    let sessionSecret = '';
+    const partA = env.AGENT_SESSION_SECRETS_A;
+    const partB = env.AGENT_SESSION_SECRETS_B;
+    if (partA || partB) {
+      try {
+        const secrets = {
+          ...(partA ? (JSON.parse(partA) as Record<string, string>) : {}),
+          ...(partB ? (JSON.parse(partB) as Record<string, string>) : {}),
+        };
+        sessionSecret = secrets[this.manifest.slug] ?? '';
+      } catch {
+        sessionSecret = '';
+      }
+    }
+    if (!endpoint || !projectId || !apiKey || !sessionSecret) {
       return { status: 'FAILED', errorCode: 'GATEWAY_NOT_CONFIGURED' };
     }
+    // Forward the agent's own session so the gateway derives the actor
+    // server-side (SEC-03 full closure) instead of trusting a body actorId.
     const gw = {
       requestId: crypto.randomUUID(),
       correlationId: crypto.randomUUID(),
-      actorId: this.actorId,
+      session: sessionSecret,
       payload: { operation, input },
     };
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       'X-Appwrite-Project': projectId,
+      'X-Appwrite-Key': apiKey,
     };
-    if (jwt) {
-      headers['Authorization'] = `Bearer ${jwt}`;
-    } else {
-      headers['X-Appwrite-Key'] = apiKey!;
-    }
     const res = await fetch(`${endpoint}/functions/api/executions`, {
       method: 'POST',
       headers,

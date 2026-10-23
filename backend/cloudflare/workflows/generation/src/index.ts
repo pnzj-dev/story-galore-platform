@@ -21,7 +21,8 @@ type Env = {
   APPWRITE_ENDPOINT: string;
   APPWRITE_PROJECT_ID: string;
   APPWRITE_API_KEY: string;
-  ADMIN_ACTOR_ID: string;
+  /** Admin session secret (server-derived actor for the api gateway, SEC-03). */
+  ADMIN_SESSION_SECRET: string;
   /** Workers AI binding (native Cloudflare models). */
   AI: Ai;
   /** JSON map of provider credential reference -> API key (Cloudflare Secret), BYOK only. */
@@ -259,7 +260,7 @@ export class GenerationWorkflow extends WorkflowEntrypoint<Env, Params> {
     const gw = {
       requestId: crypto.randomUUID(),
       correlationId: crypto.randomUUID(),
-      actorId: this.env.ADMIN_ACTOR_ID,
+      session: this.env.ADMIN_SESSION_SECRET,
       payload: { operation, input },
     };
     const res = await fetch(`${this.env.APPWRITE_ENDPOINT}/functions/api/executions`, {

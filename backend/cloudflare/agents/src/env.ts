@@ -44,5 +44,7 @@ export type Env = {
   APPWRITE_ENDPOINT?: string;
   APPWRITE_PROJECT_ID?: string;
   APPWRITE_API_KEY?: string;
-  AGENT_SESSION_JWT?: string;
+  /** JSON maps of agent slug -> Appwrite session secret (SEC-03 server-derived actor). Split to respect the 5.1 kB secret limit. */
+  AGENT_SESSION_SECRETS_A?: string;
+  AGENT_SESSION_SECRETS_B?: string;
 };

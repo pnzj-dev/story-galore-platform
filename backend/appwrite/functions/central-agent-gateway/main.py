@@ -111,26 +111,57 @@ def _parse_body(context):
 
 
 async def _call_api_operation(operation, input_data, api_key, endpoint, idempotency_key, actor_id):
-    """Delegate a mutation to the canonical `api` gateway function over HTTP."""
+    """Delegate a mutation to the canonical `api` gateway function over HTTP.
+
+    Mints a short-lived session for the agent and forwards it so the api gateway
+    derives the actor server-side (SEC-03 full closure) instead of trusting a
+    body actorId claim. The session is deleted after the call.
+    """
     import httpx
-    gw = {
-        "requestId": str(uuid.uuid4()),
-        "correlationId": str(uuid.uuid4()),
-        "actorId": actor_id,
-        "idempotencyKey": idempotency_key,
-        "payload": {"operation": operation, "input": input_data},
-    }
     project = os.environ.get("APPWRITE_FUNCTION_PROJECT_ID", "")
     async with httpx.AsyncClient(timeout=30) as client:
-        resp = await client.post(
-            endpoint.rstrip("/") + "/functions/api/executions",
-            headers={"X-Appwrite-Key": api_key, "X-Appwrite-Project": project},
-            json={"body": json.dumps(gw), "async": False},
-        )
-        resp.raise_for_status()
-        execution = resp.json()
-        raw = execution.get("responseBody", "{}")
-        return json.loads(raw) if isinstance(raw, str) else raw
+        session_secret = ""
+        session_id = ""
+        try:
+            r = await client.post(
+                endpoint.rstrip("/") + "/users/" + actor_id + "/sessions",
+                headers={"X-Appwrite-Key": api_key, "X-Appwrite-Project": project},
+                json={},
+            )
+            r.raise_for_status()
+            s = r.json()
+            session_secret = s.get("secret", "")
+            session_id = s.get("$id", "")
+        except Exception:
+            # Fall through with no session; the api gateway fails closed.
+            pass
+
+        gw = {
+            "requestId": str(uuid.uuid4()),
+            "correlationId": str(uuid.uuid4()),
+            "session": session_secret,
+            "idempotencyKey": idempotency_key,
+            "payload": {"operation": operation, "input": input_data},
+        }
+        try:
+            resp = await client.post(
+                endpoint.rstrip("/") + "/functions/api/executions",
+                headers={"X-Appwrite-Key": api_key, "X-Appwrite-Project": project},
+                json={"body": json.dumps(gw), "async": False},
+            )
+            resp.raise_for_status()
+            execution = resp.json()
+            raw = execution.get("responseBody", "{}")
+            return json.loads(raw) if isinstance(raw, str) else raw
+        finally:
+            if session_id:
+                try:
+                    await client.delete(
+                        endpoint.rstrip("/") + "/users/" + actor_id + "/sessions/" + session_id,
+                        headers={"X-Appwrite-Key": api_key, "X-Appwrite-Project": project},
+                    )
+                except Exception:
+                    pass
 
 
 def _audit(context, body, agent_slug, native_tool, allowed, error_code):

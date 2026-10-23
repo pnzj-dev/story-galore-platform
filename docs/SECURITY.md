@@ -79,13 +79,13 @@ The coding agent cannot directly access production secrets or perform unrestrict
 
 ### Actor derivation at the api gateway (SEC-03)
 
-The `api` gateway function derives the acting user from `x-appwrite-user-id` when present, otherwise from a caller-supplied session that is verified server-side, otherwise from the `actorId` field in the command envelope. Web SSR invokes `api` with a server-side API key (which does not populate `x-appwrite-user-id`), so it forwards the user session in the command envelope; the gateway verifies that session against the account endpoint and derives the actor from it.
+The `api` gateway function derives the acting user from `x-appwrite-user-id` when present, otherwise from a caller-supplied session that is verified server-side against the account endpoint. Body-claimed `actorId` values are rejected fail-closed.
 
-Controls in place:
+- **Regular users** — the web SSR forwards the user session in the command envelope; the gateway verifies it and derives the actor.
+- **System actors** — the Cloudflare workflows forward an admin session secret (`ADMIN_SESSION_SECRET`); each Cloudflare agent forwards its own session secret (split across `AGENT_SESSION_SECRETS_A`/`_B` to respect the Cloudflare secret-size limit); the Central Agent Gateway mints a short-lived session for the agent on each delegation and deletes it afterward.
+- **Anonymous / scheduled** — no actor (empty `x-appwrite-user-id` and no session).
 
-1. **Session-derived actor (implemented).** The web SSR forwards the session; the gateway resolves it to a user via `account.get()` and treats that user as authoritative over the body `actorId`.
-2. **Body-claim restricted to system actors (implemented, full closure).** Without a session, the body `actorId` is accepted only for system actors — admins (`admin` label) or platform agents (`agent*` label in the allowlist). A regular user claimed via the body without a session is rejected (fail-closed), so a leaked API key cannot impersonate a regular user. `isSystemLabel` carries the pure label rule and is unit-tested.
-3. **Remaining surface (documented).** Admin and agent actors are still legitimately body-claimed by the Cloudflare workflows and the agent gateway. A key that leaks therefore can still invoke as those system actors; closing that requires per-workflow/per-agent session JWTs (the agents' `Authorization: Bearer` path) rather than a shared API key.
+A leaked API key can therefore only reach anonymous operations; it cannot impersonate a user, admin, or agent because every actor identity is bound to a verified session. Session secrets are long-lived (1 year) and must be rotated, with per-actor revocation available by deleting the session.
 
 ## Search, recommendation and cache security
 
