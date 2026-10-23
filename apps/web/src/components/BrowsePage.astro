@@ -40,7 +40,7 @@ const ad = await fetchAd("DISCOVERY_FEED_BETWEEN_ITEMS", Astro.locals.user?.$id 
         </div>
       ) : (
         <p class="mt-8 rounded-md border border-dashed border-border px-6 py-8 text-sm text-foreground-muted">
-          No content yet. Check back soon.
+          {t("browse.noContent")}
         </p>
       )
     }

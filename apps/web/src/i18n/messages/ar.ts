@@ -13,6 +13,16 @@ const ar = {
   "nav.signIn": "تسجيل الدخول",
   "nav.getStarted": "ابدأ الآن",
 
+  // Browse / discovery pages
+  "browse.discover": "استكشف",
+  "browse.explore": "استكشف القصص عبر كل الوسائط.",
+  "browse.noStories": "لا توجد قصص بعد. عد لاحقًا.",
+  "browse.noContent": "لا يوجد محتوى بعد. عد لاحقًا.",
+  "browse.booksDesc": "روايات مسلسلة وقصص مصورة ومانغا وكل صيغ الكتب.",
+  "browse.videosDesc": "مسلسلات وأفلام وأفلام قصيرة ووثائقيات.",
+  "browse.imagesDesc": "رسوم توضيحية وتصوير وفن رقمي وفن المعجبين.",
+  "browse.audioDesc": "بودكاست وكتب صوتية والمزيد.",
+
   // Mobile navigation
   "mobile.search": "بحث",
   "mobile.profile": "الملف الشخصي",
@@ -185,7 +195,6 @@ const ar = {
   "library.desc": "عناوينك الجارية عبر كل الوسائط.",
   "library.continue": "متابعة",
   "library.emptyHint": "لا شيء قيد التقدم بعد. ابدأ بالقراءة أو المشاهدة أو الاستماع.",
-  "library.comingSoon": "العناوين والمجموعات المحفوظة قادمة قريبًا.",
   "library.downloads": "التنزيلات ودون اتصال",
   "library.downloadsDesc": "العناوين المخزّنة مؤقتًا على هذا الجهاز للقراءة دون اتصال.",
   "library.noDownloads": "لا توجد عناوين دون اتصال بعد. افتح كتابًا لتخزينه مؤقتًا.",
@@ -290,10 +299,8 @@ const ar = {
   "admin.ads": "الإعلانات",
   "admin.support": "الدعم",
   "admin.comingSoon": "قريبًا",
-  "admin.aiOperations": "عمليات الذكاء الاصطناعي",
   "admin.storage": "التخزين",
   "admin.messaging": "المراسلة",
-  "admin.system": "النظام",
   "admin.settings": "الإعدادات",
 
   // Admin overview
@@ -477,8 +484,8 @@ const ar = {
   "admin.notFound.ticket": "التذكرة غير موجودة.",
 
   // Catch-all section
-  "admin.section": "قسم",
-  "admin.sectionComingSoon": "هذا القسم قادم قريبًا.",
+  "admin.notFound": "غير موجود",
+  "admin.notFoundDesc": "هذا القسم الإداري غير موجود.",
   "admin.noCategoryData": "لا توجد بيانات متاحة لهذه الفئة بعد.",
 
   "admin.cat.advertising": "الإعلانات",

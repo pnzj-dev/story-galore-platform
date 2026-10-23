@@ -1,12 +1,14 @@
 ---
 import BrowsePage from "@/components/BrowsePage.astro";
+import { getTranslations } from "@/i18n";
 
+const { t } = getTranslations(Astro.currentLocale);
 const format = Astro.url.searchParams.get("format")?.toUpperCase().replace(/-/g, "_") ?? undefined;
 ---
 
 <BrowsePage
-  title="Audio"
-  description="Podcasts, audiobooks, and more."
+  title={t("nav.audio")}
+  description={t("browse.audioDesc")}
   type="AUDIO"
   format={format}
 />

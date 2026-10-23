@@ -1,12 +1,14 @@
 ---
 import BrowsePage from "@/components/BrowsePage.astro";
+import { getTranslations } from "@/i18n";
 
+const { t } = getTranslations(Astro.currentLocale);
 const format = Astro.url.searchParams.get("format")?.toUpperCase().replace(/-/g, "_") ?? undefined;
 ---
 
 <BrowsePage
-  title="Books"
-  description="Serialized novels, comics, manga, and every book format."
+  title={t("nav.books")}
+  description={t("browse.booksDesc")}
   type="BOOK"
   format={format}
 />

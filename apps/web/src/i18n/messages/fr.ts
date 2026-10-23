@@ -13,6 +13,16 @@ const fr = {
   "nav.signIn": "Se connecter",
   "nav.getStarted": "Commencer",
 
+  // Browse / discovery pages
+  "browse.discover": "Découvrir",
+  "browse.explore": "Explorez des histoires sur tous les supports.",
+  "browse.noStories": "Pas encore d'histoires. Revenez bientôt.",
+  "browse.noContent": "Pas encore de contenu. Revenez bientôt.",
+  "browse.booksDesc": "Romans en série, BD, mangas et tous les formats de livres.",
+  "browse.videosDesc": "Séries, films, courts métrages et documentaires.",
+  "browse.imagesDesc": "Illustrations, photographie, art numérique et fan art.",
+  "browse.audioDesc": "Podcasts, livres audio et plus encore.",
+
   // Mobile navigation
   "mobile.search": "Recherche",
   "mobile.profile": "Profil",
@@ -186,7 +196,6 @@ const fr = {
   "library.desc": "Vos titres en cours sur tous les supports.",
   "library.continue": "Continuer",
   "library.emptyHint": "Rien en cours pour l'instant. Commencez à lire, regarder ou écouter.",
-  "library.comingSoon": "Les titres et collections enregistrés arrivent bientôt.",
   "library.downloads": "Téléchargements et hors ligne",
   "library.downloadsDesc": "Titres mis en cache sur cet appareil pour la lecture hors ligne.",
   "library.noDownloads": "Aucun titre hors ligne pour l'instant. Ouvrez un livre pour le mettre en cache.",
@@ -291,10 +300,8 @@ const fr = {
   "admin.ads": "Publicité",
   "admin.support": "Support",
   "admin.comingSoon": "Bientôt",
-  "admin.aiOperations": "Opérations IA",
   "admin.storage": "Stockage",
   "admin.messaging": "Messagerie",
-  "admin.system": "Système",
   "admin.settings": "Paramètres",
 
   // Admin overview
@@ -478,8 +485,8 @@ const fr = {
   "admin.notFound.ticket": "Ticket introuvable.",
 
   // Catch-all section
-  "admin.section": "Section",
-  "admin.sectionComingSoon": "Cette section arrive bientôt.",
+  "admin.notFound": "Introuvable",
+  "admin.notFoundDesc": "Cette section d'administration n'existe pas.",
   "admin.noCategoryData": "Aucune donnée disponible pour cette catégorie pour l'instant.",
 
   "admin.cat.advertising": "Publicité",

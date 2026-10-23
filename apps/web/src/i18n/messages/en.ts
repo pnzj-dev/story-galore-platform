@@ -14,6 +14,16 @@ export default {
   "nav.signIn": "Sign in",
   "nav.getStarted": "Get started",
 
+  // Browse / discovery pages
+  "browse.discover": "Discover",
+  "browse.explore": "Explore stories across every medium.",
+  "browse.noStories": "No stories yet. Check back soon.",
+  "browse.noContent": "No content yet. Check back soon.",
+  "browse.booksDesc": "Serialized novels, comics, manga, and every book format.",
+  "browse.videosDesc": "Series, movies, shorts, and documentaries.",
+  "browse.imagesDesc": "Illustrations, photography, digital art, and fan art.",
+  "browse.audioDesc": "Podcasts, audiobooks, and more.",
+
   // Mobile navigation
   "mobile.search": "Search",
   "mobile.profile": "Profile",
@@ -186,7 +196,6 @@ export default {
   "library.desc": "Your in-progress titles across every medium.",
   "library.continue": "Continue",
   "library.emptyHint": "Nothing in progress yet. Start reading, watching, or listening.",
-  "library.comingSoon": "Saved titles and collections are coming soon.",
   "library.downloads": "Downloads & offline",
   "library.downloadsDesc": "Titles cached on this device for offline reading.",
   "library.noDownloads": "No offline titles yet. Open a book to cache it for offline reading.",
@@ -291,10 +300,8 @@ export default {
   "admin.ads": "Ads & Monetization",
   "admin.support": "Support",
   "admin.comingSoon": "Coming soon",
-  "admin.aiOperations": "AI Operations",
   "admin.storage": "Storage",
   "admin.messaging": "Messaging",
-  "admin.system": "System",
   "admin.settings": "Settings",
 
   // Admin overview
@@ -478,8 +485,8 @@ export default {
   "admin.notFound.ticket": "Ticket not found.",
 
   // Catch-all section
-  "admin.section": "Section",
-  "admin.sectionComingSoon": "This section is coming soon.",
+  "admin.notFound": "Not found",
+  "admin.notFoundDesc": "This admin section does not exist.",
   "admin.noCategoryData": "No data available for this category yet.",
 
   // Admin sub-page category titles

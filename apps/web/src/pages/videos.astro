@@ -1,12 +1,14 @@
 ---
 import BrowsePage from "@/components/BrowsePage.astro";
+import { getTranslations } from "@/i18n";
 
+const { t } = getTranslations(Astro.currentLocale);
 const format = Astro.url.searchParams.get("format")?.toUpperCase().replace(/-/g, "_") ?? undefined;
 ---
 
 <BrowsePage
-  title="Videos"
-  description="Series, movies, shorts, and documentaries."
+  title={t("nav.videos")}
+  description={t("browse.videosDesc")}
   type="VIDEO"
   format={format}
 />

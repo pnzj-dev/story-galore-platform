@@ -1,12 +1,14 @@
 ---
 import BrowsePage from "@/components/BrowsePage.astro";
+import { getTranslations } from "@/i18n";
 
+const { t } = getTranslations(Astro.currentLocale);
 const format = Astro.url.searchParams.get("format")?.toUpperCase().replace(/-/g, "_") ?? undefined;
 ---
 
 <BrowsePage
-  title="Art"
-  description="Illustrations, photography, digital art, and fan art."
+  title={t("nav.images")}
+  description={t("browse.imagesDesc")}
   type="POST"
   format={format}
 />

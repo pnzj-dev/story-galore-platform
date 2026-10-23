@@ -6,12 +6,9 @@ import { getTranslations } from "@/i18n";
 
 const { t } = getTranslations(Astro.currentLocale);
 
-const genre = Astro.url.searchParams.get("genre");
-const heading = genre ? `Browse: ${genre.replace(/-/g, " ")}` : "Discover";
-
 // Genre filtering is deferred until publications carry a registered genre/tags
-// taxonomy (contracts/domain/media-catalog-taxonomy.yaml). The `genre` param is
-// surfaced in the heading for now.
+// taxonomy (contracts/domain/media-catalog-taxonomy.yaml).
+const heading = t("browse.discover");
 const items = await fetchPublications("trending");
 const ad = await fetchAd("DISCOVERY_FEED_BETWEEN_ITEMS", Astro.locals.user?.$id ?? "");
 ---
@@ -19,7 +16,7 @@ const ad = await fetchAd("DISCOVERY_FEED_BETWEEN_ITEMS", Astro.locals.user?.$id 
 <Layout title={heading}>
   <main class="mx-auto max-w-[1400px] px-12 py-12">
     <h1 class="text-3xl font-bold capitalize">{heading}</h1>
-    <p class="mt-2 text-foreground-muted">Explore stories across every medium.</p>
+    <p class="mt-2 text-foreground-muted">{t("browse.explore")}</p>
 
     {ad?.url && (
       <div class="mt-6 rounded-md border border-border bg-surface/40 p-4">
@@ -38,7 +35,7 @@ const ad = await fetchAd("DISCOVERY_FEED_BETWEEN_ITEMS", Astro.locals.user?.$id 
       </div>
     ) : (
       <p class="mt-8 rounded-xl border border-dashed border-border px-6 py-8 text-sm text-foreground-muted">
-        No stories yet. Check back soon.
+        {t("browse.noStories")}
       </p>
     )}
   </main>
