@@ -38,11 +38,14 @@ type stripeAdapter struct {
 }
 
 func newStripeAdapter(secretKey string) *stripeAdapter {
+	// stripe-go v81 is global-state only (no per-request key); set the key once
+	// at construction instead of mutating the package global on every call. A
+	// single platform-wide key is used, so this is safe for the current config.
+	stripe.Key = secretKey
 	return &stripeAdapter{secretKey: secretKey}
 }
 
 func (s *stripeAdapter) CreatePayment(_ context.Context, _, paymentId string, amount int, currency string) (string, error) {
-	stripe.Key = s.secretKey
 	params := &stripe.PaymentIntentParams{
 		Amount:   stripe.Int64(int64(amount)),
 		Currency: stripe.String(strings.ToLower(currency)),
@@ -56,7 +59,6 @@ func (s *stripeAdapter) CreatePayment(_ context.Context, _, paymentId string, am
 }
 
 func (s *stripeAdapter) Refund(providerPaymentId string, amount int) error {
-	stripe.Key = s.secretKey
 	params := &stripe.RefundParams{
 		PaymentIntent: stripe.String(providerPaymentId),
 	}
@@ -74,8 +76,6 @@ func (s *stripeAdapter) SupportsNativeSubscriptions() bool { return true }
 // CreateSubscription creates a Stripe Billing subscription (Customer + Price +
 // Subscription). interval is DAY/WEEK/MONTH/YEAR.
 func (s *stripeAdapter) CreateSubscription(_ context.Context, userId, subscriptionId, _ string, amount int, currency, interval string) (string, error) {
-	stripe.Key = s.secretKey
-
 	c, err := customer.New(&stripe.CustomerParams{
 		Metadata: map[string]string{"userId": userId},
 	})
@@ -108,7 +108,6 @@ func (s *stripeAdapter) CreateSubscription(_ context.Context, userId, subscripti
 
 // CancelSubscription cancels a Stripe Billing subscription.
 func (s *stripeAdapter) CancelSubscription(providerSubscriptionId string) error {
-	stripe.Key = s.secretKey
 	_, err := subscription.Cancel(providerSubscriptionId, &stripe.SubscriptionCancelParams{})
 	return err
 }
