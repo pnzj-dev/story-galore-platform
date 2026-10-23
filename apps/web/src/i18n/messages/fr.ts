@@ -191,6 +191,10 @@ const fr = {
   "library.downloadsDesc": "Titres mis en cache sur cet appareil pour la lecture hors ligne.",
   "library.noDownloads": "Aucun titre hors ligne pour l'instant. Ouvrez un livre pour le mettre en cache.",
   "library.remove": "Supprimer",
+  "library.collections": "Collections",
+  "library.noCollections": "Aucune collection pour l'instant. Commencez à créer une collection depuis la page d'un créateur ou la découverte.",
+  "library.titles": "titres",
+  "library.emptyCollection": "Cette collection ne contient aucun titre pour l'instant.",
 
   // Media detail / reader / shorts
   "media.locked": "Ce titre nécessite un abonnement ou un achat.",

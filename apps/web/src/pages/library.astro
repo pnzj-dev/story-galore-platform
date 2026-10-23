@@ -2,7 +2,7 @@
 import Layout from "@/layouts/Layout.astro";
 import { MediaRail } from "@storygalore/ui";
 import DownloadsList from "@/components/DownloadsList.svelte";
-import { fetchContinueItems } from "@/lib/gateway";
+import { fetchContinueItems, fetchCollections } from "@/lib/gateway";
 import { getTranslations } from "@/i18n";
 
 const { t } = getTranslations(Astro.currentLocale);
@@ -13,6 +13,7 @@ if (!user) {
 }
 
 const continueItems = await fetchContinueItems(user.$id);
+const collections = (await fetchCollections(user.$id)).filter((c) => c.curatorId === user.$id);
 
 const downloadLabels = {
   downloads: t("library.downloads"),
@@ -36,6 +37,30 @@ const downloadLabels = {
         emptyHint={t("library.emptyHint")}
       />
     </div>
+
+    <section class="mt-10">
+      <h2 class="text-xl font-semibold">{t("library.collections")}</h2>
+      {
+        collections.length > 0 ? (
+          <div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {collections.map((c) => (
+              <a
+                href={`/collections/${c.$id}`}
+                class="rounded-md border border-border bg-surface p-4 transition hover:border-foreground-muted"
+              >
+                <h3 class="font-semibold">{c.title}</h3>
+                {c.description && <p class="mt-1 text-sm text-foreground-muted">{c.description}</p>}
+                <p class="mt-2 text-xs text-foreground-tertiary">
+                  {c.publicationIds?.length ?? 0} {t("library.titles")}
+                </p>
+              </a>
+            ))}
+          </div>
+        ) : (
+          <p class="mt-2 text-sm text-foreground-muted">{t("library.noCollections")}</p>
+        )
+      }
+    </section>
 
     <DownloadsList client:load labels={downloadLabels} />
   </main>

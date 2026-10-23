@@ -190,6 +190,10 @@ const ar = {
   "library.downloadsDesc": "العناوين المخزّنة مؤقتًا على هذا الجهاز للقراءة دون اتصال.",
   "library.noDownloads": "لا توجد عناوين دون اتصال بعد. افتح كتابًا لتخزينه مؤقتًا.",
   "library.remove": "إزالة",
+  "library.collections": "المجموعات",
+  "library.noCollections": "لا توجد مجموعات بعد. ابدأ بإنشاء مجموعة من صفحة منشئ المحتوى أو سطح الاكتشاف.",
+  "library.titles": "عناوين",
+  "library.emptyCollection": "لا تحتوي هذه المجموعة على عناوين بعد.",
 
   // Media detail / reader / shorts
   "media.locked": "يتطلب هذا العنوان اشتراكًا أو شراءً.",

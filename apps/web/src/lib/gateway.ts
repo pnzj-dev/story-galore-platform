@@ -334,6 +334,55 @@ export async function fetchMediaByType(
     });
 }
 
+export interface CollectionSummary {
+  $id?: string;
+  title?: string;
+  description?: string;
+  curatorId?: string;
+  status?: string;
+  visibility?: string;
+  publicationIds?: string[];
+  coverPublicationId?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+/** Fetch collections visible to the actor (own + public published). */
+export async function fetchCollections(actorId: string): Promise<CollectionSummary[]> {
+  const out = await invokeApi<{ items?: CollectionSummary[] }>("collection_list", {}, actorId);
+  if (out.status !== "SUCCESS" || !out.result?.items) return [];
+  return out.result.items;
+}
+
+/** Fetch a single collection (own, admin, or public+published). */
+export async function fetchCollection(actorId: string, collectionId: string): Promise<CollectionSummary | null> {
+  const out = await invokeApi<CollectionSummary>("collection_get", { collectionId }, actorId);
+  if (out.status !== "SUCCESS" || !out.result) return null;
+  return out.result;
+}
+
+/** Resolve a collection's publicationIds into MediaCardData for the detail page. */
+export async function fetchCollectionItems(actorId: string, collection: CollectionSummary): Promise<MediaCardData[]> {
+  const ids = collection.publicationIds ?? [];
+  const items: MediaCardData[] = [];
+  for (const id of ids) {
+    const detail = await fetchPublication(id, actorId);
+    if (!detail?.publication?.$id) continue;
+    const pub = detail.publication;
+    const t = VALID_TYPES.includes(pub.type as MediaType) ? (pub.type as MediaType) : "BOOK";
+    items.push({
+      id: pub.$id,
+      title: pub.title ?? "Untitled",
+      type: t,
+      format: pub.format,
+      contentRating: pub.contentRating as ContentRating | undefined,
+      coverUrl: detail.coverUrl,
+      creatorName: detail.creatorName,
+    } satisfies MediaCardData);
+  }
+  return items;
+}
+
 export interface MediaDeliveryItem {
   mediaId: string;
   allowed: boolean;

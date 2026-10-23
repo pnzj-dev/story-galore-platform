@@ -191,6 +191,10 @@ export default {
   "library.downloadsDesc": "Titles cached on this device for offline reading.",
   "library.noDownloads": "No offline titles yet. Open a book to cache it for offline reading.",
   "library.remove": "Remove",
+  "library.collections": "Collections",
+  "library.noCollections": "No collections yet. Start curating from a creator's page or the discovery surface.",
+  "library.titles": "titles",
+  "library.emptyCollection": "This collection has no titles yet.",
 
   // Media detail / reader / shorts
   "media.locked": "This title requires a subscription or purchase.",

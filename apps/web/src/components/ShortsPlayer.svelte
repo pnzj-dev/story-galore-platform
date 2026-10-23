@@ -11,6 +11,19 @@
     const index = Math.max(0, shorts.findIndex((s) => s.id === initialId));
     el.scrollTo({ top: index * el.clientHeight, behavior: 'instant' });
   });
+
+  async function share(short: MediaCardData) {
+    const url = `${window.location.origin}/shorts/play/${short.id}`;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: short.title, url });
+      } else {
+        await navigator.clipboard.writeText(url);
+      }
+    } catch {
+      /* cancelled or unsupported */
+    }
+  }
 </script>
 
 <div
@@ -31,35 +44,12 @@
             {(short.creatorName ?? '?').charAt(0)}
           </span>
           <span class="text-[13px] font-bold">{short.creatorName ?? '@creator'}</span>
-          <button
-            type="button"
-            data-auth="signin"
-            class="ml-1 rounded-full border border-white/60 px-3 py-1 text-[11px] font-bold text-white"
-          >
-            Follow
-          </button>
         </div>
         <p class="mt-2 max-w-[280px] text-[12px] leading-5">{short.title}</p>
       </div>
 
       <div class="absolute bottom-20 right-3 flex flex-col items-center gap-5 text-white">
-        <button type="button" aria-label="Like" class="flex flex-col items-center gap-0.5">
-          <span class="grid h-10 w-10 place-items-center rounded-full border border-white/20 bg-white/10 backdrop-blur">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 21s-7-4.6-9.5-9A5.5 5.5 0 0 1 12 6.5 5.5 5.5 0 0 1 21.5 12C19 16.4 12 21 12 21z"></path>
-            </svg>
-          </span>
-          <span class="text-[10px] font-bold">1.2k</span>
-        </button>
-        <button type="button" aria-label="Comment" class="flex flex-col items-center gap-0.5">
-          <span class="grid h-10 w-10 place-items-center rounded-full border border-white/20 bg-white/10 backdrop-blur">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 12a8 8 0 0 1-8 8H4l2-3a8 8 0 1 1 15-5z"></path>
-            </svg>
-          </span>
-          <span class="text-[10px] font-bold">86</span>
-        </button>
-        <button type="button" aria-label="Share" class="flex flex-col items-center gap-0.5">
+        <button type="button" aria-label="Share" onclick={() => share(short)} class="flex flex-col items-center gap-0.5">
           <span class="grid h-10 w-10 place-items-center rounded-full border border-white/20 bg-white/10 backdrop-blur">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"></path>
