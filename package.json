@@ -44,6 +44,7 @@
     "dev": "pnpm --filter @storygalore/web dev",
     "validate:docs": "node scripts/validate-repository-coherence.mjs && node scripts/validate-doc-consistency.mjs && pnpm validate:authorization && pnpm validate:technology-freshness && pnpm validate:appwrite-mcp-agent-access && pnpm validate:central-agent-gateway",
     "validate:authorization": "node scripts/validate-authorization-contracts.mjs && node scripts/validate-admin-rbac.mjs",
+    "validate:runtime-authorization": "node scripts/validate-runtime-authorization.mjs",
     "validate:technology-freshness": "node scripts/validate-technology-freshness.mjs",
     "validate:repository-coherence": "node scripts/validate-repository-coherence.mjs",
     "validate:social-v1": "python3 scripts/validate-social-v1.py",
