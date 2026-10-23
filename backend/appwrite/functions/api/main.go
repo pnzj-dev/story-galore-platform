@@ -5636,11 +5636,7 @@ func cancelNativeSubscription(ctx openruntimes.Context, cl client.Client, subscr
 // cancelNowpaymentsSubscription delegates a NOWPayments subscription cancel to
 // the nowpayments function.
 func cancelNowpaymentsSubscription(ctx openruntimes.Context, cl client.Client, providerSubscriptionId string) {
-	npInput := map[string]interface{}{
-		"operation":     "cancel_subscription",
-		"serviceSecret": os.Getenv("NP_SERVICE_SECRET"),
-		"input":         map[string]interface{}{"providerSubscriptionId": providerSubscriptionId},
-	}
+	npInput := nowpaymentsCommandBody("cancel_subscription", map[string]interface{}{"providerSubscriptionId": providerSubscriptionId})
 	service := functions.New(cl)
 	if _, err := service.CreateExecution("nowpayments",
 		service.WithCreateExecutionBody(mustJSON(npInput)),
@@ -5786,23 +5782,30 @@ func paymentCreate(ctx openruntimes.Context, in *GatewayInput, cl client.Client)
 	return success(ctx, in, map[string]interface{}{"paymentId": paymentId})
 }
 
+// nowpaymentsCommandBody builds the service-to-service command body for the
+// nowpayments function, including the shared NP_SERVICE_SECRET used to prove
+// the call originates from the api gateway (SEC-01).
+func nowpaymentsCommandBody(operation string, input map[string]interface{}) map[string]interface{} {
+	return map[string]interface{}{
+		"operation":     operation,
+		"serviceSecret": os.Getenv("NP_SERVICE_SECRET"),
+		"input":         input,
+	}
+}
+
 // delegateToNowpayments forwards a NOWPAYMENTS payment creation to the
 // TypeScript nowpayments function (the NOWPayments SDK has no Go equivalent).
 // The nowpayments function writes the payments row and returns the deposit
 // details; we surface its result directly.
 func delegateToNowpayments(ctx openruntimes.Context, in *GatewayInput, cl client.Client, userId string, amountMinor int, currency, payCurrency string) openruntimes.Response {
 	paymentId := idOrUUID(in.IdempotencyKey)
-	npInput := map[string]interface{}{
-		"operation":     "create_payment",
-		"serviceSecret": os.Getenv("NP_SERVICE_SECRET"),
-		"input": map[string]interface{}{
-			"userId":      userId,
-			"amount":      float64(amountMinor) / 100.0,
-			"currency":    strings.ToLower(currency),
-			"payCurrency": payCurrency,
-			"paymentId":   paymentId,
-		},
-	}
+	npInput := nowpaymentsCommandBody("create_payment", map[string]interface{}{
+		"userId":      userId,
+		"amount":      float64(amountMinor) / 100.0,
+		"currency":    strings.ToLower(currency),
+		"payCurrency": payCurrency,
+		"paymentId":   paymentId,
+	})
 	service := functions.New(cl)
 	exec, err := service.CreateExecution("nowpayments",
 		service.WithCreateExecutionBody(mustJSON(npInput)),
@@ -5833,19 +5836,15 @@ func delegateToNowpayments(ctx openruntimes.Context, in *GatewayInput, cl client
 // created the subscriptions row; the nowpayments function creates the
 // NOWPayments plan/subscription and updates the row in place.
 func delegateToNowpaymentsSubscription(ctx openruntimes.Context, in *GatewayInput, cl client.Client, subscriptionId, userId, email, planId string, amount int, currency, interval string) openruntimes.Response {
-	npInput := map[string]interface{}{
-		"operation":     "create_subscription",
-		"serviceSecret": os.Getenv("NP_SERVICE_SECRET"),
-		"input": map[string]interface{}{
-			"userId":         userId,
-			"subscriptionId": subscriptionId,
-			"email":          email,
-			"planId":         planId,
-			"amount":         float64(amount) / 100.0,
-			"currency":       strings.ToLower(currency),
-			"interval":       strings.ToLower(interval),
-		},
-	}
+	npInput := nowpaymentsCommandBody("create_subscription", map[string]interface{}{
+		"userId":         userId,
+		"subscriptionId": subscriptionId,
+		"email":          email,
+		"planId":         planId,
+		"amount":         float64(amount) / 100.0,
+		"currency":       strings.ToLower(currency),
+		"interval":       strings.ToLower(interval),
+	})
 	service := functions.New(cl)
 	exec, err := service.CreateExecution("nowpayments",
 		service.WithCreateExecutionBody(mustJSON(npInput)),

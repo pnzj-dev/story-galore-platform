@@ -198,3 +198,20 @@ func TestDedupeStrings(t *testing.T) {
 		}
 	}
 }
+
+// TestNowpaymentsCommandBodyIncludesServiceSecret guards SEC-01: every
+// api -> nowpayments command body must carry the shared service secret so the
+// nowpayments function can reject calls that did not originate from the api
+// gateway.
+func TestNowpaymentsCommandBodyIncludesServiceSecret(t *testing.T) {
+	body := nowpaymentsCommandBody("create_payment", map[string]interface{}{"userId": "u1"})
+	if body["operation"] != "create_payment" {
+		t.Errorf("operation = %v, want create_payment", body["operation"])
+	}
+	if _, ok := body["serviceSecret"]; !ok {
+		t.Error("nowpayments command body must include a serviceSecret key")
+	}
+	if _, ok := body["input"]; !ok {
+		t.Error("nowpayments command body must include an input map")
+	}
+}
