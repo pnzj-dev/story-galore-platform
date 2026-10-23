@@ -1,6 +1,7 @@
 import { defineMiddleware } from "astro:middleware";
 import { createServerClient, SESSION_COOKIE } from "@storygalore/appwrite-client";
 import type { Models } from "@storygalore/appwrite-client";
+import { authContext } from "@/lib/auth-context";
 import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from "@/i18n/languages";
 
 /**
@@ -25,9 +26,10 @@ export const onRequest = defineMiddleware(async (context, next) => {
   const projectId = import.meta.env.PUBLIC_APPWRITE_PROJECT_ID;
 
   let user: Models.User | null = null;
+  let session: string | undefined;
 
   if (endpoint && projectId) {
-    const session = context.cookies.get(SESSION_COOKIE)?.value;
+    session = context.cookies.get(SESSION_COOKIE)?.value;
     if (session) {
       try {
         const { account } = createServerClient({ endpoint, projectId }, { session });
@@ -36,11 +38,13 @@ export const onRequest = defineMiddleware(async (context, next) => {
         // Invalid, expired or revoked session: clear the cookie and treat as anonymous.
         context.cookies.delete(SESSION_COOKIE, { path: "/" });
         user = null;
+        session = undefined;
       }
     }
   }
 
   context.locals.user = user;
+  context.locals.session = session;
 
   const pathname = context.url.pathname;
   const { locale, path } = splitLocale(pathname);
@@ -61,5 +65,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
     return context.redirect(`${loginPath}?returnTo=${returnTo}`);
   }
 
-  return next();
+  // Expose the session secret to the gateway call stack so the api function can
+  // derive the actor server-side (x-appwrite-user-id) instead of the body claim.
+  return authContext.run({ session }, () => next());
 });

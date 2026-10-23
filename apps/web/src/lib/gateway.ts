@@ -1,5 +1,6 @@
 import type { MediaType, ContentRating, MediaCardData, CreatorCardData } from "@storygalore/ui";
 import type { MessageKey } from "@/i18n";
+import { authContext } from "@/lib/auth-context";
 
 export interface GatewayOutput<T = unknown> {
   status: "SUCCESS" | "FAILED";
@@ -48,6 +49,8 @@ function formatClock(totalSeconds: number): string {
 /**
  * Invoke the `api` gateway function synchronously (server-side only).
  * Uses the narrowly-scoped server API key; never call from the browser.
+ * When a user session is present in the request context it is forwarded so the
+ * gateway derives the actor server-side (SEC-03) instead of the body claim.
  */
 export async function invokeApi<T>(
   operation: string,
@@ -62,6 +65,7 @@ export async function invokeApi<T>(
     requestId: crypto.randomUUID(),
     correlationId: crypto.randomUUID(),
     actorId,
+    session: authContext.getStore()?.session,
     payload: { operation, input },
   };
 

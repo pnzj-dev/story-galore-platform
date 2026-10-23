@@ -13,6 +13,8 @@ declare global {
     interface Locals {
       /** Verified Appwrite user from the server-side session, or null when anonymous. */
       user: Models.User | null;
+      /** Raw Appwrite session secret (forwarded to the api gateway for server-side actor derivation). */
+      session?: string;
     }
   }
 }

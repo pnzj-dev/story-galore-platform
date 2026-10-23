@@ -79,12 +79,13 @@ The coding agent cannot directly access production secrets or perform unrestrict
 
 ### Actor derivation at the api gateway (SEC-03)
 
-The `api` gateway function derives the acting user from `x-appwrite-user-id` when present, otherwise from the `actorId` field in the command envelope. Web SSR invokes `api` with a server-side API key, which does not populate `x-appwrite-user-id`, so the body `actorId` is the effective source.
+The `api` gateway function derives the acting user from `x-appwrite-user-id` when present, otherwise from a caller-supplied session that is verified server-side, otherwise from the `actorId` field in the command envelope. Web SSR invokes `api` with a server-side API key (which does not populate `x-appwrite-user-id`), so it forwards the user session in the command envelope; the gateway verifies that session against the account endpoint and derives the actor from it.
 
-Two controls apply today:
+Controls in place:
 
-1. **Defense in depth (implemented).** The gateway rejects an `actorId` that is not an existing Appwrite user, so arbitrary/unknown identities cannot be claimed. This is the current mitigation.
-2. **Authoritative actor (follow-up).** Server-authoritative derivation would require the web SSR to invoke `api` through the Appwrite Client SDK `functions.createExecution` with the user session (which populates `x-appwrite-user-id`), and the `api` function's `execute` permission would need to admit session invocations. This is a deliberate architectural change (it shifts the gateway from API-key to session auth) and is tracked as a follow-up rather than shipped silently. Raw `X-Appwrite-Session`/`Authorization: Bearer` headers on the REST execution endpoint were verified not to populate `x-appwrite-user-id`.
+1. **Session-derived actor (implemented).** The web SSR forwards the session; the gateway resolves it to a user via `account.get()` and treats that user as authoritative over the body `actorId`. A forged body claim no longer wins when a session is present.
+2. **Defense in depth (implemented).** When no session is present (system/agent invocations), the gateway rejects an `actorId` that is not an existing Appwrite user, so arbitrary/unknown identities cannot be claimed.
+3. **Remaining limitation (documented).** System actors (Cloudflare workflows) and agents legitimately invoke `api` with a body `actorId` and no session; the gateway still trusts those claims after the existence check. Full closure would require separating the user invocation path from the system path. The Client SDK `createExecution` route (which populates `x-appwrite-user-id` natively) is an alternative but changes the function's `execute` permission surface.
 
 ## Search, recommendation and cache security
 

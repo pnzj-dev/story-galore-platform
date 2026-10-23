@@ -15,6 +15,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/appwrite/sdk-for-go/account"
 	"github.com/appwrite/sdk-for-go/appwrite"
 	"github.com/appwrite/sdk-for-go/client"
 	"github.com/appwrite/sdk-for-go/file"
@@ -30,6 +31,7 @@ type GatewayInput struct {
 	RequestId      string         `json:"requestId"`
 	CorrelationId  string         `json:"correlationId"`
 	ActorId        *string        `json:"actorId"`
+	Session        string         `json:"session"`
 	OperationId    *string        `json:"operationId"`
 	IdempotencyKey *string        `json:"idempotencyKey"`
 	Payload        GatewayPayload `json:"payload"`
@@ -177,8 +179,14 @@ func Main(ctx openruntimes.Context) openruntimes.Response {
 	// caller; trust it over the body actorId claim so a compromised agent cannot
 	// impersonate another actor (e.g. the admin service account). API-key
 	// invocations (the trusted web SSR and the Cloudflare workflows) have no user
-	// header and keep the body claim.
+	// header; the web SSR additionally forwards the user session so the actor can
+	// be derived server-side rather than trusted from the body claim (SEC-03).
 	userHeader := ctx.Req.Headers["x-appwrite-user-id"]
+	if userHeader == "" && in.Session != "" {
+		if uid := verifySession(ctx, in.Session); uid != "" {
+			userHeader = uid
+		}
+	}
 	in.ActorId = stringPtr(resolveActor(userHeader, in.ActorId))
 
 	if !knownOperations[op] {
@@ -8035,6 +8043,34 @@ func resolveActor(userHeader string, bodyActor *string) string {
 		return userHeader
 	}
 	return actorOrEmpty(bodyActor)
+}
+
+// verifySession resolves a caller-supplied Appwrite session secret to its user
+// id via the account endpoint, returning "" when invalid or expired. This lets
+// the trusted web SSR forward the user session so the gateway derives the actor
+// server-side instead of trusting the body actorId claim (SEC-03).
+func verifySession(ctx openruntimes.Context, session string) string {
+	if session == "" {
+		return ""
+	}
+	endpoint := os.Getenv("APPWRITE_ENDPOINT")
+	if endpoint == "" {
+		endpoint = os.Getenv("APPWRITE_FUNCTION_API_ENDPOINT")
+	}
+	if endpoint == "" || strings.Contains(endpoint, "appwrite.test") {
+		endpoint = os.Getenv("APPWRITE_FUNCTION_ENDPOINT")
+	}
+	sessionClient := appwrite.NewClient(
+		appwrite.WithEndpoint(endpoint),
+		appwrite.WithProject(os.Getenv("APPWRITE_FUNCTION_PROJECT_ID")),
+		appwrite.WithSession(session),
+	)
+	user, err := account.New(sessionClient).Get()
+	if err != nil {
+		ctx.Log("api: session verification failed", "err="+err.Error())
+		return ""
+	}
+	return user.Id
 }
 
 func stringPtr(s string) *string {
