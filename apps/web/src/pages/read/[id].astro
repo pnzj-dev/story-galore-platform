@@ -50,7 +50,17 @@ const commentLabels = {
         {pub!.format ?? t("studio.type.book")} · {pub!.readingFormat ?? t("story.readingFormat")} · {manifest.pages.length} {t("story.pages")}
       </p>
 
-      {pages.length > 0 ? (
+      {manifest.entitlementDenied ? (
+        <div class="mt-8 rounded-md border border-dashed border-border px-6 py-10 text-center">
+          <p class="text-lg font-semibold">{t("media.locked")}</p>
+          <a
+            href="/account/billing"
+            class="mt-4 inline-block rounded-sm bg-primary px-4 py-2 font-semibold text-primary-foreground transition hover:opacity-90"
+          >
+            {t("media.viewPlans")}
+          </a>
+        </div>
+      ) : pages.length > 0 ? (
         <div class="mt-8">
           <Reader
             client:load

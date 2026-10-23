@@ -864,6 +864,9 @@ export interface ReaderManifest {
     contentRating?: string;
   };
   pages: ReaderManifestPage[];
+  entitlementDenied?: boolean;
+  entitlementReasons?: string[];
+  accessClass?: string;
 }
 
 /** Fetch a book publication's reader manifest (publication + authorized pages). */
