@@ -195,13 +195,14 @@ func Main(ctx openruntimes.Context) openruntimes.Response {
 
 	cl := newClient(ctx)
 
-	// Defense-in-depth (SEC-03): a body-supplied actorId (API-key invocation with
-	// no session header) is only accepted when it resolves to a real Appwrite
-	// user; otherwise the invocation is treated as anonymous (fail-closed). This
-	// narrows the trusted surface from "any string" to "an existing user", while
-	// the authoritative fix remains passing a session JWT from the web SSR.
+	// Defense-in-depth + full closure (SEC-03): without an authoritative session
+	// (x-appwrite-user-id or a verified session), the body actorId is accepted
+	// only for system/agent actors (admin or a platform agent). Regular users
+	// must authenticate via a verified session, so a leaked API key cannot
+	// impersonate a regular user. Unknown/non-system IDs are treated as
+	// anonymous (fail-closed).
 	if userHeader == "" && actorOrEmpty(in.ActorId) != "" {
-		if _, err := users.New(cl).Get(actorOrEmpty(in.ActorId)); err != nil {
+		if !isSystemActor(cl, actorOrEmpty(in.ActorId)) {
 			in.ActorId = nil
 		}
 	}
@@ -1751,6 +1752,32 @@ func agentLabel(cl client.Client, actorId string) string {
 // isAgentActor reports whether the actor is a trusted platform agent.
 func isAgentActor(cl client.Client, actorId string) bool {
 	return agentLabel(cl, actorId) != ""
+}
+
+// isSystemActor reports whether the actor may be body-claimed without a
+// verified session: an admin or a trusted platform agent. Regular users must
+// authenticate via a verified session (SEC-03 full closure), so a leaked API
+// key cannot impersonate a regular user by supplying a body actorId.
+func isSystemActor(cl client.Client, actorId string) bool {
+	if actorId == "" {
+		return false
+	}
+	user, err := users.New(cl).Get(actorId)
+	if err != nil {
+		return false
+	}
+	return isSystemLabel(user.Labels)
+}
+
+// isSystemLabel reports whether a user's labels identify a system actor (admin
+// or a trusted platform agent). Pure (no DB); tested directly.
+func isSystemLabel(labels []string) bool {
+	for _, l := range labels {
+		if l == "admin" || agentAllowedOperations[l] != nil {
+			return true
+		}
+	}
+	return false
 }
 
 // agentAuthorizedForOperation reports whether the agent actor is allowlisted

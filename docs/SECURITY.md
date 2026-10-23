@@ -83,9 +83,9 @@ The `api` gateway function derives the acting user from `x-appwrite-user-id` whe
 
 Controls in place:
 
-1. **Session-derived actor (implemented).** The web SSR forwards the session; the gateway resolves it to a user via `account.get()` and treats that user as authoritative over the body `actorId`. A forged body claim no longer wins when a session is present.
-2. **Defense in depth (implemented).** When no session is present (system/agent invocations), the gateway rejects an `actorId` that is not an existing Appwrite user, so arbitrary/unknown identities cannot be claimed.
-3. **Remaining limitation (documented).** System actors (Cloudflare workflows) and agents legitimately invoke `api` with a body `actorId` and no session; the gateway still trusts those claims after the existence check. Full closure would require separating the user invocation path from the system path. The Client SDK `createExecution` route (which populates `x-appwrite-user-id` natively) is an alternative but changes the function's `execute` permission surface.
+1. **Session-derived actor (implemented).** The web SSR forwards the session; the gateway resolves it to a user via `account.get()` and treats that user as authoritative over the body `actorId`.
+2. **Body-claim restricted to system actors (implemented, full closure).** Without a session, the body `actorId` is accepted only for system actors — admins (`admin` label) or platform agents (`agent*` label in the allowlist). A regular user claimed via the body without a session is rejected (fail-closed), so a leaked API key cannot impersonate a regular user. `isSystemLabel` carries the pure label rule and is unit-tested.
+3. **Remaining surface (documented).** Admin and agent actors are still legitimately body-claimed by the Cloudflare workflows and the agent gateway. A key that leaks therefore can still invoke as those system actors; closing that requires per-workflow/per-agent session JWTs (the agents' `Authorization: Bearer` path) rather than a shared API key.
 
 ## Search, recommendation and cache security
 

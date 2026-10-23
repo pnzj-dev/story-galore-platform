@@ -63,6 +63,30 @@ func TestResolveActorPreferSessionUser(t *testing.T) {
 	}
 }
 
+// TestIsSystemLabel verifies the SEC-03 full-closure label rule: only admin or
+// platform-agent labels qualify an actor for the body-claimed (no-session)
+// path. Regular users and unknown labels are not system actors.
+func TestIsSystemLabel(t *testing.T) {
+	if !isSystemLabel([]string{"admin"}) {
+		t.Error("admin label must be a system actor")
+	}
+	if !isSystemLabel([]string{"agentstoryproducer"}) {
+		t.Error("agent label must be a system actor")
+	}
+	if !isSystemLabel([]string{"agentsupport"}) {
+		t.Error("support agent label must be a system actor")
+	}
+	if isSystemLabel([]string{}) {
+		t.Error("a regular user (no labels) must not be a system actor")
+	}
+	if isSystemLabel([]string{"premium", "verified"}) {
+		t.Error("non-admin/non-agent labels must not be a system actor")
+	}
+	if isSystemLabel(nil) {
+		t.Error("nil labels must not be a system actor")
+	}
+}
+
 // TestRowOwnedByActor verifies the direct-owner/public/comment-visibility
 // policy (the pure, DB-free part of getRow authorization).
 func TestRowOwnedByActor(t *testing.T) {
