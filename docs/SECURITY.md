@@ -77,6 +77,15 @@ Agent authorization is capability-based. Sensitive agent credentials are short-l
 
 The coding agent cannot directly access production secrets or perform unrestricted production destructive actions. Production changes pass through controlled review/approval workflows.
 
+### Actor derivation at the api gateway (SEC-03)
+
+The `api` gateway function derives the acting user from `x-appwrite-user-id` when present, otherwise from the `actorId` field in the command envelope. Web SSR invokes `api` with a server-side API key, which does not populate `x-appwrite-user-id`, so the body `actorId` is the effective source.
+
+Two controls apply today:
+
+1. **Defense in depth (implemented).** The gateway rejects an `actorId` that is not an existing Appwrite user, so arbitrary/unknown identities cannot be claimed. This is the current mitigation.
+2. **Authoritative actor (follow-up).** Server-authoritative derivation would require the web SSR to invoke `api` through the Appwrite Client SDK `functions.createExecution` with the user session (which populates `x-appwrite-user-id`), and the `api` function's `execute` permission would need to admit session invocations. This is a deliberate architectural change (it shifts the gateway from API-key to session auth) and is tracked as a follow-up rather than shipped silently. Raw `X-Appwrite-Session`/`Authorization: Bearer` headers on the REST execution endpoint were verified not to populate `x-appwrite-user-id`.
+
 ## Search, recommendation and cache security
 
 Search/vector similarity is not authorization. Candidate results must be filtered by authorization, entitlement, age/geography and publication/moderation policy before being returned.

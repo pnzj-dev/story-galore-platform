@@ -1432,9 +1432,52 @@ func hasActiveSubscription(cl client.Client, userId, creatorId string) bool {
 	return len(rows) > 0
 }
 
+// hasPlatformSubscription reports whether the actor has an active subscription to
+// a PLATFORM-scope plan (e.g. StoryGalore Premium). A platform subscription
+// unlocks content across every creator, so it satisfies SUBSCRIPTION-gated
+// delivery regardless of creatorId.
+func hasPlatformSubscription(cl client.Client, userId string) bool {
+	if userId == "" {
+		return false
+	}
+	service := tablesdb.New(cl)
+	list, err := service.ListRows(databaseID, "subscriptions", service.WithListRowsQueries([]string{
+		qEqual("userId", userId),
+		qEqual("status", "ACTIVE"),
+		`{"method":"limit","values":[20]}`,
+	}))
+	if err != nil {
+		return false
+	}
+	var raw map[string]interface{}
+	if list.Decode(&raw) != nil {
+		return false
+	}
+	rows, _ := raw["rows"].([]interface{})
+	for _, r := range rows {
+		sub, _ := r.(map[string]interface{})
+		planId, _ := sub["planId"].(string)
+		if planId == "" {
+			continue
+		}
+		plan, err := service.GetRow(databaseID, "plans", planId)
+		if err != nil {
+			continue
+		}
+		var pm map[string]interface{}
+		if plan.Decode(&pm) == nil {
+			if scope, _ := pm["scope"].(string); scope == "PLATFORM" {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 // entitlementSatisfied evaluates the publication's accessClass against the
-// actor's entitlements (fail-closed). SUBSCRIPTION requires an active creator
-// subscription; PURCHASE is not wired in V1 and fails closed.
+// actor's entitlements (fail-closed). SUBSCRIPTION is satisfied by an active
+// creator subscription OR an active PLATFORM-scope subscription (Premium);
+// PURCHASE is not wired in V1 and fails closed.
 func entitlementSatisfied(cl client.Client, actorId string, pm map[string]interface{}, decision *deliveryDecision) bool {
 	accessClass, _ := pm["accessClass"].(string)
 	if accessClass == "PURCHASE" {
@@ -1448,7 +1491,7 @@ func entitlementSatisfied(cl client.Client, actorId string, pm map[string]interf
 		return false
 	}
 	creatorId, _ := pm["creatorId"].(string)
-	if !hasActiveSubscription(cl, actorId, creatorId) {
+	if !hasPlatformSubscription(cl, actorId) && !hasActiveSubscription(cl, actorId, creatorId) {
 		decision.Reasons = append(decision.Reasons, "ENTITLEMENT_REQUIRED")
 		decision.AccessClass = "ENTITLEMENT_PROTECTED"
 		return false
