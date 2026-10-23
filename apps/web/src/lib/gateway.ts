@@ -862,6 +862,7 @@ export interface ReaderManifest {
     format?: string;
     readingFormat?: string;
     contentRating?: string;
+    creatorId?: string;
   };
   pages: ReaderManifestPage[];
   entitlementDenied?: boolean;

@@ -195,6 +195,8 @@ const fr = {
   // Media detail / reader / shorts
   "media.locked": "Ce titre nécessite un abonnement ou un achat.",
   "media.viewPlans": "Voir les formules",
+  "media.subscribeTitle": "S'abonner pour débloquer",
+  "media.signInToSubscribe": "Se connecter pour s'abonner",
   "media.unavailable": "Média indisponible.",
   "media.notFound": "Introuvable",
   "media.episodeLabel": "Épisode",

@@ -194,6 +194,8 @@ const ar = {
   // Media detail / reader / shorts
   "media.locked": "يتطلب هذا العنوان اشتراكًا أو شراءً.",
   "media.viewPlans": "عرض الخطط",
+  "media.subscribeTitle": "اشترك للفتح",
+  "media.signInToSubscribe": "سجّل الدخول للاشتراك",
   "media.unavailable": "الوسائط غير متاحة.",
   "media.notFound": "غير موجود",
   "media.episodeLabel": "الحلقة",

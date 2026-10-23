@@ -1009,6 +1009,7 @@ export const server = {
       planId: z.string().min(1),
       provider: z.enum(["STRIPE", "NOWPAYMENTS"]),
       email: z.string().email().optional(),
+      creatorId: z.string().optional(),
     }),
     handler: async (input, context) => {
       const user = context.locals.user;
@@ -1024,6 +1025,7 @@ export const server = {
           billingStrategy: "NATIVE_RECURRING",
           provider: input.provider,
           email: input.email ?? undefined,
+          creatorId: input.creatorId ?? undefined,
         },
         user.$id,
       );

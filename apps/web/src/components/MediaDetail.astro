@@ -2,6 +2,7 @@
 import Layout from "@/layouts/Layout.astro";
 import VideoDetail from "@/components/VideoDetail.svelte";
 import Comments from "@/components/Comments.svelte";
+import SubscribeUpsell from "@/components/SubscribeUpsell.astro";
 import { ImageViewer } from "@storygalore/ui";
 import type { PlaylistItem } from "@storygalore/ui";
 import { fetchSeriesEpisodes, fetchMediaProgress, fetchComments } from "@/lib/gateway";
@@ -132,15 +133,7 @@ const commentLabels = {
               <div class="mt-6">
                 {
                   locked ? (
-                    <div class="rounded-md border border-dashed border-border px-6 py-10 text-center">
-                      <p class="text-lg font-semibold">{t("media.locked")}</p>
-                      <a
-                        href="/account/billing"
-                        class="mt-4 inline-block rounded-sm bg-primary px-4 py-2 text-primary-foreground"
-                      >
-                        {t("media.viewPlans")}
-                      </a>
-                    </div>
+                    <SubscribeUpsell creatorId={pub?.creatorId} t={t} />
                   ) : allowed.length > 0 ? (
                     kind === "video" ? (
                       <VideoDetail

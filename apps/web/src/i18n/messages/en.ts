@@ -195,6 +195,8 @@ export default {
   // Media detail / reader / shorts
   "media.locked": "This title requires a subscription or purchase.",
   "media.viewPlans": "View plans",
+  "media.subscribeTitle": "Subscribe to unlock",
+  "media.signInToSubscribe": "Sign in to subscribe",
   "media.unavailable": "Media unavailable.",
   "media.notFound": "Not found",
   "media.episodeLabel": "Episode",
