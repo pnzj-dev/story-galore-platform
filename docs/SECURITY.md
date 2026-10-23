@@ -85,7 +85,7 @@ The `api` gateway function derives the acting user from `x-appwrite-user-id` whe
 - **System actors** — the Cloudflare workflows forward an admin session secret (`ADMIN_SESSION_SECRET`); each Cloudflare agent forwards its own session secret (split across `AGENT_SESSION_SECRETS_A`/`_B` to respect the Cloudflare secret-size limit); the Central Agent Gateway mints a short-lived session for the agent on each delegation and deletes it afterward.
 - **Anonymous / scheduled** — no actor (empty `x-appwrite-user-id` and no session).
 
-A leaked API key can therefore only reach anonymous operations; it cannot impersonate a user, admin, or agent because every actor identity is bound to a verified session. Session secrets are long-lived (1 year) and must be rotated, with per-actor revocation available by deleting the session.
+A leaked API key can therefore only reach anonymous operations; it cannot impersonate a user, admin, or agent because every actor identity is bound to a verified session. Session secrets are long-lived (1 year); rotate them with `scripts/rotate-system-actor-sessions.py` (creates fresh sessions, re-syncs the Cloudflare secrets, and revokes the old sessions), and revoke a single actor on demand by deleting its session.
 
 ## Search, recommendation and cache security
 
