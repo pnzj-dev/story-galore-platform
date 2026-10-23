@@ -383,6 +383,38 @@ export async function fetchCollectionItems(actorId: string, collection: Collecti
   return items;
 }
 
+/** Fetch the authenticated user's saved ("My List") publications. */
+export async function fetchSavedTitles(actorId: string): Promise<MediaCardData[]> {
+  const out = await invokeApi<{ items?: PublicationItem[] }>("library_entry_list", {}, actorId);
+  if (out.status !== "SUCCESS" || !out.result?.items) return [];
+  return out.result.items
+    .filter((item) => Boolean(item.publication?.$id))
+    .map((item) => {
+      const pub = item.publication!;
+      const t = VALID_TYPES.includes(pub.type as MediaType) ? (pub.type as MediaType) : "BOOK";
+      return {
+        id: pub.$id!,
+        title: pub.title ?? "Untitled",
+        type: t,
+        format: pub.format,
+        contentRating: pub.contentRating as ContentRating | undefined,
+        coverUrl: item.coverUrl,
+        creatorName: item.creatorName,
+      } satisfies MediaCardData;
+    });
+}
+
+/** Fetch the set of saved publication ids (for the Save button state). */
+export async function fetchSavedPublicationIds(actorId: string): Promise<Set<string>> {
+  const out = await invokeApi<{ items?: PublicationItem[] }>("library_entry_list", {}, actorId);
+  if (out.status !== "SUCCESS" || !out.result?.items) return new Set();
+  return new Set(
+    out.result.items
+      .map((item) => item.publication?.$id)
+      .filter((id): id is string => Boolean(id)),
+  );
+}
+
 export interface MediaDeliveryItem {
   mediaId: string;
   allowed: boolean;

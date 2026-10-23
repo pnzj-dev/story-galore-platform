@@ -194,6 +194,8 @@ const ar = {
   "library.noCollections": "لا توجد مجموعات بعد. ابدأ بإنشاء مجموعة من صفحة منشئ المحتوى أو سطح الاكتشاف.",
   "library.titles": "عناوين",
   "library.emptyCollection": "لا تحتوي هذه المجموعة على عناوين بعد.",
+  "library.save": "حفظ في القائمة",
+  "library.saved": "محفوظ",
 
   // Media detail / reader / shorts
   "media.locked": "يتطلب هذا العنوان اشتراكًا أو شراءً.",

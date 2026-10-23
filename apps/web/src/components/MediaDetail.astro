@@ -3,9 +3,10 @@ import Layout from "@/layouts/Layout.astro";
 import VideoDetail from "@/components/VideoDetail.svelte";
 import Comments from "@/components/Comments.svelte";
 import SubscribeUpsell from "@/components/SubscribeUpsell.astro";
+import SaveButton from "@/components/SaveButton.svelte";
 import { ImageViewer } from "@storygalore/ui";
 import type { PlaylistItem } from "@storygalore/ui";
-import { fetchSeriesEpisodes, fetchMediaProgress, fetchComments } from "@/lib/gateway";
+import { fetchSeriesEpisodes, fetchMediaProgress, fetchComments, fetchSavedPublicationIds } from "@/lib/gateway";
 import type { PublicationDetail } from "@/lib/gateway";
 import { getTranslations } from "@/i18n";
 
@@ -36,6 +37,7 @@ const autoplay = Astro.url.searchParams.get("autoplay") === "1";
 // parts within this publication, plus the resume index from saved progress.
 const userId = Astro.locals.user?.$id ?? "";
 const pubId = pub?.$id ?? "";
+const savedIds = userId ? await fetchSavedPublicationIds(userId) : new Set<string>();
 let videoItems: PlaylistItem[] = [];
 let videoInitialIndex = 0;
 let videoInitialTime = 0;
@@ -129,6 +131,16 @@ const commentLabels = {
               {pub!.description && (
                 <p class="mt-4 max-w-2xl text-sm leading-7 text-foreground-muted">{pub!.description}</p>
               )}
+
+              <div class="mt-5">
+                <SaveButton
+                  client:load
+                  publicationId={pubId}
+                  saved={savedIds.has(pubId)}
+                  saveLabel={t("library.save")}
+                  savedLabel={t("library.saved")}
+                />
+              </div>
 
               <div class="mt-6">
                 {

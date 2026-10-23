@@ -2,7 +2,7 @@
 import Layout from "@/layouts/Layout.astro";
 import { MediaRail } from "@storygalore/ui";
 import DownloadsList from "@/components/DownloadsList.svelte";
-import { fetchContinueItems, fetchCollections } from "@/lib/gateway";
+import { fetchContinueItems, fetchCollections, fetchSavedTitles } from "@/lib/gateway";
 import { getTranslations } from "@/i18n";
 
 const { t } = getTranslations(Astro.currentLocale);
@@ -13,6 +13,7 @@ if (!user) {
 }
 
 const continueItems = await fetchContinueItems(user.$id);
+const savedTitles = await fetchSavedTitles(user.$id);
 const collections = (await fetchCollections(user.$id)).filter((c) => c.curatorId === user.$id);
 
 const downloadLabels = {
@@ -37,6 +38,14 @@ const downloadLabels = {
         emptyHint={t("library.emptyHint")}
       />
     </div>
+
+    {
+      savedTitles.length > 0 && (
+        <div class="mt-10">
+          <MediaRail client:load title={t("library.saved")} items={savedTitles} />
+        </div>
+      )
+    }
 
     <section class="mt-10">
       <h2 class="text-xl font-semibold">{t("library.collections")}</h2>

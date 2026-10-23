@@ -740,6 +740,13 @@ studio_tables:
       - {key: coverPublicationId, type: varchar, size: 255, required: false}
       - {key: createdAt, type: datetime, required: true}
       - {key: updatedAt, type: datetime, required: false}
+  - table: library_entries
+    source: contracts/domain/library-entry.schema.yaml
+    partition_key: userId
+    columns:
+      - {key: userId, type: varchar, size: 255, required: true}
+      - {key: publicationId, type: varchar, size: 255, required: true}
+      - {key: createdAt, type: datetime, required: true}
 pending_columns_note: "desired-schema tables with NO schema source found; columns are BLOCKED until a schema contract exists."
 pending_columns:
   - table: profiles
@@ -751,7 +758,6 @@ pending_columns:
   - table: entitlements
   - table: payment_attempts
   - table: ledger_entries
-  - table: library_entries
   - table: follows
   - table: ai_jobs
   - table: ai_usage

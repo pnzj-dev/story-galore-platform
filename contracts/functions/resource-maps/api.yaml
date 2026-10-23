@@ -33,4 +33,5 @@ resources:
   - book_pages
   - agent_tasks
   - collections
+  - library_entries
 undeclared_resource_access: BLOCK

@@ -131,6 +131,7 @@ var knownOperations = map[string]bool{
 	"agent_task_get": true, "agent_task_update": true,
 	"collection_create": true, "collection_list": true,
 	"collection_get": true, "collection_update": true,
+	"library_entry_create": true, "library_entry_list": true, "library_entry_delete": true,
 }
 
 const databaseID = "main"
@@ -298,6 +299,12 @@ func Main(ctx openruntimes.Context) openruntimes.Response {
 		return collectionGet(ctx, &in, cl)
 	case "collection_update":
 		return collectionUpdate(ctx, &in, cl)
+	case "library_entry_create":
+		return libraryEntryCreate(ctx, &in, cl)
+	case "library_entry_list":
+		return libraryEntryList(ctx, &in, cl)
+	case "library_entry_delete":
+		return libraryEntryDelete(ctx, &in, cl)
 	case "creator_analytics_get":
 		return creatorAnalyticsGet(ctx, &in, cl)
 	case "publication_validate":
@@ -7052,6 +7059,90 @@ func collectionUpdate(ctx openruntimes.Context, in *GatewayInput, cl client.Clie
 		return internalFailure(ctx, in, err)
 	}
 	return success(ctx, in, map[string]interface{}{"collectionId": input.CollectionId, "updated": true})
+}
+
+// --- library entries (saved "My List") ---
+
+// libraryEntryCreate saves a publication to the actor's library. Idempotent;
+// the row id is "{userId}:{publicationId}".
+func libraryEntryCreate(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	var input struct {
+		PublicationId string `json:"publicationId"`
+	}
+	if !decode(ctx, in, &input) || input.PublicationId == "" {
+		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
+	}
+	actorId := actorOrEmpty(in.ActorId)
+	if actorId == "" {
+		return respond(ctx, in.OperationId, "UNAUTHORIZED", false)
+	}
+	entryId := actorId + "_" + input.PublicationId
+	if _, ok := fetchRowMap(cl, "library_entries", entryId); ok {
+		return success(ctx, in, map[string]interface{}{"entryId": entryId, "saved": true, "idempotent": true})
+	}
+	row := map[string]interface{}{
+		"userId":        actorId,
+		"publicationId": input.PublicationId,
+		"createdAt":     now(),
+	}
+	if err := createRow(cl, "library_entries", entryId, row); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	emit(ctx, cl, "library.entry.created.v1", entryId, actorId, map[string]interface{}{"entryId": entryId, "publicationId": input.PublicationId}, in.CorrelationId)
+	return success(ctx, in, map[string]interface{}{"entryId": entryId, "saved": true})
+}
+
+// libraryEntryList returns the actor's saved publications (resolved metadata).
+func libraryEntryList(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	actorId := actorOrEmpty(in.ActorId)
+	if actorId == "" {
+		return respond(ctx, in.OperationId, "UNAUTHORIZED", false)
+	}
+	entries := listRowsByField(cl, "library_entries", "userId", actorId)
+	items := make([]map[string]interface{}, 0, len(entries))
+	for _, e := range entries {
+		pubId, _ := e["publicationId"].(string)
+		if pubId == "" {
+			continue
+		}
+		row, ok := fetchRowMap(cl, "publications", pubId)
+		if !ok {
+			continue
+		}
+		if status, _ := row["status"].(string); status != "PUBLISHED" && status != "APPROVED" {
+			continue
+		}
+		item := map[string]interface{}{"publication": row}
+		item["coverUrl"] = resolveCoverURL(cl, pubId, "")
+		if creatorId, ok := row["creatorId"].(string); ok && creatorId != "" {
+			item["creatorName"] = resolveCreatorName(cl, creatorId)
+		}
+		items = append(items, item)
+	}
+	return success(ctx, in, map[string]interface{}{"items": items})
+}
+
+// libraryEntryDelete removes a saved publication from the actor's library.
+func libraryEntryDelete(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	var input struct {
+		PublicationId string `json:"publicationId"`
+	}
+	if !decode(ctx, in, &input) || input.PublicationId == "" {
+		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
+	}
+	actorId := actorOrEmpty(in.ActorId)
+	if actorId == "" {
+		return respond(ctx, in.OperationId, "UNAUTHORIZED", false)
+	}
+	entryId := actorId + "_" + input.PublicationId
+	if _, ok := fetchRowMap(cl, "library_entries", entryId); !ok {
+		return success(ctx, in, map[string]interface{}{"removed": false})
+	}
+	if _, err := tablesdb.New(cl).DeleteRow(databaseID, "library_entries", entryId); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	emit(ctx, cl, "library.entry.deleted.v1", entryId, actorId, map[string]interface{}{"entryId": entryId, "publicationId": input.PublicationId}, in.CorrelationId)
+	return success(ctx, in, map[string]interface{}{"removed": true})
 }
 
 func supportTicketList(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {

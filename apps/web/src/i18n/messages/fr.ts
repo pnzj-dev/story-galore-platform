@@ -195,6 +195,8 @@ const fr = {
   "library.noCollections": "Aucune collection pour l'instant. Commencez à créer une collection depuis la page d'un créateur ou la découverte.",
   "library.titles": "titres",
   "library.emptyCollection": "Cette collection ne contient aucun titre pour l'instant.",
+  "library.save": "Enregistrer dans la liste",
+  "library.saved": "Enregistré",
 
   // Media detail / reader / shorts
   "media.locked": "Ce titre nécessite un abonnement ou un achat.",

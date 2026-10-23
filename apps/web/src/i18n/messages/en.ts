@@ -195,6 +195,8 @@ export default {
   "library.noCollections": "No collections yet. Start curating from a creator's page or the discovery surface.",
   "library.titles": "titles",
   "library.emptyCollection": "This collection has no titles yet.",
+  "library.save": "Save to list",
+  "library.saved": "Saved",
 
   // Media detail / reader / shorts
   "media.locked": "This title requires a subscription or purchase.",

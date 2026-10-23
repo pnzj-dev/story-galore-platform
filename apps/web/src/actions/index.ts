@@ -1077,4 +1077,32 @@ export const server = {
       return { ok: true };
     },
   }),
+
+  saveToLibrary: defineAction({
+    accept: "form",
+    input: z.object({ publicationId: z.string().min(1) }),
+    handler: async (input, context) => {
+      const user = context.locals.user;
+      if (!user) throw new ActionError({ code: "UNAUTHORIZED", message: "Sign in to save." });
+      const out = await invokeApi("library_entry_create", { publicationId: input.publicationId }, user.$id);
+      if (out.status !== "SUCCESS") {
+        throw new ActionError({ code: "BAD_REQUEST", message: "Could not save to your list." });
+      }
+      return { ok: true };
+    },
+  }),
+
+  removeFromLibrary: defineAction({
+    accept: "form",
+    input: z.object({ publicationId: z.string().min(1) }),
+    handler: async (input, context) => {
+      const user = context.locals.user;
+      if (!user) throw new ActionError({ code: "UNAUTHORIZED", message: "Sign in." });
+      const out = await invokeApi("library_entry_delete", { publicationId: input.publicationId }, user.$id);
+      if (out.status !== "SUCCESS") {
+        throw new ActionError({ code: "BAD_REQUEST", message: "Could not remove from your list." });
+      }
+      return { ok: true };
+    },
+  }),
 };

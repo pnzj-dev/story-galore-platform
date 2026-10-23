@@ -1,0 +1,15 @@
+version: 1
+name: library-entry
+description: >
+  A saved ("My List") publication in a user's library. Content-only reference;
+  saving never grants access beyond the publication's own entitlement, age,
+  jurisdiction, moderation, or publication-status policy.
+fields:
+  userId: string
+  publicationId: string
+  createdAt: datetime
+rules:
+  - One entry per (userId, publicationId); the row id is "{userId}_{publicationId}".
+  - Saving is idempotent and removable by the owner.
+  - Saving never bypasses entitlement, age, jurisdiction, moderation, or
+    publication-status policy.

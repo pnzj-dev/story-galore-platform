@@ -3,7 +3,8 @@ import Layout from "@/layouts/Layout.astro";
 import MediaDetail from "@/components/MediaDetail.astro";
 import Comments from "@/components/Comments.svelte";
 import SubscribeUpsell from "@/components/SubscribeUpsell.astro";
-import { fetchPublication, fetchComments } from "@/lib/gateway";
+import SaveButton from "@/components/SaveButton.svelte";
+import { fetchPublication, fetchComments, fetchSavedPublicationIds } from "@/lib/gateway";
 import { getTranslations } from "@/i18n";
 
 const { t } = getTranslations(Astro.currentLocale);
@@ -16,6 +17,7 @@ if (!detail) {
 }
 
 const pub = detail?.publication;
+const savedIds = actorId ? await fetchSavedPublicationIds(actorId) : new Set<string>();
 const type = pub?.type ?? "BOOK";
 const isBook = type === "BOOK";
 
@@ -91,6 +93,16 @@ function kindFor(t: string): "video" | "audio" | "post" {
                   {pub!.description && (
                     <p class="mt-4 max-w-2xl text-sm leading-7 text-foreground-muted">{pub!.description}</p>
                   )}
+
+                  <div class="mt-5">
+                    <SaveButton
+                      client:load
+                      publicationId={storyId}
+                      saved={savedIds.has(storyId)}
+                      saveLabel={t("library.save")}
+                      savedLabel={t("library.saved")}
+                    />
+                  </div>
 
                   <div class="mt-6">
                     {
