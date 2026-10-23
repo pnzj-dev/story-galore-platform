@@ -178,13 +178,25 @@ func Main(ctx openruntimes.Context) openruntimes.Response {
 	// impersonate another actor (e.g. the admin service account). API-key
 	// invocations (the trusted web SSR and the Cloudflare workflows) have no user
 	// header and keep the body claim.
-	in.ActorId = stringPtr(resolveActor(ctx.Req.Headers["x-appwrite-user-id"], in.ActorId))
+	userHeader := ctx.Req.Headers["x-appwrite-user-id"]
+	in.ActorId = stringPtr(resolveActor(userHeader, in.ActorId))
 
 	if !knownOperations[op] {
 		return respond(ctx, in.OperationId, "RESOURCE_NOT_FOUND", false)
 	}
 
 	cl := newClient(ctx)
+
+	// Defense-in-depth (SEC-03): a body-supplied actorId (API-key invocation with
+	// no session header) is only accepted when it resolves to a real Appwrite
+	// user; otherwise the invocation is treated as anonymous (fail-closed). This
+	// narrows the trusted surface from "any string" to "an existing user", while
+	// the authoritative fix remains passing a session JWT from the web SSR.
+	if userHeader == "" && actorOrEmpty(in.ActorId) != "" {
+		if _, err := users.New(cl).Get(actorOrEmpty(in.ActorId)); err != nil {
+			in.ActorId = nil
+		}
+	}
 
 	// Agent actors (Appwrite users carrying a generated agent label) may only call
 	// the operations their tools are wired to. This is the primary agent->gateway
