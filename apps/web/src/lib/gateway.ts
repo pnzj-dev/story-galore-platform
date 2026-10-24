@@ -254,6 +254,7 @@ export async function fetchContinueItems(actorId: string): Promise<MediaCardData
         contentRating: pub.contentRating as ContentRating | undefined,
         coverUrl: item.coverUrl,
         backdropUrl: item.backdropUrl ?? item.coverUrl,
+        orientation: 'LANDSCAPE',
         creatorName: item.creatorName,
         progress: {
           percentComplete: progress.percentComplete ?? 0,

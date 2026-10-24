@@ -53,9 +53,9 @@
 
   const defaultOrientation: Record<MediaCardData['type'], CardOrientation> = {
     BOOK: 'PORTRAIT',
-    POST: 'LANDSCAPE',
-    VIDEO: 'LANDSCAPE',
-    AUDIO: 'SQUARE',
+    POST: 'PORTRAIT',
+    VIDEO: 'PORTRAIT',
+    AUDIO: 'PORTRAIT',
     MIXED: 'PORTRAIT',
   };
 
