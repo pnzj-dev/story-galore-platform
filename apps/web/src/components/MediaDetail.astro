@@ -13,7 +13,7 @@ const { t } = getTranslations(Astro.currentLocale);
 
 interface Props {
   detail: PublicationDetail | null;
-  kind: "video" | "audio" | "post";
+  kind: "video" | "audio" | "post" | "book";
   title: string;
 }
 
@@ -153,6 +153,24 @@ const commentLabels = {
                     )
                   )
                 }
+                {
+                  kind === "book" && (
+                    locked ? (
+                      <SubscribeUpsell creatorId={pub?.creatorId} t={t} />
+                    ) : (
+                      <a
+                        href={`/read/${pubId}`}
+                        class="inline-flex items-center gap-2 rounded-sm bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                          <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                        </svg>
+                        {t("media.readNow")}
+                      </a>
+                    )
+                  )
+                }
                 <SaveButton
                   client:load
                   publicationId={pubId}
@@ -186,7 +204,7 @@ const commentLabels = {
                         />
                       ))}
                     </div>
-                  ) : kind !== "video" && !locked && allowed.length === 0 ? (
+                  ) : kind !== "video" && kind !== "book" && !locked && allowed.length === 0 ? (
                     <p class="rounded-md border border-dashed border-border px-6 py-8 text-sm text-foreground-muted">
                       {t("media.unavailable")}
                     </p>
