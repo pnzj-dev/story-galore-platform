@@ -69,6 +69,61 @@ export function createServerClient(config: AppwriteConfig, options?: ServerClien
   };
 }
 
+/** Extract the `a_session_<project>` cookie value from a `Set-Cookie` header. */
+function sessionValueFromSetCookie(setCookie: string | null, projectId: string): string {
+  if (!setCookie) return "";
+  const prefix = `a_session_${projectId}=`;
+  const idx = setCookie.indexOf(prefix);
+  if (idx === -1) return "";
+  return setCookie.slice(idx + prefix.length).split(";")[0].trim();
+}
+
+/**
+ * Create an email/password session and return its secret. Appwrite v28 delivers
+ * the session secret via the `a_session_<project>` Set-Cookie (not the response
+ * body), so this reads it from that header.
+ */
+export async function createEmailPasswordSessionSecret(
+  config: AppwriteConfig,
+  email: string,
+  password: string,
+): Promise<string> {
+  const resp = await fetch(`${config.endpoint}/account/sessions/email`, {
+    method: "POST",
+    headers: {
+      "X-Appwrite-Project": config.projectId,
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({ email, password }),
+  });
+  if (resp.status >= 400) {
+    const body = (await resp.json().catch(() => ({}))) as { message?: string };
+    throw new Error(body.message ?? "Invalid email or password.");
+  }
+  return sessionValueFromSetCookie(resp.headers.get("set-cookie"), config.projectId);
+}
+
+/** Create an OAuth provider session and return its session value. */
+export async function createOAuthSessionSecret(
+  config: AppwriteConfig,
+  userId: string,
+  secret: string,
+): Promise<string> {
+  const resp = await fetch(`${config.endpoint}/account/sessions`, {
+    method: "POST",
+    headers: {
+      "X-Appwrite-Project": config.projectId,
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({ userId, secret }),
+  });
+  if (resp.status >= 400) {
+    const body = (await resp.json().catch(() => ({}))) as { message?: string };
+    throw new Error(body.message ?? "Could not create session.");
+  }
+  return sessionValueFromSetCookie(resp.headers.get("set-cookie"), config.projectId);
+}
+
 /**
  * Server-side Appwrite client authenticated with a scoped API key.
  * Used for privileged operations (e.g. uploading to Storage) that run only in

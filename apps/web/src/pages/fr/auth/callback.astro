@@ -1,6 +1,6 @@
 ---
 import MinimalLayout from "@/layouts/MinimalLayout.astro";
-import { createServerClient, SESSION_COOKIE } from "@storygalore/appwrite-client";
+import { createOAuthSessionSecret, SESSION_COOKIE } from "@storygalore/appwrite-client";
 import { getTranslations } from "@/i18n";
 import { getRelativeLocaleUrl } from "astro:i18n";
 
@@ -13,9 +13,8 @@ const secret = Astro.url.searchParams.get("secret");
 
 if (userId && secret) {
   try {
-    const { account } = createServerClient({ endpoint, projectId });
-    const session = await account.createSession(userId, secret);
-    Astro.cookies.set(SESSION_COOKIE, session.secret, {
+    const sessionSecret = await createOAuthSessionSecret({ endpoint, projectId }, userId, secret);
+    Astro.cookies.set(SESSION_COOKIE, sessionSecret, {
       httpOnly: true,
       secure: import.meta.env.PROD,
       sameSite: "lax",

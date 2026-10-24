@@ -1,7 +1,7 @@
 import { defineAction, ActionError } from "astro:actions";
 import { z } from "astro:schema";
 import { createHash, randomUUID } from "node:crypto";
-import { createServerClient, createAdminClient, SESSION_COOKIE, ID } from "@storygalore/appwrite-client";
+import { createServerClient, createAdminClient, createEmailPasswordSessionSecret, SESSION_COOKIE, ID } from "@storygalore/appwrite-client";
 import { invokeApi } from "@/lib/gateway";
 
 const endpoint = import.meta.env.PUBLIC_APPWRITE_ENDPOINT;
@@ -36,10 +36,13 @@ export const server = {
       returnTo: z.string().optional(),
     }),
     handler: async (input, context) => {
-      const { account } = createServerClient({ endpoint, projectId });
       try {
-        const session = await account.createEmailPasswordSession(input.email, input.password);
-        context.cookies.set(SESSION_COOKIE, session.secret, sessionCookieOptions());
+        const secret = await createEmailPasswordSessionSecret(
+          { endpoint, projectId },
+          input.email,
+          input.password,
+        );
+        context.cookies.set(SESSION_COOKIE, secret, sessionCookieOptions());
         return { ok: true, returnTo: input.returnTo ?? "/" };
       } catch {
         throw new ActionError({ code: "UNAUTHORIZED", message: "Invalid email or password." });
@@ -58,8 +61,12 @@ export const server = {
       const { account } = createServerClient({ endpoint, projectId });
       try {
         await account.create(ID.unique(), input.email, input.password, input.name);
-        const session = await account.createEmailPasswordSession(input.email, input.password);
-        context.cookies.set(SESSION_COOKIE, session.secret, sessionCookieOptions());
+        const secret = await createEmailPasswordSessionSecret(
+          { endpoint, projectId },
+          input.email,
+          input.password,
+        );
+        context.cookies.set(SESSION_COOKIE, secret, sessionCookieOptions());
         return { ok: true };
       } catch {
         throw new ActionError({
