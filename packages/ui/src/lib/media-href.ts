@@ -33,7 +33,8 @@ export function mediaHref(item: MediaHrefTarget, opts: MediaHrefOptions = {}): s
     case 'AUDIO':
       return resume ? `/listen/${item.id}/play` : `/listen/${item.id}`;
     case 'POST':
-      return resume ? `/posts/${item.id}/play` : `/posts/${item.id}`;
+      // Images/galleries open in a rolling feed (like shorts); no details page.
+      return `/images/play/${item.id}`;
     default:
       // BOOK (and MIXED fallback): the details page vs. the reader directly.
       return resume ? `/read/${item.id}` : `/stories/${item.id}`;

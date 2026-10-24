@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import { actions } from 'astro:actions';
   import { createBrowserClient } from '@storygalore/appwrite-client';
 
@@ -51,6 +52,10 @@
       comments = (r.data.items ?? []) as Comment[];
     }
   }
+
+  onMount(() => {
+    void refresh();
+  });
 
   async function submitComment() {
     if (!body.trim() || posting) return;
