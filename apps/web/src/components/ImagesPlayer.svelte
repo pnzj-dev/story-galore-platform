@@ -120,14 +120,23 @@
 
 {#if sheetOpen && activeImage}
   <div class="fixed inset-0 z-50 bg-black/60" onclick={closeComments} role="presentation"></div>
-  <div
-    class="fixed inset-x-0 bottom-0 z-50 max-h-[70dvh] overflow-y-auto rounded-t-2xl border-t border-border bg-background p-5"
-  >
-    <div class="mx-auto mb-3 h-1 w-10 rounded-full bg-border"></div>
+  <aside class="fixed inset-y-0 right-0 z-50 w-[380px] max-w-[92vw] overflow-y-auto border-l border-border bg-background p-5">
+    <div class="mb-3 flex justify-end">
+      <button
+        type="button"
+        aria-label="Close"
+        onclick={closeComments}
+        class="grid h-8 w-8 place-items-center rounded-full border border-border bg-surface text-foreground transition hover:bg-surface-elevated"
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 6L6 18M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
     {#key activeImage.id}
       <Comments targetType="PUBLICATION" targetId={activeImage.id} signedIn={signedIn} labels={labels} />
     {/key}
-  </div>
+  </aside>
 {/if}
 
 <style>
