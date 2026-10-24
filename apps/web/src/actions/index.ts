@@ -508,7 +508,7 @@ export const server = {
   }),
 
   updateDocument: defineAction({
-    accept: "form",
+    accept: "json",
     input: z.object({
       documentId: z.string().min(1),
       title: z.string().optional(),
@@ -870,7 +870,7 @@ export const server = {
   }),
 
   createComment: defineAction({
-    accept: "form",
+    accept: "json",
     input: z.object({
       targetType: z.string().min(1),
       targetId: z.string().min(1),
@@ -1079,7 +1079,7 @@ export const server = {
   }),
 
   saveToLibrary: defineAction({
-    accept: "form",
+    accept: "json",
     input: z.object({ publicationId: z.string().min(1) }),
     handler: async (input, context) => {
       const user = context.locals.user;
@@ -1093,7 +1093,7 @@ export const server = {
   }),
 
   removeFromLibrary: defineAction({
-    accept: "form",
+    accept: "json",
     input: z.object({ publicationId: z.string().min(1) }),
     handler: async (input, context) => {
       const user = context.locals.user;

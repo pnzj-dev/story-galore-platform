@@ -42,15 +42,20 @@
     loading = true;
     error = '';
     try {
+      const formData = new FormData();
+      formData.set('email', email);
+      formData.set('password', password);
       if (mode === 'signin') {
-        const result = await actions.login({ email, password, returnTo: currentPath() });
+        formData.set('returnTo', currentPath());
+        const result = await actions.login(formData);
         if (result.error) {
           error = result.error.message;
         } else {
           window.location.assign(result.data?.returnTo ?? currentPath());
         }
       } else {
-        const result = await actions.register({ name, email, password });
+        formData.set('name', name);
+        const result = await actions.register(formData);
         if (result.error) {
           error = result.error.message;
         } else {
