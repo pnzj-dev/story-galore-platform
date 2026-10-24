@@ -77,9 +77,9 @@
       {#if plans.length === 0}
         <p class="mt-2 text-sm text-foreground-muted">{labels.noPlans}</p>
       {:else}
-        <div class="mt-3 grid gap-4 sm:grid-cols-2">
+        <div class="mt-3 flex flex-wrap gap-4">
           {#each plans as plan (plan.$id)}
-            <div class="rounded-sm border border-border bg-surface p-4">
+            <div class="min-w-0 flex-1 rounded-sm border border-border bg-surface p-4">
               <h4 class="font-semibold">{plan.name}</h4>
               {#if plan.description}
                 <p class="mt-1 text-sm text-foreground-muted">{plan.description}</p>

@@ -25,9 +25,9 @@ const subscriptions = await fetchSubscriptions(user.$id);
         plans.length === 0 ? (
           <p class="mt-2 text-sm text-foreground-muted">{t("account.noPlans")}</p>
         ) : (
-          <div class="mt-4 grid gap-4 sm:grid-cols-2">
+          <div class="mt-4 flex flex-wrap gap-4">
             {plans.map((plan) => (
-              <div class="rounded-sm border border-border bg-surface p-4">
+              <div class="min-w-0 flex-1 rounded-sm border border-border bg-surface p-4">
                 <h3 class="font-semibold">{plan.name}</h3>
                 {plan.description && <p class="mt-1 text-sm text-foreground-muted">{plan.description}</p>}
                 <p class="mt-2 text-lg font-bold">
