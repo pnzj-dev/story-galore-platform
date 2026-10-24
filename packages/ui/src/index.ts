@@ -10,6 +10,7 @@ export { default as ImageViewer } from './domain/ImageViewer.svelte';
 export { default as MediaPlaylist } from './domain/MediaPlaylist.svelte';
 export { default as ShortCard } from './domain/ShortCard.svelte';
 export { default as MediaRail } from './composites/MediaRail.svelte';
+export { default as MediaCarousel } from './composites/MediaCarousel.svelte';
 export { default as CreatorCard } from './domain/CreatorCard.svelte';
 export { default as CreatorRail } from './composites/CreatorRail.svelte';
 export { default as GenreRail } from './composites/GenreRail.svelte';

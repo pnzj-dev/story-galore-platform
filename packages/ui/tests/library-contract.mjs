@@ -1,7 +1,7 @@
 import { readFileSync, existsSync } from 'node:fs';
 const root = (file) => new URL('../' + file, import.meta.url);
 const required = [
-  'src/index.ts', 'src/primitives/Button.svelte', 'src/primitives/StatusBadge.svelte',
+  'src/index.ts', 'src/primitives/Button.svelte', 'src/primitives/Badge.svelte',
   'src/primitives/EmptyState.svelte', 'src/composites/AsyncButton.svelte',
   'src/domain/DraftStatus.svelte', 'src/domain/ContentRatingBadge.svelte', 'README.md'
 ];
