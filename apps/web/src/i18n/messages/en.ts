@@ -42,6 +42,7 @@ export default {
   "menu.billing": "Billing",
   "menu.creatorStudio": "Creator Studio",
   "menu.signOut": "Sign out",
+  "menu.signOutConfirm": "Sign out of StoryGalore?",
 
   // Notifications
   "notif.title": "Notifications",

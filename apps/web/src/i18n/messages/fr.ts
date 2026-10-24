@@ -41,6 +41,7 @@ const fr = {
   "menu.billing": "Facturation",
   "menu.creatorStudio": "Studio créateur",
   "menu.signOut": "Se déconnecter",
+  "menu.signOutConfirm": "Se déconnecter de StoryGalore ?",
 
   // Notifications
   "notif.title": "Notifications",

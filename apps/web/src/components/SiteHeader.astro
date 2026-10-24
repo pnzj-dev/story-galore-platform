@@ -35,8 +35,9 @@ const navItems = [
 const initial = (user?.name ?? user?.email ?? "A").trim().charAt(0).toUpperCase();
 ---
 
-<header class="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-[20px]">
-  <nav class="mx-auto flex max-w-[1400px] items-center gap-6 px-6 py-4">
+<header class="sticky top-0 z-50 border-b border-border">
+  <div class="absolute inset-0 bg-background/80 backdrop-blur-[20px]"></div>
+  <nav class="relative mx-auto flex max-w-[1400px] items-center gap-6 px-6 py-4">
     <a href={getRelativeLocaleUrl(currentLocale, "/")} class="flex shrink-0 items-center gap-2 text-lg font-extrabold tracking-tight">
       <span
         class="grid h-[26px] w-[26px] place-items-center rounded-[7px] bg-gradient-to-br from-brand-500 to-accent text-[13px] font-black text-white"
@@ -114,6 +115,8 @@ const initial = (user?.name ?? user?.email ?? "A").trim().charAt(0).toUpperCase(
             billingLabel={t("menu.billing")}
             studioLabel={t("menu.creatorStudio")}
             signOutLabel={t("menu.signOut")}
+            signOutConfirmLabel={t("menu.signOutConfirm")}
+            cancelLabel={t("comments.cancel")}
             libraryLabels={{
               continue: t("library.continue"),
               saved: t("library.saved"),

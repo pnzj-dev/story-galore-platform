@@ -16,6 +16,8 @@
     billingLabel = 'Billing',
     studioLabel = 'Creator Studio',
     signOutLabel = 'Sign out',
+    signOutConfirmLabel = 'Sign out?',
+    cancelLabel = 'Cancel',
     libraryLabels,
     settingsLabels,
     billingLabels,
@@ -30,6 +32,8 @@
     billingLabel?: string;
     studioLabel?: string;
     signOutLabel?: string;
+    signOutConfirmLabel?: string;
+    cancelLabel?: string;
     libraryLabels: {
       continue: string;
       saved: string;
@@ -72,6 +76,7 @@
 
   let open = $state(false);
   let active = $state<null | 'account' | 'library' | 'settings' | 'billing'>(null);
+  let confirmSignOut = $state(false);
   let root: HTMLElement | null = $state(null);
 
   function openModal(k: 'account' | 'library' | 'settings' | 'billing') {
@@ -79,19 +84,25 @@
     open = false;
   }
 
+  function askSignOut() {
+    confirmSignOut = true;
+    open = false;
+  }
+
   function onKeydown(e: KeyboardEvent) {
     if (e.key === 'Escape') {
-      if (active) active = null;
+      if (confirmSignOut) confirmSignOut = false;
+      else if (active) active = null;
       else open = false;
     }
   }
 
   function onMousedown(e: MouseEvent) {
-    if (root && !root.contains(e.target as Node) && !active) open = false;
+    if (root && !root.contains(e.target as Node) && !active && !confirmSignOut) open = false;
   }
 
   $effect(() => {
-    if (!open && !active) return;
+    if (!open && !active && !confirmSignOut) return;
     document.addEventListener('mousedown', onMousedown);
     document.addEventListener('keydown', onKeydown);
     return () => {
@@ -145,15 +156,14 @@
       {/if}
 
       <div class="border-t border-border">
-        <form method="POST" action={actions.logout}>
-          <button
-            role="menuitem"
-            type="submit"
-            class="block w-full px-4 py-2 text-left text-sm text-foreground transition hover:bg-surface-elevated"
-          >
-            {signOutLabel}
-          </button>
-        </form>
+        <button
+          type="button"
+          role="menuitem"
+          onclick={askSignOut}
+          class="block w-full px-4 py-2 text-left text-sm text-foreground transition hover:bg-surface-elevated"
+        >
+          {signOutLabel}
+        </button>
       </div>
     </div>
   {/if}
@@ -161,19 +171,45 @@
 
 {#if active === 'account'}
   <AccountModal initial={initial} name={name} email={email} title={accountLabel} signOutLabel={signOutLabel} onclose={() => (active = null)} />
-{:else if active === 'library'}
-  <LibraryModal
-    title={libraryLabel}
-    onclose={() => (active = null)}
-    continueLabel={libraryLabels.continue}
-    savedLabel={libraryLabels.saved}
-    collectionsLabel={libraryLabels.collections}
-    emptyHint={libraryLabels.emptyHint}
-    noCollectionsLabel={libraryLabels.noCollections}
-    titlesLabel={libraryLabels.titles}
-  />
-{:else if active === 'settings'}
-  <SettingsModal title={settingsLabel} labels={settingsLabels} onclose={() => (active = null)} />
-{:else if active === 'billing'}
-  <BillingModal title={billingLabel} labels={billingLabels} onclose={() => (active = null)} />
-{/if}
+  {:else if active === 'library'}
+    <LibraryModal
+      title={libraryLabel}
+      onclose={() => (active = null)}
+      continueLabel={libraryLabels.continue}
+      savedLabel={libraryLabels.saved}
+      collectionsLabel={libraryLabels.collections}
+      emptyHint={libraryLabels.emptyHint}
+      noCollectionsLabel={libraryLabels.noCollections}
+      titlesLabel={libraryLabels.titles}
+    />
+  {:else if active === 'settings'}
+    <SettingsModal title={settingsLabel} labels={settingsLabels} onclose={() => (active = null)} />
+  {:else if active === 'billing'}
+    <BillingModal title={billingLabel} labels={billingLabels} onclose={() => (active = null)} />
+  {/if}
+
+{#if confirmSignOut}
+    <div class="fixed inset-0 z-[70] flex items-center justify-center p-4">
+      <div class="absolute inset-0 bg-black/60" onclick={() => (confirmSignOut = false)} role="presentation"></div>
+      <div class="relative z-10 w-full max-w-xs rounded-md border border-border bg-surface p-6 text-center shadow-xl">
+        <p class="text-lg font-semibold">{signOutConfirmLabel}</p>
+        <div class="mt-5 flex justify-center gap-3">
+          <button
+            type="button"
+            onclick={() => (confirmSignOut = false)}
+            class="rounded-sm border border-border px-4 py-2 text-sm transition hover:opacity-90"
+          >
+            {cancelLabel}
+          </button>
+          <form method="POST" action={actions.logout}>
+            <button
+              type="submit"
+              class="rounded-sm bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
+            >
+              {signOutLabel}
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  {/if}

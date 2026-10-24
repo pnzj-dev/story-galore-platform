@@ -41,6 +41,7 @@ const ar = {
   "menu.billing": "الفوترة",
   "menu.creatorStudio": "استوديو المبدعين",
   "menu.signOut": "تسجيل الخروج",
+  "menu.signOutConfirm": "تسجيل الخروج من StoryGalore؟",
 
   // Notifications
   "notif.title": "الإشعارات",
