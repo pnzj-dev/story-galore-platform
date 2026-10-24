@@ -25,7 +25,7 @@ const plans = await fetchPlans("");
     ) : (
       <div class="mt-4 flex flex-wrap gap-4">
         {plans.map((plan) => (
-          <div class="min-w-0 flex-1 rounded-sm border border-border bg-surface p-4">
+          <div class="flex min-w-0 flex-1 flex-col rounded-sm border border-border bg-surface p-4">
             <h3 class="font-semibold">{plan.name}</h3>
             {plan.description && <p class="mt-1 text-sm text-foreground-muted">{plan.description}</p>}
             <p class="mt-2 text-lg font-bold">
@@ -38,7 +38,7 @@ const plans = await fetchPlans("");
 
             {
               user ? (
-                <form method="POST" action={actions.subscribe} class="mt-4 space-y-3">
+                <form method="POST" action={actions.subscribe} class="mt-auto space-y-3 pt-4">
                   <input type="hidden" name="planId" value={plan.$id} />
                   {creatorId && <input type="hidden" name="creatorId" value={creatorId} />}
                   <div>
@@ -53,17 +53,6 @@ const plans = await fetchPlans("");
                       <option value="STRIPE">{t("account.cardStripe")}</option>
                       <option value="NOWPAYMENTS">{t("account.cryptoNowPayments")}</option>
                     </select>
-                  </div>
-                  <div>
-                    <label for={`email-${plan.$id}`} class="mb-1 block text-sm text-foreground-muted">
-                      {t("account.emailCrypto")}
-                    </label>
-                    <input
-                      type="email"
-                      name="email"
-                      id={`email-${plan.$id}`}
-                      class="w-full rounded-sm border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
-                    />
                   </div>
                   <button
                     type="submit"

@@ -1039,7 +1039,7 @@ export const server = {
           billingMode,
           billingStrategy: "NATIVE_RECURRING",
           provider: input.provider,
-          email: input.email ?? undefined,
+          email: input.email ?? user.email,
           creatorId: input.creatorId ?? undefined,
         },
         user.$id,

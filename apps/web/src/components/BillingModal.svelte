@@ -64,7 +64,7 @@
   }
 </script>
 
-<Modal title={title} {onclose}>
+<Modal title={title} {onclose} maxWidthClass="max-w-5xl">
   {#if !loaded}
     <p class="text-sm text-foreground-muted">…</p>
   {:else}
@@ -79,7 +79,7 @@
       {:else}
         <div class="mt-3 flex flex-wrap gap-4">
           {#each plans as plan (plan.$id)}
-            <div class="min-w-0 flex-1 rounded-sm border border-border bg-surface p-4">
+            <div class="flex min-w-0 flex-1 flex-col rounded-sm border border-border bg-surface p-4">
               <h4 class="font-semibold">{plan.name}</h4>
               {#if plan.description}
                 <p class="mt-1 text-sm text-foreground-muted">{plan.description}</p>
@@ -89,7 +89,7 @@
                 <span class="text-sm font-normal text-foreground-muted"> / {(plan.billingInterval ?? 'month').toLowerCase()}</span>
               </p>
 
-              <form onsubmit={subscribePlan} class="mt-4 space-y-3">
+              <form onsubmit={subscribePlan} class="mt-auto space-y-3 pt-4">
                 <input type="hidden" name="planId" value={plan.$id} />
                 <div>
                   <label for={`provider-${plan.$id}`} class="mb-1 block text-sm text-foreground-muted">{labels.payWith}</label>
@@ -97,10 +97,6 @@
                     <option value="STRIPE">{labels.cardStripe}</option>
                     <option value="NOWPAYMENTS">{labels.cryptoNowPayments}</option>
                   </select>
-                </div>
-                <div>
-                  <label for={`email-${plan.$id}`} class="mb-1 block text-sm text-foreground-muted">{labels.emailCrypto}</label>
-                  <input id={`email-${plan.$id}`} type="email" name="email" class="w-full rounded-sm border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary" />
                 </div>
                 <button type="submit" class="rounded-sm bg-primary px-4 py-2 font-semibold text-primary-foreground transition hover:opacity-90">
                   {labels.subscribe}
