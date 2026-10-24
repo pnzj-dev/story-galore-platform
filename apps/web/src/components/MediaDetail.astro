@@ -23,6 +23,7 @@ const pubId = pub?.$id ?? "";
 const allowed = (detail?.media ?? []).filter((m) => m.allowed && m.url);
 const locked = Boolean(detail && !detail.entitled);
 const cover = detail?.coverUrl;
+const backdrop = detail?.backdropUrl ?? cover;
 const rating =
   pub?.contentRating && pub.contentRating !== "ALL_AGES"
     ? pub.contentRating === "ADULT_18_PLUS"
@@ -88,7 +89,7 @@ const commentLabels = {
     detail ? (
       <main>
         <div class="relative h-[340px] overflow-hidden">
-          {cover && <img src={cover} alt="" draggable="false" class="h-full w-full select-none object-cover" style="-webkit-user-drag: none;" />}
+          {backdrop && <img src={backdrop} alt="" draggable="false" class="h-full w-full select-none object-cover" style="-webkit-user-drag: none;" />}
           <div class="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent"></div>
         </div>
 

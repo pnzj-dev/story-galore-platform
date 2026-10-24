@@ -31,6 +31,7 @@ interface ContinueItem {
   progress: ContinueProgress;
   publication?: ContinuePublication;
   coverUrl?: string;
+  backdropUrl?: string;
   creatorName?: string;
 }
 
@@ -165,6 +166,7 @@ export async function searchPublications(query: string, type?: string): Promise<
         format: pub.format,
         contentRating: pub.contentRating as ContentRating | undefined,
         coverUrl: item.coverUrl,
+        backdropUrl: item.backdropUrl,
         creatorName: item.creatorName,
       } satisfies MediaCardData;
     });
@@ -204,6 +206,7 @@ export async function fetchRecommendations(publicationId?: string): Promise<Medi
         format: pub.format,
         contentRating: pub.contentRating as ContentRating | undefined,
         coverUrl: item.coverUrl,
+        backdropUrl: item.backdropUrl,
         creatorName: item.creatorName,
       } satisfies MediaCardData;
     });
@@ -250,6 +253,7 @@ export async function fetchContinueItems(actorId: string): Promise<MediaCardData
         format: pub.format,
         contentRating: pub.contentRating as ContentRating | undefined,
         coverUrl: item.coverUrl,
+        backdropUrl: item.backdropUrl ?? item.coverUrl,
         creatorName: item.creatorName,
         progress: {
           percentComplete: progress.percentComplete ?? 0,
@@ -275,6 +279,7 @@ interface PublicationItem {
     contentRating?: string;
   };
   coverUrl?: string;
+  backdropUrl?: string;
   creatorName?: string;
 }
 
@@ -304,6 +309,7 @@ export async function fetchPublications(
         format: pub.format,
         contentRating: pub.contentRating as ContentRating | undefined,
         coverUrl: item.coverUrl,
+        backdropUrl: item.backdropUrl,
         creatorName: item.creatorName,
       } satisfies MediaCardData;
     });
@@ -354,6 +360,7 @@ export async function fetchMediaByType(
         format: pub.format,
         contentRating: pub.contentRating as ContentRating | undefined,
         coverUrl: item.coverUrl,
+        backdropUrl: item.backdropUrl,
         creatorName: item.creatorName,
       } satisfies MediaCardData;
     });
@@ -425,6 +432,7 @@ export async function fetchSavedTitles(actorId: string): Promise<MediaCardData[]
         format: pub.format,
         contentRating: pub.contentRating as ContentRating | undefined,
         coverUrl: item.coverUrl,
+        backdropUrl: item.backdropUrl,
         creatorName: item.creatorName,
       } satisfies MediaCardData;
     });
@@ -468,6 +476,7 @@ export interface PublicationDetail {
   entitled: boolean;
   accessClass?: string;
   coverUrl?: string;
+  backdropUrl?: string;
   creatorName?: string;
   year?: number;
   durationMs?: number;

@@ -25,6 +25,8 @@ export type MediaCardData = {
   orientation?: CardOrientation;
   contentRating?: ContentRating;
   coverUrl?: string;
+  /** Landscape thumbnail/backdrop (used for the resume rail and detail hero). */
+  backdropUrl?: string;
   creatorName?: string;
   /** Present for video/audio publications. */
   durationMs?: number;

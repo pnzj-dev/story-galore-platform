@@ -84,6 +84,13 @@
   }
 
   let orientation = $derived(publication.orientation ?? defaultOrientation[publication.type]);
+  // Landscape cards (video/post/resume) prefer the backdrop/thumbnail; otherwise
+  // use the portrait cover.
+  let imgUrl = $derived(
+    orientation === 'LANDSCAPE' && publication.backdropUrl
+      ? publication.backdropUrl
+      : publication.coverUrl,
+  );
   let badge = $derived(formatLabels[publication.format ?? ''] ?? typeLabels[publication.type]);
   let imgFailed = $state(false);
 </script>
@@ -96,9 +103,9 @@
   <div
     class="relative overflow-hidden rounded-md border border-border bg-surface shadow-card {aspectClass[orientation]}"
   >
-    {#if publication.coverUrl && !imgFailed}
+    {#if imgUrl && !imgFailed}
       <img
-        src={publication.coverUrl}
+        src={imgUrl}
         alt=""
         loading="lazy"
         draggable="false"

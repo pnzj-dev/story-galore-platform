@@ -5191,6 +5191,7 @@ func searchPublications(ctx openruntimes.Context, in *GatewayInput, cl client.Cl
 		}
 		item := map[string]interface{}{"publication": m}
 		item["coverUrl"] = resolveCoverURL(cl, id, "")
+		item["backdropUrl"] = resolveBackdropURL(cl, id, "")
 		if creatorId, ok := m["creatorId"].(string); ok && creatorId != "" {
 			item["creatorName"] = resolveCreatorName(cl, creatorId)
 		}
@@ -5559,6 +5560,7 @@ func recommendationsGet(ctx openruntimes.Context, in *GatewayInput, cl client.Cl
 		}
 		item := map[string]interface{}{"publication": row}
 		item["coverUrl"] = resolveCoverURL(cl, id, "")
+		item["backdropUrl"] = resolveBackdropURL(cl, id, "")
 		if creatorId, ok := row["creatorId"].(string); ok && creatorId != "" {
 			item["creatorName"] = resolveCreatorName(cl, creatorId)
 		}
@@ -6387,17 +6389,34 @@ func readingProgressGet(ctx openruntimes.Context, in *GatewayInput, cl client.Cl
 	return success(ctx, in, row)
 }
 
-// resolveCoverURL resolves a publication's cover thumbnail. For public
-// publications (or an empty access class, used by bulk list views to avoid one
-// CreateFileToken per card) it returns a permanent preview URL; for protected
-// access classes it returns a short-lived tokenized URL so the cover file is
-// never exposed as a permanent public URL.
+// resolveCoverURL resolves a publication's portrait cover (orientation PORTRAIT).
+// For public publications (or an empty access class, used by bulk list views to
+// avoid one CreateFileToken per card) it returns a permanent preview URL; for
+// protected access classes it returns a short-lived tokenized URL so the cover
+// file is never exposed as a permanent public URL.
 func resolveCoverURL(cl client.Client, publicationId, accessClass string) string {
+	return resolveMediaVariantURL(cl, publicationId, accessClass, "PORTRAIT", 800)
+}
+
+// resolveBackdropURL resolves a publication's landscape backdrop/thumbnail
+// (orientation LANDSCAPE), used for the detail hero and the resume cards.
+func resolveBackdropURL(cl client.Client, publicationId, accessClass string) string {
+	return resolveMediaVariantURL(cl, publicationId, accessClass, "LANDSCAPE", 1600)
+}
+
+// resolveMediaVariantURL resolves a media_assets asset of the given orientation
+// (PORTRAIT cover or LANDSCAPE backdrop) for a publication. Falls back to the
+// first asset when the requested orientation is absent.
+func resolveMediaVariantURL(cl client.Client, publicationId, accessClass, orientation string, width int) string {
 	service := tablesdb.New(cl)
-	list, err := service.ListRows(databaseID, "media_assets", service.WithListRowsQueries([]string{
+	queries := []string{
 		qEqual("publicationId", publicationId),
 		`{"method":"limit","values":[1]}`,
-	}))
+	}
+	if orientation != "" {
+		queries = append(queries, qEqual("orientation", orientation))
+	}
+	list, err := service.ListRows(databaseID, "media_assets", service.WithListRowsQueries(queries))
 	if err != nil {
 		return ""
 	}
@@ -6406,6 +6425,21 @@ func resolveCoverURL(cl client.Client, publicationId, accessClass string) string
 		return ""
 	}
 	rows, _ := raw["rows"].([]interface{})
+	if len(rows) == 0 && orientation != "" {
+		// Fallback: any first asset (legacy data before orientation variants).
+		queries = []string{
+			qEqual("publicationId", publicationId),
+			`{"method":"limit","values":[1]}`,
+		}
+		list, err = service.ListRows(databaseID, "media_assets", service.WithListRowsQueries(queries))
+		if err != nil {
+			return ""
+		}
+		if list.Decode(&raw) != nil {
+			return ""
+		}
+		rows, _ = raw["rows"].([]interface{})
+	}
 	if len(rows) == 0 {
 		return ""
 	}
@@ -6416,9 +6450,9 @@ func resolveCoverURL(cl client.Client, publicationId, accessClass string) string
 		return ""
 	}
 	if accessClass == "" || accessClass == "PUBLIC" {
-		return buildPreviewURL(bucket, fileId, 800)
+		return buildPreviewURL(bucket, fileId, width)
 	}
-	return resolveDeliveryURL(cl, bucket, fileId, time.Hour, 800)
+	return resolveDeliveryURL(cl, bucket, fileId, time.Hour, width)
 }
 
 // publicMediaEndpoint resolves the browser-facing origin for media URLs. It
@@ -6547,7 +6581,8 @@ func continueList(ctx openruntimes.Context, in *GatewayInput, cl client.Client) 
 					}
 				}
 			}
-			item["coverUrl"] = resolveCoverURL(cl, pubId, "") // list view: keep permanent low-res thumbnail
+			item["coverUrl"] = resolveCoverURL(cl, pubId, "")   // list view: keep permanent low-res portrait cover
+			item["backdropUrl"] = resolveBackdropURL(cl, pubId, "") // landscape thumbnail for resume cards
 		}
 		items = append(items, item)
 	}
@@ -6623,7 +6658,8 @@ func publicationList(ctx openruntimes.Context, in *GatewayInput, cl client.Clien
 		}
 		item := map[string]interface{}{"publication": row}
 		if pubId != "" {
-			item["coverUrl"] = resolveCoverURL(cl, pubId, "") // list view: keep permanent low-res thumbnail
+			item["coverUrl"] = resolveCoverURL(cl, pubId, "")    // list view: keep permanent low-res portrait cover
+			item["backdropUrl"] = resolveBackdropURL(cl, pubId, "") // landscape thumbnail for video cards
 			if creatorId, ok := row["creatorId"].(string); ok && creatorId != "" {
 				item["creatorName"] = resolveCreatorName(cl, creatorId)
 			}
@@ -6696,6 +6732,7 @@ func publicationGet(ctx openruntimes.Context, in *GatewayInput, cl client.Client
 		"entitled":    entitled,
 		"accessClass": accessClass,
 		"coverUrl":    resolveCoverURL(cl, input.PublicationId, accessClass),
+		"backdropUrl": resolveBackdropURL(cl, input.PublicationId, accessClass),
 		"year":        yearFromPublishedAt(pm["publishedAt"]),
 		"durationMs":  totalDuration,
 	}
@@ -7214,6 +7251,7 @@ func libraryEntryList(ctx openruntimes.Context, in *GatewayInput, cl client.Clie
 		}
 		item := map[string]interface{}{"publication": row}
 		item["coverUrl"] = resolveCoverURL(cl, pubId, "")
+		item["backdropUrl"] = resolveBackdropURL(cl, pubId, "")
 		if creatorId, ok := row["creatorId"].(string); ok && creatorId != "" {
 			item["creatorName"] = resolveCreatorName(cl, creatorId)
 		}

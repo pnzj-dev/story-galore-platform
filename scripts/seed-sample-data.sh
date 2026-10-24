@@ -60,51 +60,53 @@ while IFS='|' read -r pid name scope amount interval adFree desc; do
   create_row "plans" "$pid" '{"code":"'"${pid#plan-}"'","name":"'"$name"'","description":"'"$desc"'","status":"ACTIVE","scope":"'"$scope"'","currency":"USD","amount":'"$amount"',"billingInterval":"'"$interval"'","billingIntervalCount":1,"trialDays":0,"adFree":'"$adFree"',"version":1,"createdAt":"'"$NOW"'","updatedAt":"'"$NOW"'"}'
 done <<< "$PLANS"
 
-# --- Covers (download) ---------------------------------------------------
+# --- Artwork (download) ---------------------------------------------------
 
-# pid:photoid:w:h
-COVER_SEEDS="
-seed-book-1:photo-1544947950-fa07a98d237f:600:900
-seed-book-2:photo-1532012197267-da84d127e765:600:900
-seed-book-3:photo-1512820790803-83ca734da794:600:900
-seed-book-4:photo-1495446815901-a7297e633e8d:600:900
-seed-book-5:photo-1544947950-fa07a98d237f:600:900
-seed-book-6:photo-1532012197267-da84d127e765:600:900
-seed-video-1:photo-1478720568477-152d9b164e26:800:450
-seed-video-2:photo-1489599849927-2ee91cede3ba:600:1067
-seed-video-3:photo-1489599849927-2ee91cede3ba:800:450
-seed-video-4:photo-1440404653325-ab127d49abc1:800:450
-seed-video-5:photo-1518676590629-3dcbd9c5a5c9:800:450
-seed-video-6:photo-1485846234645-a62644f84728:800:450
-seed-video-7:photo-1478720568477-152d9b164e26:800:450
-seed-short-1:photo-1535713875002-d1d0cf377fde:600:1067
-seed-short-2:photo-1507003211169-0a1dd7228f2d:600:1067
-seed-short-3:photo-1518676590629-3dcbd9c5a5c9:600:1067
-seed-short-4:photo-1535713875002-d1d0cf377fde:600:1067
-seed-short-5:photo-1440404653325-ab127d49abc1:600:1067
-seed-short-6:photo-1507003211169-0a1dd7228f2d:600:1067
-seed-art-1:photo-1512820790803-83ca734da794:800:450
-seed-audio-1:photo-1495446815901-a7297e633e8d:600:600
+# pid:photoid — used for both the portrait cover and (for video/art) the landscape backdrop.
+ARTWORK_SEEDS="
+seed-book-1:photo-1544947950-fa07a98d237f
+seed-book-2:photo-1532012197267-da84d127e765
+seed-book-3:photo-1512820790803-83ca734da794
+seed-book-4:photo-1495446815901-a7297e633e8d
+seed-book-5:photo-1544947950-fa07a98d237f
+seed-book-6:photo-1532012197267-da84d127e765
+seed-video-1:photo-1478720568477-152d9b164e26
+seed-video-2:photo-1489599849927-2ee91cede3ba
+seed-video-3:photo-1489599849927-2ee91cede3ba
+seed-video-4:photo-1440404653325-ab127d49abc1
+seed-video-5:photo-1518676590629-3dcbd9c5a5c9
+seed-video-6:photo-1485846234645-a62644f84728
+seed-video-7:photo-1478720568477-152d9b164e26
+seed-short-1:photo-1535713875002-d1d0cf377fde
+seed-short-2:photo-1507003211169-0a1dd7228f2d
+seed-short-3:photo-1518676590629-3dcbd9c5a5c9
+seed-short-4:photo-1535713875002-d1d0cf377fde
+seed-short-5:photo-1440404653325-ab127d49abc1
+seed-short-6:photo-1507003211169-0a1dd7228f2d
+seed-art-1:photo-1512820790803-83ca734da794
+seed-audio-1:photo-1495446815901-a7297e633e8d
 "
+
+# Publications that also get a landscape backdrop (detail hero + resume card).
+BACKDROP_PIDS="seed-video-1 seed-video-2 seed-video-3 seed-video-4 seed-video-5 seed-video-6 seed-video-7 seed-art-1"
 
 TMPDIR="$(mktemp -d)"
 trap 'rm -rf "$TMPDIR"' EXIT
 
-for entry in $COVER_SEEDS; do
+for entry in $ARTWORK_SEEDS; do
   pid="${entry%%:*}"
-  rest="${entry#*:}"
-  photoid="${rest%%:*}"
-  rest2="${rest#*:}"
-  size="${rest2#*:}"
-  w="${rest2%%:*}"
-  h="${size}"
-  curl -sL -o "$TMPDIR/$pid.jpg" "https://images.unsplash.com/${photoid}?w=${w}&h=${h}&fit=crop&q=80" \
+  photoid="${entry#*:}"
+  curl -sL -o "$TMPDIR/$pid-cover.jpg" "https://images.unsplash.com/${photoid}?w=600&h=900&fit=crop&q=80" \
     || echo "warning: could not download cover for $pid" >&2
+  case " $BACKDROP_PIDS " in
+    *" $pid "*) curl -sL -o "$TMPDIR/$pid-backdrop.jpg" "https://images.unsplash.com/${photoid}?w=1600&h=900&fit=crop&q=80" \
+      || echo "warning: could not download backdrop for $pid" >&2 ;;
+  esac
 done
 
-# --- Covers (upload + media_assets) --------------------------------------
+# --- Artwork (upload + media_assets) --------------------------------------
 
-echo "Seeding covers..."
+echo "Seeding artwork..."
 for pid in seed-book-1 seed-book-2 seed-book-3 seed-book-4 seed-book-5 seed-book-6 \
            seed-video-1 seed-video-2 seed-video-3 seed-video-4 seed-video-5 seed-video-6 seed-video-7 \
            seed-short-1 seed-short-2 seed-short-3 seed-short-4 seed-short-5 seed-short-6 \
@@ -114,13 +116,28 @@ for pid in seed-book-1 seed-book-2 seed-book-3 seed-book-4 seed-book-5 seed-book
     seed-book-2|seed-book-4|seed-video-3|seed-video-6|seed-short-3|seed-short-5|seed-audio-1) creator="seed-creator-2" ;;
     *) creator="seed-creator-3" ;;
   esac
-  file="$TMPDIR/$pid.jpg"
+
+  # Portrait cover
+  file="$TMPDIR/$pid-cover.jpg"
   file_id="$pid-cover"
   if ! row_exists "media_assets" "$file_id"; then
     appwrite storage create-file --bucket-id "$BUCKET" --file "$file" --file-id "$file_id" --folder "seed" >/dev/null
   fi
   size=$(wc -c < "$file" | tr -d ' ')
   create_row "media_assets" "$file_id" '{"id":"'"$file_id"'","creatorId":"'"$creator"'","publicationId":"'"$pid"'","type":"IMAGE","status":"READY","originProvider":"seed","originBucketKey":"'"$BUCKET"'","originFileId":"'"$file_id"'","mimeType":"image/jpeg","sizeBytes":'"$size"',"moderationStatus":"APPROVED","contentRating":"ALL_AGES","orientation":"PORTRAIT","variant":"ORIGINAL","createdAt":"'"$NOW"'","updatedAt":"'"$NOW"'"}'
+
+  # Landscape backdrop (video/art only)
+  case " $BACKDROP_PIDS " in
+    *" $pid "*)
+      bfile="$TMPDIR/$pid-backdrop.jpg"
+      bfile_id="$pid-backdrop"
+      if ! row_exists "media_assets" "$bfile_id"; then
+        appwrite storage create-file --bucket-id "$BUCKET" --file "$bfile" --file-id "$bfile_id" --folder "seed" >/dev/null
+      fi
+      bsize=$(wc -c < "$bfile" | tr -d ' ')
+      create_row "media_assets" "$bfile_id" '{"id":"'"$bfile_id"'","creatorId":"'"$creator"'","publicationId":"'"$pid"'","type":"IMAGE","status":"READY","originProvider":"seed","originBucketKey":"'"$BUCKET"'","originFileId":"'"$bfile_id"'","mimeType":"image/jpeg","sizeBytes":'"$bsize"',"moderationStatus":"APPROVED","contentRating":"ALL_AGES","orientation":"LANDSCAPE","variant":"ORIGINAL","createdAt":"'"$NOW"'","updatedAt":"'"$NOW"'"}'
+      ;;
+  esac
 done
 
 # --- Publications ---------------------------------------------------------
