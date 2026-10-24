@@ -119,7 +119,6 @@
 </div>
 
 {#if sheetOpen && activeImage}
-  <div class="fixed inset-0 z-50 bg-black/60" onclick={closeComments} role="presentation"></div>
   <aside class="fixed inset-y-0 right-0 z-50 w-[380px] max-w-[92vw] overflow-y-auto border-l border-border bg-background p-5">
     <div class="mb-3 flex justify-end">
       <button

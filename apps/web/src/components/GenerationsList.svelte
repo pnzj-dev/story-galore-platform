@@ -59,7 +59,7 @@
             void refresh();
           },
         );
-        unsub = () => sub.unsubscribe();
+        unsub = () => sub();
       } catch {
         /* realtime unavailable */
       }

@@ -126,7 +126,7 @@
         const sub = client.subscribe('databases.main.collections.comments.documents', () => {
           void refresh();
         });
-        unsub = () => sub.unsubscribe();
+        unsub = () => sub();
       } catch {
         /* realtime unavailable; manual refresh still works after posting */
       }

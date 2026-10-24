@@ -80,7 +80,7 @@
           const r = await actions.listNotifications();
           if (!r.error && r.data) rows = (r.data.items ?? []) as NotificationItem[];
         });
-        unsub = () => sub.unsubscribe();
+        unsub = () => sub();
       } catch {
         /* realtime unavailable */
       }
