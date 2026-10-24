@@ -2,7 +2,15 @@ import { defineAction, ActionError } from "astro:actions";
 import { z } from "astro:schema";
 import { createHash, randomUUID } from "node:crypto";
 import { createServerClient, createAdminClient, createEmailPasswordSessionSecret, SESSION_COOKIE, ID } from "@storygalore/appwrite-client";
-import { invokeApi } from "@/lib/gateway";
+import {
+  invokeApi,
+  fetchContinueItems,
+  fetchSavedTitles,
+  fetchCollections,
+  fetchLanguagePreferences,
+  fetchPlans,
+  fetchSubscriptions,
+} from "@/lib/gateway";
 
 const endpoint = import.meta.env.PUBLIC_APPWRITE_ENDPOINT;
 const projectId = import.meta.env.PUBLIC_APPWRITE_PROJECT_ID;
@@ -1110,6 +1118,53 @@ export const server = {
         throw new ActionError({ code: "BAD_REQUEST", message: "Could not remove from your list." });
       }
       return { ok: true };
+    },
+  }),
+
+  libraryGet: defineAction({
+    accept: "json",
+    input: z.object({}),
+    handler: async (_input, context) => {
+      const user = context.locals.user;
+      if (!user) throw new ActionError({ code: "UNAUTHORIZED", message: "Sign in." });
+      const [continueItems, savedTitles, collections] = await Promise.all([
+        fetchContinueItems(user.$id),
+        fetchSavedTitles(user.$id),
+        fetchCollections(user.$id),
+      ]);
+      return {
+        continueItems,
+        savedTitles,
+        collections: collections.filter((c) => c.curatorId === user.$id),
+      };
+    },
+  }),
+
+  languagePreferencesGet: defineAction({
+    accept: "json",
+    input: z.object({}),
+    handler: async (_input, context) => {
+      const user = context.locals.user;
+      if (!user) throw new ActionError({ code: "UNAUTHORIZED", message: "Sign in." });
+      const prefs = await fetchLanguagePreferences(user.$id);
+      return {
+        contentLanguageMode: prefs.contentLanguageMode,
+        contentLanguages: prefs.contentLanguages ?? [],
+      };
+    },
+  }),
+
+  billingGet: defineAction({
+    accept: "json",
+    input: z.object({}),
+    handler: async (_input, context) => {
+      const user = context.locals.user;
+      if (!user) throw new ActionError({ code: "UNAUTHORIZED", message: "Sign in." });
+      const [plans, subscriptions] = await Promise.all([
+        fetchPlans(user.$id),
+        fetchSubscriptions(user.$id),
+      ]);
+      return { plans, subscriptions };
     },
   }),
 };

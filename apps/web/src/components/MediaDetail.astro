@@ -4,6 +4,7 @@ import Comments from "@/components/Comments.svelte";
 import SubscribeUpsell from "@/components/SubscribeUpsell.astro";
 import SaveButton from "@/components/SaveButton.svelte";
 import ShareButton from "@/components/ShareButton.svelte";
+import GateButton from "@/components/GateButton.svelte";
 import { ImageViewer, MediaCarousel } from "@storygalore/ui";
 import { fetchSeriesEpisodes, fetchMediaProgress, fetchComments, fetchSavedPublicationIds, fetchRecommendations } from "@/lib/gateway";
 import type { PublicationDetail, SeriesEpisode } from "@/lib/gateway";
@@ -139,7 +140,11 @@ const commentLabels = {
                 {
                   kind === "video" && (
                     locked ? (
-                      <SubscribeUpsell creatorId={pub?.creatorId} t={t} />
+                      <GateButton
+                        client:load
+                        dialogId="gate-dialog"
+                        label={resumeLabel ? t("media.resumeFrom").replace("{time}", resumeLabel) : t("media.play")}
+                      />
                     ) : (
                       <a
                         href={playHref}
@@ -156,7 +161,7 @@ const commentLabels = {
                 {
                   kind === "book" && (
                     locked ? (
-                      <SubscribeUpsell creatorId={pub?.creatorId} t={t} />
+                      <GateButton client:load dialogId="gate-dialog" label={t("media.readNow")} icon="book" />
                     ) : (
                       <a
                         href={`/read/${pubId}`}
@@ -213,6 +218,30 @@ const commentLabels = {
               </div>
             </div>
           </div>
+
+          {
+            locked && (kind === "video" || kind === "book") && (
+              <dialog
+                id="gate-dialog"
+                class="m-auto w-full max-w-lg rounded-md border border-border bg-surface p-6 shadow-xl backdrop:bg-black/60"
+              >
+                <div class="mb-3 flex justify-end">
+                  <form method="dialog">
+                    <button
+                      type="submit"
+                      aria-label="Close"
+                      class="grid h-8 w-8 place-items-center rounded-full border border-border bg-surface text-foreground transition hover:bg-surface-elevated"
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 6L6 18M6 6l12 12"></path>
+                      </svg>
+                    </button>
+                  </form>
+                </div>
+                <SubscribeUpsell creatorId={pub?.creatorId} t={t} />
+              </dialog>
+            )
+          }
 
           {
             kind === "video" && !locked && episodes.length > 0 && (

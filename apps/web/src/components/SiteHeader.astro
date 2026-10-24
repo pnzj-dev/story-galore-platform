@@ -114,6 +114,44 @@ const initial = (user?.name ?? user?.email ?? "A").trim().charAt(0).toUpperCase(
             billingLabel={t("menu.billing")}
             studioLabel={t("menu.creatorStudio")}
             signOutLabel={t("menu.signOut")}
+            libraryLabels={{
+              continue: t("library.continue"),
+              saved: t("library.saved"),
+              collections: t("library.collections"),
+              emptyHint: t("library.emptyHint"),
+              noCollections: t("library.noCollections"),
+              titles: t("library.titles"),
+            }}
+            settingsLabels={{
+              adultContent: t("settings.adultContent"),
+              adultContentDescription: t("settings.adultContentDescription"),
+              dateOfBirth: t("settings.dateOfBirth"),
+              enableAdult: t("settings.enableAdult"),
+              no: t("settings.no"),
+              yes: t("settings.yes"),
+              save: t("settings.save"),
+              language: t("settings.language"),
+              languageDescription: t("settings.languageDescription"),
+              contentLanguageMode: t("settings.contentLanguageMode"),
+              showAllLanguages: t("settings.showAllLanguages"),
+              showSelectedLanguages: t("settings.showSelectedLanguages"),
+              contentLanguagesLabel: t("settings.contentLanguagesLabel"),
+              saved: t("settings.save"),
+            }}
+            billingLabels={{
+              plans: t("account.plans"),
+              noPlans: t("account.noPlans"),
+              payWith: t("account.payWith"),
+              cardStripe: t("account.cardStripe"),
+              cryptoNowPayments: t("account.cryptoNowPayments"),
+              emailCrypto: t("account.emailCrypto"),
+              subscribe: t("account.subscribe"),
+              yourSubscriptions: t("account.yourSubscriptions"),
+              noSubscriptions: t("account.noSubscriptions"),
+              pause: t("account.pause"),
+              resume: t("account.resume"),
+              cancel: t("account.cancel"),
+            }}
           />
         ) : (
           <>

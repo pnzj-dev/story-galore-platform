@@ -1,5 +1,9 @@
 <script lang="ts">
   import { actions } from 'astro:actions';
+  import AccountModal from './AccountModal.svelte';
+  import LibraryModal from './LibraryModal.svelte';
+  import SettingsModal from './SettingsModal.svelte';
+  import BillingModal from './BillingModal.svelte';
 
   let {
     initial,
@@ -12,6 +16,9 @@
     billingLabel = 'Billing',
     studioLabel = 'Creator Studio',
     signOutLabel = 'Sign out',
+    libraryLabels,
+    settingsLabels,
+    billingLabels,
   }: {
     initial: string;
     name?: string;
@@ -23,21 +30,68 @@
     billingLabel?: string;
     studioLabel?: string;
     signOutLabel?: string;
+    libraryLabels: {
+      continue: string;
+      saved: string;
+      collections: string;
+      emptyHint: string;
+      noCollections: string;
+      titles: string;
+    };
+    settingsLabels: {
+      adultContent: string;
+      adultContentDescription: string;
+      dateOfBirth: string;
+      enableAdult: string;
+      no: string;
+      yes: string;
+      save: string;
+      language: string;
+      languageDescription: string;
+      contentLanguageMode: string;
+      showAllLanguages: string;
+      showSelectedLanguages: string;
+      contentLanguagesLabel: string;
+      saved: string;
+    };
+    billingLabels: {
+      plans: string;
+      noPlans: string;
+      payWith: string;
+      cardStripe: string;
+      cryptoNowPayments: string;
+      emailCrypto: string;
+      subscribe: string;
+      yourSubscriptions: string;
+      noSubscriptions: string;
+      pause: string;
+      resume: string;
+      cancel: string;
+    };
   } = $props();
 
   let open = $state(false);
+  let active = $state<null | 'account' | 'library' | 'settings' | 'billing'>(null);
   let root: HTMLElement | null = $state(null);
 
+  function openModal(k: 'account' | 'library' | 'settings' | 'billing') {
+    active = k;
+    open = false;
+  }
+
   function onKeydown(e: KeyboardEvent) {
-    if (e.key === 'Escape') open = false;
+    if (e.key === 'Escape') {
+      if (active) active = null;
+      else open = false;
+    }
   }
 
   function onMousedown(e: MouseEvent) {
-    if (root && !root.contains(e.target as Node)) open = false;
+    if (root && !root.contains(e.target as Node) && !active) open = false;
   }
 
   $effect(() => {
-    if (!open) return;
+    if (!open && !active) return;
     document.addEventListener('mousedown', onMousedown);
     document.addEventListener('keydown', onKeydown);
     return () => {
@@ -72,18 +126,18 @@
         {/if}
       </div>
 
-      <a role="menuitem" href="/account" class="block px-4 py-2 text-sm text-foreground transition hover:bg-surface-elevated">
+      <button type="button" role="menuitem" onclick={() => openModal('account')} class="block w-full px-4 py-2 text-left text-sm text-foreground transition hover:bg-surface-elevated">
         {accountLabel}
-      </a>
-      <a role="menuitem" href="/library" class="block px-4 py-2 text-sm text-foreground transition hover:bg-surface-elevated">
+      </button>
+      <button type="button" role="menuitem" onclick={() => openModal('library')} class="block w-full px-4 py-2 text-left text-sm text-foreground transition hover:bg-surface-elevated">
         {libraryLabel}
-      </a>
-      <a role="menuitem" href="/settings" class="block px-4 py-2 text-sm text-foreground transition hover:bg-surface-elevated">
+      </button>
+      <button type="button" role="menuitem" onclick={() => openModal('settings')} class="block w-full px-4 py-2 text-left text-sm text-foreground transition hover:bg-surface-elevated">
         {settingsLabel}
-      </a>
-      <a role="menuitem" href="/account/billing" class="block px-4 py-2 text-sm text-foreground transition hover:bg-surface-elevated">
+      </button>
+      <button type="button" role="menuitem" onclick={() => openModal('billing')} class="block w-full px-4 py-2 text-left text-sm text-foreground transition hover:bg-surface-elevated">
         {billingLabel}
-      </a>
+      </button>
       {#if isCreator}
         <a role="menuitem" href="/studio" class="block px-4 py-2 text-sm text-foreground transition hover:bg-surface-elevated">
           {studioLabel}
@@ -104,3 +158,22 @@
     </div>
   {/if}
 </div>
+
+{#if active === 'account'}
+  <AccountModal initial={initial} name={name} email={email} title={accountLabel} signOutLabel={signOutLabel} onclose={() => (active = null)} />
+{:else if active === 'library'}
+  <LibraryModal
+    title={libraryLabel}
+    onclose={() => (active = null)}
+    continueLabel={libraryLabels.continue}
+    savedLabel={libraryLabels.saved}
+    collectionsLabel={libraryLabels.collections}
+    emptyHint={libraryLabels.emptyHint}
+    noCollectionsLabel={libraryLabels.noCollections}
+    titlesLabel={libraryLabels.titles}
+  />
+{:else if active === 'settings'}
+  <SettingsModal title={settingsLabel} labels={settingsLabels} onclose={() => (active = null)} />
+{:else if active === 'billing'}
+  <BillingModal title={billingLabel} labels={billingLabels} onclose={() => (active = null)} />
+{/if}
