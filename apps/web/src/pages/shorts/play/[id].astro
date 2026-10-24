@@ -6,7 +6,7 @@ import { getTranslations } from "@/i18n";
 
 const { t } = getTranslations(Astro.currentLocale);
 
-const shorts = await fetchMediaByType("VIDEO", "SHORT_FILM");
+const { items: shorts } = await fetchMediaByType("VIDEO", { format: "SHORT_FILM", limit: 100 });
 const id = Astro.params.id ?? "";
 ---
 

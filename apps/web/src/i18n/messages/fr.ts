@@ -13,6 +13,8 @@ const fr = {
   "nav.signIn": "Se connecter",
   "nav.getStarted": "Commencer",
   "nav.back": "Retour",
+  "nav.prev": "Précédent",
+  "nav.next": "Suivant",
 
   // Browse / discovery pages
   "browse.discover": "Découvrir",

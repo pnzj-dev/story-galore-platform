@@ -1,12 +1,10 @@
 ---
 import Layout from "@/layouts/Layout.astro";
-import VideoDetail from "@/components/VideoDetail.svelte";
 import Comments from "@/components/Comments.svelte";
 import SubscribeUpsell from "@/components/SubscribeUpsell.astro";
 import SaveButton from "@/components/SaveButton.svelte";
 import ShareButton from "@/components/ShareButton.svelte";
 import { ImageViewer, MediaRail } from "@storygalore/ui";
-import type { PlaylistItem } from "@storygalore/ui";
 import { fetchSeriesEpisodes, fetchMediaProgress, fetchComments, fetchSavedPublicationIds, fetchRecommendations } from "@/lib/gateway";
 import type { PublicationDetail, SeriesEpisode } from "@/lib/gateway";
 import { getTranslations } from "@/i18n";
@@ -32,9 +30,6 @@ const rating =
       : t("studio.editor.rating.teen")
     : null;
 
-// "Continue watching" cards land on ?autoplay=1 to start playback immediately.
-const autoplay = Astro.url.searchParams.get("autoplay") === "1";
-
 /** Format milliseconds as "2h 14m", "48m", or "30s". */
 function formatDuration(ms: number): string {
   if (!ms || ms <= 0) return "";
@@ -57,33 +52,13 @@ const durationLabel = formatDuration(detail?.durationMs ?? 0);
 const qualityRating = pub?.rating;
 const genres = pub?.genres ?? [];
 
-// Build the ordered video playlist (series episodes or parts) for the player.
-let videoItems: PlaylistItem[] = [];
-let videoInitialIndex = 0;
-if (kind === "video" && pubId) {
-  if (pub?.seriesId) {
-    const episodes = await fetchSeriesEpisodes(pub.seriesId, userId);
-    videoItems = episodes
-      .filter((e) => e.url)
-      .map((e, i) => ({
-        id: e.publicationId,
-        publicationId: e.publicationId,
-        mediaId: e.mediaId,
-        episodeId: e.episodeId,
-        label: e.title ?? `${t("media.episodeLabel")} ${e.episodeNumber ?? i + 1}`,
-        src: e.url!,
-      }));
-    videoInitialIndex = Math.max(0, videoItems.findIndex((it) => it.publicationId === pubId));
-  } else {
-    videoItems = allowed.map((m, i) => ({
-      id: m.mediaId,
-      mediaId: m.mediaId,
-      publicationId: pubId,
-      label: m.label ?? `${t("media.partLabel")} ${(m.position ?? i) + 1}`,
-      src: m.url!,
-    }));
-  }
-}
+// The player route (play button target) for the current kind.
+const playHref =
+  kind === "video"
+    ? `/watch/${pubId}/play`
+    : kind === "audio"
+      ? `/listen/${pubId}/play`
+      : `/posts/${pubId}/play`;
 
 // Episode panel (video, series) shows metadata even when delivery is gated.
 let episodes: SeriesEpisode[] = [];
@@ -112,19 +87,6 @@ const commentLabels = {
   {
     detail ? (
       <main>
-        {autoplay && (
-          <div class="mx-auto max-w-[1400px] px-12 pt-6">
-            <a
-              href={Astro.url.pathname}
-              class="inline-flex items-center gap-1.5 text-sm font-semibold text-foreground-muted transition hover:text-foreground"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M15 18l-6-6 6-6"></path>
-              </svg>
-              {t("nav.back")}
-            </a>
-          </div>
-        )}
         <div class="relative h-[340px] overflow-hidden">
           {cover && <img src={cover} alt="" draggable="false" class="h-full w-full select-none object-cover" style="-webkit-user-drag: none;" />}
           <div class="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent"></div>
@@ -132,9 +94,9 @@ const commentLabels = {
 
         <div class="mx-auto max-w-[1400px] px-12">
           <div class="-mt-24 grid gap-6 md:grid-cols-[200px_1fr]">
-            <div class="hidden aspect-[2/3] overflow-hidden rounded-md border border-border shadow-lg md:block">
+            <div class="hidden aspect-[2/3] overflow-hidden rounded-md border border-border bg-surface shadow-lg md:block">
               {cover ? (
-                <img src={cover} alt={pub!.title ?? ""} draggable="false" class="h-full w-full select-none object-cover" style="-webkit-user-drag: none;" />
+                <img src={cover} alt={pub!.title ?? ""} draggable="false" class="h-full w-full select-none object-contain" style="-webkit-user-drag: none;" />
               ) : (
                 <div class="flex h-full items-center justify-center bg-surface text-3xl font-bold text-foreground-muted">
                   {(pub!.title ?? "?").charAt(0)}
@@ -174,12 +136,12 @@ const commentLabels = {
 
               <div class="mt-5 flex flex-wrap items-center gap-3">
                 {
-                  kind === "video" && !autoplay && (
+                  kind === "video" && (
                     locked ? (
                       <SubscribeUpsell creatorId={pub?.creatorId} t={t} />
                     ) : (
                       <a
-                        href={`/watch/${pubId}?autoplay=1`}
+                        href={playHref}
                         class="inline-flex items-center gap-2 rounded-sm bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
                       >
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -203,22 +165,12 @@ const commentLabels = {
 
               <div class="mt-6">
                 {
-                  autoplay && kind === "video" && !locked && allowed.length > 0 ? (
-                    <VideoDetail
-                      client:load
-                      publicationId={pubId}
-                      items={videoItems}
-                      initialIndex={videoInitialIndex}
-                      initialTime={progress.position}
-                      autoplay={true}
-                    />
-                  ) : kind === "audio" && !locked && allowed.length > 0 ? (
+                  kind === "audio" && !locked && allowed.length > 0 ? (
                     <audio
                       controls
                       controlslist="nodownload"
                       preload="metadata"
                       src={allowed[0].url}
-                      autoplay={autoplay}
                       class="w-full"
                     />
                   ) : kind === "post" && !locked && allowed.length > 0 ? (
@@ -244,7 +196,7 @@ const commentLabels = {
           </div>
 
           {
-            kind === "video" && !autoplay && !locked && episodes.length > 0 && (
+            kind === "video" && !locked && episodes.length > 0 && (
               <div class="mt-10">
                 <h3 class="text-lg font-bold tracking-tight">{t("media.episodes")} · {t("media.season").replace("{n}", "1")}</h3>
                 <ul class="mt-3 grid gap-2">

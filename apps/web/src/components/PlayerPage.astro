@@ -1,0 +1,111 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import VideoDetail from "@/components/VideoDetail.svelte";
+import { ImageViewer } from "@storygalore/ui";
+import type { PlaylistItem } from "@storygalore/ui";
+import { fetchSeriesEpisodes, fetchMediaProgress } from "@/lib/gateway";
+import type { PublicationDetail } from "@/lib/gateway";
+import { getRelativeLocaleUrl } from "astro:i18n";
+import { getTranslations } from "@/i18n";
+import { DEFAULT_LOCALE } from "@/i18n/languages";
+
+const { t } = getTranslations(Astro.currentLocale);
+
+interface Props {
+  detail: PublicationDetail | null;
+  kind: "video" | "audio" | "post";
+}
+
+const { detail, kind } = Astro.props;
+const pub = detail?.publication;
+const pubId = pub?.$id ?? "";
+const userId = Astro.locals.user?.$id ?? "";
+const currentLocale = Astro.currentLocale ?? DEFAULT_LOCALE;
+const allowed = (detail?.media ?? []).filter((m) => m.allowed && m.url);
+
+const backHref =
+  kind === "video"
+    ? getRelativeLocaleUrl(currentLocale, `/watch/${pubId}`)
+    : kind === "audio"
+      ? getRelativeLocaleUrl(currentLocale, `/listen/${pubId}`)
+      : getRelativeLocaleUrl(currentLocale, `/posts/${pubId}`);
+
+const progress = userId && pubId ? await fetchMediaProgress(userId, pubId) : { position: 0, pageId: "" };
+
+let items: PlaylistItem[] = [];
+let initialIndex = 0;
+if (kind === "video" && pubId) {
+  if (pub?.seriesId) {
+    const eps = await fetchSeriesEpisodes(pub.seriesId, userId);
+    items = eps
+      .filter((e) => e.url)
+      .map((e, i) => ({
+        id: e.publicationId,
+        publicationId: e.publicationId,
+        mediaId: e.mediaId,
+        episodeId: e.episodeId,
+        label: e.title ?? `${t("media.episodeLabel")} ${e.episodeNumber ?? i + 1}`,
+        src: e.url!,
+      }));
+    initialIndex = Math.max(0, items.findIndex((it) => it.publicationId === pubId));
+  } else {
+    items = allowed.map((m, i) => ({
+      id: m.mediaId,
+      mediaId: m.mediaId,
+      publicationId: pubId,
+      label: m.label ?? `${t("media.partLabel")} ${(m.position ?? i) + 1}`,
+      src: m.url!,
+    }));
+  }
+}
+
+const pageTitle = pub?.title ?? (kind === "video" ? t("media.watch") : kind === "audio" ? t("media.listen") : t("media.post"));
+---
+
+<Layout title={pageTitle}>
+  {
+    detail ? (
+      <main class="mx-auto max-w-[1200px] px-6 py-6">
+        <a
+          href={backHref}
+          class="mb-4 inline-flex items-center gap-1.5 text-sm font-semibold text-foreground-muted transition hover:text-foreground"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M15 18l-6-6 6-6"></path>
+          </svg>
+          {t("nav.back")}
+        </a>
+        <h1 class="mb-4 font-serif text-2xl font-bold">{pub?.title}</h1>
+        {
+          kind === "video" && items.length > 0 ? (
+            <VideoDetail
+              client:load
+              publicationId={pubId}
+              items={items}
+              initialIndex={initialIndex}
+              initialTime={progress.position}
+              autoplay={true}
+            />
+          ) : kind === "audio" && allowed.length > 0 ? (
+            <audio controls controlslist="nodownload" preload="metadata" src={allowed[0].url} autoplay class="w-full" />
+          ) : kind === "post" && allowed.length > 0 ? (
+            <div class="grid gap-4 sm:grid-cols-2">
+              {allowed.map((m) => (
+                <ImageViewer client:load src={m.url} alt={pub?.title ?? ""} guarded class="w-full rounded-md" />
+              ))}
+            </div>
+          ) : (
+            <p class="rounded-md border border-dashed border-border px-6 py-8 text-sm text-foreground-muted">
+              {t("media.unavailable")}
+            </p>
+          )
+        }
+      </main>
+    ) : (
+      <main class="mx-auto max-w-3xl px-6 py-24 text-center">
+        <h1 class="text-3xl font-bold">{t("media.notFound")}</h1>
+        <a href="/" class="mt-6 inline-block text-link">{t("story.backHome")}</a>
+      </main>
+    )
+  }
+</Layout>

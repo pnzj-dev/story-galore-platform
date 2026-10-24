@@ -13,6 +13,8 @@ const ar = {
   "nav.signIn": "تسجيل الدخول",
   "nav.getStarted": "ابدأ الآن",
   "nav.back": "رجوع",
+  "nav.prev": "السابق",
+  "nav.next": "التالي",
 
   // Browse / discovery pages
   "browse.discover": "استكشف",

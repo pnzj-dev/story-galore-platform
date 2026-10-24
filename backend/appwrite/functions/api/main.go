@@ -6234,6 +6234,11 @@ func qEqual(attr, value string) string {
 	return `{"method":"equal","attribute":"` + attr + `","values":[` + string(v) + `]}`
 }
 
+func qNotEqual(attr, value string) string {
+	v, _ := json.Marshal(value)
+	return `{"method":"notEqual","attribute":"` + attr + `","values":[` + string(v) + `]}`
+}
+
 func qSearch(attr, value string) string {
 	v, _ := json.Marshal(value)
 	return `{"method":"search","attribute":"` + attr + `","values":[` + string(v) + `]}`
@@ -6411,9 +6416,9 @@ func resolveCoverURL(cl client.Client, publicationId, accessClass string) string
 		return ""
 	}
 	if accessClass == "" || accessClass == "PUBLIC" {
-		return buildPreviewURL(bucket, fileId, 400)
+		return buildPreviewURL(bucket, fileId, 800)
 	}
-	return resolveDeliveryURL(cl, bucket, fileId, time.Hour, 400)
+	return resolveDeliveryURL(cl, bucket, fileId, time.Hour, 800)
 }
 
 // publicMediaEndpoint resolves the browser-facing origin for media URLs. It
@@ -6551,12 +6556,21 @@ func continueList(ctx openruntimes.Context, in *GatewayInput, cl client.Client) 
 
 func publicationList(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
 	var input struct {
-		Sort      string `json:"sort"`
-		CreatorId string `json:"creatorId"`
-		Type      string `json:"type"`
-		Format    string `json:"format"`
+		Sort          string `json:"sort"`
+		CreatorId     string `json:"creatorId"`
+		Type          string `json:"type"`
+		Format        string `json:"format"`
+		ExcludeFormat string `json:"excludeFormat"`
+		Limit         int    `json:"limit"`
+		Offset        int    `json:"offset"`
 	}
 	_ = json.Unmarshal(in.Payload.Input, &input)
+	if input.Limit <= 0 || input.Limit > 100 {
+		input.Limit = 24
+	}
+	if input.Offset < 0 {
+		input.Offset = 0
+	}
 	sortAttr := "publishedAt"
 	if input.Sort == "new" {
 		sortAttr = "createdAt"
@@ -6574,9 +6588,14 @@ func publicationList(ctx openruntimes.Context, in *GatewayInput, cl client.Clien
 	if input.Format != "" {
 		queries = append(queries, qEqual("format", input.Format))
 	}
+	if input.ExcludeFormat != "" {
+		queries = append(queries, qNotEqual("format", input.ExcludeFormat))
+	}
+	// Fetch limit+1 so the caller can tell whether another page exists.
 	queries = append(queries,
 		`{"method":"orderDesc","attribute":"`+sortAttr+`"}`,
-		`{"method":"limit","values":[200]}`,
+		`{"method":"limit","values":[`+fmt.Sprint(input.Limit+1)+`]}`,
+		`{"method":"offset","values":[`+fmt.Sprint(input.Offset)+`]}`,
 	)
 	list, err := service.ListRows(databaseID, "publications", service.WithListRowsQueries(queries))
 	if err != nil {
@@ -6610,11 +6629,12 @@ func publicationList(ctx openruntimes.Context, in *GatewayInput, cl client.Clien
 			}
 		}
 		items = append(items, item)
-		if len(items) >= 20 {
-			break
-		}
 	}
-	return success(ctx, in, map[string]interface{}{"items": items})
+	hasMore := len(items) > input.Limit
+	if hasMore {
+		items = items[:input.Limit]
+	}
+	return success(ctx, in, map[string]interface{}{"items": items, "hasMore": hasMore})
 }
 
 func publicationGet(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {

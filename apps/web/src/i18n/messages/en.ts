@@ -14,6 +14,8 @@ export default {
   "nav.signIn": "Sign in",
   "nav.getStarted": "Get started",
   "nav.back": "Back",
+  "nav.prev": "Previous",
+  "nav.next": "Next",
 
   // Browse / discovery pages
   "browse.discover": "Discover",

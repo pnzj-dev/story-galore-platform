@@ -11,4 +11,5 @@ const format = Astro.url.searchParams.get("format")?.toUpperCase().replace(/-/g,
   description={t("browse.videosDesc")}
   type="VIDEO"
   format={format}
+  excludeFormat="SHORT_FILM"
 />

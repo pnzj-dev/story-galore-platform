@@ -309,19 +309,40 @@ export async function fetchPublications(
     });
 }
 
+/** A page of browse results. */
+export interface MediaPage {
+  items: MediaCardData[];
+  hasMore: boolean;
+}
+
+/** Options for browsing media by type (pagination + optional format filtering). */
+export interface MediaByTypeOptions {
+  format?: string;
+  excludeFormat?: string;
+  sort?: "trending" | "new";
+  limit?: number;
+  offset?: number;
+}
+
 /** Fetch published publications filtered by media type and/or format (browse). */
 export async function fetchMediaByType(
   type: string,
-  format?: string,
-  sort: "trending" | "new" = "trending",
-): Promise<MediaCardData[]> {
-  const out = await invokeApi<{ items?: PublicationItem[] }>(
+  opts: MediaByTypeOptions = {},
+): Promise<MediaPage> {
+  const out = await invokeApi<{ items?: PublicationItem[]; hasMore?: boolean }>(
     "publication_list",
-    { sort, type, format },
+    {
+      sort: opts.sort ?? "trending",
+      type,
+      format: opts.format,
+      excludeFormat: opts.excludeFormat,
+      limit: opts.limit ?? 24,
+      offset: opts.offset ?? 0,
+    },
     "",
   );
-  if (out.status !== "SUCCESS" || !out.result?.items) return [];
-  return out.result.items
+  if (out.status !== "SUCCESS" || !out.result?.items) return { items: [], hasMore: false };
+  const items = out.result.items
     .filter((item) => Boolean(item.publication?.$id))
     .map((item) => {
       const pub = item.publication!;
@@ -336,6 +357,7 @@ export async function fetchMediaByType(
         creatorName: item.creatorName,
       } satisfies MediaCardData;
     });
+  return { items, hasMore: out.result.hasMore ?? false };
 }
 
 export interface CollectionSummary {

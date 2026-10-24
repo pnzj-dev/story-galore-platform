@@ -13,9 +13,9 @@ const { t } = getTranslations(Astro.currentLocale);
 const user = Astro.locals.user;
 const continueItems = user ? await fetchContinueItems(user.$id) : [];
 
-const videoItems = (await fetchMediaByType("VIDEO")).filter((i) => i.format !== "SHORT_FILM");
-const bookItems = await fetchMediaByType("BOOK");
-const shortItems = await fetchMediaByType("VIDEO", "SHORT_FILM");
+const videoItems = (await fetchMediaByType("VIDEO", { excludeFormat: "SHORT_FILM", limit: 12 })).items;
+const bookItems = (await fetchMediaByType("BOOK", { limit: 12 })).items;
+const shortItems = (await fetchMediaByType("VIDEO", { format: "SHORT_FILM", limit: 12 })).items;
 const recommendedItems = await fetchRecommendations();
 const enabledFlags = await fetchEnabledFlagKeys(user?.$id ?? "");
 const showShorts = enabledFlags.has("video.shorts");
