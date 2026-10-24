@@ -1,6 +1,6 @@
 ---
 import Layout from "@/layouts/Layout.astro";
-import { MediaRail, ShortCard, mediaHref } from "@storygalore/ui";
+import { MediaCarousel, mediaHref } from "@storygalore/ui";
 import { fetchContinueItems, fetchMediaByType, fetchAd, fetchRecommendations, fetchEnabledFlagKeys } from "@/lib/gateway";
 import { getTranslations } from "@/i18n";
 
@@ -123,8 +123,9 @@ const featuredRating =
     <section class="mx-auto max-w-[1400px] space-y-12 px-12 py-12">
       {
         user && continueItems.length > 0 && (
-          <MediaRail
+          <MediaCarousel
             client:load
+            wide
             title={t("home.continueWatching")}
             items={continueItems}
             getHref={(item: { id: string; type: string }) => mediaHref(item, { resume: true })}
@@ -141,27 +142,22 @@ const featuredRating =
         </div>
       )}
 
-      <MediaRail client:load title={t("home.trendingMovies")} items={videoItems} />
-      <MediaRail client:load title={t("home.trendingBooks")} items={bookItems} />
+      <MediaCarousel client:load title={t("home.trendingMovies")} items={videoItems} />
+      <MediaCarousel client:load title={t("home.trendingBooks")} items={bookItems} />
 
       {recommendedItems.length > 0 && (
-        <MediaRail client:load title={t("home.recommended")} items={recommendedItems} />
+        <MediaCarousel client:load title={t("home.recommended")} items={recommendedItems} />
       )}
 
       {showShorts && shortItems.length > 0 && (
-        <section class="space-y-4">
-          <div class="flex items-baseline justify-between">
-            <h3 class="text-lg font-bold tracking-tight">{t("home.shorts")}</h3>
-            <a href="/shorts" class="text-[12px] font-semibold text-foreground-muted transition hover:text-brand-400">
-              {t("home.seeAll")}
-            </a>
-          </div>
-          <div class="grid grid-cols-3 gap-4 sm:grid-cols-4 lg:grid-cols-6">
-            {shortItems.map((item) => (
-              <ShortCard publication={item} href={`/shorts/play/${item.id}`} />
-            ))}
-          </div>
-        </section>
+        <MediaCarousel
+          client:load
+          variant="short"
+          title={t("home.shorts")}
+          items={shortItems}
+          seeAllHref="/shorts"
+          seeAllLabel={t("home.seeAll")}
+        />
       )}
     </section>
   </main>

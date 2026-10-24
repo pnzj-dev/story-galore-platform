@@ -1,6 +1,7 @@
 <script lang="ts">
   import { ChevronLeft, ChevronRight } from '@lucide/svelte';
   import MediaCard from '../domain/MediaCard.svelte';
+  import ShortCard from '../domain/ShortCard.svelte';
   import { mediaHref } from '../lib/media-href';
   import type { MediaCardData } from '../types';
 
@@ -8,14 +9,20 @@
     title,
     items,
     seeAllHref,
+    seeAllLabel = 'See all →',
     getHref,
     emptyHint,
+    variant = 'media',
+    wide = false,
   }: {
     title: string;
     items: MediaCardData[];
     seeAllHref?: string;
+    seeAllLabel?: string;
     getHref?: (item: MediaCardData) => string;
     emptyHint?: string;
+    variant?: 'media' | 'short';
+    wide?: boolean;
   } = $props();
 
   let scroller: HTMLDivElement | undefined;
@@ -44,6 +51,14 @@
   }
 
   const hrefFor = (item: MediaCardData) => (getHref ?? mediaHref)(item);
+
+  const cardWidthClass = $derived(
+    variant === 'short'
+      ? 'w-28 shrink-0 sm:w-36'
+      : wide
+        ? 'w-72 shrink-0 sm:w-96'
+        : 'w-36 shrink-0 sm:w-44',
+  );
 </script>
 
 <section class="space-y-4">
@@ -54,7 +69,7 @@
         href={seeAllHref}
         class="flex items-center gap-1 text-[12px] font-semibold text-foreground-muted transition hover:text-brand-400"
       >
-        See all →
+        {seeAllLabel}
       </a>
     {/if}
   </div>
@@ -77,8 +92,12 @@
         class="flex gap-4 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {#each items as item (item.id)}
-          <div class="w-36 shrink-0 sm:w-44">
-            <MediaCard publication={item} href={hrefFor(item)} />
+          <div class={cardWidthClass}>
+            {#if variant === 'short'}
+              <ShortCard publication={item} href={hrefFor(item)} />
+            {:else}
+              <MediaCard publication={item} href={hrefFor(item)} />
+            {/if}
           </div>
         {/each}
       </div>

@@ -95,7 +95,7 @@ const commentLabels = {
 
         <div class="mx-auto max-w-[1400px] px-12">
           <div class="grid gap-6 md:grid-cols-[200px_1fr]">
-            <div class="-mt-24 hidden aspect-[2/3] overflow-hidden rounded-md border border-border bg-surface shadow-lg md:block">
+            <div class="relative z-10 -mt-24 hidden aspect-[2/3] overflow-hidden rounded-md border border-border bg-surface shadow-lg md:block">
               {cover ? (
                 <img src={cover} alt={pub!.title ?? ""} draggable="false" class="h-full w-full select-none object-contain" style="-webkit-user-drag: none;" />
               ) : (
