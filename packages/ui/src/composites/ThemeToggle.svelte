@@ -29,7 +29,17 @@
   }
 
   onMount(() => {
-    apply(document.documentElement.dataset.theme === 'light' ? 'light' : 'dark');
+    // Read the persisted preference (source of truth), not the data-theme
+    // attribute: on a client-side (View Transition) navigation the fresh
+    // document is <html data-theme="dark">, so reading the attribute here would
+    // overwrite the stored 'light' preference back to 'dark'.
+    let stored = 'dark';
+    try {
+      stored = localStorage.getItem(STORAGE_KEY) ?? 'dark';
+    } catch {
+      stored = 'dark';
+    }
+    apply(stored === 'light' ? 'light' : 'dark');
   });
 </script>
 

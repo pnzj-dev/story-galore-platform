@@ -12,6 +12,7 @@ const ar = {
   "nav.search": "بحث…",
   "nav.signIn": "تسجيل الدخول",
   "nav.getStarted": "ابدأ الآن",
+  "nav.back": "رجوع",
 
   // Browse / discovery pages
   "browse.discover": "استكشف",

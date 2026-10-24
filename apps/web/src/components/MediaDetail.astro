@@ -112,6 +112,19 @@ const commentLabels = {
   {
     detail ? (
       <main>
+        {autoplay && (
+          <div class="mx-auto max-w-[1400px] px-12 pt-6">
+            <a
+              href={Astro.url.pathname}
+              class="inline-flex items-center gap-1.5 text-sm font-semibold text-foreground-muted transition hover:text-foreground"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M15 18l-6-6 6-6"></path>
+              </svg>
+              {t("nav.back")}
+            </a>
+          </div>
+        )}
         <div class="relative h-[340px] overflow-hidden">
           {cover && <img src={cover} alt="" draggable="false" class="h-full w-full select-none object-cover" style="-webkit-user-drag: none;" />}
           <div class="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent"></div>

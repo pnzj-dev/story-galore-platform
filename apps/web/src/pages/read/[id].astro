@@ -4,11 +4,15 @@ import Reader from "@/components/Reader.svelte";
 import Comments from "@/components/Comments.svelte";
 import SubscribeUpsell from "@/components/SubscribeUpsell.astro";
 import { fetchReaderManifest, fetchReadingPosition, fetchComments, fetchDownloadPolicy } from "@/lib/gateway";
+import { getRelativeLocaleUrl } from "astro:i18n";
 import { getTranslations } from "@/i18n";
+import { DEFAULT_LOCALE } from "@/i18n/languages";
 
 const { t } = getTranslations(Astro.currentLocale);
 
 const publicationId = Astro.params.id ?? "";
+const currentLocale = Astro.currentLocale ?? DEFAULT_LOCALE;
+const backHref = publicationId ? getRelativeLocaleUrl(currentLocale, `/stories/${publicationId}`) : getRelativeLocaleUrl(currentLocale, "/");
 const manifest = publicationId ? await fetchReaderManifest(publicationId, Astro.locals.user?.$id ?? "") : null;
 if (!manifest) {
   Astro.response.status = 404;
@@ -46,6 +50,15 @@ const commentLabels = {
 <Layout title={pub?.title ?? t("media.reader")}>
   {manifest ? (
     <main class="mx-auto max-w-4xl px-6 py-12">
+      <a
+        href={backHref}
+        class="mb-6 inline-flex items-center gap-1.5 text-sm font-semibold text-foreground-muted transition hover:text-foreground"
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M15 18l-6-6 6-6"></path>
+        </svg>
+        {t("nav.back")}
+      </a>
       <h1 class="font-serif text-4xl font-bold leading-tight tracking-tight">{pub!.title}</h1>
       <p class="mt-2 text-foreground-muted">
         {pub!.format ?? t("studio.type.book")} · {pub!.readingFormat ?? t("story.readingFormat")} · {manifest.pages.length} {t("story.pages")}

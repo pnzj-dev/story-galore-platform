@@ -4,6 +4,9 @@ import NotificationCenter from "@/components/NotificationCenter.svelte";
 import UserMenu from "@/components/UserMenu.svelte";
 import LocaleSwitcher from "@/components/LocaleSwitcher.astro";
 import { fetchNotifications, fetchCreator } from "@/lib/gateway";
+import { getRelativeLocaleUrl } from "astro:i18n";
+import { stripLocalePrefix } from "@/i18n";
+import { DEFAULT_LOCALE } from "@/i18n/languages";
 import type { MessageKey } from "@/i18n";
 
 interface Props {
@@ -13,18 +16,20 @@ interface Props {
 const { t } = Astro.props;
 
 const user = Astro.locals.user;
+const currentLocale = Astro.currentLocale ?? DEFAULT_LOCALE;
 const pathname = Astro.url.pathname;
+const path = stripLocalePrefix(pathname);
 
 const notifications = user ? await fetchNotifications(user.$id) : [];
 const isCreator = user ? Boolean(await fetchCreator(user.$id)) : false;
 
 const navItems = [
-  { label: t("nav.home"), href: "/", active: pathname === "/" },
-  { label: t("nav.videos"), href: "/videos", active: pathname.startsWith("/videos") },
-  { label: t("nav.shorts"), href: "/shorts", active: pathname.startsWith("/shorts") },
-  { label: t("nav.books"), href: "/books", active: pathname.startsWith("/books") },
-  { label: t("nav.images"), href: "/images", active: pathname.startsWith("/images") },
-  { label: t("nav.audio"), href: "/audio", active: pathname.startsWith("/audio") },
+  { label: t("nav.home"), href: getRelativeLocaleUrl(currentLocale, "/"), active: path === "/" },
+  { label: t("nav.videos"), href: getRelativeLocaleUrl(currentLocale, "/videos"), active: path.startsWith("/videos") },
+  { label: t("nav.shorts"), href: getRelativeLocaleUrl(currentLocale, "/shorts"), active: path.startsWith("/shorts") },
+  { label: t("nav.books"), href: getRelativeLocaleUrl(currentLocale, "/books"), active: path.startsWith("/books") },
+  { label: t("nav.images"), href: getRelativeLocaleUrl(currentLocale, "/images"), active: path.startsWith("/images") },
+  { label: t("nav.audio"), href: getRelativeLocaleUrl(currentLocale, "/audio"), active: path.startsWith("/audio") },
 ];
 
 const initial = (user?.name ?? user?.email ?? "A").trim().charAt(0).toUpperCase();
@@ -32,7 +37,7 @@ const initial = (user?.name ?? user?.email ?? "A").trim().charAt(0).toUpperCase(
 
 <header class="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-[20px]">
   <nav class="mx-auto flex max-w-[1400px] items-center gap-6 px-6 py-4">
-    <a href="/" class="flex shrink-0 items-center gap-2 text-lg font-extrabold tracking-tight">
+    <a href={getRelativeLocaleUrl(currentLocale, "/")} class="flex shrink-0 items-center gap-2 text-lg font-extrabold tracking-tight">
       <span
         class="grid h-[26px] w-[26px] place-items-center rounded-[7px] bg-gradient-to-br from-brand-500 to-accent text-[13px] font-black text-white"
       >
@@ -61,7 +66,7 @@ const initial = (user?.name ?? user?.email ?? "A").trim().charAt(0).toUpperCase(
 
     <div class="ml-auto flex items-center gap-3">
       <a
-        href="/discover"
+        href={getRelativeLocaleUrl(currentLocale, "/discover")}
         class="hidden w-60 items-center gap-2 whitespace-nowrap rounded-full border border-border bg-surface px-4 py-2 text-[13px] text-foreground-tertiary transition hover:border-border-strong lg:flex"
       >
         <svg

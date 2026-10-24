@@ -1,4 +1,7 @@
 ---
+import { getRelativeLocaleUrl } from "astro:i18n";
+import { stripLocalePrefix } from "@/i18n";
+import { DEFAULT_LOCALE } from "@/i18n/languages";
 import type { MessageKey } from "@/i18n";
 
 interface Props {
@@ -14,15 +17,16 @@ interface NavItem {
 }
 
 const { t } = Astro.props;
-const pathname = Astro.url.pathname;
+const currentLocale = Astro.currentLocale ?? DEFAULT_LOCALE;
+const pathname = stripLocalePrefix(Astro.url.pathname);
 const user = Astro.locals.user;
 
 const items: NavItem[] = [
-  { label: t("nav.home"), href: "/", icon: "home", active: pathname === "/" },
-  { label: t("mobile.search"), href: "/discover", icon: "search", active: pathname.startsWith("/discover") },
-  { label: t("nav.shorts"), href: "/shorts", icon: "shorts", active: pathname.startsWith("/shorts") },
-  { label: t("menu.library"), href: "/library", icon: "library", requiresAuth: true, active: pathname.startsWith("/library") },
-  { label: t("mobile.profile"), href: "/account", icon: "profile", requiresAuth: true, active: pathname.startsWith("/account") || pathname.startsWith("/settings") },
+  { label: t("nav.home"), href: getRelativeLocaleUrl(currentLocale, "/"), icon: "home", active: pathname === "/" },
+  { label: t("mobile.search"), href: getRelativeLocaleUrl(currentLocale, "/discover"), icon: "search", active: pathname.startsWith("/discover") },
+  { label: t("nav.shorts"), href: getRelativeLocaleUrl(currentLocale, "/shorts"), icon: "shorts", active: pathname.startsWith("/shorts") },
+  { label: t("menu.library"), href: getRelativeLocaleUrl(currentLocale, "/library"), icon: "library", requiresAuth: true, active: pathname.startsWith("/library") },
+  { label: t("mobile.profile"), href: getRelativeLocaleUrl(currentLocale, "/account"), icon: "profile", requiresAuth: true, active: pathname.startsWith("/account") || pathname.startsWith("/settings") },
 ];
 ---
 

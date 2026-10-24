@@ -36,12 +36,18 @@ const canonicalUrl = Astro.site ? new URL(Astro.url.pathname, Astro.site).toStri
     <ClientRouter />
     <script is:inline>
       (function () {
-        try {
-          var t = localStorage.getItem('sg-theme');
-          if (t === 'light' || t === 'dark') {
-            document.documentElement.dataset.theme = t;
-          }
-        } catch (e) {}
+        function applyTheme() {
+          try {
+            var t = localStorage.getItem('sg-theme');
+            if (t === 'light' || t === 'dark') {
+              document.documentElement.dataset.theme = t;
+            }
+          } catch (e) {}
+        }
+        applyTheme();
+        // Re-apply after each client-side navigation so the theme never flashes
+        // back to the default while the ThemeToggle island re-hydrates.
+        document.addEventListener('astro:after-swap', applyTheme);
       })();
       document.addEventListener('click', function (e) {
         var btn = e.target && e.target.closest ? e.target.closest('[data-auth]') : null;

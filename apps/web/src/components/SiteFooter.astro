@@ -1,4 +1,6 @@
 ---
+import { getRelativeLocaleUrl } from "astro:i18n";
+import { DEFAULT_LOCALE } from "@/i18n/languages";
 import type { MessageKey } from "@/i18n";
 
 interface Props {
@@ -6,6 +8,7 @@ interface Props {
 }
 
 const { t } = Astro.props;
+const currentLocale = Astro.currentLocale ?? DEFAULT_LOCALE;
 const year = new Date().getFullYear();
 ---
 
@@ -15,8 +18,8 @@ const year = new Date().getFullYear();
   >
     <p>© {year} StoryGalore</p>
     <div class="flex gap-6">
-      <a href="/help" class="transition hover:text-foreground">{t("footer.help")}</a>
-      <a href="/support" class="transition hover:text-foreground">{t("footer.support")}</a>
+      <a href={getRelativeLocaleUrl(currentLocale, "/help")} class="transition hover:text-foreground">{t("footer.help")}</a>
+      <a href={getRelativeLocaleUrl(currentLocale, "/support")} class="transition hover:text-foreground">{t("footer.support")}</a>
     </div>
   </div>
 </footer>

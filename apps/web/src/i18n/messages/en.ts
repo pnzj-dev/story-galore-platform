@@ -13,6 +13,7 @@ export default {
   "nav.search": "Search…",
   "nav.signIn": "Sign in",
   "nav.getStarted": "Get started",
+  "nav.back": "Back",
 
   // Browse / discovery pages
   "browse.discover": "Discover",
