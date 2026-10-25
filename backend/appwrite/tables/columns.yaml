@@ -302,6 +302,17 @@ tables_with_columns:
       - {key: featuredPublicationIds, type: varchar, array: true, required: false}
       - {key: createdAt, type: datetime, required: true}
       - {key: updatedAt, type: datetime, required: true}
+  - table: creator_stats
+    source: docs/DOMAIN_MODEL.md
+    note: creator dashboard metrics (views/revenue) seeded per creator
+    partition_key: creatorId
+    indexes: [creatorId]
+    columns:
+      - {key: creatorId, type: varchar, size: 255, required: true}
+      - {key: totalViews, type: integer, required: false}
+      - {key: revenueCents, type: integer, required: false}
+      - {key: createdAt, type: datetime, required: true}
+      - {key: updatedAt, type: datetime, required: true}
   - table: book_pages
     source: contracts/domain/book-page.schema.yaml
     partition_key: publicationId

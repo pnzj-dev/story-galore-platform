@@ -45,6 +45,12 @@ create_row "creators" "seed-creator-1" '{"actorId":"seed-creator-1","handle":"el
 create_row "creators" "seed-creator-2" '{"actorId":"seed-creator-2","handle":"kaitonak","displayName":"Kaito Nakamura","bio":"Comics, manga, and visual storytelling.","creatorStatus":"ACTIVE","verificationStatus":"VERIFIED","followerCountProjection":947,"createdAt":"'"$NOW"'","updatedAt":"'"$NOW"'"}'
 create_row "creators" "seed-creator-3" '{"actorId":"seed-creator-3","handle":"miraokafor","displayName":"Mira Okafor","bio":"Illustrator and short-film maker.","creatorStatus":"ACTIVE","verificationStatus":"UNVERIFIED","followerCountProjection":512,"createdAt":"'"$NOW"'","updatedAt":"'"$NOW"'"}'
 
+# --- Creator stats (Studio dashboard) --------------------------------------
+echo "Seeding creator stats..."
+create_row "creator_stats" "seed-stats-creator-1" '{"creatorId":"seed-creator-1","totalViews":1240000,"revenueCents":341200,"createdAt":"'"$NOW"'","updatedAt":"'"$NOW"'"}'
+create_row "creator_stats" "seed-stats-creator-2" '{"creatorId":"seed-creator-2","totalViews":480000,"revenueCents":120000,"createdAt":"'"$NOW"'","updatedAt":"'"$NOW"'"}'
+create_row "creator_stats" "seed-stats-creator-3" '{"creatorId":"seed-creator-3","totalViews":210000,"revenueCents":55000,"createdAt":"'"$NOW"'","updatedAt":"'"$NOW"'"}'
+
 # --- Plans ---------------------------------------------------------------
 
 echo "Seeding plans..."

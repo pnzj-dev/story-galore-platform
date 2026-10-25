@@ -1,181 +1,231 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import { actions } from "astro:actions";
-import { fetchCreator, fetchProjects, fetchMediaAssets } from "@/lib/gateway";
+import { fetchCreatorDashboard } from "@/lib/gateway";
 import { getTranslations } from "@/i18n";
 
 const { t } = getTranslations(Astro.currentLocale);
 
 const user = Astro.locals.user;
-const creator = user ? await fetchCreator(user.$id) : null;
-const projects = creator && user ? await fetchProjects(user.$id) : [];
-const mediaAssets = user ? await fetchMediaAssets(user.$id) : [];
+const dashboard = user ? await fetchCreatorDashboard(user.$id) : null;
 
 const becomeResult = Astro.getActionResult(actions.becomeCreator);
 if (becomeResult?.data?.ok) {
   return Astro.redirect("/studio");
 }
-const projectResult = Astro.getActionResult(actions.createProject);
-if (projectResult?.data?.ok) {
-  return Astro.redirect("/studio");
-}
-const profileResult = Astro.getActionResult(actions.updateCreatorProfile);
-if (profileResult?.data?.ok) {
-  return Astro.redirect("/studio");
-}
 const becomeError = becomeResult?.error?.message;
-const projectError = projectResult?.error?.message;
-const profileError = profileResult?.error?.message;
+
+function fmtCount(n: number): string {
+  if (n >= 1_000_000) return (n / 1_000_000).toFixed(2).replace(/\.?0+$/, "") + "M";
+  if (n >= 1_000) return (n / 1_000).toFixed(1).replace(/\.0$/, "") + "K";
+  return String(n);
+}
+
+function fmtCents(c: number): string {
+  return "€" + Math.round(c / 100).toLocaleString("en-US");
+}
+
+function labelOf(s?: string): string {
+  if (!s) return "";
+  return s.replace(/_/g, " ").replace(/\b\w/g, (m) => m.toUpperCase());
+}
+
+function fmtDate(iso?: string): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return "";
+  return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
+
+const recent = dashboard?.recentContent ?? [];
 ---
 
 <Layout title={t("studio.title")}>
-  <main class="mx-auto max-w-4xl px-6 py-12">
-    {creator ? (
-      <>
-        <h1 class="text-3xl font-bold">{t("studio.title")}</h1>
-        <p class="mt-2 text-foreground-muted">@{creator.handle}</p>
+  {dashboard ? (
+    <div class="flex min-h-screen">
+      <aside class="w-[220px] shrink-0 border-r border-border bg-surface/40 px-4 py-5">
+        <a href="/studio" class="flex items-center gap-2 px-2 text-sm font-extrabold tracking-tight">
+          <span
+            class="grid h-[22px] w-[22px] place-items-center rounded-md bg-gradient-to-br from-brand-500 to-accent text-[11px] font-black text-white"
+          >
+            SG
+          </span>
+          {t("studio.title")}
+        </a>
+
+        <nav class="mt-6 space-y-0.5">
+          <a
+            href="/studio"
+            aria-current="page"
+            class="flex items-center gap-2 rounded-sm bg-surface-elevated px-3 py-1.5 text-sm font-medium text-foreground"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"></rect><rect x="14" y="3" width="7" height="5"></rect><rect x="14" y="12" width="7" height="9"></rect><rect x="3" y="16" width="7" height="5"></rect></svg>
+            {t("studio.dashboard")}
+          </a>
+          <a href="/studio/projects" class="flex items-center gap-2 rounded-sm px-3 py-1.5 text-sm text-foreground-muted transition hover:bg-surface-elevated hover:text-foreground">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"></path><path d="M4 9h16"></path></svg>
+            <span>{t("studio.contentLibrary")}</span>
+            <span class="ml-auto text-xs text-foreground-tertiary">{dashboard.publishedCount ?? 0}</span>
+          </a>
+          <a href="/studio/projects" class="flex items-center gap-2 rounded-sm px-3 py-1.5 text-sm text-foreground-muted transition hover:bg-surface-elevated hover:text-foreground">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"></path></svg>
+            {t("studio.newContent")}
+          </a>
+          <a href="/studio" class="flex items-center gap-2 rounded-sm px-3 py-1.5 text-sm text-foreground-muted transition hover:bg-surface-elevated hover:text-foreground">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l6-6 4 4 8-8"></path><path d="M14 7h7v7"></path></svg>
+            {t("studio.analytics")}
+          </a>
+          <a href="/studio" class="flex items-center gap-2 rounded-sm px-3 py-1.5 text-sm text-foreground-muted transition hover:bg-surface-elevated hover:text-foreground">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path></svg>
+            {t("studio.notifications")}
+          </a>
+          <a href="/settings" class="flex items-center gap-2 rounded-sm px-3 py-1.5 text-sm text-foreground-muted transition hover:bg-surface-elevated hover:text-foreground">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            {t("menu.settings")}
+          </a>
+        </nav>
+      </aside>
+
+      <main class="min-w-0 flex-1 px-8 py-8">
+        <header class="flex items-center justify-between gap-4">
+          <div>
+            <h1 class="text-2xl font-bold">
+              {t("studio.welcomeBack")}, {dashboard.displayName}
+            </h1>
+            <p class="mt-1 text-sm text-foreground-muted">@{dashboard.handle}</p>
+          </div>
+          <a
+            href="/studio/projects"
+            class="rounded-sm bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
+          >
+            + {t("studio.newContent")}
+          </a>
+        </header>
+
+        <div class="mt-8 grid grid-cols-2 gap-4 md:grid-cols-4">
+          <div class="rounded-md border border-border bg-surface p-4">
+            <p class="text-sm text-foreground-muted">{t("studio.totalViews")}</p>
+            <p class="mt-1 text-2xl font-bold tabular-nums">{fmtCount(dashboard.totalViews ?? 0)}</p>
+          </div>
+          <div class="rounded-md border border-border bg-surface p-4">
+            <p class="text-sm text-foreground-muted">{t("studio.followers")}</p>
+            <p class="mt-1 text-2xl font-bold tabular-nums">{fmtCount(dashboard.followers ?? 0)}</p>
+          </div>
+          <div class="rounded-md border border-border bg-surface p-4">
+            <p class="text-sm text-foreground-muted">{t("studio.published")}</p>
+            <p class="mt-1 text-2xl font-bold tabular-nums">{dashboard.publishedCount ?? 0}</p>
+          </div>
+          <div class="rounded-md border border-border bg-surface p-4">
+            <p class="text-sm text-foreground-muted">{t("studio.revenue")}</p>
+            <p class="mt-1 text-2xl font-bold tabular-nums">{fmtCents(dashboard.revenueCents ?? 0)}</p>
+          </div>
+        </div>
 
         <section class="mt-8">
-          <h2 class="text-xl font-semibold">{t("studio.profileImage")}</h2>
-          <form method="POST" action={actions.updateCreatorProfile} class="mt-4 max-w-sm space-y-4">
-            <div>
-              <label for="avatarMediaAssetId" class="mb-1 block text-sm text-foreground-muted">{t("studio.avatar")}</label>
-              <select
-                id="avatarMediaAssetId"
-                name="avatarMediaAssetId"
-                class="w-full rounded-sm border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
-              >
-                <option value="">{t("studio.none")}</option>
-                {mediaAssets.map((a) => (
-                  <option value={a.$id} selected={a.$id === creator.avatarMediaAssetId}>
-                    {a.mimeType}
-                    {a.width && a.height ? ` ${a.width}×${a.height}` : ""}
-                  </option>
-                ))}
-              </select>
-            </div>
-            {profileError && (
-              <p class="rounded-sm border border-danger bg-danger/15 px-3 py-2 text-sm text-danger" role="alert">
-                {profileError}
-              </p>
-            )}
-            <button
-              type="submit"
-              class="rounded-sm bg-primary px-4 py-2 font-semibold text-primary-foreground transition hover:opacity-90"
-            >
-              {t("studio.setAvatar")}
-            </button>
-          </form>
-        </section>
+          <div class="flex items-center justify-between">
+            <h2 class="text-xl font-bold">{t("studio.recentContent")}</h2>
+            <a href="/studio/projects" class="text-xs text-foreground-muted transition hover:text-foreground">
+              {t("studio.viewAll")} →
+            </a>
+          </div>
 
-        <section class="mt-8">
-          <h2 class="text-xl font-semibold">{t("studio.newProject")}</h2>
-          <form method="POST" action={actions.createProject} class="mt-4 max-w-sm space-y-4">
-            <div>
-              <label for="name" class="mb-1 block text-sm text-foreground-muted">{t("studio.name")}</label>
-              <input
-                id="name"
-                name="name"
-                type="text"
-                required
-                maxlength="200"
-                class="w-full rounded-sm border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
-              />
+          {recent.length > 0 ? (
+            <div class="mt-4 overflow-x-auto rounded-md border border-border">
+              <table class="w-full text-sm">
+                <thead class="border-b border-border bg-surface/60 text-left text-xs uppercase tracking-wide text-foreground-muted">
+                  <tr>
+                    <th class="px-4 py-2 font-medium">{t("studio.title")}</th>
+                    <th class="px-4 py-2 font-medium">{t("studio.type")}</th>
+                    <th class="px-4 py-2 font-medium">{t("studio.status")}</th>
+                    <th class="px-4 py-2 font-medium">{t("studio.updated")}</th>
+                    <th class="px-4 py-2"></th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-border">
+                  {recent.map((p) => (
+                    <tr class="transition hover:bg-surface/40">
+                      <td class="px-4 py-3">
+                        <p class="font-medium text-foreground">{p.title}</p>
+                        <p class="text-xs text-foreground-muted">{labelOf(p.format)}</p>
+                      </td>
+                      <td class="px-4 py-3 text-foreground-muted">{labelOf(p.type)}</td>
+                      <td class="px-4 py-3">
+                        <span class="rounded-full border border-border px-2 py-0.5 text-xs font-semibold">
+                          {labelOf(p.status)}
+                        </span>
+                      </td>
+                      <td class="px-4 py-3 text-foreground-muted">{fmtDate(p.updatedAt)}</td>
+                      <td class="px-4 py-3 text-right">
+                        <a
+                          href={`/admin/content/${p.$id}`}
+                          class="rounded-sm border border-border px-3 py-1 text-xs font-semibold transition hover:bg-surface"
+                        >
+                          {t("studio.edit")}
+                        </a>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-            <div>
-              <label for="description" class="mb-1 block text-sm text-foreground-muted">{t("studio.description")}</label>
-              <textarea
-                id="description"
-                name="description"
-                class="w-full rounded-sm border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
-              ></textarea>
-            </div>
-            {projectError && (
-              <p class="rounded-sm border border-danger bg-danger/15 px-3 py-2 text-sm text-danger" role="alert">
-                {projectError}
-              </p>
-            )}
-            <button
-              type="submit"
-              class="w-full rounded-sm bg-primary px-4 py-2 font-semibold text-primary-foreground transition hover:opacity-90"
-            >
-              {t("studio.createProject")}
-            </button>
-          </form>
-        </section>
-
-        <section class="mt-10">
-          <h2 class="text-xl font-semibold">{t("studio.yourProjects")}</h2>
-          {projects.length > 0 ? (
-            <ul class="mt-4 space-y-2">
-              {projects.map((p) => (
-                <li class="flex items-center justify-between rounded-sm border border-border bg-surface p-3">
-                  <a href={`/studio/projects/${p.$id}`} class="min-w-0 flex-1">
-                    <p class="truncate font-medium text-foreground transition hover:text-primary">{p.name}</p>
-                    {p.description && <p class="truncate text-sm text-foreground-muted">{p.description}</p>}
-                  </a>
-                  <span class="ml-4 shrink-0 text-xs text-foreground-muted">{p.status}</span>
-                </li>
-              ))}
-            </ul>
           ) : (
             <p class="mt-4 rounded-md border border-dashed border-border px-6 py-8 text-sm text-foreground-muted">
               {t("studio.noProjects")}
             </p>
           )}
         </section>
-      </>
-    ) : (
-      <>
-        <h1 class="text-3xl font-bold">{t("studio.becomeCreator")}</h1>
-        <p class="mt-2 text-foreground-muted">{t("studio.becomeCreatorDesc")}</p>
+      </main>
+    </div>
+  ) : (
+    <main class="mx-auto max-w-4xl px-6 py-12">
+      <h1 class="text-3xl font-bold">{t("studio.becomeCreator")}</h1>
+      <p class="mt-2 text-foreground-muted">{t("studio.becomeCreatorDesc")}</p>
 
-        <form method="POST" action={actions.becomeCreator} class="mt-6 max-w-sm space-y-4">
-          <div>
-            <label for="handle" class="mb-1 block text-sm text-foreground-muted">{t("studio.handle")}</label>
-            <input
-              id="handle"
-              name="handle"
-              type="text"
-              required
-              maxlength="255"
-              class="w-full rounded-sm border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
-            />
-          </div>
-          <div>
-            <label for="displayName" class="mb-1 block text-sm text-foreground-muted">{t("studio.displayName")}</label>
-            <input
-              id="displayName"
-              name="displayName"
-              type="text"
-              required
-              maxlength="255"
-              class="w-full rounded-sm border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
-            />
-          </div>
-          <div>
-            <label for="bio" class="mb-1 block text-sm text-foreground-muted">{t("studio.bio")}</label>
-            <textarea
-              id="bio"
-              name="bio"
-              class="w-full rounded-sm border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
-            ></textarea>
-          </div>
+      <form method="POST" action={actions.becomeCreator} class="mt-6 max-w-sm space-y-4">
+        <div>
+          <label for="handle" class="mb-1 block text-sm text-foreground-muted">{t("studio.handle")}</label>
+          <input
+            id="handle"
+            name="handle"
+            type="text"
+            required
+            maxlength="255"
+            class="w-full rounded-sm border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
+          />
+        </div>
+        <div>
+          <label for="displayName" class="mb-1 block text-sm text-foreground-muted">{t("studio.displayName")}</label>
+          <input
+            id="displayName"
+            name="displayName"
+            type="text"
+            required
+            maxlength="255"
+            class="w-full rounded-sm border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
+          />
+        </div>
+        <div>
+          <label for="bio" class="mb-1 block text-sm text-foreground-muted">{t("studio.bio")}</label>
+          <textarea
+            id="bio"
+            name="bio"
+            class="w-full rounded-sm border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
+          ></textarea>
+        </div>
 
-          {becomeError && (
-            <p class="rounded-sm border border-danger bg-danger/15 px-3 py-2 text-sm text-danger" role="alert">
-              {becomeError}
-            </p>
-          )}
+        {becomeError && (
+          <p class="rounded-sm border border-danger bg-danger/15 px-3 py-2 text-sm text-danger" role="alert">
+            {becomeError}
+          </p>
+        )}
 
-          <button
-            type="submit"
-            class="w-full rounded-sm bg-primary px-4 py-2 font-semibold text-primary-foreground transition hover:opacity-90"
-          >
-            {t("studio.becomeCreator")}
-          </button>
-        </form>
-      </>
-    )}
-  </main>
+        <button
+          type="submit"
+          class="w-full rounded-sm bg-primary px-4 py-2 font-semibold text-primary-foreground transition hover:opacity-90"
+        >
+          {t("studio.becomeCreator")}
+        </button>
+      </form>
+    </main>
+  )}
 </Layout>

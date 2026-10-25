@@ -112,7 +112,7 @@ var knownOperations = map[string]bool{
 	"admin_analytics_retention_get": true, "admin_analytics_funnel_get": true,
 	"admin_analytics_acquisition_get": true, "admin_analytics_cohorts_get": true,
 	"prompt_template_list": true, "prompt_template_create": true,
-	"generation_list": true, "creator_analytics_get": true,
+	"generation_list": true, "creator_analytics_get": true, "creator_dashboard_get": true,
 	"generation_cancel": true, "generation_fail": true,
 	"generation_process": true, "generation_list_pending": true,
 	"generation_complete":   true,
@@ -324,6 +324,8 @@ func Main(ctx openruntimes.Context) openruntimes.Response {
 		return libraryEntryDelete(ctx, &in, cl)
 	case "creator_analytics_get":
 		return creatorAnalyticsGet(ctx, &in, cl)
+	case "creator_dashboard_get":
+		return creatorDashboardGet(ctx, &in, cl)
 	case "publication_validate":
 		return validatePublication(ctx, &in, cl)
 	case "publication_publish":
@@ -4646,6 +4648,81 @@ func listRowsByField(cl client.Client, table, field, value string) []map[string]
 		}
 	}
 	return out
+}
+
+// creatorDashboardGet returns the calling creator's Studio dashboard data:
+// profile, seeded stats, and their recent publications (scoped server-side).
+func creatorDashboardGet(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	actorId := actorOrEmpty(in.ActorId)
+	if actorId == "" {
+		return respond(ctx, in.OperationId, "UNAUTHORIZED", false)
+	}
+
+	service := tablesdb.New(cl)
+
+	cList, err := service.ListRows(databaseID, "creators", service.WithListRowsQueries([]string{
+		qEqual("actorId", actorId),
+		`{"method":"limit","values":[1]}`,
+	}))
+	if err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	var cRaw map[string]interface{}
+	if err := cList.Decode(&cRaw); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	cRows, _ := cRaw["rows"].([]interface{})
+	if len(cRows) == 0 {
+		return respond(ctx, in.OperationId, "RESOURCE_NOT_FOUND", false)
+	}
+	creator, _ := cRows[0].(map[string]interface{})
+
+	totalViews := int64(0)
+	revenueCents := int64(0)
+	if stats := listRowsByField(cl, "creator_stats", "creatorId", actorId); len(stats) > 0 {
+		if v, ok := stats[0]["totalViews"].(float64); ok {
+			totalViews = int64(v)
+		}
+		if v, ok := stats[0]["revenueCents"].(float64); ok {
+			revenueCents = int64(v)
+		}
+	}
+
+	pubList, err := service.ListRows(databaseID, "publications", service.WithListRowsQueries([]string{
+		qEqual("creatorId", actorId),
+		`{"method":"orderDesc","attribute":"updatedAt"}`,
+		`{"method":"limit","values":[50]}`,
+	}))
+	if err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	var pRaw map[string]interface{}
+	if err := pubList.Decode(&pRaw); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	pRows, _ := pRaw["rows"].([]interface{})
+	recent := make([]map[string]interface{}, 0, len(pRows))
+	for _, r := range pRows {
+		p, _ := r.(map[string]interface{})
+		recent = append(recent, map[string]interface{}{
+			"$id":       p["$id"],
+			"title":     p["title"],
+			"type":      p["type"],
+			"format":    p["format"],
+			"status":    p["status"],
+			"updatedAt": p["updatedAt"],
+		})
+	}
+
+	return success(ctx, in, map[string]interface{}{
+		"displayName":    creator["displayName"],
+		"handle":         creator["handle"],
+		"followers":      creator["followerCountProjection"],
+		"totalViews":     totalViews,
+		"revenueCents":   revenueCents,
+		"publishedCount": len(recent),
+		"recentContent":  recent,
+	})
 }
 
 // creatorAnalyticsGet returns the calling creator's own workspace-level metrics,

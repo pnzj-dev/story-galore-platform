@@ -1222,6 +1222,30 @@ export async function fetchGenerations(actorId: string, projectId: string): Prom
   return out.result.items;
 }
 
+export interface CreatorDashboard {
+  displayName?: string;
+  handle?: string;
+  followers?: number;
+  totalViews?: number;
+  revenueCents?: number;
+  publishedCount?: number;
+  recentContent?: Array<{
+    $id?: string;
+    title?: string;
+    type?: string;
+    format?: string;
+    status?: string;
+    updatedAt?: string;
+  }>;
+}
+
+/** Fetch the calling creator's Studio dashboard data (scoped server-side). */
+export async function fetchCreatorDashboard(actorId: string): Promise<CreatorDashboard | null> {
+  const out = await invokeApi<CreatorDashboard>("creator_dashboard_get", {}, actorId);
+  if (out.status !== "SUCCESS" || !out.result) return null;
+  return out.result;
+}
+
 export interface CreatorAnalytics {
   projects?: number;
   documents?: number;
