@@ -121,7 +121,7 @@ var knownOperations = map[string]bool{
 	"ai_provider_create": true, "ai_provider_update": true,
 	"ai_model_list": true, "ai_model_get": true,
 	"ai_model_create": true, "ai_model_update": true,
-	"admin_operations_get": true, "admin_security_get": true,
+	"admin_operations_get": true, "admin_security_get": true, "admin_notification_delivery_get": true, "admin_notification_retry": true,
 	"incident_create": true, "incident_list": true, "incident_update": true,
 	"admin_plan_profitability": true,
 	"alert_create":             true, "alert_list": true, "alert_update": true,
@@ -276,6 +276,10 @@ func Main(ctx openruntimes.Context) openruntimes.Response {
 		return adminOperationsGet(ctx, &in, cl)
 	case "admin_security_get":
 		return adminSecurityGet(ctx, &in, cl)
+	case "admin_notification_delivery_get":
+		return adminNotificationDeliveryGet(ctx, &in, cl)
+	case "admin_notification_retry":
+		return adminNotificationRetry(ctx, &in, cl)
 	case "incident_create":
 		return incidentCreate(ctx, &in, cl)
 	case "incident_list":
@@ -2726,6 +2730,82 @@ func adminSecurityGet(ctx openruntimes.Context, in *GatewayInput, cl client.Clie
 		"auditEvents":  countRows(cl, "audit_events"),
 		"domainEvents": countRows(cl, "domain_events"),
 	})
+}
+
+// adminNotificationDeliveryGet returns notification delivery health: counts by
+// status plus the recent delivery attempts (admin-only).
+func adminNotificationDeliveryGet(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	if !adminActor(ctx, in, cl) {
+		return respond(ctx, in.OperationId, "FORBIDDEN", false)
+	}
+	service := tablesdb.New(cl)
+	list, err := service.ListRows(databaseID, "notification_delivery_attempts", service.WithListRowsQueries([]string{
+		`{"method":"orderDesc","attribute":"createdAt"}`,
+		`{"method":"limit","values":[100]}`,
+	}))
+	if err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	var raw map[string]interface{}
+	if err := list.Decode(&raw); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	rows, _ := raw["rows"].([]interface{})
+
+	attempts := make([]map[string]interface{}, 0, len(rows))
+	queued, sent, retryable, terminal, suppressed := 0, 0, 0, 0, 0
+	for _, r := range rows {
+		m, _ := r.(map[string]interface{})
+		attempts = append(attempts, map[string]interface{}{
+			"$id":         m["$id"],
+			"recipientId": m["recipientId"],
+			"category":    m["category"],
+			"channel":     m["channel"],
+			"status":      m["status"],
+			"failureCode": m["failureCode"],
+			"createdAt":   m["createdAt"],
+		})
+		switch m["status"] {
+		case "QUEUED":
+			queued++
+		case "SENT":
+			sent++
+		case "RETRYABLE":
+			retryable++
+		case "TERMINAL":
+			terminal++
+		case "SUPPRESSED":
+			suppressed++
+		}
+	}
+
+	return success(ctx, in, map[string]interface{}{
+		"queued":           queued,
+		"sent":             sent,
+		"retryable":        retryable,
+		"terminalFailures": terminal,
+		"suppressed":       suppressed,
+		"attempts":         attempts,
+	})
+}
+
+// adminNotificationRetry re-queues a retryable notification attempt (admin-only,
+// audited). The attempt is moved back to QUEUED for re-delivery.
+func adminNotificationRetry(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {
+	if !adminActor(ctx, in, cl) {
+		return respond(ctx, in.OperationId, "FORBIDDEN", false)
+	}
+	var input struct {
+		AttemptId string `json:"attemptId"`
+	}
+	if !decode(ctx, in, &input) || input.AttemptId == "" {
+		return respond(ctx, in.OperationId, "INVALID_INPUT", false)
+	}
+	if err := updateRow(cl, "notification_delivery_attempts", input.AttemptId, map[string]interface{}{"status": "QUEUED"}); err != nil {
+		return internalFailure(ctx, in, err)
+	}
+	emit(ctx, cl, "admin.notification.retry.v1", input.AttemptId, actorOrEmpty(in.ActorId), map[string]interface{}{"attemptId": input.AttemptId}, in.CorrelationId)
+	return success(ctx, in, map[string]interface{}{"ok": true})
 }
 
 func incidentCreate(ctx openruntimes.Context, in *GatewayInput, cl client.Client) openruntimes.Response {

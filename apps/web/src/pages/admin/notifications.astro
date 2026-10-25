@@ -1,0 +1,156 @@
+---
+import AdminLayout from "@/layouts/AdminLayout.astro";
+import { actions } from "astro:actions";
+import { fetchNotificationDelivery } from "@/lib/gateway";
+import { getTranslations } from "@/i18n";
+
+const { t } = getTranslations(Astro.currentLocale);
+const user = Astro.locals.user;
+const delivery = user ? await fetchNotificationDelivery(user.$id) : null;
+
+const retryResult = Astro.getActionResult(actions.retryNotification);
+if (retryResult?.data?.ok) {
+  return Astro.redirect("/admin/notifications");
+}
+const retryError = retryResult?.error?.message;
+
+function fmtAge(iso?: string): string {
+  if (!iso) return "";
+  const then = new Date(iso).getTime();
+  if (isNaN(then)) return "";
+  const mins = Math.max(0, Math.round((Date.now() - then) / 60000));
+  if (mins < 60) return `${mins}m`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h`;
+  return `${Math.floor(hrs / 24)}d`;
+}
+
+function shortId(id?: string): string {
+  if (!id) return "";
+  return id.length > 9 ? `${id.slice(0, 7)}…${id.slice(-3)}` : id;
+}
+
+function shortRecipient(id?: string): string {
+  if (!id) return "";
+  return id.length > 8 ? `${id.slice(0, 4)}…${id.slice(-3)}` : id;
+}
+
+const attempts = delivery?.attempts ?? [];
+const statusBadge: Record<string, string> = {
+  SENT: "border-success text-success",
+  QUEUED: "border-border text-foreground-muted",
+  RETRYABLE: "border-warning text-warning",
+  TERMINAL: "border-danger text-danger",
+  SUPPRESSED: "border-border text-foreground-muted",
+};
+---
+
+<AdminLayout title={`${t("admin.label")} — ${t("admin.notifications.deliveryHealth")}`}>
+  <main class="mx-auto max-w-[1600px] px-6 py-10">
+    <header>
+      <h1 class="text-3xl font-bold">{t("admin.notifications.deliveryHealth")}</h1>
+      <p class="mt-1 text-sm text-foreground-muted">{t("admin.notifications.deliveryDesc")}</p>
+    </header>
+
+    <div class="mt-6 flex items-center gap-3">
+      <span class="rounded-full border border-warning bg-warning/15 px-3 py-1 text-xs font-semibold text-warning">
+        ⚠ {t("admin.notifications.elevation")}
+      </span>
+    </div>
+
+    <div class="mt-6 grid grid-cols-2 gap-4 md:grid-cols-5">
+      <div class="rounded-md border border-border bg-surface p-4">
+        <p class="text-sm text-foreground-muted">{t("admin.notifications.queued")}</p>
+        <p class="mt-1 text-2xl font-bold tabular-nums">{delivery?.queued ?? 0}</p>
+      </div>
+      <div class="rounded-md border border-border bg-surface p-4">
+        <p class="text-sm text-foreground-muted">{t("admin.notifications.sent")}</p>
+        <p class="mt-1 text-2xl font-bold tabular-nums text-success">{delivery?.sent ?? 0}</p>
+      </div>
+      <div class="rounded-md border border-border bg-surface p-4">
+        <p class="text-sm text-foreground-muted">{t("admin.notifications.retryable")}</p>
+        <p class="mt-1 text-2xl font-bold tabular-nums text-warning">{delivery?.retryable ?? 0}</p>
+      </div>
+      <div class="rounded-md border border-border bg-surface p-4">
+        <p class="text-sm text-foreground-muted">{t("admin.notifications.terminal")}</p>
+        <p class="mt-1 text-2xl font-bold tabular-nums text-danger">{delivery?.terminalFailures ?? 0}</p>
+      </div>
+      <div class="rounded-md border border-border bg-surface p-4">
+        <p class="text-sm text-foreground-muted">{t("admin.notifications.suppressed")}</p>
+        <p class="mt-1 text-2xl font-bold tabular-nums">{delivery?.suppressed ?? 0}</p>
+      </div>
+    </div>
+
+    <section class="mt-8">
+      <div class="flex items-center justify-between">
+        <h2 class="text-2xl font-bold">{t("admin.notifications.attempts")}</h2>
+        <div class="flex gap-2">
+          <button type="button" class="rounded-sm border border-border px-3 py-1.5 text-xs font-semibold transition hover:bg-surface">
+            {t("admin.notifications.filterRetryable")}
+          </button>
+          <button type="button" class="rounded-sm border border-border px-3 py-1.5 text-xs font-semibold transition hover:bg-surface">
+            {t("admin.notifications.export")}
+          </button>
+        </div>
+      </div>
+
+      {retryError && (
+        <p class="mt-3 rounded-sm border border-danger bg-danger/15 px-3 py-2 text-sm text-danger" role="alert">{retryError}</p>
+      )}
+
+      {attempts.length > 0 ? (
+        <div class="mt-4 overflow-x-auto rounded-md border border-border">
+          <table class="w-full text-sm">
+            <thead class="border-b border-border bg-surface/60 text-left text-xs uppercase tracking-wide text-foreground-muted">
+              <tr>
+                <th class="px-4 py-2 font-medium">{t("admin.notifications.attemptId")}</th>
+                <th class="px-4 py-2 font-medium">{t("admin.notifications.recipient")}</th>
+                <th class="px-4 py-2 font-medium">{t("admin.notifications.category")}</th>
+                <th class="px-4 py-2 font-medium">{t("admin.notifications.channel")}</th>
+                <th class="px-4 py-2 font-medium">{t("admin.notifications.status")}</th>
+                <th class="px-4 py-2 font-medium">{t("admin.notifications.failure")}</th>
+                <th class="px-4 py-2 font-medium">{t("admin.notifications.age")}</th>
+                <th class="px-4 py-2"></th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-border">
+              {attempts.map((a) => (
+                <tr class="transition hover:bg-surface/40">
+                  <td class="px-4 py-3 font-mono text-xs">{shortId(a.$id)}</td>
+                  <td class="px-4 py-3 font-mono text-xs text-foreground-muted">{shortRecipient(a.recipientId)}</td>
+                  <td class="px-4 py-3 text-foreground-muted">{a.category}</td>
+                  <td class="px-4 py-3 text-foreground-muted">{a.channel}</td>
+                  <td class="px-4 py-3">
+                    <span class={`rounded-full border px-2 py-0.5 text-xs font-semibold ${statusBadge[a.status ?? ""] ?? "border-border text-foreground-muted"}`}>
+                      {a.status}
+                    </span>
+                  </td>
+                  <td class="px-4 py-3 font-mono text-[11px] text-foreground-muted">{a.failureCode || "—"}</td>
+                  <td class="px-4 py-3 text-foreground-muted">{fmtAge(a.createdAt)}</td>
+                  <td class="px-4 py-3 text-right">
+                    {a.status === "RETRYABLE" ? (
+                      <form method="POST" action={actions.retryNotification}>
+                        <input type="hidden" name="attemptId" value={a.$id} />
+                        <button type="submit" class="rounded-sm border border-border px-3 py-1 text-xs font-semibold transition hover:bg-surface">
+                          {t("admin.notifications.retry")}
+                        </button>
+                      </form>
+                    ) : a.status === "TERMINAL" ? (
+                      <button type="button" disabled class="cursor-not-allowed rounded-sm border border-border px-3 py-1 text-xs font-semibold opacity-40">
+                        {t("admin.notifications.retry")}
+                      </button>
+                    ) : null}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <p class="mt-4 rounded-md border border-dashed border-border px-6 py-8 text-sm text-foreground-muted">
+          {t("admin.noOperations")}
+        </p>
+      )}
+    </section>
+  </main>
+</AdminLayout>

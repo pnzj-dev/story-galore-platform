@@ -847,6 +847,30 @@ export async function fetchAdminSecurity(actorId: string): Promise<AdminSecurity
   return out.result ?? {};
 }
 
+export interface NotificationDelivery {
+  queued?: number;
+  sent?: number;
+  retryable?: number;
+  terminalFailures?: number;
+  suppressed?: number;
+  attempts?: Array<{
+    $id?: string;
+    recipientId?: string;
+    category?: string;
+    channel?: string;
+    status?: string;
+    failureCode?: string;
+    createdAt?: string;
+  }>;
+}
+
+/** Fetch notification delivery health + recent attempts (admin-only). */
+export async function fetchNotificationDelivery(actorId: string): Promise<NotificationDelivery | null> {
+  const out = await invokeApi<NotificationDelivery>("admin_notification_delivery_get", {}, actorId);
+  if (out.status !== "SUCCESS") return null;
+  return out.result ?? {};
+}
+
 export interface Incident {
   $id?: string;
   severity?: string;

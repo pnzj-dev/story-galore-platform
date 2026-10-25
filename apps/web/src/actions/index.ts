@@ -1167,4 +1167,18 @@ export const server = {
       return { plans, subscriptions };
     },
   }),
+
+  retryNotification: defineAction({
+    accept: "form",
+    input: z.object({ attemptId: z.string().min(1) }),
+    handler: async (input, context) => {
+      const user = context.locals.user;
+      if (!user) throw new ActionError({ code: "UNAUTHORIZED", message: "Sign in." });
+      const out = await invokeApi("admin_notification_retry", { attemptId: input.attemptId }, user.$id);
+      if (out.status !== "SUCCESS") {
+        throw new ActionError({ code: "BAD_REQUEST", message: "Could not retry the attempt." });
+      }
+      return { ok: true };
+    },
+  }),
 };

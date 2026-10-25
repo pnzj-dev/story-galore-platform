@@ -313,6 +313,18 @@ tables_with_columns:
       - {key: revenueCents, type: integer, required: false}
       - {key: createdAt, type: datetime, required: true}
       - {key: updatedAt, type: datetime, required: true}
+  - table: notification_delivery_attempts
+    source: docs/DOMAIN_MODEL.md
+    note: notification delivery attempt history (admin notification ops)
+    partition_key: recipientId
+    indexes: [recipientId, status]
+    columns:
+      - {key: recipientId, type: varchar, size: 255, required: true}
+      - {key: category, type: varchar, size: 64, required: true}
+      - {key: channel, type: varchar, size: 32, required: true}
+      - {key: status, type: enum, elements: [QUEUED, SENT, RETRYABLE, TERMINAL, SUPPRESSED], required: true}
+      - {key: failureCode, type: varchar, size: 64, required: false}
+      - {key: createdAt, type: datetime, required: true}
   - table: book_pages
     source: contracts/domain/book-page.schema.yaml
     partition_key: publicationId
