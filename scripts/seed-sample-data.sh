@@ -173,6 +173,17 @@ while IFS='|' read -r pid title ptype format creator accessClass rating desc; do
   create_row "publications" "$pid" '{"creatorId":"'"$creator"'","projectId":"seed-project-1","type":"'"$ptype"'","status":"PUBLISHED","accessClass":"'"$accessClass"'","title":"'"$title"'","description":"'"$desc"'","format":"'"$format"'","contentRating":"'"$rating"'","contentOrigin":"HUMAN","readingFormat":"PAGINATED","publishedAt":"'"$NOW"'","createdAt":"'"$NOW"'","updatedAt":"'"$NOW"'"}'
 done <<< "$PUBS"
 
+# --- Publication language metadata -----------------------------------------
+# Required so ONLY_SELECTED content-language filtering doesn't drop every
+# publication (English seed content).
+echo "Seeding publication language metadata..."
+for pid in seed-book-1 seed-book-2 seed-book-3 seed-book-4 seed-book-5 seed-book-6 \
+           seed-video-1 seed-video-2 seed-video-3 seed-video-4 seed-video-5 seed-video-6 seed-video-7 \
+           seed-short-1 seed-short-2 seed-short-3 seed-short-4 seed-short-5 seed-short-6 \
+           seed-art-1 seed-audio-1; do
+  create_row "publication_language_metadata" "seed-lang-$pid" '{"publicationId":"'"$pid"'","contentLanguageMode":"LANGUAGE_BEARING","primaryLanguage":"en","contentLanguages":["en"]}'
+done
+
 # --- Rating + genres (media detail meta-row fidelity) ----------------------
 echo "Seeding rating/genres..."
 # id|qualityRating|genre1,genre2,...

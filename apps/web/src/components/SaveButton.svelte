@@ -52,7 +52,7 @@
     </svg>
   {:else}
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <path d="M12 5v14M5 12h14"></path>
+      <path d="M5 4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v18l-7-4-7 4z"></path>
     </svg>
   {/if}
   {isSaved ? savedLabel : saveLabel}
