@@ -22,6 +22,7 @@ const path = stripLocalePrefix(pathname);
 
 const notifications = user ? await fetchNotifications(user.$id) : [];
 const isCreator = user ? Boolean(await fetchCreator(user.$id)) : false;
+const isAdmin = (user?.labels ?? []).includes("admin");
 
 const navItems = [
   { label: t("nav.home"), href: getRelativeLocaleUrl(currentLocale, "/"), active: path === "/" },
@@ -109,6 +110,8 @@ const initial = (user?.name ?? user?.email ?? "A").trim().charAt(0).toUpperCase(
             name={user.name ?? undefined}
             email={user.email ?? undefined}
             isCreator={isCreator}
+            isAdmin={isAdmin}
+            adminLabel={t("admin.label")}
             accountLabel={t("menu.account")}
             libraryLabel={t("menu.library")}
             settingsLabel={t("menu.settings")}

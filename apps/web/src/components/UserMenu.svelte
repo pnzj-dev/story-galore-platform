@@ -10,6 +10,8 @@
     name,
     email,
     isCreator = false,
+    isAdmin = false,
+    adminLabel = 'Admin',
     accountLabel = 'Account',
     libraryLabel = 'Library',
     settingsLabel = 'Settings',
@@ -26,6 +28,8 @@
     name?: string;
     email?: string;
     isCreator?: boolean;
+    isAdmin?: boolean;
+    adminLabel?: string;
     accountLabel?: string;
     libraryLabel?: string;
     settingsLabel?: string;
@@ -152,6 +156,11 @@
       {#if isCreator}
         <a role="menuitem" href="/studio" class="block px-4 py-2 text-sm text-foreground transition hover:bg-surface-elevated">
           {studioLabel}
+        </a>
+      {/if}
+      {#if isAdmin}
+        <a role="menuitem" href="/admin" class="block px-4 py-2 text-sm text-foreground transition hover:bg-surface-elevated">
+          {adminLabel}
         </a>
       {/if}
 
