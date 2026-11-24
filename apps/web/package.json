@@ -10,14 +10,14 @@
     "typecheck": "astro check"
   },
   "dependencies": {
-    "@astrojs/svelte": "9.0.1",
-    "astro": "7.3.8",
+    "@astrojs/svelte": "9.1.2",
+    "astro": "7.4.7",
     "svelte": "5.57.2",
     "@storygalore/domain": "workspace:*",
     "@storygalore/appwrite-client": "workspace:*",
     "@storygalore/ui": "workspace:*",
     "@storygalore/config": "workspace:*",
-    "@astrojs/node": "11.1.7"
+    "@astrojs/node": "11.1.12"
   },
   "devDependencies": {
     "@tailwindcss/vite": "4.3.3"
